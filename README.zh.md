@@ -2,17 +2,33 @@
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · **中文**
 
-由 buddypia 打造的一个小巧、采用 MIT 许可证的跨智能体 **[Agent Skills](https://agentskills.io)** 合集。每个技能都遵循开放的 `SKILL.md` 标准，因此可在 Claude Code、OpenAI Codex、Cursor、Gemini CLI 以及其他兼容的智能体中通用。
+由 buddypia 打造的一个小巧、采用 MIT 许可证的跨智能体 **[Agent Skills](https://agentskills.io)** 合集。每个技能都让 2~3 个来自不同厂商的 LLM（Gemini、Claude、GPT）互相检查彼此的成果并在此基础上继续推进——也就是说，在真正重要的问题上，你得到的结果会超越单一模型的一次性回答。每个技能都遵循开放的 `SKILL.md` 标准，因此可在 Claude Code、OpenAI Codex、Cursor、Gemini CLI 以及其他兼容的智能体中通用。
+
+## Why these skills exist
+
+单个 LLM 有着可预测的盲点：它很少能发现自己的错误，会继承训练数据中的偏见，并且倾向于认同被给定的前提（即谄媚, sycophancy）。让*同一个*模型“自我复核”，往往只是把这些盲点再重复一遍。
+
+这些技能采用了不同的思路——把每个角色交给**不同厂商**的模型。一个模型提出方案；另一个来自不同实验室、经过不同训练的模型对其进行批评或提出相反意见；然后再对结果进行调和。相互独立的模型所犯的错误*相关性更低*，因此真正的分歧会暴露出实际问题，而不是相互附和。其目标是在单次处理不足以胜任的决策与产出上，获得更稳健的结果。
 
 ## Skills
 
-| Skill | What it does |
-|---|---|
-| [`multi-llm-debate`](./skills/multi-llm-debate) | 三个来自不同厂商的 LLM 分别以正方 / 反方 / 主持人的角色就某一议题展开辩论，最终得出多视角的结论。 |
-| [`multi-llm-reflection`](./skills/multi-llm-reflection) | 一个 生成器 → 评论者 → 优化者 的循环，其中每个角色都运行在来自不同厂商的 LLM 上。 |
-| [`multi-llm-recursive-meta-cognition`](./skills/multi-llm-recursive-meta-cognition) | 一条横跨不同厂商 LLM 的 分解 → 求解 → 验证 → 整合 → 反思 流水线。 |
+| Skill | 模式 | 解决的问题 |
+|---|---|---|
+| [`multi-llm-debate`](./skills/multi-llm-debate) | 正方 / 反方 / 主持人 → 结论 | 在需要判断的问题上出现片面或过度自信的回答 |
+| [`multi-llm-reflection`](./skills/multi-llm-reflection) | Generator → Critic → Refiner | 需要更犀利的外部批评来改进的草稿 |
+| [`multi-llm-recursive-meta-cognition`](./skills/multi-llm-recursive-meta-cognition) | Decompose → Solve → Verify → Integrate → Reflect | 一次推理过于浅显的、困难的多步骤问题 |
 
 > 这些技能负责编排你自行安装的厂商 CLI（`agy` / Antigravity、`claude` / Claude Code、`codex` / Codex）。有关安装设置、模型覆盖以及离线 `mock` 模式，请参阅各技能各自的 README。
+
+## Use cases
+
+- **multi-llm-debate** —— 架构与技术栈选型、自建还是采购（build vs buy）、风险评估、“这个该不该上线？”之类的判断——适用于你不希望由单一模型的偏见来拍板的各种权衡取舍。
+- **multi-llm-reflection** —— 改进高风险的写作与设计：提案、RFC、文档、营销文案，或是你希望由*撰写它的模型之外*的另一个模型来批评的分析。
+- **multi-llm-recursive-meta-cognition** —— 复杂的多步骤推理：迁移计划、调试策略、研究型问题——任何能从分解、独立验证以及最终元审查中获益的问题。
+
+## When to use it (and when not)
+
+当其价值足以抵得上额外的时间与 token 时再使用它们——艰难的决策、必须正确的产出、棘手的多步骤问题。它们会依次运行多个 CLI，因此比单次提示**更慢、成本也更高**；对于快速查询或简单编辑，普通的单模型调用才是更合适的工具。多模型编排能减少盲点，但**并不保证**给出正确答案，因此请务必审查输出。
 
 ## Install
 

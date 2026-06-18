@@ -2,17 +2,33 @@
 
 **English** · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [中文](./README.zh.md)
 
-A small, MIT-licensed collection of cross-agent **[Agent Skills](https://agentskills.io)** by buddypia. Each skill follows the open `SKILL.md` standard, so it works across Claude Code, OpenAI Codex, Cursor, Gemini CLI, and other compatible agents.
+A small, MIT-licensed collection of cross-agent **[Agent Skills](https://agentskills.io)** by buddypia. Each skill makes two or three **different-vendor** LLMs (Gemini, Claude, GPT) check and build on each other's work — so you get more than a single model's one-shot answer on the questions that matter. Every skill follows the open `SKILL.md` standard and works across Claude Code, OpenAI Codex, Cursor, Gemini CLI, and other compatible agents.
+
+## Why these skills exist
+
+A single LLM has predictable blind spots: it rarely catches its own mistakes, it inherits the biases of its training data, and it tends to agree with the framing it is given (sycophancy). Asking the *same* model to "double-check itself" mostly repeats those blind spots.
+
+These skills take a different approach — they assign each role to a **different vendor's** model. One model proposes; another, from a different lab with different training, critiques it or argues the opposite; then the results are reconciled. Independent models make *less-correlated* errors, so genuine disagreement surfaces real problems instead of echoing them. The aim is a more robust result on the decisions and deliverables where a single pass is not enough.
 
 ## Skills
 
-| Skill | What it does |
-|---|---|
-| [`multi-llm-debate`](./skills/multi-llm-debate) | Three different-vendor LLMs argue a topic as Proponent / Opponent / Moderator and reach a multi-perspective verdict. |
-| [`multi-llm-reflection`](./skills/multi-llm-reflection) | A Generator → Critic → Refiner loop where each role runs on a different-vendor LLM. |
-| [`multi-llm-recursive-meta-cognition`](./skills/multi-llm-recursive-meta-cognition) | A Decompose → Solve → Verify → Integrate → Reflect pipeline across different-vendor LLMs. |
+| Skill | Pattern | Problem it addresses |
+|---|---|---|
+| [`multi-llm-debate`](./skills/multi-llm-debate) | Proponent / Opponent / Moderator → verdict | One-sided or overconfident answers on judgment calls |
+| [`multi-llm-reflection`](./skills/multi-llm-reflection) | Generator → Critic → Refiner | A draft that needs a sharper, outside critique to improve |
+| [`multi-llm-recursive-meta-cognition`](./skills/multi-llm-recursive-meta-cognition) | Decompose → Solve → Verify → Integrate → Reflect | Hard, multi-step problems where one pass reasons too shallowly |
 
 > These skills orchestrate vendor CLIs that you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). See each skill's README for setup, model overrides, and an offline `mock` mode.
+
+## Use cases
+
+- **multi-llm-debate** — Architecture and tech-stack choices, build-vs-buy, risk assessment, "should we ship this?" calls — weighing trade-offs where you do not want a single model's bias to decide.
+- **multi-llm-reflection** — Improving high-stakes writing and design: proposals, RFCs, docs, marketing copy, or an analysis you want critiqued by a model *other than* the one that wrote it.
+- **multi-llm-recursive-meta-cognition** — Complex, multi-step reasoning: migration plans, debugging strategies, research-style questions — anything that benefits from decomposition, independent verification, and a final meta-review.
+
+## When to use it (and when not)
+
+Reach for these when the stakes justify the extra time and tokens — a hard decision, a deliverable that has to be right, a thorny multi-step problem. They run several CLIs in sequence, so they are **slower and cost more** than a single prompt; for quick lookups or simple edits, a normal single-model call is the better tool. Multi-model orchestration reduces blind spots — it does **not** guarantee a correct answer, so always review the output.
 
 ## Install
 

@@ -1,0 +1,15 @@
+[project]
+name = "multi-llm-debate"
+version = "0.1.0"
+description = "Multi-LLM debate workflow (proponent/opponent/moderator) over subscription-auth CLIs (claude / codex / agy)."
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "pyyaml>=6.0.3",
+]
+
+# This project is an application (main.py + workflow/), not a distributable package.
+# With package=false, uv manages only the dependencies and does not try to build/install the project itself.
+[tool.uv]
+package = false

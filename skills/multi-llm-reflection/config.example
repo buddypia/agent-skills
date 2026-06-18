@@ -1,0 +1,86 @@
+# ===========================================
+# Multi-LLM Reflection Configuration
+# Reflection-pattern multi-agent settings
+# ===========================================
+#
+# Copy this file to config.yaml and customize the settings
+#
+# Configuration precedence (highest first):
+#   1. CLI arguments (--generator-model, --critic-provider, etc.)
+#   2. Environment variables (REFLECTION_<ROLE>_<KEY>, <PROVIDER>_API_KEY)
+#   3. Configuration file (this file)
+#   4. Default values
+#
+# ===========================================
+
+# -------------------------------------------
+# Generator Agent (creates the initial draft)
+# Default: Gemini
+# -------------------------------------------
+generator:
+  provider: gemini              # gemini, anthropic, openai, mock, or random
+  model: gemini-3.5-flash   # model ID
+  # api_key: your_key_here      # or use the GEMINI_API_KEY environment variable
+  # base_url: null              # custom base URL (optional)
+  temperature: 0.7              # generation diversity (0.0 - 1.0)
+
+# -------------------------------------------
+# Critic Agent (critique and improvement suggestions)
+# Default: Claude (Anthropic)
+# -------------------------------------------
+critic:
+  provider: anthropic           # gemini, anthropic, openai, mock, or random
+  model: claude-opus-4-1-20250805  # model ID
+  # api_key: your_key_here      # or use the ANTHROPIC_API_KEY environment variable
+  temperature: 0.7
+
+# -------------------------------------------
+# Refiner Agent (creates the final version)
+# Default: OpenAI
+# -------------------------------------------
+refiner:
+  provider: openai              # gemini, anthropic, openai, mock, or random
+  model: gpt-5.2                # model ID
+  # api_key: your_key_here      # or use the OPENAI_API_KEY environment variable
+  # base_url: null              # custom endpoint such as Azure OpenAI
+  temperature: 0.7
+
+# -------------------------------------------
+# Global settings
+# Applied when not specified individually for each agent
+# -------------------------------------------
+global:
+  # fixed | random | shuffle
+  provider_strategy: fixed
+  temperature: 0.7
+
+# ===========================================
+# Usage examples
+# ===========================================
+#
+# 1. Setting API keys:
+#    - Set GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY in the .env file
+#    - Or set them directly in each agent's api_key field
+#
+# 2. Changing the model:
+#    - Change the model field in this file
+#    - Or environment variable: REFLECTION_GENERATOR_MODEL=gemini-3.5-flash
+#    - Or CLI: --generator-model gemini-3.5-flash
+#
+# 3. Changing the provider:
+#    - Example: to use Claude for all agents
+#      generator:
+#        provider: anthropic
+#        model: claude-3-5-sonnet-latest
+#
+# 4. Checking the resolved configuration:
+#    python main.py --show-config
+#
+# 5. Random provider selection:
+#    - CLI: python main.py --random-providers "prompt"
+#    - Per-role: python main.py --generator-provider random "prompt"
+#    - Configuration file:
+#      generator:
+#        provider: random
+#
+# ===========================================

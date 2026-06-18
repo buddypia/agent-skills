@@ -1,0 +1,28 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets / local runtime config — NEVER commit (the *.example templates are tracked)
+.env
+.env.*
+!.env.example
+config.yaml
+config.yml
+config.json
+.config.yaml
+.config.yml
+.config.json
+
+# Runtime artifacts
+raw_output.json
+raw_output_*.json
+*.log
+.tmp/

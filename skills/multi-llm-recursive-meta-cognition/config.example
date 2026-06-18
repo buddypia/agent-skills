@@ -1,0 +1,111 @@
+# ===========================================
+# Multi-LLM Reflection Configuration (5 stages)
+# Reflection-pattern multi-agent settings
+# ===========================================
+#
+# Copy this file to config.yaml and customize the settings.
+#
+# Configuration precedence (highest first):
+#   1. CLI arguments (--decomposer-model, --verifier-provider, etc.)
+#   2. Environment variables (REFLECTION_<ROLE>_<KEY>, <PROVIDER>_API_KEY)
+#   3. Config file (this file)
+#   4. Default values
+#
+# ===========================================
+
+# -------------------------------------------
+# Decomposer (decompose)
+# Default: Gemini
+# -------------------------------------------
+decomposer:
+  provider: gemini              # gemini, anthropic, openai, or mock
+  model: gemini-3.5-flash   # model ID
+  # api_key: your_key_here      # or use the GEMINI_API_KEY environment variable
+  # base_url: null              # custom base URL (optional)
+  temperature: 0.7              # generation diversity (0.0 - 1.0)
+  timeout: 120                  # timeout (seconds)
+
+# -------------------------------------------
+# Solver (solve)
+# Default: Gemini
+# -------------------------------------------
+solver:
+  provider: gemini              # gemini, anthropic, openai, or mock
+  model: gemini-3.5-flash
+  # api_key: your_key_here
+  temperature: 0.7
+  timeout: 120
+
+# -------------------------------------------
+# Verifier (verify)
+# Default: Claude (Anthropic)
+# -------------------------------------------
+verifier:
+  provider: anthropic           # gemini, anthropic, openai, or mock
+  model: claude-opus-4-1-20250805
+  # api_key: your_key_here      # or use the ANTHROPIC_API_KEY environment variable
+  temperature: 0.7
+  timeout: 120
+
+# -------------------------------------------
+# Integrator (integrate)
+# Default: OpenAI
+# -------------------------------------------
+integrator:
+  provider: openai              # gemini, anthropic, openai, or mock
+  model: gpt-5.2
+  # api_key: your_key_here      # or use the OPENAI_API_KEY environment variable
+  # base_url: null              # custom endpoint such as Azure OpenAI
+  temperature: 0.7
+  timeout: 120
+
+# -------------------------------------------
+# Reflector (reflect)
+# Default: OpenAI
+# -------------------------------------------
+reflector:
+  provider: openai              # gemini, anthropic, openai, or mock
+  model: gpt-5.2
+  # api_key: your_key_here      # or use the OPENAI_API_KEY environment variable
+  # base_url: null
+  temperature: 0.7
+  timeout: 120
+
+# -------------------------------------------
+# Global settings
+# Applied when not specified individually per agent
+# -------------------------------------------
+global:
+  # fixed | random | shuffle
+  provider_strategy: fixed
+  temperature: 0.7
+  timeout: 120
+  # nested | flat
+  output_schema: nested
+
+# ===========================================
+# Examples
+# ===========================================
+#
+# 1. Setting API keys:
+#    - Set GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY in the .env file
+#    - Or set the api_key field directly for each agent
+#
+# 2. Changing the model:
+#    - Change the model field in this file
+#    - Or via environment variable: REFLECTION_DECOMPOSER_MODEL=gemini-3.5-flash
+#    - Or via CLI: --decomposer-model gemini-3.5-flash
+#
+# 3. Changing the provider:
+#    - Example: to use Claude for verify and reflect
+#      verifier:
+#        provider: anthropic
+#        model: claude-3-5-sonnet-latest
+#      reflector:
+#        provider: anthropic
+#        model: claude-3-5-sonnet-latest
+#
+# 4. Checking configuration details:
+#    python main.py --show-config
+#
+# ===========================================

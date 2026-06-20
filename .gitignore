@@ -26,3 +26,6 @@ raw_output.json
 raw_output_*.json
 *.log
 .tmp/
+
+# Local-only maintenance tooling (kept in the working tree, not published)
+skills/publish-skill/

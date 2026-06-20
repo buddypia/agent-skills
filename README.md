@@ -57,4 +57,4 @@ Default model IDs (e.g. `gemini-3.5-flash`, `claude-opus-4-8`, `gpt-5.5`) reflec
 
 ## License
 
-MIT © 2026 buddypia. See [LICENSE](./LICENSE) and [NOTICE](./NOTICE). Each skill also bundles its own LICENSE and a per-skill **References & Attribution** section crediting the research that inspired it.
+MIT © 2026 buddypia. See [LICENSE](./LICENSE). Each skill also bundles its own LICENSE and a per-skill **References & Attribution** section crediting the research that inspired it.

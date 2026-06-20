@@ -57,4 +57,4 @@ npx skills add buddypia/agent-skills
 
 ## License
 
-MIT © 2026 buddypia。参见 [LICENSE](./LICENSE) 与 [NOTICE](./NOTICE)。每个技能还各自附带其自己的 LICENSE，以及一个针对该技能的 **References & Attribution** 章节，用以致谢启发该技能的相关研究。
+MIT © 2026 buddypia。参见 [LICENSE](./LICENSE)。每个技能还各自附带其自己的 LICENSE，以及一个针对该技能的 **References & Attribution** 章节，用以致谢启发该技能的相关研究。

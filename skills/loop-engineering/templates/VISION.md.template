@@ -1,0 +1,27 @@
+# Vision / standing spec · <project or loop>
+
+> **State tells the agent where it is; this spec tells it where to go.**
+> Reread every run. This is the primary defense against **goal drift** — each summarization step is lossy, and "don't do X" constraints vanish around turn 47 unless they live here.
+
+## North star
+<The single outcome this loop exists to produce. One or two sentences.>
+
+## Scope — the loop MAY
+- <e.g. draft fix PRs for deterministic test failures>
+- <e.g. open dependency-bump PRs that pass the suite>
+
+## Out of scope — the loop MUST NOT (non-negotiable, survives compaction)
+- Touch architecture, auth, payments, billing, or production deploys.
+- Merge, deploy, or change dependencies without the human approval gate.
+- Disable or weaken a failing test to make the gate pass.
+- Install or enable any skill/connector that hasn't been source-audited.
+- <project-specific hard constraints>
+
+## Definition of done (objective — checked by the gate, not by opinion)
+- <e.g. "All tests in test/<area> pass AND lint returns 0 AND build compiles.">
+
+## Hard stops
+- Token budget: <cap>   ·   Max iterations: <n>   ·   Time limit: <duration>
+
+## Human approval gates (before anything irreversible)
+- Merge to <branch>, deploy, dependency changes, anything under <protected paths>.

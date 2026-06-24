@@ -19,6 +19,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 | [`multi-llm-recursive-meta-cognition`](./skills/multi-llm-recursive-meta-cognition) | Decompose → Solve → Verify → Integrate → Reflect | 一回の推論では浅すぎる、難しい多段階の問題 |
 | [`reflect`](./skills/reflect) | Trigger → 5 Whys → Placement → Cure + Prevent → Ledger | 修正が誤った階層に入るために繰り返すバグやニアミス |
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | 指示が誤ったメカニズムに置かれ、CLAUDE.md が肥大化しルールが無視される |
+| [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | ゲートなしでループ化されたエージェントの反復作業が、ドリフトしトークンを浪費し未レビューのコードを出してしまう |
 
 > `multi-llm-*` スキルは、ユーザー自身がインストールするベンダー CLI（`agy` / Antigravity、`claude` / Claude Code、`codex` / Codex）をオーケストレーションします。`reflect` のような単一エージェントスキルは外部 CLI を必要としません。セットアップ、モデルの上書き設定、オフラインの `mock` モードについては、各スキルの README を参照してください。
 
@@ -29,6 +30,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 - **multi-llm-recursive-meta-cognition** — 複雑な多段階の推論: 移行計画、デバッグ戦略、研究的な問い — 分解・独立した検証・最終的なメタレビューが効くあらゆる問題。
 - **reflect** — バグ・ニアミス・繰り返す摩擦のあとのポストモーテムと根本原因分析: 場当たり的な対処で再発させるのではなく、インシデントを正しい管理階層での修正と書面の台帳（ledger）に落とし込む。
 - **claude-code-steering** — Claude Code の指示をどこに置くべきか（CLAUDE.md / ルール / スキル / サブエージェント / hook / アウトプットスタイル）の判断、そしてドリフトや肥大化した既存の .claude 設定の監査。
+- **loop-engineering** — 反復的なエージェントタスクを自己プロンプト型ループにすべきか — そしてすべきでない場合はそれを示す — を判断し、最小構成のループ（automation + skill + state file + gate を 1 つずつ）を構築して、ゴールのドリフト・トークンの暴走・未レビューのマージに対して堅牢化する。
 
 ## When to use it (and when not)
 

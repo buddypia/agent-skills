@@ -1,0 +1,30 @@
+# Loop state · <loop-name>
+
+> The agent forgets each run. This file does not. Tomorrow's run reads this and **resumes** instead of restarting.
+> Markdown-in-repo is best for solo/small teams; use Linear/Issues/DB for production loops with multiple human watchers.
+
+## Last run
+<YYYY-MM-DD HH:MM UTC> · <summary: e.g. 7 failures classified, 3 fixes drafted, 4 escalated>
+
+## In progress
+- <branch / ticket> — <status, e.g. tests passing locally, awaiting CI>
+- <branch / ticket> — <status>
+
+## Completed today
+- <branch> → merged (<how it was verified, e.g. CI green, deps loop verified>)
+- <branch> → merged
+
+## Escalated to humans
+- <path / area> — <why a human is needed, e.g. tests failing in 3 ways, root cause unclear>
+- <infra item> — <why it's not a code issue>
+
+## Lessons learned (write here, not in chat)
+- <YYYY-MM-DD>: <durable fact the loop must remember, e.g. "PowerShell hits TLS 1.2 on this Windows runner — use bash.">
+- <YYYY-MM-DD>: <e.g. "tests/e2e/checkout requires Stripe webhook secret in env. Skip if missing.">
+
+## Stop conditions met since last review
+- /goal "<condition>" achieved on commit <sha> at <HH:MM UTC>
+
+## Metrics (cost per accepted change — the only metric that matters)
+- cost/accepted: $<n>   accepted: <n>   reject rate: <n>%   MTTA: <n> min   lead: <n> hr
+- ⚠ If accepted-change rate < 50%, the loop is losing — tighten the gate, narrow the task, or retire it.

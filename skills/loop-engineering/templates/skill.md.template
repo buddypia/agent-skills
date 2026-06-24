@@ -1,0 +1,44 @@
+---
+name: <loop-name>            # e.g. ci-triage, dep-bumps, lint-fix
+description: |
+  <One sentence: what the loop does and what it classifies/produces.>
+  Trigger whenever <event, e.g. "a workflow run fails"> or on <the cadence, e.g. "the morning triage loop">.
+---
+
+# <Loop name> skill
+
+> One skill = the project context this loop would otherwise re-derive from zero every run.
+> Keep it source-of-truth: conventions, commands, fix patterns, and the institutional memory.
+
+## Goal
+<What "done" means for one run, stated objectively. Point at the gate command.>
+
+## Classification rules        # (drop this section if the loop isn't a triage loop)
+- <category>: <how to recognize it>. # <disposition: human / retry once then file / draft fix / escalate>
+- env: missing secret, wrong env var, infra not provisioned.   # human
+- flake: passes on retry without code change.                  # retry once, then file
+- bug: deterministic failure tied to a recent commit.          # draft fix
+- dependency: failure tied to a version bump.                  # draft rollback
+- infra: timeout, OOM, runner issue.                           # escalate
+
+## Fix patterns
+- <Symptom> → <where to look first>.
+- Auth tests → check src/auth/middleware first.
+- Database tests → verify migration applied in CI env.
+- E2E tests → check selectors against the latest UI snapshot.
+
+## Build / verify commands (the gate)
+- Test:  `<command>`     # non-zero exit must fail the run
+- Types: `<command>`
+- Lint:  `<command>`
+- Build: `<command>`
+
+## Never do                    # survives compaction only if also in VISION.md
+- Disable failing tests — always file as an escalation instead.
+- Modify CI config without human approval.
+- Touch <protected paths, e.g. src/payments/ or src/billing/> (see permissions).
+- Merge/deploy/change dependencies without the human approval gate.
+
+## State
+After each run, update STATE.md: file paths checked, classifications,
+PRs opened, items escalated, and any new "lesson learned."

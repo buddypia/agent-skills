@@ -1,0 +1,87 @@
+# Loop Engineering report · <project>
+
+> Written and updated by the `loop-engineering` skill. Carries the scan + analysis between sessions so the work itself resumes instead of restarting. One section per phase.
+
+---
+
+## Phase 0 · SCAN (factual inventory — no proposals yet)
+
+**Verification surface** (can bad output be failed objectively?)
+- Tests: <framework, command, real coverage — not just "exists">
+- Types: <tool, command>     · Lint: <tool, command>     · Build: <command>
+- CI: <files, what runs when>
+- Verdict: <strong / thin / none>  ← if thin/none, the headline recommendation is "build verification before any loop"
+
+**Reproduction surface** (can the agent run what it changes?)
+- <dev server / test runner / fixtures / containers / seed data>
+
+**Recurring-work surface** (loop candidates found)
+- <task> — recurs <cadence>, evidence: <issues/CI history/grep>
+- <task> — recurs <cadence>, evidence: <…>
+
+**Existing steering config**
+- .claude/ : <skills, agents, hooks, settings, MCP>
+- .codex/  : <agents, automations>
+- CLAUDE.md / AGENTS.md / VISION.md / STATE.md : <present? contents?>
+- Scheduled tasks / routines / crons already running: <…>
+
+**Budget & review reality**
+- Plan: <metered consumer / unmetered>     · Who reviews merges: <…>     · Is review already the bottleneck? <yes/no>
+
+---
+
+## Phase 1 · ANALYZE (the gate decision)
+
+**4-condition test (per task class)** — all four must pass:
+
+| Task | 1. Repeats ≥weekly | 2. Auto verification | 3. Budget absorbs waste | 4. Senior-eng tools | Result |
+|------|:---:|:---:|:---:|:---:|:---:|
+
+**30-second check (per BUILD candidate)** — all five:
+
+| Task | Weekly | Rejectable | Runnable | Hard stop | Human gate | Verdict |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|
+
+**Candidate classification**
+
+| Task | Verdict (BUILD / KEEP MANUAL) | If KEEP MANUAL: which box failed + remedy |
+|------|---|---|
+
+> If nothing qualifies: state "don't build a loop yet" + the shortest path to qualifying (usually: add automated verification). This is a successful outcome.
+
+---
+
+## Phase 2 · BUILD (per BUILD candidate, in order)
+
+| Part | Status | Location / notes |
+|------|--------|------------------|
+| ① Reliable manual run | ☐ | <one accepted result by hand?> |
+| ② One skill | ☐ | `.claude/skills/<name>/SKILL.md` |
+| ③ One state file | ☐ | `STATE.md` (+ `VISION.md` for long runs) |
+| ④ One gate (objective) | ☐ | command + exit code: <…> |
+| ⑤ One automation | ☐ | `/loop … /goal …` |
+| + Worktrees (if parallel) | ☐ | <only if >1 agent> |
+| + Connectors (if real tools) | ☐ | <GitHub / Linear / Slack / Sentry> |
+| + Maker/checker sub-agent | ☐ | `.claude/agents/<name>-verifier.md` |
+
+---
+
+## Phase 3 · HARDEN (sign-off — see references/03-failure-modes.md)
+
+- [ ] Objective gate names a command + exit code
+- [ ] Hard stop set (budget / iterations / time)
+- [ ] Human approval gate before merge/deploy/deps/auth/payments
+- [ ] Maker ≠ checker (different model; /goal checker ≠ maker)
+- [ ] VISION.md restates non-negotiable constraints, reread each run
+- [ ] Security gate: SAST + dependency audit + secret scanning
+- [ ] No auto-install of unaudited skills/connectors
+- [ ] Verbose logging off; logs sanitized
+- [ ] Permission re-audit scheduled (≤30 days)
+- [ ] Human owns reading diffs + spot-checking gates on a cadence
+
+---
+
+## Phase 4 · MEASURE
+
+- cost/accepted: $<n>   ·   accepted: <n>   ·   reject rate: <n>%   ·   MTTA: <n> min   ·   lead: <n> hr
+- Accepted-change rate ≥ 50%? <yes/no>  → if no, the loop is losing: tighten gate / narrow task / retire.

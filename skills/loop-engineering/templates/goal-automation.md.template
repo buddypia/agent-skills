@@ -1,0 +1,43 @@
+# One automation — the heartbeat
+
+> `/loop` = re-run on a cadence regardless of state. `/goal` = keep going until a written condition is **actually true**, checked by a **separate small model** (maker ≠ checker). Compose them. Every automation needs a **hard stop** and a **human approval gate** before anything irreversible.
+
+## Claude Code — composed /loop + /goal
+
+```
+> /loop <cadence> /goal <objective, checkable stop condition>.
+  <What to scan>, propose fixes in <branch/prefix>,
+  open draft PR when goal condition holds.
+```
+
+Worked example:
+
+```
+> /loop 30m /goal All tests in test/auth pass and lint is clean.
+  Scan src/auth for new failures, propose fixes in claude/auth-fixes,
+  open draft PR when goal condition holds.
+
+▲ Claude
+  CronCreate(*/30 * * * * : auth quality loop)
+  Stop condition: tests pass + lint clean (verified by checker)
+✓ Scheduled. Will continue past intermediate completions
+  until /goal condition is met by independent checker.
+```
+
+### Escalation path (do these in order, never skip)
+1. **Manual run** — run the task by hand, agent-assisted, until one result is accepted.
+2. **`/loop … /goal …`** — session-scoped, while you watch the first few cycles.
+3. **Desktop scheduled task** — survives restarts.
+4. **Routine** — runs with the laptop off (cloud).
+5. **Hooks** — fire on lifecycle events (e.g. lint-and-fix on PR-open).
+
+### Non-negotiables baked into the condition
+- The `/goal` condition is **objective** ("tests in test/X pass AND lint = 0"), never "looks good."
+- A **hard stop**: cadence has a max-iteration or time bound, and a token budget cap.
+- The checker model is **not** the maker model.
+- A **human approval gate** sits before merge / deploy / dependency / auth / payments.
+
+## Codex — Automations tab equivalent
+- Project: `<repo>` · Prompt: `<the task + the objective stop condition>` · Cadence: `<e.g. every 30m / nightly>`
+- Environment: local checkout **or** background worktree.
+- Found-something → **Triage inbox**; found-nothing → self-archives.

@@ -1,0 +1,42 @@
+<!--
+  PR 承認後の完了報告テンプレート (worktree-review-gate)
+  §1 承認依頼でユーザーが「✅ 承認して進める」を選んだ後にのみ出力する。
+  merge / cleanup を実際に実行した結果を、実測値で埋める。
+  すべての <...> を実際の値で埋める。
+-->
+
+# PR 承認後の完了報告
+
+## 1. PR
+
+- PR URL: `<URL>`
+- PR Merged 状況: `<merged / not merged + 理由>`
+- Merge commit / squash commit: `<sha>`
+- CI status: `<passing / failing / なし>`
+
+## 2. Cleanup 状況
+
+- Worktree cleanup: `<git worktree remove 実行 / 未実施 + 理由>`
+- Branch cleanup: `<local branch 削除 / 残置>`
+- Remote branch cleanup: `<remote branch 削除 / 残置>`
+- main への ff 状況: `<fast-forward 済 / 不要 / 手動 pull 必要>`
+- stash の復元状況: `<復元済 / なし>`
+- active stash: `<git stash list の結果 / なし>`
+
+## 3. 反映されたファイル
+
+```text
+<changed_files_tree （main に反映された変更のツリー）>
+```
+
+## 4. 残った対応
+
+- 残タスク: `<…>`
+- 手動対応が必要なもの: `<…>`
+- 次回セッションへの引き継ぎ: `<…>`
+
+## 5. 問題 / 改善メモ
+
+- 発生した問題: `<…>`
+- 回避策: `<…>`
+- 仕組みに反映したい改善: `<…>`

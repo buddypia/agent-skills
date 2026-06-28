@@ -27,5 +27,8 @@ raw_output_*.json
 *.log
 .tmp/
 
+# Git worktrees (worktree-review-gate works in these; never commit them back into the main tree)
+.worktrees/
+
 # Local-only maintenance tooling (kept in the working tree, not published)
 skills/publish-skill/

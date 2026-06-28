@@ -1,0 +1,98 @@
+<!--
+  承認依頼テンプレート (worktree-review-gate)
+  worktree 作業が「PLAN.md 全チェック済み」かつ「実作業(コミット)あり」のときだけ出力する。
+  READ-ONLY セッション・worktree 外・未完了では絶対に出力しない。
+  すべての <...> を実際の値で埋める。不明な項目は「不明」ではなく実際に調べて埋める。
+-->
+
+## 1. 承認依頼
+
+以下の worktree 作業は完了状態です。
+内容を確認し、merge / cleanup に進めてよいか承認してください。
+
+選択してください:
+- ✅ 承認して進める（merge → cleanup）
+- ✏️ 修正が必要（指摘点を返してください）
+- ⛔ 停止する（マージせず保留）
+
+## 2. 状態サマリー
+
+- Worktree path: `<.worktrees/...>`
+- Branch: `<branch>`
+- Base branch: `<origin/main など>`
+- PLAN.md: `<path>`
+- PLAN.md checklist: `<done>/<total> 完了（残 0）`
+- Worktree status: `<clean / uncommitted N files>`
+- Quality Gate: `<lint/format/typecheck の結果。無ければ「該当なし」>`
+- Test / verify: `<コマンドと結果。例: pytest → passed (12), あるいは「未実施・理由」>`
+- Draft PR: `<あり (URL) / なし>`
+
+## 3. Worktree のコミット情報
+
+```text
+<git log --oneline <base>..HEAD の出力>
+```
+
+- Commit count: `<n>`
+- Commit range: `<base>..HEAD`
+- Latest commit: `<sha + subject>`
+
+## 4. PR Draft
+
+- PR URL: `<URL / なし>`
+- PR status: `<Draft / Open / 未作成>`
+- Merge status: `<mergeable / conflict / 未確認>`
+- CI status: `<passing / failing / running / なし>`
+
+## 5. 修正 / 追加したファイル
+
+```text
+<変更ファイルのツリー構造 (git diff --stat <base>..HEAD をツリー化)>
+```
+
+## 6. 変更内容
+
+| Path | 種別 | 役割 | 変更理由 |
+|------|------|------|----------|
+| `<path>` | NEW / EDIT / DELETE | `<役割>` | `<理由>` |
+
+## 7. なぜ修正したか
+
+- 背景: `<…>`
+- 解決した問題: `<…>`
+- 採用した方針: `<…>`
+- ユーザー要求との対応: `<元の要求 → 本変更での充足点>`
+
+## 8. トレードオフ
+
+- 採用案: `<…>`
+- 代替案: `<…>`
+- 採用理由: `<…>`
+- 犠牲にした点: `<…>`
+- 将来見直す条件: `<…>`
+
+## 9. リスク / Rollback
+
+- 影響範囲: `<…>`
+- 既知リスク: `<…>`
+- 未検証事項: `<…>`
+- Rollback 方法: `<revert / branch 破棄 / worktree remove などの具体手順>`
+
+## 10. セッション内の残タスク
+
+- なし / あり: `<…>`
+- 次に必要な作業: `<…>`
+
+## 11. セッション内の問題点や改善点
+
+- 問題点: `<…>`
+- 改善案: `<…>`
+- 次回の注意: `<…>`
+
+<!--
+  ↓ このマーカー行は worktree-review-gate hook の「冪等性判定」に必須。削除しないこと。
+  <short-HEAD> を `git rev-parse --short HEAD` の実出力（例: a1b2c3d）に置換して必ず残す。
+  これがある限り hook は同じ HEAD で承認依頼を再要求しない（＝二重出力・nag を防ぐ）。
+  新たにコミットして HEAD が変われば、修正後の再承認が改めて要求される。
+-->
+<!-- WTRG:APPROVAL:<short-HEAD> -->

@@ -13,8 +13,11 @@ each SDK bundled OS/architecture-specific CLI binaries (hundreds of MB), causing
 so it was unified to a lightweight approach that calls the user's globally installed CLI directly via subprocess (same as reflection/recursive).
 
 Environment variables:
-  MULTILLM_REASONING_EFFORT   reasoning effort (default xhigh; applied to Codex)
-  MULTILLM_CLI_TIMEOUT        CLI call timeout (seconds) (default 360)
+  MULTILLM_REASONING_EFFORT   reasoning effort (default high; applied to both Claude and Codex)
+  MULTILLM_CLI_TIMEOUT        per-CLI-call timeout (seconds) (default 360)
+  MULTILLM_TOTAL_DEADLINE     whole-pipeline wall-clock budget in seconds (default 540; keeps the
+                              run under a typical 600s agent/Bash tool ceiling — each call is capped
+                              at the remaining budget and calls are skipped once it is exhausted)
   MULTILLM_AGY_PRINT_TIMEOUT  agy --print-timeout value (default 5m)
   MULTILLM_CLAUDE_MODEL / MULTILLM_CODEX_MODEL  per-backend model override (optional)
 """
@@ -22,10 +25,14 @@ Environment variables:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
+import random
 import shutil
+import signal
 import tempfile
+import time
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -44,7 +51,36 @@ def _cli_timeout() -> float:
 
 
 def _reasoning_effort() -> str:
-    return os.getenv("MULTILLM_REASONING_EFFORT", "xhigh").strip() or "xhigh"
+    # Default "high" (not "xhigh"): under the whole-pipeline wall-clock budget each stage gets a
+    # limited slice, and xhigh routinely exceeds it. "high" is the balanced default; override with
+    # MULTILLM_REASONING_EFFORT=xhigh|max when you have the time budget.
+    return os.getenv("MULTILLM_REASONING_EFFORT", "high").strip() or "high"
+
+
+# --- whole-pipeline wall-clock budget (deadline propagation) -----------------
+# A multi-stage pipeline is usually launched by an agent/Bash tool with a hard ~600s
+# ceiling. We anchor a monotonic deadline on first use and cap every CLI call at the
+# time remaining, so the run returns labeled partial output BEFORE it gets killed.
+_POSIX = os.name == "posix"
+_KILL_GRACE_SEC = 3.0      # SIGTERM -> grace -> SIGKILL when terminating a timed-out call
+_MIN_CALL_FLOOR_SEC = 8.0  # don't start a new CLI call with less than this many seconds left
+_deadline_mono: float | None = None
+
+
+def _total_deadline() -> float:
+    try:
+        return float(os.getenv("MULTILLM_TOTAL_DEADLINE", "540"))
+    except ValueError:
+        return 540.0
+
+
+def _deadline_remaining() -> float:
+    """Seconds left in the whole-pipeline budget. Lazily anchored on the first call."""
+    global _deadline_mono
+    now = time.monotonic()
+    if _deadline_mono is None:
+        _deadline_mono = now + _total_deadline()
+    return _deadline_mono - now
 
 
 def _agy_print_timeout() -> str:
@@ -61,6 +97,49 @@ def _strip_code_fences(text: str) -> str:
     return cleaned
 
 
+_CLAUDE_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
+
+
+def _claude_effort(effort: str) -> str:
+    """Clamp to a value Claude's --effort accepts (Codex additionally allows none/minimal)."""
+    e = (effort or "").strip().lower()
+    if e in _CLAUDE_EFFORTS:
+        return e
+    if e in {"none", "minimal"}:
+        return "low"
+    return "high"
+
+
+async def _terminate_process_tree(proc: "asyncio.subprocess.Process") -> None:
+    """Kill the whole process tree of a timed-out CLI, not just the direct child.
+
+    The CLIs (claude/codex/agy) spawn their own node/bun children; a bare proc.kill()
+    orphans those grandchildren. We start each child in its own session/group and signal
+    the group: SIGTERM, a short grace period, then SIGKILL, finally reaping to avoid zombies.
+    """
+    if _POSIX:
+        pgid = None
+        try:
+            pgid = os.getpgid(proc.pid)
+        except (ProcessLookupError, PermissionError):
+            pgid = None
+        if pgid is not None:
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(pgid, signal.SIGTERM)
+            try:
+                await asyncio.wait_for(proc.wait(), timeout=_KILL_GRACE_SEC)
+                return
+            except asyncio.TimeoutError:
+                pass
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(pgid, signal.SIGKILL)
+    else:
+        with contextlib.suppress(ProcessLookupError):
+            proc.kill()
+    with contextlib.suppress(Exception):
+        await proc.wait()
+
+
 async def _run_cli(
     cmd: list[str],
     *,
@@ -68,23 +147,32 @@ async def _run_cli(
     cwd: str | None,
     timeout: float,
 ) -> tuple[int, str, str]:
-    """Run a CLI via subprocess. Long-form input goes through stdin. Returns (rc, stdout, stderr)."""
+    """Run a CLI via subprocess. Long-form input goes through stdin. Returns (rc, stdout, stderr).
+
+    The effective timeout is the smaller of the per-call timeout and the time left in the
+    whole-pipeline budget, so a single slow stage cannot blow the overall wall-clock ceiling.
+    """
+    remaining = _deadline_remaining()
+    if remaining <= _MIN_CALL_FLOOR_SEC:
+        raise RuntimeError(
+            f"deadline budget exhausted ({remaining:.0f}s left); skipping {cmd[0]} "
+            "to return partial results before the wall-clock ceiling"
+        )
+    effective_timeout = min(timeout, remaining)
     proc = await asyncio.create_subprocess_exec(
         *cmd,
         stdin=asyncio.subprocess.PIPE if stdin_text is not None else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=cwd,
+        start_new_session=_POSIX,
     )
     payload = stdin_text.encode("utf-8") if stdin_text is not None else None
     try:
-        out, err = await asyncio.wait_for(proc.communicate(payload), timeout=timeout)
+        out, err = await asyncio.wait_for(proc.communicate(payload), timeout=effective_timeout)
     except asyncio.TimeoutError:
-        try:
-            proc.kill()
-        except ProcessLookupError:
-            pass
-        raise RuntimeError(f"CLI timeout after {timeout}s: {cmd[0]}")
+        await _terminate_process_tree(proc)
+        raise RuntimeError(f"CLI timeout after {effective_timeout:.0f}s: {cmd[0]}")
     rc = proc.returncode if proc.returncode is not None else 0
     return rc, out.decode("utf-8", "replace"), err.decode("utf-8", "replace")
 
@@ -140,6 +228,7 @@ class ClaudeCliAdapter:
     ) -> ProviderResponse:
         binary = shutil.which("claude") or "claude"
         model_id = os.getenv("MULTILLM_CLAUDE_MODEL") or model
+        effort = _reasoning_effort()
         timeout = _cli_timeout()
         with tempfile.TemporaryDirectory(prefix="mll_claude_") as tmp:
             sys_file = os.path.join(tmp, "system.txt")
@@ -153,6 +242,7 @@ class ClaudeCliAdapter:
                 "--allowed-tools", "",
                 "--permission-mode", "dontAsk",
                 "--model", model_id,
+                "--effort", _claude_effort(effort),
             ]
             # cwd=tmp → avoids loading the project's CLAUDE.md/hooks. Does not use --bare so subscription auth still applies.
             rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
@@ -179,6 +269,7 @@ class ClaudeCliAdapter:
         meta = {
             "backend": "claude-cli",
             "model": model_id,
+            "reasoning_effort": effort,
             "usage": data.get("modelUsage") or data.get("usage"),
             "session_id": data.get("session_id"),
         }
@@ -333,9 +424,16 @@ class AntigravityCliAdapter:
         # agy creates an .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
         tmp = tempfile.mkdtemp(prefix="mll_agy_")
         last_err = ""
+        max_attempts = 2
         try:
-            for attempt in range(2):
-                rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
+            for attempt in range(max_attempts):
+                try:
+                    rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
+                except RuntimeError as exc:
+                    # Timeout / exhausted deadline: re-running only burns more of the shared
+                    # budget against the same wall-clock ceiling, so do not retry.
+                    last_err = str(exc)
+                    break
                 text = _strip_code_fences(out.strip())
                 if rc == 0 and text:
                     request = {
@@ -354,6 +452,11 @@ class AntigravityCliAdapter:
                         response_meta=meta,
                     )
                 last_err = err.strip()[:300] or f"exit {rc}"
+                # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
+                if attempt + 1 < max_attempts and _deadline_remaining() > _MIN_CALL_FLOOR_SEC + 5:
+                    await asyncio.sleep(1.0 + random.random())
+                else:
+                    break
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
         raise RuntimeError(f"agy -p failed: {last_err}")

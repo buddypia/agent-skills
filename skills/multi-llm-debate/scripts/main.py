@@ -761,6 +761,33 @@ def _extract_debate_result(run_result: object) -> DebateResult | None:
     return None
 
 
+def _annotate_degradation(result: DebateResult) -> None:
+    """Flag a partial/degraded debate (a role timed out or errored) and warn loudly on stderr.
+
+    The exit code stays 0 for backward compatibility, but the result carries `degraded=True`
+    plus the list of roles so a caller never mistakes placeholder output for a real verdict.
+    """
+    degraded_stages: list[str] = []
+    if result.raw is not None:
+        for role in ("proponent", "opponent", "moderator"):
+            role_raw = getattr(result.raw, role, None)
+            if role_raw is not None and getattr(role_raw, "error", None):
+                degraded_stages.append(role)
+
+    if not degraded_stages:
+        return
+
+    result.degraded = True
+    result.degraded_stages = degraded_stages
+    print(
+        "WARNING: multi-llm-debate ran in DEGRADED mode — these roles timed out or errored and "
+        f"returned placeholder output: {', '.join(degraded_stages)}. The verdict is PARTIAL. "
+        "Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
+        "MULTILLM_REASONING_EFFORT, or a simpler topic.",
+        file=sys.stderr,
+    )
+
+
 async def run_cli(args: argparse.Namespace, runtime: RuntimeConfig) -> None:
     """Run the workflow in CLI mode."""
 
@@ -798,6 +825,8 @@ async def run_cli(args: argparse.Namespace, runtime: RuntimeConfig) -> None:
         print(f"Error: could not extract a DebateResult: {type(run_result)}", file=sys.stderr)
         print(run_result)
         sys.exit(1)
+
+    _annotate_degradation(debate_result)
 
     # Write raw data
     if args.raw_output:

@@ -126,6 +126,12 @@ class ReflectionResult(BaseModel):
     integration: IntegrationOutput
     reflection: ReflectionOutput
 
+    # Degradation signal — set when one or more stages timed out or errored and returned
+    # placeholder output. Lets callers tell a real answer apart from a partial/degraded one
+    # (the process still exits 0 for backward compatibility; see the stderr warning in main.py).
+    degraded: bool = Field(False, description="True if any stage timed out or errored")
+    degraded_stages: List[str] = Field(default_factory=list, description="Names of stages that degraded")
+
     # Metadata
     total_duration_sec: float = Field(0.0)
     decomposer_model: str = Field("")

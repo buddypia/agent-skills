@@ -95,8 +95,9 @@ uv run --directory scripts main.py "topic" \
 | Variable | Default | Purpose |
 |------|------|------|
 | `DEBATE_PROVIDER_STRATEGY` | `shuffle` | Assignment strategy (shuffle / random / fixed) |
-| `MULTILLM_REASONING_EFFORT` | `xhigh` | Codex reasoning effort (none/minimal/low/medium/high/xhigh) |
-| `MULTILLM_CLI_TIMEOUT` | `360` | Timeout for each CLI call (seconds) |
+| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude (`--effort`) and Codex (none/minimal/low/medium/high/xhigh/max). `xhigh` is the slowest and routinely exceeds the wall-clock budget — raise it only when you have the time |
+| `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
+| `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling: each call is capped at the time remaining, and once the budget is spent the remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the whole process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
 | `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | Per-backend model override |
 | `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | — | API keys (when not using CLI login / when running in a sandbox). Only Gemini uses it for direct API calls |
@@ -115,7 +116,9 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 | `agy / claude / codex: command not found` | Install the relevant CLI and add it to your PATH (verify with `command -v`) |
 | `models/... is not found (404)` (gemini) | The default is `gemini-3.5-flash`. The `agy` CLI takes over automatically |
 | Authentication error | Run the relevant CLI interactively to log in once, or set an API key |
-| Codex timeout | Lower `MULTILLM_REASONING_EFFORT` (xhigh takes a long time) |
+| Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run the skill as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
+| `WARNING: ... DEGRADED mode` / `"degraded": true` | One or more roles timed out or errored and returned placeholder text, so the verdict is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the topic, then re-run |
+| Codex/Claude slow | Lower `MULTILLM_REASONING_EFFORT` (`high`→`medium`); `xhigh` is the slowest tier |
 | Empty output / corrupted JSON | Use `--verbose` to inspect the raw output of each stage |
 
 ## Architecture (summary)

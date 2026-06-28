@@ -74,7 +74,9 @@ class DefaultAgentSettings:
     provider: str
     model: Optional[str] = None
     temperature: float = 0.7
-    timeout_sec: float = 120.0
+    # Per-stage safety cap (s); the total bound is MULTILLM_TOTAL_DEADLINE in providers.py.
+    # Raised from 120 (which silently degraded "high"/reasoning stages mid-run).
+    timeout_sec: float = 300.0
 
     def get_model(self) -> str:
         """Get the model ID (falls back to the provider's default when not set)"""

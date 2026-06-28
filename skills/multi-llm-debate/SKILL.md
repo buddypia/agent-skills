@@ -16,6 +16,8 @@ Different-vendor CLIs (`agy` / `claude` / `codex`) run as **proponent, opponent,
 # Flags: --verbose (per-role detail) | --json | --shuffle (default) | --random | --fixed
 ```
 
+> **Long runs / timeouts:** a debate makes **3 sequential** model calls and can take a few minutes. The run self-bounds to `MULTILLM_TOTAL_DEADLINE` (540s) so it returns before a typical **600s agent/Bash-tool ceiling**. When invoking from an agent harness, run it as a **background** task to avoid that wall-clock limit. If a role times out, the result is flagged `"degraded": true` with a stderr warning — treat it as partial. Speed levers: lower `MULTILLM_REASONING_EFFORT` (`high`→`medium`); do **not** just raise `MULTILLM_CLI_TIMEOUT`.
+
 `run.sh` auto-prepares Python deps (uses uv if available, else venv+pip — no manual `pip`). The only prerequisite is installing the three CLIs once.
 
 ## Prerequisites & details

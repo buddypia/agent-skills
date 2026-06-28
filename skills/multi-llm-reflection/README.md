@@ -70,8 +70,9 @@ uv run --directory scripts main.py "task" \
 
 | Variable | Default | Purpose |
 |------|------|------|
-| `MULTILLM_REASONING_EFFORT` | `xhigh` | Codex reasoning effort (none/low/medium/high/xhigh) |
-| `MULTILLM_CLI_TIMEOUT` | `360` | CLI call timeout (seconds) |
+| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude (`--effort`) and Codex (none/low/medium/high/xhigh/max). `xhigh` is the slowest and often exceeds the wall-clock budget — raise it only when you have the time |
+| `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
+| `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling; once spent, remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
 | `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override |
 | `REFLECTION_{GENERATOR,CRITIC,REFINER}_{PROVIDER,MODEL}` | — | per-role override |
@@ -88,7 +89,8 @@ REFLECTION_GENERATOR_PROVIDER=mock REFLECTION_CRITIC_PROVIDER=mock REFLECTION_RE
 |------|------|
 | `agy/claude/codex: command not found` | install above + check PATH |
 | `... failed (exit ...)` / authentication error | run the relevant CLI interactively once to log in |
-| Timeout | increase `MULTILLM_CLI_TIMEOUT` (xhigh takes time) |
+| Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
+| `WARNING: ... DEGRADED mode` / `"degraded": true` | A stage timed out or errored and returned placeholder text, so the result is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the prompt |
 | `Prompt file not found` | check that `assets/prompts/*.txt` are bundled |
 | Empty output / broken JSON | check each stage's raw output with `--verbose` |
 

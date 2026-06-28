@@ -18,7 +18,10 @@ class AgentConfig:
     base_url: Optional[str] = None
     system_prompt: Optional[str] = None
     temperature: float = 0.7
-    timeout_sec: float = 120.0
+    # Per-stage safety cap (s). The real total bound is the whole-pipeline deadline enforced in
+    # providers.py (MULTILLM_TOTAL_DEADLINE); this just stops a single stage from hanging forever.
+    # 120s was too tight for "high"/reasoning models and silently degraded stages mid-run.
+    timeout_sec: float = 300.0
     enabled: bool = True
 
     def normalized_provider(self) -> str:

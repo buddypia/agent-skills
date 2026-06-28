@@ -191,6 +191,8 @@ def _resolve_provider_strategy(
     args: argparse.Namespace,
     config_file: dict[str, Any],
 ) -> Optional[str]:
+    if getattr(args, "fixed_providers", False):
+        return "fixed"
     if getattr(args, "random_providers", False):
         return "random"
     if getattr(args, "shuffle_providers", False):
@@ -412,14 +414,22 @@ Configuration precedence: CLI arguments > environment variables > configuration 
         help=f"DevUI server port number (default: {DEFAULT_DEVUI_PORT})",
     )
 
-    # Random provider selection options
+    # Provider assignment strategy options (parity with multi-llm-debate)
     parser.add_argument(
-        "--random-providers",
+        "--fixed-providers", "--fixed",
+        dest="fixed_providers",
+        action="store_true",
+        help="Pin providers to the per-role defaults (no random/shuffle assignment)",
+    )
+    parser.add_argument(
+        "--random-providers", "--random",
+        dest="random_providers",
         action="store_true",
         help="Randomly select the provider for all agents (random from gemini/anthropic/openai)",
     )
     parser.add_argument(
-        "--shuffle-providers",
+        "--shuffle-providers", "--shuffle",
+        dest="shuffle_providers",
         action="store_true",
         help="Shuffle and assign providers across all agents (no duplicates)",
     )
@@ -726,6 +736,33 @@ def _extract_reflection_result(run_result: object) -> ReflectionResult | None:
     return None
 
 
+def _annotate_degradation(result: ReflectionResult) -> None:
+    """Flag a partial/degraded run (a stage timed out or errored) and warn loudly on stderr.
+
+    The exit code stays 0 for backward compatibility, but the result carries `degraded=True`
+    plus the list of stages so a caller never mistakes placeholder output for a real result.
+    """
+    degraded_stages: list[str] = []
+    if result.raw is not None:
+        for stage in ("generator", "critic", "refiner"):
+            stage_raw = getattr(result.raw, stage, None)
+            if stage_raw is not None and getattr(stage_raw, "error", None):
+                degraded_stages.append(stage)
+
+    if not degraded_stages:
+        return
+
+    result.degraded = True
+    result.degraded_stages = degraded_stages
+    print(
+        "WARNING: multi-llm-reflection ran in DEGRADED mode — these stages timed out or errored "
+        f"and returned placeholder output: {', '.join(degraded_stages)}. The result is PARTIAL. "
+        "Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
+        "MULTILLM_REASONING_EFFORT, or a simpler prompt.",
+        file=sys.stderr,
+    )
+
+
 async def run_cli(args: argparse.Namespace, runtime: RuntimeConfig) -> None:
     """Run the workflow in CLI mode."""
 
@@ -763,6 +800,8 @@ async def run_cli(args: argparse.Namespace, runtime: RuntimeConfig) -> None:
         print(f"Error: could not extract a ReflectionResult: {type(run_result)}", file=sys.stderr)
         print(run_result)
         sys.exit(1)
+
+    _annotate_degradation(reflection_result)
 
     if args.raw_output:
         raw_data = reflection_result.raw.model_dump() if reflection_result.raw is not None else {}

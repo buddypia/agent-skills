@@ -14,7 +14,7 @@ proponent:
 
 opponent:
   provider: anthropic
-  model: claude-opus-4-8
+  model: claude-sonnet-5
   api_key: YOUR_ANTHROPIC_API_KEY
   temperature: 0.7
 

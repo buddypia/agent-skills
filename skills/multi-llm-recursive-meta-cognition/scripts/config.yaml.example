@@ -42,7 +42,7 @@ solver:
 # -------------------------------------------
 verifier:
   provider: anthropic
-  model: claude-opus-4-1-20250805
+  model: claude-sonnet-5
   # api_key: your_key_here      # or use the ANTHROPIC_API_KEY environment variable
   temperature: 0.7
   timeout: 120

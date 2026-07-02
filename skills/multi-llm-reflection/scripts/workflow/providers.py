@@ -16,6 +16,12 @@ Environment variables:
                               at the remaining budget and calls are skipped once it is exhausted)
   MULTILLM_AGY_PRINT_TIMEOUT  agy --print-timeout value (default 5m)
   MULTILLM_CLAUDE_MODEL / MULTILLM_CODEX_MODEL  per-backend model override (optional)
+
+Gemini auth priority: the agy CLI (subscription OAuth) is always tried first, even if
+GEMINI_API_KEY happens to be set (e.g. exported by an unrelated tool) — an incidental API key
+must not silently override the user's OAuth session. GEMINI_API_KEY is only used as a fallback
+when agy itself fails (not installed, not logged in, or stuck in a sandbox that can't complete
+OAuth).
 """
 
 from __future__ import annotations
@@ -91,6 +97,23 @@ def _strip_code_fences(text: str) -> str:
     if cleaned.startswith("json"):
         cleaned = cleaned[4:].strip()
     return cleaned
+
+
+def _strip_unsupported_schema_fields(schema: Any) -> Any:
+    """Drop JSON-Schema fields the Gemini REST API's responseSchema (an OpenAPI 3.0
+    subset) doesn't understand — notably "additionalProperties", which the API
+    rejects outright with a 400 INVALID_ARGUMENT ("Cannot find field."). Recurses
+    into nested object/array schemas so every level is cleaned, not just the root.
+    """
+    if isinstance(schema, dict):
+        return {
+            key: _strip_unsupported_schema_fields(value)
+            for key, value in schema.items()
+            if key != "additionalProperties"
+        }
+    if isinstance(schema, list):
+        return [_strip_unsupported_schema_fields(item) for item in schema]
+    return schema
 
 
 _CLAUDE_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
@@ -350,8 +373,12 @@ class CodexAdapter:
 
 # =============================================================================
 # Antigravity CLI  (gemini)  — successor to the Gemini CLI. Default model Gemini 3.5 Flash (High).
-#   agy 0.42.0 does not support the --output-format/--model/reasoning flags → the plain-text output
+#   agy 1.0.x does not support the --output-format/reasoning flags → the plain-text output
 #   is steered with a JSON-only directive and parsed via the executor's Pydantic validation path.
+#
+#   Auth priority is agy CLI (subscription OAuth) first, GEMINI_API_KEY second (fallback only).
+#   An incidental GEMINI_API_KEY exported for some unrelated tool must not silently steal traffic
+#   away from the user's OAuth session — see module docstring.
 # =============================================================================
 
 class AntigravityCliAdapter:
@@ -370,92 +397,106 @@ class AntigravityCliAdapter:
         schema_name: str,
         output_model: Any | None,
     ) -> ProviderResponse:
-        # If an API key was provided via an environment variable or parameter, try calling the Gemini API directly first instead of the agy CLI (works around sandbox login errors)
         effective_api_key = api_key or os.getenv("GEMINI_API_KEY")
-        if effective_api_key:
-            try:
-                loop = asyncio.get_running_loop()
-                response_text = await loop.run_in_executor(
-                    None,
-                    _call_gemini_api,
-                    model,
-                    effective_api_key,
-                    system_prompt,
-                    user_prompt,
-                    temperature,
-                    schema,
-                )
-                text = _strip_code_fences(response_text.strip())
-                request = {
-                    "backend": "gemini-api",
-                    "model": model,
-                    "directive_chars": len(system_prompt),
-                    "user_prompt_chars": len(user_prompt),
-                }
-                meta = {"backend": "gemini-api", "model": model}
-                return ProviderResponse(
-                    provider=self.name,
-                    model=model,
-                    request=to_jsonable(request),
-                    response_text=text,
-                    response_meta=meta,
-                )
-            except Exception as e:
-                import sys
-                print(f"Direct Gemini API call failed, falling back to agy CLI: {e}", file=sys.stderr)
 
-        binary = shutil.which("agy") or "agy"
-        timeout = _cli_timeout()
-        directive = (
-            f"{system_prompt}\n\n"
-            "[Important] Based on the stdin body below, output exactly one JSON object that "
-            "strictly conforms to the following JSON schema, with no code fences or extra explanation:\n"
-            f"{json.dumps(schema, ensure_ascii=False)}"
-        )
-        cmd = [
-            binary, "-p", directive,
-            "--dangerously-skip-permissions",
-            "--print-timeout", _agy_print_timeout(),
-        ]
-        # agy creates a .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
-        tmp = tempfile.mkdtemp(prefix="mll_agy_")
-        last_err = ""
-        max_attempts = 2
+        async def call_api() -> ProviderResponse:
+            loop = asyncio.get_running_loop()
+            response_text = await loop.run_in_executor(
+                None,
+                _call_gemini_api,
+                model,
+                effective_api_key,
+                system_prompt,
+                user_prompt,
+                temperature,
+                schema,
+            )
+            text = _strip_code_fences(response_text.strip())
+            request = {
+                "backend": "gemini-api",
+                "model": model,
+                "directive_chars": len(system_prompt),
+                "user_prompt_chars": len(user_prompt),
+            }
+            meta = {"backend": "gemini-api", "model": model}
+            return ProviderResponse(
+                provider=self.name,
+                model=model,
+                request=to_jsonable(request),
+                response_text=text,
+                response_meta=meta,
+            )
+
+        async def call_agy() -> ProviderResponse:
+            binary = shutil.which("agy") or "agy"
+            timeout = _cli_timeout()
+            directive = (
+                f"{system_prompt}\n\n"
+                "[Important] Based on the stdin body below, output exactly one JSON object that "
+                "strictly conforms to the following JSON schema, with no code fences or extra explanation:\n"
+                f"{json.dumps(schema, ensure_ascii=False)}"
+            )
+            cmd = [
+                binary, "-p", directive,
+                "--dangerously-skip-permissions",
+                "--print-timeout", _agy_print_timeout(),
+            ]
+            # agy creates a .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
+            tmp = tempfile.mkdtemp(prefix="mll_agy_")
+            last_err = ""
+            max_attempts = 2
+            try:
+                for attempt in range(max_attempts):
+                    try:
+                        rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
+                    except RuntimeError as exc:
+                        # Timeout / exhausted deadline: re-running only burns more of the shared
+                        # budget against the same wall-clock ceiling, so do not retry.
+                        last_err = str(exc)
+                        break
+                    text = _strip_code_fences(out.strip())
+                    if rc == 0 and text:
+                        request = {
+                            "backend": "antigravity-cli",
+                            "model": model,
+                            "directive_chars": len(directive),
+                            "user_prompt_chars": len(user_prompt),
+                            "attempt": attempt + 1,
+                        }
+                        meta = {"backend": "antigravity-cli", "model": model, "attempt": attempt + 1}
+                        return ProviderResponse(
+                            provider=self.name,
+                            model=model,
+                            request=to_jsonable(request),
+                            response_text=text,
+                            response_meta=meta,
+                        )
+                    last_err = err.strip()[:300] or f"exit {rc}"
+                    # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
+                    if attempt + 1 < max_attempts and _deadline_remaining() > _MIN_CALL_FLOOR_SEC + 5:
+                        await asyncio.sleep(1.0 + random.random())
+                    else:
+                        break
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+            raise RuntimeError(f"agy -p failed: {last_err}")
+
+        import sys
+
+        # agy CLI (subscription OAuth) is tried first and is the normal path. GEMINI_API_KEY (if
+        # any) is only a fallback for when agy itself is unusable (not installed, not logged in,
+        # or stuck in a sandbox that can't complete OAuth) — an incidental GEMINI_API_KEY exported
+        # for some unrelated tool must not silently steal traffic away from the OAuth session.
         try:
-            for attempt in range(max_attempts):
-                try:
-                    rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
-                except RuntimeError as exc:
-                    # Timeout / exhausted deadline: re-running only burns more of the shared
-                    # budget against the same wall-clock ceiling, so do not retry.
-                    last_err = str(exc)
-                    break
-                text = _strip_code_fences(out.strip())
-                if rc == 0 and text:
-                    request = {
-                        "backend": "antigravity-cli",
-                        "model": model,
-                        "directive_chars": len(directive),
-                        "user_prompt_chars": len(user_prompt),
-                        "attempt": attempt + 1,
-                    }
-                    meta = {"backend": "antigravity-cli", "model": model, "attempt": attempt + 1}
-                    return ProviderResponse(
-                        provider=self.name,
-                        model=model,
-                        request=to_jsonable(request),
-                        response_text=text,
-                        response_meta=meta,
-                    )
-                last_err = err.strip()[:300] or f"exit {rc}"
-                # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
-                if attempt + 1 < max_attempts and _deadline_remaining() > _MIN_CALL_FLOOR_SEC + 5:
-                    await asyncio.sleep(1.0 + random.random())
-                else:
-                    break
-        finally:
-            shutil.rmtree(tmp, ignore_errors=True)
-        raise RuntimeError(f"agy -p failed: {last_err}")
+            return await call_agy()
+        except Exception as agy_exc:
+            if not effective_api_key:
+                raise
+            print(f"agy CLI (OAuth) failed, falling back to direct Gemini API: {agy_exc}", file=sys.stderr)
+            try:
+                return await call_api()
+            except Exception:
+                raise agy_exc
 
 
 def _call_gemini_api(
@@ -472,7 +513,12 @@ def _call_gemini_api(
 
     model_name = model if model.startswith("models/") else f"models/{model}"
     url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={api_key}"
-    
+
+    # The Gemini REST API's responseSchema is an OpenAPI 3.0 subset: fields like
+    # "additionalProperties" (present in the Pydantic-derived schemas in types.py) are rejected
+    # with 400 INVALID_ARGUMENT ("Cannot find field."), so strip them before sending.
+    clean_schema = _strip_unsupported_schema_fields(schema)
+
     payload = {
         "contents": [
             {
@@ -489,10 +535,10 @@ def _call_gemini_api(
         "generationConfig": {
             "temperature": temperature,
             "responseMimeType": "application/json",
-            "responseSchema": schema
+            "responseSchema": clean_schema
         }
     }
-    
+
     req_data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url,
@@ -500,15 +546,14 @@ def _call_gemini_api(
         headers={"Content-Type": "application/json"},
         method="POST"
     )
-    
+
     with urllib.request.urlopen(req, timeout=120) as response:
         res_data = json.loads(response.read().decode("utf-8"))
-        
+
     try:
         return res_data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError) as e:
         raise ValueError(f"Failed to parse Gemini API response: {res_data}") from e
-
 
 
 # =============================================================================

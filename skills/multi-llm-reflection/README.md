@@ -99,6 +99,7 @@ REFLECTION_GENERATOR_PROVIDER=mock REFLECTION_CRITIC_PROVIDER=mock REFLECTION_RE
 - The 3 adapters (Claude/Codex/Antigravity) in `scripts/workflow/providers.py` implement `generate_structured()`. The role executors and workflow are unmodified.
 - Structured output: claude `--output-format json --json-schema` (native), codex `--output-schema` (native), agy uses plaintext → JSON instruction + Pydantic validation.
 - Long text always goes through stdin (avoiding ARG_MAX/escaping issues). agy is isolated with a tempdir cwd.
+- Gemini uses the `agy` CLI (subscription OAuth) first; it only falls back to the direct API via the standard library `urllib` when `agy` itself fails and `GEMINI_API_KEY` is available. An incidental `GEMINI_API_KEY` exported for some unrelated tool never overrides the OAuth session. The direct-API path strips schema fields (e.g. `additionalProperties`) that the Gemini REST `responseSchema` (an OpenAPI 3.0 subset) doesn't support.
 - Dependency management uses uv (`pyproject.toml` + `uv.lock`), with venv + pip as fallback. Uses each CLI's existing login by default; API keys are also supported.
 
 ## References & Attribution

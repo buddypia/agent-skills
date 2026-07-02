@@ -7,7 +7,7 @@ For the skill definition (invocation summary), see [SKILL.md](./SKILL.md)
 
 ```
 [Task] → Generator(generate) → Critic(critique) → Refiner(refine) → Final output
-          agy/Gemini3.5     claude/opus-4-8  codex/gpt-5.5(xhigh)
+          agy/Gemini3.5     claude/sonnet-5  codex/gpt-5.5(xhigh)
 ```
 Each stage outputs structured JSON in an independent context, and the refine stage incorporates the critique results.
 
@@ -60,7 +60,7 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 # uv recommended (cwd set to scripts)
 uv run --directory scripts main.py "task" \
     --generator-model gemini-3.5-flash \
-    --critic-model    claude-opus-4-8 \
+    --critic-model    claude-sonnet-5 \
     --refiner-model   gpt-5.5
 # without uv: source scripts/.venv/bin/activate && python scripts/main.py ...
 # swap provider: --generator-provider {gemini|anthropic|openai|mock}
@@ -99,6 +99,7 @@ REFLECTION_GENERATOR_PROVIDER=mock REFLECTION_CRITIC_PROVIDER=mock REFLECTION_RE
 - The 3 adapters (Claude/Codex/Antigravity) in `scripts/workflow/providers.py` implement `generate_structured()`. The role executors and workflow are unmodified.
 - Structured output: claude `--output-format json --json-schema` (native), codex `--output-schema` (native), agy uses plaintext → JSON instruction + Pydantic validation.
 - Long text always goes through stdin (avoiding ARG_MAX/escaping issues). agy is isolated with a tempdir cwd.
+- Gemini uses the `agy` CLI (subscription OAuth) first; it only falls back to the direct API via the standard library `urllib` when `agy` itself fails and `GEMINI_API_KEY` is available. An incidental `GEMINI_API_KEY` exported for some unrelated tool never overrides the OAuth session. The direct-API path strips schema fields (e.g. `additionalProperties`) that the Gemini REST `responseSchema` (an OpenAPI 3.0 subset) doesn't support.
 - Dependency management uses uv (`pyproject.toml` + `uv.lock`), with venv + pip as fallback. Uses each CLI's existing login by default; API keys are also supported.
 
 ## References & Attribution
@@ -122,6 +123,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.5-flash`, `claude-opus-4-8`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
+- **Model names.** Default model IDs (e.g. `gemini-3.5-flash`, `claude-sonnet-5`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
 - **No quality guarantee.** Multi-model reflection is a design choice intended to surface more perspectives; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

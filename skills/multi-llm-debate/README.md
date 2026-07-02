@@ -8,7 +8,7 @@ For the skill definition (invocation summary), see [SKILL.md](./SKILL.md).
 ```
 [topic] → Proponent(for) → Opponent(against) → Moderator(neutral eval) → integrated output
           agy (Antigravity)   claude (Claude)   codex (Codex)
-          gemini-3.5-flash    claude-opus-4-8    gpt-5.5(xhigh)
+          gemini-3.5-flash    claude-sonnet-5    gpt-5.5(xhigh)
 ```
 
 Each role produces structured JSON based solely on its assigned role within an independent context, and each stage references the output of the previous one.
@@ -29,7 +29,8 @@ Each CLI runs under the user's existing login, so no API key is required by defa
 ### Authentication
 
 - **Running directly from a terminal**: works without an API key as long as each CLI is logged in.
-- **Running in an agent (sandbox)**: since the local login session cannot be read, set `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` as environment variables or in `.env`. When an API key is available, Gemini calls the API directly (via the standard library `urllib`) without going through the `agy` CLI, avoiding the login prompt.
+- **Running in an agent (sandbox)**: since the local login session cannot be read, set `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` as environment variables or in `.env`.
+- **Gemini auth priority**: the `agy` CLI (subscription OAuth) is always tried **first**, even if `GEMINI_API_KEY` happens to be set (e.g. exported by an unrelated tool) — an incidental API key must not silently steal traffic away from your OAuth session. `GEMINI_API_KEY` is used only as a fallback when `agy` itself fails (not installed, not logged in, or stuck in a sandbox that can't complete OAuth).
 
 ## Installation
 
@@ -84,7 +85,7 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 # uv recommended (set cwd to scripts)
 uv run --directory scripts main.py "topic" \
     --proponent-model gemini-3.5-flash \
-    --opponent-model  claude-opus-4-8 \
+    --opponent-model  claude-sonnet-5 \
     --moderator-model gpt-5.5
 # without uv: scripts/.venv/bin/python scripts/main.py ... (Windows: .venv\Scripts\python.exe)
 # per-role provider: --{proponent,opponent,moderator}-provider {gemini|anthropic|openai|mock}
@@ -100,7 +101,7 @@ uv run --directory scripts main.py "topic" \
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling: each call is capped at the time remaining, and once the budget is spent the remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the whole process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
 | `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | Per-backend model override |
-| `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | — | API keys (when not using CLI login / when running in a sandbox). Only Gemini uses it for direct API calls |
+| `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | — | API keys (when not using CLI login / when running in a sandbox). Only Gemini uses it for direct API calls, and only as a fallback when the `agy` CLI itself fails |
 | `DEBATE_{PROPONENT,OPPONENT,MODERATOR}_{PROVIDER,MODEL}` | — | Per-role override |
 
 ## Offline contract test (mock — no CLI/network required)
@@ -114,8 +115,9 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 | Symptom | Resolution |
 |------|------|
 | `agy / claude / codex: command not found` | Install the relevant CLI and add it to your PATH (verify with `command -v`) |
-| `models/... is not found (404)` (gemini) | The default is `gemini-3.5-flash`. The `agy` CLI takes over automatically |
+| `models/... is not found (404)` (gemini) | The default is `gemini-3.5-flash`. The `agy` CLI is used automatically since it's tried first |
 | Authentication error | Run the relevant CLI interactively to log in once, or set an API key |
+| `Direct Gemini API call failed` / API key silently used instead of OAuth | `agy` (OAuth) is always tried first regardless of whether `GEMINI_API_KEY` is set in your shell profile (e.g. exported for an unrelated tool) — the API key is only a fallback for when `agy` itself fails |
 | Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run the skill as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | One or more roles timed out or errored and returned placeholder text, so the verdict is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the topic, then re-run |
 | Codex/Claude slow | Lower `MULTILLM_REASONING_EFFORT` (`high`→`medium`); `xhigh` is the slowest tier |
@@ -126,7 +128,7 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 - The three adapters in `scripts/workflow/providers.py` (`ClaudeCliAdapter` / `CodexAdapter` / `AntigravityCliAdapter`) implement `generate_structured()`. The role executors and workflow are unchanged.
 - Each CLI is invoked via `asyncio.create_subprocess_exec`, and long inputs are passed through stdin (no `shell=True`, OS-independent). claude/codex produce native JSON schema output; Antigravity extracts JSON from plain-text output and validates it with Pydantic.
 - claude uses `--allowed-tools "" --permission-mode dontAsk`, and each CLI runs with a working tempdir as its cwd so that project settings and hooks are not read — pure generation.
-- Gemini calls the API directly via the standard library `urllib` only when an API key is available; otherwise it uses the `agy` CLI.
+- Gemini uses the `agy` CLI (subscription OAuth) first; it only falls back to the direct API via the standard library `urllib` when `agy` itself fails and `GEMINI_API_KEY` is available. The direct-API path strips schema fields (e.g. `additionalProperties`) that the Gemini REST `responseSchema` (an OpenAPI 3.0 subset) doesn't support.
 - Provider assignment is handled by `settings.get_{shuffled,random}_providers()`, and strategy selection by `main._resolve_provider_strategy()` (default shuffle).
 - Dependency management uses uv (`pyproject.toml` + `uv.lock`), with venv + pip as the fallback. The only Python dependencies are the three packages `pydantic / python-dotenv / pyyaml`.
 
@@ -151,6 +153,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.5-flash`, `claude-opus-4-8`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
+- **Model names.** Default model IDs (e.g. `gemini-3.5-flash`, `claude-sonnet-5`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
 - **No quality guarantee.** Multi-model debate is a design choice intended to surface more perspectives; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

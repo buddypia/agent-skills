@@ -24,9 +24,9 @@ from .config import AgentConfig
 DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini: Antigravity CLI default (Gemini 3.5 Flash, 2026-05)
     "gemini": "gemini-3.5-flash",
-    # Anthropic Claude: latest Claude Code CLI (2026-05)
-    "anthropic": "claude-opus-4-8",
-    "claude": "claude-opus-4-8",
+    # Anthropic Claude: latest Claude Code CLI (Sonnet 5.0, 2026-06)
+    "anthropic": "claude-sonnet-5",
+    "claude": "claude-sonnet-5",
     # OpenAI: latest Codex CLI flagship (2026-04)
     "openai": "gpt-5.5",
     # Mock provider (offline smoke tests)
@@ -89,7 +89,7 @@ class DefaultAgentSettings:
 
 DECOMPOSER_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.5-flash")
 SOLVER_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.5-flash")
-VERIFIER_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-opus-4-8")
+VERIFIER_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-sonnet-5")
 INTEGRATOR_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-5.5")
 REFLECTOR_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-5.5")
 
@@ -427,7 +427,7 @@ Environment variables:
 Default values:
     Decomposer: gemini / gemini-3.5-flash
     Solver:    gemini / gemini-3.5-flash
-    Verifier:  anthropic / claude-opus-4-8
+    Verifier:  anthropic / claude-sonnet-5
     Integrator: openai / gpt-5.5
     Reflector:  openai / gpt-5.5
 """

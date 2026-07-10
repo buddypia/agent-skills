@@ -1,0 +1,278 @@
+/* =======================================================================
+ * spec-preview — 共通スタイル（目視確認HTML用）
+ *
+ * このファイルはスキル資産。生成時は .tmp/<slug>/ にコピーし、コピー先を編集する。
+ * 既定はダークテーマ。対象プロジェクトに globals.css / CSS 変数 / tailwind
+ * のトークンがあれば、コピー先の :root の値を上書きしてプロダクトに馴染ませること。
+ * lang=ko の成果物では font-family の先頭を韓国語フォント
+ * （"Apple SD Gothic Neo", "Noto Sans KR" 等）に並べ替えると字面が安定する。
+ * 各 HTML はこの 1 枚を相対 link で読み込み、固有の構造だけ持つ。
+ * ===================================================================== */
+
+:root {
+  --background: #0b0d12;
+  --surface: #14171f;
+  --surface-2: #1b1f2a;
+  --border: #2a2f3d;
+  --text: #e7e9ee;
+  --muted: #9aa3b2;
+  --accent: #5b8cff;
+  --accent-2: #7c5cff;
+  --accent-grad: linear-gradient(135deg, #5b8cff 0%, #7c5cff 100%);
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; border-color: var(--border); }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background:
+    radial-gradient(900px 480px at 12% -8%, rgba(91, 140, 255, 0.10), transparent 60%),
+    radial-gradient(820px 520px at 100% 0%, rgba(124, 92, 255, 0.10), transparent 55%),
+    var(--background);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Yu Gothic", Meiryo, "Malgun Gothic", system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- レイアウト ---- */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+.container { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.spacer { flex: 1; }
+
+/* ---- ヘッダー ---- */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(11, 13, 18, 0.72); backdrop-filter: blur(10px);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .logo {
+  width: 30px; height: 30px; border-radius: 9px; background: var(--accent-grad);
+  display: grid; place-items: center; font-size: 15px; box-shadow: 0 6px 18px rgba(91,140,255,.35);
+}
+.brand .name { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.brand .tag { font-size: 12px; color: var(--muted); }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.mode-group {
+  display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+.mode-group .btn {
+  min-height: 28px; padding: 5px 10px; border-color: transparent;
+  background: transparent; color: var(--muted);
+}
+.mode-group .btn.active { background: var(--accent); color: #fff; }
+
+/* ---- ボタン ---- */
+.btn {
+  font: inherit; font-size: 13px; cursor: pointer; border-radius: 10px;
+  padding: 7px 13px; border: 1px solid var(--border); background: transparent;
+  color: var(--text); transition: .15s ease; display: inline-flex; align-items: center; gap: 7px;
+  white-space: nowrap; text-decoration: none;
+}
+.btn:hover { background: var(--surface-2); }
+.btn-primary { background: var(--accent); border-color: transparent; color: #fff; font-weight: 600; }
+.btn-accent2 { background: var(--accent-2); border-color: transparent; color: #fff; font-weight: 600; }
+.btn-grad { background: var(--accent-grad); border-color: transparent; color: #fff; font-weight: 700; box-shadow: 0 8px 22px rgba(91,140,255,.32); }
+.btn-grad:hover { filter: brightness(1.06); }
+.btn-lg { padding: 11px 22px; font-size: 14px; border-radius: 12px; }
+.btn-ghost { color: var(--muted); border-color: transparent; }
+.btn-ghost:hover { color: var(--text); background: var(--surface-2); }
+
+/* ---- タイポ ---- */
+.title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+.subtitle { color: var(--muted); font-size: 15px; margin: 10px 0 0; line-height: 1.6; }
+.muted { color: var(--muted); }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600;
+  color: var(--accent); background: rgba(91,140,255,.12); padding: 5px 11px; border-radius: 999px;
+}
+.section-label { font-size: 14px; font-weight: 700; }
+
+/* ---- カード ---- */
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 22px; transition: .18s ease;
+}
+.card-hover:hover { border-color: var(--accent); box-shadow: 0 14px 40px rgba(0,0,0,.35); transform: translateY(-2px); }
+
+/* ---- バッジ ---- */
+.badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  background: var(--surface-2); color: var(--muted); }
+.badge-rec { background: var(--accent-grad); color: #fff; box-shadow: 0 4px 12px rgba(124,92,255,.4); }
+.badge-ok { background: rgba(52,211,153,.16); color: var(--ok); }
+.badge-warn { background: rgba(251,191,36,.16); color: var(--warn); }
+
+/* ---- チップ ----
+ * 既定は静的表示（フロー図のステップ等）。押せる見た目は button.chip だけに付く。 */
+.chip {
+  font: inherit; font-size: 13px; border-radius: 999px;
+  padding: 7px 14px; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text);
+}
+button.chip { cursor: pointer; transition: .15s ease; }
+button.chip:hover { border-color: var(--accent); }
+.chip.active { background: var(--accent); border-color: transparent; color: #fff; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---- 入力 ---- */
+.input, .textarea {
+  width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; outline: none;
+}
+.input:focus, .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,.18); }
+.textarea { resize: none; line-height: 1.6; }
+.search {
+  width: 220px; font-size: 13px; padding: 8px 12px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text); outline: none;
+}
+.search:focus { border-color: var(--accent); }
+
+/* ---- 区切り ---- */
+.divider { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--border); }
+
+/* ---- セグメント（タブ） ---- */
+.segmented { display: inline-flex; gap: 4px; padding: 5px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border); }
+.seg { font: inherit; font-size: 14px; cursor: pointer; border: none; background: transparent;
+  color: var(--muted); padding: 10px 18px; border-radius: 10px; transition: .15s ease;
+  display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.seg:hover { color: var(--text); }
+.seg.active { background: var(--accent-grad); color: #fff; box-shadow: 0 6px 16px rgba(91,140,255,.3); }
+
+/* ---- 表 ---- */
+table.grid { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.grid th, table.grid td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+table.grid th { color: var(--muted); font-weight: 600; }
+table.grid tr:last-child td { border-bottom: none; }
+
+/* ---- ユーティリティ ---- */
+.row { display: flex; align-items: center; gap: 10px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.center { text-align: center; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+/* ---- 全画面モーダル（index の「全画面で開く」） ----
+ * DOM は preview.js が生成する。画面遷移せず現在画面のオーバーレイで view を拡大表示。 */
+.fullview-overlay {
+  position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column;
+  background: rgba(11, 13, 18, 0.9); backdrop-filter: blur(8px);
+}
+.fullview-overlay[hidden] { display: none; }
+.fullview-bar {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  border-bottom: 1px solid var(--border); background: rgba(11, 13, 18, 0.72);
+}
+.fullview-title {
+  font-size: 13px; font-weight: 600; color: var(--muted); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fullview-iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: var(--background); }
+body[data-fullview="1"] { overflow: hidden; }
+
+/* ---- レビューチェックリスト（DOM 契約: references/review-checklist.md） ----
+ * ボタンは preview.js が .check-actions に生成する。状態は li[data-state] が持つ。 */
+.checklist { padding: 20px 22px; }
+.check-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.check-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.check-item .check-label { min-width: 0; display: grid; gap: 2px; }
+.check-item .check-label b { font-size: 13.5px; }
+.check-item .check-label .muted { font-size: 12.5px; line-height: 1.55; }
+.check-item .check-actions { display: inline-flex; gap: 6px; flex-shrink: 0; }
+.check-btn { min-height: 28px; padding: 4px 12px; font-size: 12.5px; }
+.check-btn-ok.active { background: rgba(52, 211, 153, 0.16); border-color: var(--ok); color: var(--ok); }
+.check-btn-ng.active { background: rgba(248, 113, 113, 0.14); border-color: #f87171; color: #f87171; }
+.check-item[data-state="ok"] { border-color: rgba(52, 211, 153, 0.45); }
+.check-item[data-state="ng"] { border-color: rgba(248, 113, 113, 0.5); background: rgba(248, 113, 113, 0.06); }
+.check-progress { white-space: nowrap; }
+
+/* ---- Target surface preview primitives ---------------------------------- */
+.surface-preview {
+  display: grid; grid-template-columns: minmax(260px, .82fr) minmax(320px, 1.18fr);
+  gap: 22px; align-items: start;
+}
+.preview-copy { display: grid; gap: 14px; align-content: start; }
+.preview-copy p { margin: 0; color: var(--muted); line-height: 1.65; }
+.device-stage {
+  display: grid; place-items: center; padding: 18px; border-radius: 22px;
+  border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+}
+.device-frame {
+  /* width は確定値 + max-width で縮める。min(…, 100%) にすると、親幅が不定な文脈
+     （embed の fit-content / app モードの中央寄せ）で内容幅に潰れる。 */
+  width: var(--device-width, 390px); max-width: 100%; height: var(--device-height, 780px);
+  display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+  border: 1px solid var(--border); border-radius: 32px; background: var(--surface);
+  box-shadow: 0 26px 70px rgba(0,0,0,.32);
+}
+.device-safe-top {
+  min-height: 24px; display: flex; align-items: end; justify-content: center;
+  padding: 7px 14px 4px; color: var(--muted); font-size: 11px;
+}
+.device-appbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 52px; padding: 0 16px; border-bottom: 1px solid var(--border);
+}
+.device-title { display: flex; align-items: center; gap: 9px; min-width: 0; font-weight: 700; }
+.device-icon {
+  width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--accent-grad); color: #fff; font-size: 12px; font-weight: 800;
+}
+.device-screen { min-height: 0; overflow: hidden; background: var(--background); }
+.device-bottom {
+  min-height: 62px; border-top: 1px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px max(10px, env(safe-area-inset-bottom));
+}
+.phone-input {
+  flex: 1; min-width: 0; min-height: 40px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--muted); display: flex; align-items: center; padding: 0 13px;
+  font-size: 13px;
+}
+body[data-target="mobile-app"] .surface-preview,
+body[data-target="tablet-app"] .surface-preview {
+  grid-template-columns: minmax(0, .9fr) minmax(320px, 430px);
+}
+body[data-viewport="phone"] .device-frame { --device-width: 390px; --device-height: 780px; }
+body[data-viewport="phone"] .surface-preview { grid-template-columns: minmax(0, .9fr) minmax(320px, 430px); }
+body[data-viewport="tablet"] .device-frame { --device-width: 760px; --device-height: 820px; border-radius: 24px; }
+body[data-viewport="tablet"] .surface-preview { grid-template-columns: minmax(280px, .72fr) minmax(620px, 1.28fr); }
+body[data-viewport="desktop"] .device-frame { --device-width: 1040px; --device-height: 720px; border-radius: 18px; }
+body[data-viewport="desktop"] .surface-preview { grid-template-columns: minmax(320px, .7fr) minmax(760px, 1.3fr); }
+/* view の mode: app = 製品画面のみ（説明を隠し中央寄せ）/ explainer = 説明文を併記 */
+body[data-mode="app"] .preview-copy { display: none; }
+body[data-mode="app"] .surface-preview,
+body[data-mode="app"][data-viewport="phone"] .surface-preview,
+body[data-mode="app"][data-viewport="tablet"] .surface-preview,
+body[data-mode="app"][data-viewport="desktop"] .surface-preview { grid-template-columns: 1fr; justify-items: center; }
+body[data-embed="1"] { background: var(--background); }
+body[data-embed="1"] .header,
+body[data-embed="1"] .preview-copy { display: none; }
+body[data-embed="1"] .container { max-width: none; width: 100%; padding: 0; }
+body[data-embed="1"] main.container { min-height: 100vh; display: grid; place-items: center; padding: 12px; }
+body[data-embed="1"] .surface-preview { display: block; width: fit-content; max-width: 100%; }
+body[data-embed="1"] .device-stage { border: 0; background: transparent; padding: 0; }
+
+@media (max-width: 880px) {
+  .title { font-size: 24px; }
+  .brand .tag { display: none; }
+  .header { flex-wrap: wrap; }
+  .header-actions { width: 100%; overflow-x: auto; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .surface-preview,
+  body[data-viewport="phone"] .surface-preview,
+  body[data-viewport="tablet"] .surface-preview,
+  body[data-viewport="desktop"] .surface-preview { grid-template-columns: 1fr; }
+}

@@ -20,6 +20,7 @@ buddypia가 만든, MIT 라이선스로 배포되는 작은 크로스 에이전�
 | [`reflect`](./skills/reflect) | Trigger → 5 Whys → Placement → Cure + Prevent → Ledger | 수정이 잘못된 계층에 들어가 반복되는 버그와 니어미스 |
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | 지시가 잘못된 메커니즘에 놓여 CLAUDE.md가 비대해지고 규칙이 무시되는 상황 |
 | [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | 게이트 없이 루프로 만든 에이전트 반복 작업이 드리프트하고 토큰을 낭비하며 미검토 코드를 내보내는 문제 |
+| [`spec-preview`](./skills/spec-preview) | 모드 + target → (캐시된) UI 스캔 → 자체 완결 HTML → 열어서 즉시 결정 | 사양과 UI 아이디어가 글로 훑고 넘겨져 리뷰가 지체되고 의사결정이 밀리는 문제 |
 
 > `multi-llm-*` 스킬은 사용자가 직접 설치하는 벤더 CLI(`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex)를 오케스트레이션합니다. `reflect` 같은 단일 에이전트 스킬은 외부 CLI가 필요 없습니다. 설정 방법, 모델 오버라이드, 오프라인 `mock` 모드는 각 스킬의 README를 참고하세요.
 
@@ -31,6 +32,7 @@ buddypia가 만든, MIT 라이선스로 배포되는 작은 크로스 에이전�
 - **reflect** — 버그·니어미스·반복되는 마찰 이후의 포스트모템과 근본 원인 분석: 임시방편으로 재발시키는 대신, 인시던트를 올바른 통제 계층의 수정과 문서화된 원장(ledger)으로 정리한다.
 - **claude-code-steering** — Claude Code 지시를 어디에 둘지(CLAUDE.md / 규칙 / 스킬 / 서브에이전트 / hook / 아웃풋 스타일) 결정하고, 흐트러지거나 비대해진 기존 .claude 설정을 감사하는 작업.
 - **loop-engineering** — 반복적인 에이전트 작업을 자가 프롬프트 루프로 만들지 — 그리고 만들지 말아야 할 때는 그 점을 입증 — 결정한 뒤, 최소 구성 루프(automation + skill + state file + gate 각 하나)를 구축하고 목표 드리프트·토큰 폭주·미검토 머지에 대해 견고하게 만든다.
+- **spec-preview** — 사양·요구사항·UI 제안을 브라우저에서 열리는 자체 완결 HTML(여러 안 비교 / 요구사항 대시보드 / before-after 차이)로 만들어, 글을 훑고 넘기는 대신 사람이 눈으로 확인하고 즉시 결정할 수 있게 한다. target surface를 판별하고(모바일 앱 / 웹 / 문서 / 다이어그램), 프레임워크를 아우르는 UI 스캔(캐시 재사용으로 비용 절감)으로 대상 제품의 겉모습을 재현한다.
 
 ## When to use it (and when not)
 
@@ -49,7 +51,7 @@ npx skills add buddypia/agent-skills
 
 ## Requirements
 
-`multi-llm-*` 스킬은 사용자가 본인 계정으로 직접 설치하는 공식 벤더 CLI를 구동합니다: `agy`(Antigravity), `claude`(Claude Code), `codex`(Codex). `command -v agy claude codex`로 확인하세요. Python 의존성(`pydantic` / `python-dotenv` / `pyyaml`)은 각 스킬의 `run.sh`가 자동으로 준비합니다(uv가 있으면 uv를, 없으면 venv + pip을 사용). `reflect` 같은 단일 에이전트 스킬에는 이런 것이 전혀 필요 없습니다.
+`multi-llm-*` 스킬은 사용자가 본인 계정으로 직접 설치하는 공식 벤더 CLI를 구동합니다: `agy`(Antigravity), `claude`(Claude Code), `codex`(Codex). `command -v agy claude codex`로 확인하세요. Python 의존성(`pydantic` / `python-dotenv` / `pyyaml`)은 각 스킬의 `run.sh`가 자동으로 준비합니다(uv가 있으면 uv를, 없으면 venv + pip을 사용). `reflect` 같은 단일 에이전트 스킬에는 이런 것이 전혀 필요 없습니다. `spec-preview`는 UI 스캔(`ui-scan.mjs`)에 `node`만 필요합니다.
 
 ## Disclaimer
 

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- TITLE: 対象 + 目的（例: トップUI/UX 改善提案 — Slide Studio） -->
+<title>__TITLE__</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  /* index 固有の比較レイアウト（共通でないのでここに置く） */
+  .hero { padding: 48px 0 8px; }
+  .insight { padding: 18px; }
+  .insight h4 { margin: 0 0 10px; font-size: 14px; }
+  .insight ul { margin: 0; padding-left: 18px; }
+  .insight li { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .insight li b { color: var(--text); font-weight: 600; }
+
+  /* proposals: フル画面ビューへのミニプレビュー + 説明 */
+  .item { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: center; margin-top: 18px; }
+  /* aspect-ratio と width/height 100% は no-JS フォールバック。
+     読み込み後は preview.js の fitFrames() が実寸 + scale に上書きする。 */
+  .frame { width: 100%; position: relative; overflow: hidden; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface); aspect-ratio: 1280 / 800; }
+  body[data-frame-viewport="phone"] .frame { aspect-ratio: 430 / 840; }
+  body[data-frame-viewport="tablet"] .frame { aspect-ratio: 820 / 860; }
+  .frame iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
+    transform-origin: top left; pointer-events: none; }
+  .frame .open-overlay { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0;
+    background: rgba(11,13,18,.45); transition: .15s; text-decoration: none; }
+  .frame:hover .open-overlay { opacity: 1; }
+  .num { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-grad);
+    display: inline-grid; place-items: center; font-weight: 800; font-size: 14px; color: #fff; }
+  .pros { margin: 12px 0 0; padding: 0; list-style: none; }
+  .pros li { font-size: 13px; line-height: 1.7; padding-left: 22px; position: relative; }
+  .pros li::before { content: "✓"; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+  .note { font-size: 12.5px; color: var(--muted); margin-top: 10px; padding: 9px 12px;
+    border-radius: 9px; background: var(--surface-2); border: 1px solid var(--border); }
+  .ref { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  hr.sep { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  @media (max-width: 860px) { .item { grid-template-columns: 1fr; } }
+</style>
+</head>
+<!-- data-frame-viewport がミニプレビューの初期 viewport になる
+     （preview.js は ?viewport= → この属性 → target 既定 の順で参照） -->
+<body data-page="index" data-target="__TARGET__" data-frame-viewport="__DEFAULT_VIEWPORT__">
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <span class="name">__PRODUCT_NAME__</span>
+      <span class="tag">__SUBTITLE__</span>
+    </div>
+    <div class="header-actions">
+      <div class="mode-group" aria-label="Preview viewport">
+        <button class="btn" type="button" data-frame-viewport="phone">__LABEL_PHONE__</button>
+        <button class="btn" type="button" data-frame-viewport="tablet">__LABEL_TABLET__</button>
+        <button class="btn" type="button" data-frame-viewport="desktop">__LABEL_DESKTOP__</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-bottom:90px;">
+    <!-- ===== イントロ: 対象・狙い ===== -->
+    <section class="hero">
+      <span class="eyebrow">__EYEBROW__</span>
+      <h1 class="title" style="margin-top:14px;">__HEADLINE__</h1>
+      <p class="subtitle" style="max-width:760px;">__INTRO__</p>
+    </section>
+
+    <!-- ===== 現状の課題 / 知見（spec/review では「概要 / 影響」等に読み替え） ===== -->
+    <div class="grid2" style="margin-top:20px;">
+      <div class="card insight">
+        <h4>__LABEL_CURRENT_ISSUES__</h4>
+        <ul>
+          <!-- 現状課題: <li> を実ファイル根拠で 3〜5 個 -->
+          <li><b>__ISSUE_1__</b> — 補足</li>
+        </ul>
+      </div>
+      <div class="card insight">
+        <h4>__LABEL_GUIDANCE__</h4>
+        <ul>
+          <!-- 知見・方向性: <li> を 3〜5 個。WebSearch した場合は出典を ref に -->
+          <li><b>__INSIGHT_1__</b> — 補足</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="sep" />
+
+    <!-- ===== 各項目（案 / ビュー）。下の .item ブロックを項目数だけ複製する =====
+         proposals: A/B/C の案。view-a.html 等へ iframe + 説明 + 推奨度
+         spec:      画面/機能ごとのビュー（または 1 枚に収めるならこの節を区画表に置換）
+         review:    before / after を 2 つの .frame に並置                          -->
+    <section>
+      <div class="row"><span class="num">A</span>
+        <h2 style="margin:0; font-size:20px;">__OPTION_A_TITLE__</h2>
+        <!-- badge-rec は推奨案 1 つにだけ残し、他の案では行ごと削除する -->
+        <span class="badge badge-rec" style="margin-left:6px;">__LABEL_RECOMMENDED__</span>
+      </div>
+      <div class="item">
+        <div class="frame">
+          <!-- src は no-JS フォールバック。実際の URL は preview.js が data-view-src から
+               再構築するので、参照先を変えるときは src / data-view-src / 下の 2 つの href を揃える -->
+          <iframe src="view-a.html?target=__TARGET__&amp;viewport=__DEFAULT_VIEWPORT__&amp;embed=1"
+                  data-view-src="view-a.html"
+                  title="__OPTION_A_TITLE__" loading="lazy" scrolling="no"></iframe>
+          <!-- JS 有効時は preview.js がこのリンクを横取りし、画面遷移せず現在画面の
+               全画面モーダルで拡大表示する。href は no-JS / 修飾クリック時のフォールバック -->
+          <a class="open-overlay" href="view-a.html?target=__TARGET__&amp;viewport=__DEFAULT_VIEWPORT__" target="_blank" rel="noopener">
+            <span class="btn btn-grad btn-lg">__LABEL_OPEN_FULL__ →</span>
+          </a>
+        </div>
+        <div>
+          <p class="muted" style="font-size:14px; line-height:1.7; margin:0;">__OPTION_A_DESC__</p>
+          <ul class="pros">
+            <li>__PRO_1__</li>
+            <li>__PRO_2__</li>
+          </ul>
+          <div class="note">__LABEL_CAUTION__: __TRADEOFF_OR_COST__</div>
+          <div class="ref">__LABEL_REFERENCE__: __SOURCE_OR_SIMILAR_PRODUCT__</div>
+          <a class="btn btn-grad" style="margin-top:14px;" href="view-a.html" target="_blank" rel="noopener">__LABEL_OPEN_A__ →</a>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep" />
+
+    <!-- ===== レビューチェックリスト（UI 変更の review では必須、他モードは任意） =====
+         マークアップ契約とスニペットの正本: references/review-checklist.md
+         （.checklist / data-checklist / data-check-item / .check-actions / data-checklist-progress） -->
+
+    <!-- ===== 推奨 / まとめ（proposals では必須） ===== -->
+    <section class="card" style="padding:22px;">
+      <h3 style="margin:0 0 10px; font-size:16px;">__LABEL_SUMMARY__</h3>
+      <p class="muted" style="font-size:13.5px; line-height:1.8; margin:0;">__SUMMARY_BODY__</p>
+    </section>
+  </main>
+</div>
+
+<script src="preview.js"></script>
+</body>
+</html>

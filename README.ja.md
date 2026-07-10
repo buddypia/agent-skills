@@ -20,6 +20,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 | [`reflect`](./skills/reflect) | Trigger → 5 Whys → Placement → Cure + Prevent → Ledger | 修正が誤った階層に入るために繰り返すバグやニアミス |
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | 指示が誤ったメカニズムに置かれ、CLAUDE.md が肥大化しルールが無視される |
 | [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | ゲートなしでループ化されたエージェントの反復作業が、ドリフトしトークンを浪費し未レビューのコードを出してしまう |
+| [`spec-preview`](./skills/spec-preview) | モード + target → （キャッシュ済み）UI スキャン → 自己完結HTML → 開いて即決 | 仕様や UI 案が文章として読み飛ばされ、レビューが滞り意思決定が遅れる |
 
 > `multi-llm-*` スキルは、ユーザー自身がインストールするベンダー CLI（`agy` / Antigravity、`claude` / Claude Code、`codex` / Codex）をオーケストレーションします。`reflect` のような単一エージェントスキルは外部 CLI を必要としません。セットアップ、モデルの上書き設定、オフラインの `mock` モードについては、各スキルの README を参照してください。
 
@@ -31,6 +32,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 - **reflect** — バグ・ニアミス・繰り返す摩擦のあとのポストモーテムと根本原因分析: 場当たり的な対処で再発させるのではなく、インシデントを正しい管理階層での修正と書面の台帳（ledger）に落とし込む。
 - **claude-code-steering** — Claude Code の指示をどこに置くべきか（CLAUDE.md / ルール / スキル / サブエージェント / hook / アウトプットスタイル）の判断、そしてドリフトや肥大化した既存の .claude 設定の監査。
 - **loop-engineering** — 反復的なエージェントタスクを自己プロンプト型ループにすべきか — そしてすべきでない場合はそれを示す — を判断し、最小構成のループ（automation + skill + state file + gate を 1 つずつ）を構築して、ゴールのドリフト・トークンの暴走・未レビューのマージに対して堅牢化する。
+- **spec-preview** — 仕様・要件・UI 案を、ブラウザで開く自己完結HTML（複数案の比較 / 要件ダッシュボード / before-after 差分）に起こし、文章を読み飛ばす代わりに人間が目視で確認して即決できるようにする。target surface を判定し（モバイルアプリ / Web / ドキュメント / 図）、フレームワーク横断の UI スキャン（キャッシュ再利用でコストカット）で対象プロダクトの見た目を再現する。
 
 ## When to use it (and when not)
 
@@ -49,7 +51,7 @@ npx skills add buddypia/agent-skills
 
 ## Requirements
 
-`multi-llm-*` スキルは、ユーザー自身がインストールし、ユーザー自身のログインのもとで動作する公式ベンダー CLI を駆動します: `agy`（Antigravity）、`claude`（Claude Code）、`codex`（Codex）。`command -v agy claude codex` で確認してください。Python の依存パッケージ（`pydantic` / `python-dotenv` / `pyyaml`）は、各スキルの `run.sh` によって自動的に準備されます（uv が利用可能であれば uv を、なければ venv + pip を使用します）。`reflect` のような単一エージェントスキルにはこれらは不要です。
+`multi-llm-*` スキルは、ユーザー自身がインストールし、ユーザー自身のログインのもとで動作する公式ベンダー CLI を駆動します: `agy`（Antigravity）、`claude`（Claude Code）、`codex`（Codex）。`command -v agy claude codex` で確認してください。Python の依存パッケージ（`pydantic` / `python-dotenv` / `pyyaml`）は、各スキルの `run.sh` によって自動的に準備されます（uv が利用可能であれば uv を、なければ venv + pip を使用します）。`reflect` のような単一エージェントスキルにはこれらは不要です。`spec-preview` は UI スキャン（`ui-scan.mjs`）に `node` のみを必要とします。
 
 ## Disclaimer
 

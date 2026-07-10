@@ -20,6 +20,7 @@ The multi-LLM skills take a different approach — they assign each role to a **
 | [`reflect`](./skills/reflect) | Trigger → 5 Whys → Placement → Cure + Prevent → Ledger | Bugs and near-misses that recur because the fix lands at the wrong level |
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | Instructions that live in the wrong mechanism, so CLAUDE.md bloats and rules get ignored |
 | [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | Repetitive agent work looped without a gate, so it drifts, burns tokens, and ships unreviewed code |
+| [`spec-preview`](./skills/spec-preview) | Mode + target → (cached) UI scan → self-contained HTML → open & decide | Specs and UI ideas skimmed as prose, so review stalls and decisions slip |
 
 > The `multi-llm-*` skills orchestrate vendor CLIs that you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex); single-agent skills like `reflect` need no external CLI. See each skill's README for setup, model overrides, and an offline `mock` mode.
 
@@ -31,6 +32,7 @@ The multi-LLM skills take a different approach — they assign each role to a **
 - **reflect** — Postmortems and root-cause analysis after a bug, near-miss, or repeated friction: turn the incident into a fix at the right control tier plus a written ledger, instead of a quick patch that lets it come back.
 - **claude-code-steering** — Deciding where a Claude Code instruction belongs (CLAUDE.md vs rule vs skill vs subagent vs hook vs output style), and auditing an existing .claude config that has drifted or bloated.
 - **loop-engineering** — Deciding whether a recurring agent task should become a self-prompting loop — and proving when it shouldn't — then building the minimum viable loop (one automation + skill + state file + gate) and hardening it against goal drift, runaway token spend, and unreviewed merges.
+- **spec-preview** — Turning a spec, a set of requirements, or a UI proposal into a self-contained HTML bundle — compare options, a requirements dashboard, or a before/after diff — that opens in the browser so a human can eyeball it and decide, instead of skimming prose. Target-surface aware (mobile app / web / document / diagram) with a cached, framework-agnostic UI scan that reproduces the product's look.
 
 ## When to use it (and when not)
 
@@ -49,7 +51,7 @@ Or install manually by copying a skill folder into your agent's skills directory
 
 ## Requirements
 
-The `multi-llm-*` skills drive the official vendor CLIs you install yourself, under your own login: `agy` (Antigravity), `claude` (Claude Code), `codex` (Codex). Verify with `command -v agy claude codex`. Python dependencies (`pydantic` / `python-dotenv` / `pyyaml`) are auto-prepared by each skill's `run.sh` (uv if available, else venv + pip). Single-agent skills like `reflect` need none of this.
+The `multi-llm-*` skills drive the official vendor CLIs you install yourself, under your own login: `agy` (Antigravity), `claude` (Claude Code), `codex` (Codex). Verify with `command -v agy claude codex`. Python dependencies (`pydantic` / `python-dotenv` / `pyyaml`) are auto-prepared by each skill's `run.sh` (uv if available, else venv + pip). Single-agent skills like `reflect` need none of this; `spec-preview` needs only `node` for its UI scan.
 
 ## Disclaimer
 

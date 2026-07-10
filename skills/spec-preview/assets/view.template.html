@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- TITLE: 案/ビュー名 + 対象（例: 案A プロンプト・ファースト — Slide Studio） -->
+<title>__TITLE__</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  /* このビュー固有のスタイルがあればここに。共通は shared.css。
+     main の padding をインラインで書かないこと（embed=1 の padding 上書きが効かなくなる）。 */
+  main.container { padding-top: 48px; padding-bottom: 80px; }
+</style>
+</head>
+<body data-page="view" data-target="__TARGET__" data-viewport="__DEFAULT_VIEWPORT__" data-mode="app">
+<div class="app">
+  <!-- 対象プロダクトに寄せたヘッダー（実画面の雰囲気を再現すると伝わりやすい） -->
+  <header class="header">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <span class="name">__PRODUCT_NAME__</span>
+      <span class="tag">__SUBTITLE__</span>
+    </div>
+    <div class="header-actions">
+      <div class="mode-group" aria-label="View viewport">
+        <button class="btn" type="button" data-viewport-target="phone">__LABEL_PHONE__</button>
+        <button class="btn" type="button" data-viewport-target="tablet">__LABEL_TABLET__</button>
+        <button class="btn" type="button" data-viewport-target="desktop">__LABEL_DESKTOP__</button>
+      </div>
+      <!-- mode 切替: app = 製品画面のみ / explainer = 左に説明文を併記（shared.css が制御） -->
+      <div class="mode-group" aria-label="View mode">
+        <button class="btn" type="button" data-mode-target="app">__LABEL_APP__</button>
+        <button class="btn" type="button" data-mode-target="explainer">__LABEL_EXPLAINER__</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- VIEW_BODY: この案/ビューの中身。実画面に近いダミーで作る。
+         target 別の骨格（references/target-surface.md 参照）:
+         - mobile-app / tablet-app: 下の .surface-preview + .device-frame をそのまま使う
+         - web-app / desktop-app: .device-frame をブラウザ窓・デスクトップ窓風に作り替える
+         - document / diagram: .surface-preview ごと削除し、.container 直下に
+           文書レイアウト / 全幅キャンバスを置く（端末枠は不要）
+         インタラクションが要点なら vanilla JS を <script> で足す（タブ切替・添付トグル等）。 -->
+    <div class="surface-preview">
+      <!-- 説明側: 既定の app モードでは非表示。explainer ボタンで併記される -->
+      <section class="preview-copy">
+        <span class="eyebrow">__EYEBROW__</span>
+        <h1 class="title">__VIEW_HEADLINE__</h1>
+        <p class="subtitle">__VIEW_DESC__</p>
+        <div class="card">
+          <p class="muted" style="margin:0; line-height:1.7;">__DECISION_NOTE__</p>
+        </div>
+      </section>
+      <section class="device-stage" aria-label="Target surface preview">
+        <div class="device-frame">
+          <div>
+            <div class="device-safe-top">9:41</div>
+            <div class="device-appbar">
+              <div class="device-title"><span class="device-icon">◆</span><span>__PRODUCT_NAME__</span></div>
+              <span class="badge">__STATUS_BADGE__</span>
+            </div>
+          </div>
+          <div class="device-screen">
+            <!-- APP_SCREEN: target surface に合わせた実画面風 UI をここに置く。mobile-app なら phone-first。 -->
+          </div>
+          <div class="device-bottom">
+            <div class="phone-input">__BOTTOM_INPUT__</div>
+            <button class="btn btn-primary" type="button">__CTA__</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="preview.js"></script>
+</body>
+</html>

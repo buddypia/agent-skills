@@ -153,7 +153,17 @@ async def _terminate_process_tree(proc: "asyncio.subprocess.Process") -> None:
             with contextlib.suppress(ProcessLookupError):
                 os.killpg(pgid, signal.SIGKILL)
     else:
-        with contextlib.suppress(ProcessLookupError):
+        import subprocess
+        try:
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+        except Exception:
+            pass
+        with contextlib.suppress(Exception):
             proc.kill()
     with contextlib.suppress(Exception):
         await proc.wait()
@@ -292,12 +302,19 @@ class ClaudeCliAdapter:
             "usage": data.get("modelUsage") or data.get("usage"),
             "session_id": data.get("session_id"),
         }
+        parsed_output = None
+        if output_model is not None:
+            try:
+                parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
+            except Exception:
+                pass
         return ProviderResponse(
             provider=self.name,
             model=model_id,
             request=to_jsonable(request),
             response_text=response_text,
             response_meta=meta,
+            parsed_output=parsed_output,
         )
 
 
@@ -362,12 +379,19 @@ class CodexAdapter:
             "user_prompt_chars": len(user_prompt),
         }
         meta = {"backend": "codex-cli", "model": model_id, "reasoning_effort": effort}
+        parsed_output = None
+        if output_model is not None:
+            try:
+                parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
+            except Exception:
+                pass
         return ProviderResponse(
             provider=self.name,
             model=model_id,
             request=to_jsonable(request),
             response_text=response_text,
             response_meta=meta,
+            parsed_output=parsed_output,
         )
 
 
@@ -419,12 +443,19 @@ class AntigravityCliAdapter:
                 "user_prompt_chars": len(user_prompt),
             }
             meta = {"backend": "gemini-api", "model": model}
+            parsed_output = None
+            if output_model is not None:
+                try:
+                    parsed_output = output_model.model_validate_json(text)
+                except Exception:
+                    pass
             return ProviderResponse(
                 provider=self.name,
                 model=model,
                 request=to_jsonable(request),
                 response_text=text,
                 response_meta=meta,
+                parsed_output=parsed_output,
             )
 
         async def call_agy() -> ProviderResponse:
@@ -464,12 +495,19 @@ class AntigravityCliAdapter:
                             "attempt": attempt + 1,
                         }
                         meta = {"backend": "antigravity-cli", "model": model, "attempt": attempt + 1}
+                        parsed_output = None
+                        if output_model is not None:
+                            try:
+                                parsed_output = output_model.model_validate_json(text)
+                            except Exception:
+                                pass
                         return ProviderResponse(
                             provider=self.name,
                             model=model,
                             request=to_jsonable(request),
                             response_text=text,
                             response_meta=meta,
+                            parsed_output=parsed_output,
                         )
                     last_err = err.strip()[:300] or f"exit {rc}"
                     # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
@@ -495,8 +533,10 @@ class AntigravityCliAdapter:
             print(f"agy CLI (OAuth) failed, falling back to direct Gemini API: {agy_exc}", file=sys.stderr)
             try:
                 return await call_api()
-            except Exception:
-                raise agy_exc
+            except Exception as api_exc:
+                raise RuntimeError(
+                    f"Direct Gemini API fallback failed: {api_exc} (original agy CLI error: {agy_exc})"
+                ) from api_exc
 
 
 def _call_gemini_api(
@@ -585,12 +625,19 @@ class MockAdapter:
             "temperature": temperature,
             "mock": True,
         }
+        parsed_output = None
+        if output_model is not None:
+            try:
+                parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
+            except Exception:
+                pass
         return ProviderResponse(
             provider=self.name,
             model=model,
             request=to_jsonable(request),
             response_text=response_text,
             response_meta={"mock": True},
+            parsed_output=parsed_output,
         )
 
 

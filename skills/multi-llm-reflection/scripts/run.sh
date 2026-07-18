@@ -21,10 +21,33 @@ else
     echo "Error: none of uv / python3 / python were found. Please install uv or Python 3.10+." >&2
     exit 1
 fi
-if [ ! -x "$VENV_PY" ]; then
-    echo "venv not found. Creating at $VENV_DIR ..." >&2
-    "$PY" -m venv "$VENV_DIR"
+VENV_HASH_FILE="$VENV_DIR/requirements.txt.hash"
+REQ_HASH=$("$PY" -c "import hashlib; print(hashlib.md5(open('$SCRIPT_DIR/requirements.txt', 'rb').read()).hexdigest())")
+
+NEEDS_INSTALL=false
+if [ ! -x "$VENV_PY" ] || ! "$VENV_PY" -m pip --version >/dev/null 2>&1; then
+    echo "venv not found or missing pip. Creating/Repairing at $VENV_DIR ..." >&2
+    if [ ! -x "$VENV_PY" ]; then
+        "$PY" -m venv "$VENV_DIR"
+    fi
+    if ! "$VENV_PY" -m pip --version >/dev/null 2>&1; then
+        "$VENV_PY" -m ensurepip --default-pip --quiet || true
+    fi
     "$VENV_PY" -m pip install --quiet --upgrade pip
+    NEEDS_INSTALL=true
+else
+    if [ -f "$VENV_HASH_FILE" ]; then
+        CACHED_HASH=$(cat "$VENV_HASH_FILE")
+    else
+        CACHED_HASH=""
+    fi
+    if [ "$REQ_HASH" != "$CACHED_HASH" ]; then
+        NEEDS_INSTALL=true
+    fi
+fi
+
+if [ "$NEEDS_INSTALL" = true ]; then
     "$VENV_PY" -m pip install --quiet -r "$SCRIPT_DIR/requirements.txt"
+    echo "$REQ_HASH" > "$VENV_HASH_FILE"
 fi
 exec "$VENV_PY" "$SCRIPT_DIR/main.py" "$@"

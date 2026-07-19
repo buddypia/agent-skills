@@ -736,8 +736,26 @@ def _extract_reflection_result(run_result: object) -> ReflectionResult | None:
     return None
 
 
+def _stage_reported_zero_confidence(stage_raw: object) -> bool:
+    """True when a stage returned schema-valid output but self-rated its confidence at
+    exactly 0.0. The executors' error placeholders use 0.0, and a backend that silently
+    ignored its input (e.g. the agy CLI answering "no input was provided") self-rates 0.0
+    too — yet neither sets ``error``, so without this check such a stage is mistaken for a
+    real result. Strict ``== 0.0`` keeps genuinely low-confidence answers from being flagged.
+    """
+    parsed = getattr(stage_raw, "parsed_output", None)
+    if not isinstance(parsed, dict):
+        return False
+    for key in ("confidence", "confidence_score"):
+        value = parsed.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and float(value) == 0.0:
+            return True
+    return False
+
+
 def _annotate_degradation(result: ReflectionResult) -> None:
-    """Flag a partial/degraded run (a stage timed out or errored) and warn loudly on stderr.
+    """Flag a partial/degraded run (a stage timed out, errored, or returned empty output)
+    and warn loudly on stderr.
 
     The exit code stays 0 for backward compatibility, but the result carries `degraded=True`
     plus the list of stages so a caller never mistakes placeholder output for a real result.
@@ -746,7 +764,9 @@ def _annotate_degradation(result: ReflectionResult) -> None:
     if result.raw is not None:
         for stage in ("generator", "critic", "refiner"):
             stage_raw = getattr(result.raw, stage, None)
-            if stage_raw is not None and getattr(stage_raw, "error", None):
+            if stage_raw is not None and (
+                getattr(stage_raw, "error", None) or _stage_reported_zero_confidence(stage_raw)
+            ):
                 degraded_stages.append(stage)
 
     if not degraded_stages:
@@ -755,9 +775,9 @@ def _annotate_degradation(result: ReflectionResult) -> None:
     result.degraded = True
     result.degraded_stages = degraded_stages
     print(
-        "WARNING: multi-llm-reflection ran in DEGRADED mode — these stages timed out or errored "
-        f"and returned placeholder output: {', '.join(degraded_stages)}. The result is PARTIAL. "
-        "Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
+        "WARNING: multi-llm-reflection ran in DEGRADED mode — these stages timed out, errored, or "
+        f"returned an empty/zero-confidence result: {', '.join(degraded_stages)}. The result is "
+        "PARTIAL. Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
         "MULTILLM_REASONING_EFFORT, or a simpler prompt.",
         file=sys.stderr,
     )

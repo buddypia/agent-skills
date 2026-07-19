@@ -3,8 +3,7 @@
 AI が UI を変更（新規・修正）したとき、人間が**何を見て承認/指摘すべきか**を
 プレビュー内にチェックリストとして埋め込む。項目はブラウザ上でクリックでき、
 判定（OK / 要修正）とメモが localStorage に保存され、進捗が集計表示される。
-判定は目視で終わらせず、「結果をコピー」またはブリッジ経由の
-`review-result.json` で CLI エージェントに構造化して還流できる（下記「CLI 連携」節）。
+判定は目視で終わらせず、「結果をコピー」ボタンで CLI エージェントに構造化して還流できます（下記「CLI 連携」節）。
 
 ゴールは「レビュー漏れを構造的に防ぐ」こと。**関連する項目だけを 5〜12 個**に
 絞って出す（全部盛りは読み飛ばされて逆効果 — 選択的提示が本体）。
@@ -76,7 +75,7 @@ AI が UI を変更（新規・修正）したとき、人間が**何を見て�
 | `.check-actions` | **空のまま置く** — preview.js が OK / 要修正ボタンを生成する |
 | `[data-checklist-progress]` | 進捗バッジ。preview.js が「確認 n/m · 指摘 k」を表示 |
 | `.check-note`（自動生成） | 要修正時のみ表示されるメモ欄。**テンプレート側マークアップ不要** |
-| `.check-footer` / `.check-copy` / `.check-bridge`（自動生成） | 回収 UI（結果をコピー + ブリッジ接続状態）。**テンプレート側マークアップ不要** |
+| `.check-footer` / `.check-copy`（自動生成） | 回収 UI（結果をコピー）。**テンプレート側マークアップ不要** |
 
 - 判定は `li[data-state="ok"|"ng"]` として付与され、localStorage
   （`spec-preview-check:<pathname>:<id>`、値は `{"<slug>": {"state": "ok"|"ng", "note": "…"}}`）
@@ -88,15 +87,9 @@ AI が UI を変更（新規・修正）したとき、人間が**何を見て�
 
 ## CLI 連携 — 判定を目視で終わらせず構造化して回収する
 
-判定・メモは口頭報告に頼らず、次の2経路で CLI エージェント
-（Claude Code / Codex CLI / Cursor 等）に渡せる。中身は同じデータで、
-経路2 が使えないときは経路1 に自然にフォールバックする。
-
-### 経路1: 「結果をコピー」（常に使える・既定）
-
-チェックリスト下部の「結果をコピー」ボタン（preview.js が生成）が、
-判定+メモを **slug 付き Markdown** でクリップボードに入れる。
-ユーザーがそのまま CLI チャットに貼れば、どのエージェントでも修正タスクに変換できる:
+判定・メモは口頭報告に頼らず、チェックリスト下部の「結果をコピー」ボタン（preview.js が生成）から
+**slug 付き Markdown** としてクリップボードに入れ、CLI エージェント（Claude Code / Codex CLI / Cursor 等）に渡します。
+ユーザーがそのまま CLI チャットに貼れば、どのエージェントでも修正タスクに変換できます:
 
 ```
 ## UIレビュー結果 — ui-review
@@ -106,45 +99,13 @@ AI が UI を変更（新規・修正）したとき、人間が**何を見て�
 - [未確認] 回帰 (regression-header)
 ```
 
-### 経路2: ブリッジ（自動同期・エージェント主導）
-
-`open index.html` の**前に** `review-bridge.mjs` をバックグラウンド起動しておくと、
-ブラウザでの判定・メモがリアルタイムに `review-result.json` へ書き出される:
-
-```bash
-node <skill>/assets/review-bridge.mjs --out <project>/.tmp/<slug>/review-result.json
-# 既定 port 7357。使用中なら --port <別番号> + index.html を ?bridge=<別番号> で開く
-```
-
-- ページは port を自動検出し（`?bridge=<port>` / `body[data-bridge-port]` で変更可、
-  ブリッジが後から起動されても定期 ping で拾う）、フッターに
-  「自動保存: 接続中 / 未接続」を表示する。未起動でもチェックリスト自体は動く。
-- **1ページ 1 チェックリスト**を想定（複数置くと同じファイルを上書きし合う）。
-- `review-result.json`（コピーの Markdown と同内容の構造化版）:
-
-```json
-{
-  "tool": "spec-preview", "version": 1,
-  "checklist": "ui-review", "page": "/…/index.html", "lang": "ja",
-  "updatedAt": "…", "receivedAt": "…",
-  "summary": { "total": 9, "checked": 8, "ok": 6, "ng": 2 },
-  "items": [
-    { "slug": "fidelity-tokens", "label": "トークン準拠", "desc": "…",
-      "state": "ng", "note": "ボタンが #5b8cff のまま。brand-600 に" }
-  ]
-}
-```
-
 ## 仕上げ（レビュー結果の回収）
 
 `open index.html` 後の AskUserQuestion に、チェックリストを踏まえた選択肢を出す:
 
 - 「チェックリストを確認して進めてよいですか？」
-  選択肢 = 「全項目 OK、進めて」 / 「指摘あり（判定を送った/貼る）」 / 「保留」
-- 回答後、ブリッジ使用時は `.tmp/<slug>/review-result.json` を Read し、
-  `state: "ng"` の項目の slug / note をそのまま修正タスクの入力にする。
-  note が空の ng 項目だけ、内容を追加で聞く。
-- ブリッジ未使用時は「結果をコピー」の貼り付けを受け取るか、どの項目（slug）かを聞いて渡す。
+  選択肢 = 「全項目 OK、進めて」 / 「指摘あり（判定を貼る）」 / 「保留」
+- 回答後、「結果をコピー」の貼り付けを受け取るか、どの項目（slug）かを聞いて修正タスクに渡します。
 
 ## アンチパターン
 
@@ -153,5 +114,3 @@ node <skill>/assets/review-bridge.mjs --out <project>/.tmp/<slug>/review-result.
 - **`.check-actions` に手書きボタン** — preview.js が生成する。手書きすると保存機構と二重化する。
 - **slug の重複** — `data-check-item` が重複すると判定の保存が混線する。
 - **チェックリストだけ出して before/after を省く** — チェックは比較対象があって初めて機能する。
-- **ブリッジを起動したのに review-result.json を読まない** — 判定・メモが届いているのに
-  口頭で全項目を聞き直すのは連携の意味がない。ng 項目の note だけ確認する。

@@ -103,6 +103,54 @@ def _strip_code_fences(text: str) -> str:
     return cleaned
 
 
+def _extract_json_payload(text: str) -> str:
+    """Best-effort extraction of a single JSON value from CLI output wrapped in prose.
+
+    The Antigravity CLI (`agy -p`) has no `--output-format json` mode (confirmed via
+    `agy --help` on 1.1.x and the upstream docs) — it returns free-form text and
+    *non-deterministically* prepends agentic narration (e.g. "I have started the
+    background task ...") before the JSON object. Stripping code fences alone leaves
+    that prose in place, so `model_validate_json` fails and the entire prose+JSON blob
+    leaks downstream as the stage's content, polluting the context the next model
+    cooperates on. Here we locate the first balanced top-level ``{...}`` / ``[...]``
+    value — skipping braces that appear inside JSON strings — and return just that
+    slice. Trailing narration after the closing brace is dropped the same way. If
+    nothing balanced is found the input is returned unchanged so the caller's existing
+    validation/fallback path still runs.
+    """
+    cleaned = _strip_code_fences(text).strip()
+    start = -1
+    for i, ch in enumerate(cleaned):
+        if ch == "{" or ch == "[":
+            start = i
+            break
+    if start == -1:
+        return cleaned
+    depth = 0
+    in_str = False
+    esc = False
+    for j in range(start, len(cleaned)):
+        ch = cleaned[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{" or ch == "[":
+            depth += 1
+        elif ch == "}" or ch == "]":
+            depth -= 1
+            if depth == 0:
+                return cleaned[start : j + 1]
+    # Unbalanced (e.g. truncated output) — hand back the fence-stripped text.
+    return cleaned
+
+
 def _strip_unsupported_schema_fields(schema: Any) -> Any:
     """Drop JSON-Schema fields the Gemini REST API's responseSchema (an OpenAPI 3.0
     subset) doesn't understand — notably "additionalProperties", which the API
@@ -310,8 +358,9 @@ class ClaudeCliAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[claude] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -387,8 +436,9 @@ class CodexAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[codex] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -429,6 +479,9 @@ class AntigravityCliAdapter:
 
         async def call_api() -> ProviderResponse:
             loop = asyncio.get_running_loop()
+            timeout = _cli_timeout()
+            remaining = _deadline_remaining()
+            effective_timeout = min(timeout, remaining)
             response_text = await loop.run_in_executor(
                 None,
                 _call_gemini_api,
@@ -438,6 +491,7 @@ class AntigravityCliAdapter:
                 user_prompt,
                 temperature,
                 schema,
+                effective_timeout,
             )
             text = _strip_code_fences(response_text.strip())
             request = {
@@ -467,8 +521,11 @@ class AntigravityCliAdapter:
             timeout = _cli_timeout()
             directive = (
                 f"{system_prompt}\n\n"
-                "[Important] Based on the stdin body below, output exactly one JSON object that "
-                "strictly conforms to the following JSON schema, with no code fences or extra explanation:\n"
+                "[Important] The task content is provided on stdin below — read it in full and "
+                "base your answer on it. Then respond with EXACTLY one JSON object that strictly "
+                "conforms to the JSON schema below. Output ONLY that JSON object: no code fences, "
+                "and no narration, preamble, status message, or commentary before or after it "
+                "(do not describe what you are about to do):\n"
                 f"{json.dumps(schema, ensure_ascii=False)}"
             )
             cmd = [
@@ -489,7 +546,9 @@ class AntigravityCliAdapter:
                         # budget against the same wall-clock ceiling, so do not retry.
                         last_err = str(exc)
                         break
-                    text = _strip_code_fences(out.strip())
+                    # agy -p has no JSON output mode and may wrap the object in narration;
+                    # pull the balanced JSON value out of whatever prose it emitted.
+                    text = _extract_json_payload(out)
                     if rc == 0 and text:
                         request = {
                             "backend": "antigravity-cli",
@@ -503,8 +562,9 @@ class AntigravityCliAdapter:
                         if output_model is not None:
                             try:
                                 parsed_output = output_model.model_validate_json(text)
-                            except Exception:
-                                pass
+                            except Exception as exc:
+                                import sys
+                                print(f"[gemini-cli] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
                         return ProviderResponse(
                             provider=self.name,
                             model=model,
@@ -550,13 +610,14 @@ def _call_gemini_api(
     user_prompt: str,
     temperature: float,
     schema: dict[str, Any],
+    timeout: float,
 ) -> str:
     import urllib.request
     import urllib.error
     import json
 
     model_name = model if model.startswith("models/") else f"models/{model}"
-    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent"
 
     # The Gemini REST API's responseSchema is an OpenAPI 3.0 subset: fields like
     # "additionalProperties" (present in the Pydantic-derived schemas in types.py) are rejected
@@ -587,11 +648,11 @@ def _call_gemini_api(
     req = urllib.request.Request(
         url,
         data=req_data,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
         method="POST"
     )
 
-    with urllib.request.urlopen(req, timeout=120) as response:
+    with urllib.request.urlopen(req, timeout=max(1.0, timeout)) as response:
         res_data = json.loads(response.read().decode("utf-8"))
 
     try:

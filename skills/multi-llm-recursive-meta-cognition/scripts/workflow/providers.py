@@ -1,20 +1,24 @@
-"""Provider adapters — subscription-auth CLI backends (pure CLI).
+"""Provider adapters — subscription-authenticated CLI backends (pure CLI).
 
-Calls the latest models via the user's subscription auth, with no separate API key:
-  - gemini             -> Antigravity CLI (`agy -p`)    : plain-text output -> JSON-only directive + Pydantic validation
-  - anthropic / claude -> Claude Code     (`claude -p`) : --json-schema native structured output
-  - openai             -> Codex           (`codex exec`): --output-schema native structured output
+Calls the latest models using the user's subscription authentication, with no separate API key:
+  - gemini             → Antigravity CLI (`agy -p`)    : plain-text output → JSON-only directive + Pydantic validation
+  - anthropic / claude → Claude Code     (`claude -p`) : --json-schema native structured output
+  - openai             → Codex           (`codex exec`): --output-schema native structured output
 
 All long-form input goes through stdin (to avoid ARG_MAX / shell escaping).
-The role executors are unchanged — they only receive a ProviderResponse via the generate_structured() interface.
+The role executors (proponent/opponent/moderator) are untouched — they only receive a ProviderResponse via the generate_structured() interface.
+
+Previously this used vendor SDKs (claude-agent-sdk / openai-codex / google-antigravity), but
+each SDK bundled OS/architecture-specific CLI binaries (hundreds of MB), causing distribution/portability problems,
+so it was unified to a lightweight approach that calls the user's globally installed CLI directly via subprocess (same as reflection/recursive).
 
 Environment variables:
-  MULTILLM_REASONING_EFFORT   reasoning effort (default high; applied to both Claude and Codex)
-  MULTILLM_CLI_TIMEOUT        per-CLI-call timeout in seconds (default 360)
-  MULTILLM_TOTAL_DEADLINE     whole-pipeline wall-clock budget in seconds (default 540; keeps the
-                              run under a typical 600s agent/Bash tool ceiling — each call is capped
-                              at the remaining budget and calls are skipped once it is exhausted)
-  MULTILLM_AGY_PRINT_TIMEOUT  agy --print-timeout value (default 5m)
+  MULTILLM_REASONING_EFFORT       reasoning effort (default high; applied to both Claude and Codex)
+  MULTILLM_CLI_TIMEOUT            per-CLI-call timeout (seconds) (default 360)
+  MULTILLM_TOTAL_DEADLINE         whole-pipeline wall-clock budget in seconds (default 540; keeps the
+                                  run under a typical 600s agent/Bash tool ceiling — each call is capped
+                                  at the remaining budget and calls are skipped once it is exhausted)
+  MULTILLM_AGY_PRINT_TIMEOUT      agy --print-timeout value (default 5m)
   MULTILLM_CLAUDE_MODEL / MULTILLM_CODEX_MODEL  per-backend model override (optional)
 
 Gemini auth priority: the agy CLI (subscription OAuth) is always tried first, even if
@@ -42,7 +46,7 @@ from .raw import to_jsonable
 
 
 # =============================================================================
-# Shared CLI helpers
+# Common CLI helpers
 # =============================================================================
 
 def _cli_timeout() -> float:
@@ -53,9 +57,9 @@ def _cli_timeout() -> float:
 
 
 def _reasoning_effort() -> str:
-    # Default "high" (not "xhigh"): under the whole-pipeline wall-clock budget a 5-stage chain
-    # gets only ~100s/stage, and xhigh routinely exceeds that. "high" is the balanced default;
-    # override with MULTILLM_REASONING_EFFORT=xhigh|max when you have the time budget.
+    # Default "high" (not "xhigh"): under the whole-pipeline wall-clock budget each stage gets a
+    # limited slice, and xhigh routinely exceeds it. "high" is the balanced default; override with
+    # MULTILLM_REASONING_EFFORT=xhigh|max when you have the time budget.
     return os.getenv("MULTILLM_REASONING_EFFORT", "high").strip() or "high"
 
 
@@ -96,6 +100,54 @@ def _strip_code_fences(text: str) -> str:
     cleaned = cleaned.strip("`").strip()
     if cleaned.startswith("json"):
         cleaned = cleaned[4:].strip()
+    return cleaned
+
+
+def _extract_json_payload(text: str) -> str:
+    """Best-effort extraction of a single JSON value from CLI output wrapped in prose.
+
+    The Antigravity CLI (`agy -p`) has no `--output-format json` mode (confirmed via
+    `agy --help` on 1.1.x and the upstream docs) — it returns free-form text and
+    *non-deterministically* prepends agentic narration (e.g. "I have started the
+    background task ...") before the JSON object. Stripping code fences alone leaves
+    that prose in place, so `model_validate_json` fails and the entire prose+JSON blob
+    leaks downstream as the stage's content, polluting the context the next model
+    cooperates on. Here we locate the first balanced top-level ``{...}`` / ``[...]``
+    value — skipping braces that appear inside JSON strings — and return just that
+    slice. Trailing narration after the closing brace is dropped the same way. If
+    nothing balanced is found the input is returned unchanged so the caller's existing
+    validation/fallback path still runs.
+    """
+    cleaned = _strip_code_fences(text).strip()
+    start = -1
+    for i, ch in enumerate(cleaned):
+        if ch == "{" or ch == "[":
+            start = i
+            break
+    if start == -1:
+        return cleaned
+    depth = 0
+    in_str = False
+    esc = False
+    for j in range(start, len(cleaned)):
+        ch = cleaned[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{" or ch == "[":
+            depth += 1
+        elif ch == "}" or ch == "]":
+            depth -= 1
+            if depth == 0:
+                return cleaned[start : j + 1]
+    # Unbalanced (e.g. truncated output) — hand back the fence-stripped text.
     return cleaned
 
 
@@ -176,7 +228,7 @@ async def _run_cli(
     cwd: str | None,
     timeout: float,
 ) -> tuple[int, str, str]:
-    """Run a CLI as a subprocess. Long-form input goes through stdin. Returns (rc, stdout, stderr).
+    """Run a CLI via subprocess. Long-form input goes through stdin. Returns (rc, stdout, stderr).
 
     The effective timeout is the smaller of the per-call timeout and the time left in the
     whole-pipeline budget, so a single slow stage cannot blow the overall wall-clock ceiling.
@@ -236,7 +288,7 @@ class ProviderAdapter(Protocol):
 
 
 # =============================================================================
-# Claude Code CLI  (anthropic / claude)  — claude -p --json-schema (native structured output)
+# Claude Code CLI  (anthropic / claude)  — claude -p --json-schema (native structured)
 # =============================================================================
 
 class ClaudeCliAdapter:
@@ -273,14 +325,14 @@ class ClaudeCliAdapter:
                 "--model", model_id,
                 "--effort", _claude_effort(effort),
             ]
-            # cwd=tmp -> avoid loading the project CLAUDE.md/hooks. Do not use --bare so subscription auth works.
+            # cwd=tmp → avoids loading the project's CLAUDE.md/hooks. Does not use --bare so subscription auth still applies.
             rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
         if rc != 0:
             raise RuntimeError(f"claude -p failed (exit {rc}): {err.strip()[:500]}")
         try:
             data = json.loads(out)
         except json.JSONDecodeError as exc:
-            raise RuntimeError(f"claude -p failed to parse JSON envelope: {out[:300]}") from exc
+            raise RuntimeError(f"claude -p JSON envelope parse failed: {out[:300]}") from exc
         if data.get("is_error"):
             raise RuntimeError(f"claude -p error: {str(data.get('result', ''))[:300]}")
         structured = data.get("structured_output")
@@ -306,8 +358,9 @@ class ClaudeCliAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[claude] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -319,7 +372,7 @@ class ClaudeCliAdapter:
 
 
 # =============================================================================
-# Codex CLI  (openai)  — codex exec --output-schema (native structured output), reasoning xhigh
+# Codex CLI  (openai)  — codex exec --output-schema (native structured), reasoning xhigh
 # =============================================================================
 
 class CodexAdapter:
@@ -358,7 +411,7 @@ class CodexAdapter:
                 "--skip-git-repo-check",
                 "--ephemeral",
             ]
-            # long-form context (user_prompt) -> stdin (codex appends it as a <stdin> block)
+            # long-form context (user_prompt) → stdin (codex appends it as a <stdin> block)
             rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
             response_text = ""
             try:
@@ -383,8 +436,9 @@ class CodexAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[codex] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -397,8 +451,8 @@ class CodexAdapter:
 
 # =============================================================================
 # Antigravity CLI  (gemini)  — successor to the Gemini CLI. Default model Gemini 3.5 Flash (High).
-#   agy 1.0.x does not support the --output-format/reasoning flags -> it produces
-#   plain-text output, which we steer with a JSON-only directive and parse via the executor's Pydantic validation path.
+#   agy 1.0.x does not support the --output-format/reasoning flags → it steers the
+#   plain-text output with a JSON-only directive and parses it through the executor's Pydantic validation path.
 #
 #   Auth priority is agy CLI (subscription OAuth) first, GEMINI_API_KEY second (fallback only).
 #   An incidental GEMINI_API_KEY exported for some unrelated tool must not silently steal traffic
@@ -425,6 +479,9 @@ class AntigravityCliAdapter:
 
         async def call_api() -> ProviderResponse:
             loop = asyncio.get_running_loop()
+            timeout = _cli_timeout()
+            remaining = _deadline_remaining()
+            effective_timeout = min(timeout, remaining)
             response_text = await loop.run_in_executor(
                 None,
                 _call_gemini_api,
@@ -434,6 +491,7 @@ class AntigravityCliAdapter:
                 user_prompt,
                 temperature,
                 schema,
+                effective_timeout,
             )
             text = _strip_code_fences(response_text.strip())
             request = {
@@ -463,8 +521,11 @@ class AntigravityCliAdapter:
             timeout = _cli_timeout()
             directive = (
                 f"{system_prompt}\n\n"
-                "[IMPORTANT] Based on the stdin body below, output exactly one JSON object that "
-                "precisely conforms to the following JSON schema, with no code fences or extra explanation:\n"
+                "[Important] The task content is provided on stdin below — read it in full and "
+                "base your answer on it. Then respond with EXACTLY one JSON object that strictly "
+                "conforms to the JSON schema below. Output ONLY that JSON object: no code fences, "
+                "and no narration, preamble, status message, or commentary before or after it "
+                "(do not describe what you are about to do):\n"
                 f"{json.dumps(schema, ensure_ascii=False)}"
             )
             cmd = [
@@ -472,7 +533,7 @@ class AntigravityCliAdapter:
                 "--dangerously-skip-permissions",
                 "--print-timeout", _agy_print_timeout(),
             ]
-            # agy creates a .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
+            # agy creates an .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
             tmp = tempfile.mkdtemp(prefix="mll_agy_")
             last_err = ""
             max_attempts = 2
@@ -485,7 +546,9 @@ class AntigravityCliAdapter:
                         # budget against the same wall-clock ceiling, so do not retry.
                         last_err = str(exc)
                         break
-                    text = _strip_code_fences(out.strip())
+                    # agy -p has no JSON output mode and may wrap the object in narration;
+                    # pull the balanced JSON value out of whatever prose it emitted.
+                    text = _extract_json_payload(out)
                     if rc == 0 and text:
                         request = {
                             "backend": "antigravity-cli",
@@ -499,8 +562,9 @@ class AntigravityCliAdapter:
                         if output_model is not None:
                             try:
                                 parsed_output = output_model.model_validate_json(text)
-                            except Exception:
-                                pass
+                            except Exception as exc:
+                                import sys
+                                print(f"[gemini-cli] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
                         return ProviderResponse(
                             provider=self.name,
                             model=model,
@@ -546,13 +610,14 @@ def _call_gemini_api(
     user_prompt: str,
     temperature: float,
     schema: dict[str, Any],
+    timeout: float,
 ) -> str:
     import urllib.request
     import urllib.error
     import json
 
     model_name = model if model.startswith("models/") else f"models/{model}"
-    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent"
 
     # The Gemini REST API's responseSchema is an OpenAPI 3.0 subset: fields like
     # "additionalProperties" (present in the Pydantic-derived schemas in types.py) are rejected
@@ -583,11 +648,11 @@ def _call_gemini_api(
     req = urllib.request.Request(
         url,
         data=req_data,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
         method="POST"
     )
 
-    with urllib.request.urlopen(req, timeout=120) as response:
+    with urllib.request.urlopen(req, timeout=max(1.0, timeout)) as response:
         res_data = json.loads(response.read().decode("utf-8"))
 
     try:
@@ -643,45 +708,39 @@ class MockAdapter:
 
 def _build_mock_payload(schema_name: str, user_prompt: str) -> dict[str, Any]:
     """Return deterministic payloads for contract tests."""
-    if schema_name == "decomposition_output":
+    if schema_name == "proponent_output":
         return {
-            "subtasks": ["mock-subtask"],
-            "assumptions": ["mock-assumption"],
-            "constraints": ["mock-constraint"],
-            "questions": ["mock-question"],
+            "position": "pro (mock)",
+            "arguments": ["mock-argument"],
+            "evidence": ["mock-evidence"],
+            "benefits": ["mock-benefit"],
             "confidence": 0.5,
         }
-    if schema_name == "solution_output":
+    if schema_name == "opponent_output":
         return {
-            "solutions": [{"subtask": "mock-subtask", "answer": "mock-answer"}],
-            "open_questions": ["mock-open-question"],
+            "position": "con (mock)",
+            "counter_arguments": ["mock-counter"],
             "risks": ["mock-risk"],
+            "weaknesses": ["mock-weakness"],
+            "alternatives": ["mock-alternative"],
             "confidence": 0.5,
         }
-    if schema_name == "verification_output":
+    if schema_name == "moderator_output":
         return {
-            "issues": ["mock-issue"],
-            "corrections": ["mock-correction"],
-            "self_corrections": ["mock-self-correction"],
-            "validation_notes": ["mock-note"],
+            "summary": "mock-summary",
+            "proponent_score": 5,
+            "opponent_score": 5,
+            "key_insights": ["mock-insight"],
+            "final_verdict": "mock-verdict",
+            "recommendation": "mock-recommendation",
             "confidence": 0.5,
-        }
-    if schema_name == "integration_output":
-        return {
-            "integrated_answer": "mock-integrated-answer",
-            "applied_corrections": ["mock-applied"],
-            "confidence": 0.5,
-        }
-    if schema_name == "reflection_output":
-        return {
-            "final_response": "mock-final-response",
-            "confidence_score": 0.5,
-            "uncertainties": ["mock-uncertainty"],
-            "self_corrections": ["mock-self-correction"],
-            "reflection_notes": ["mock-note"],
         }
     return {"message": f"mock-response for {schema_name}", "prompt": user_prompt}
 
+
+# =============================================================================
+# Registry
+# =============================================================================
 
 def get_adapter(provider: str) -> ProviderAdapter:
     normalized = provider.strip().lower()

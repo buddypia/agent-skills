@@ -761,8 +761,26 @@ def _extract_debate_result(run_result: object) -> DebateResult | None:
     return None
 
 
+def _stage_reported_zero_confidence(stage_raw: object) -> bool:
+    """True when a stage returned schema-valid output but self-rated its confidence at
+    exactly 0.0. The executors' error placeholders use 0.0, and a backend that silently
+    ignored its input (e.g. the agy CLI answering "no input was provided") self-rates 0.0
+    too — yet neither sets ``error``, so without this check such a stage is mistaken for a
+    real result. Strict ``== 0.0`` keeps genuinely low-confidence answers from being flagged.
+    """
+    parsed = getattr(stage_raw, "parsed_output", None)
+    if not isinstance(parsed, dict):
+        return False
+    for key in ("confidence", "confidence_score"):
+        value = parsed.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and float(value) == 0.0:
+            return True
+    return False
+
+
 def _annotate_degradation(result: DebateResult) -> None:
-    """Flag a partial/degraded debate (a role timed out or errored) and warn loudly on stderr.
+    """Flag a partial/degraded debate (a role timed out, errored, or returned empty output)
+    and warn loudly on stderr.
 
     The exit code stays 0 for backward compatibility, but the result carries `degraded=True`
     plus the list of roles so a caller never mistakes placeholder output for a real verdict.
@@ -771,7 +789,9 @@ def _annotate_degradation(result: DebateResult) -> None:
     if result.raw is not None:
         for role in ("proponent", "opponent", "moderator"):
             role_raw = getattr(result.raw, role, None)
-            if role_raw is not None and getattr(role_raw, "error", None):
+            if role_raw is not None and (
+                getattr(role_raw, "error", None) or _stage_reported_zero_confidence(role_raw)
+            ):
                 degraded_stages.append(role)
 
     if not degraded_stages:
@@ -780,9 +800,9 @@ def _annotate_degradation(result: DebateResult) -> None:
     result.degraded = True
     result.degraded_stages = degraded_stages
     print(
-        "WARNING: multi-llm-debate ran in DEGRADED mode — these roles timed out or errored and "
-        f"returned placeholder output: {', '.join(degraded_stages)}. The verdict is PARTIAL. "
-        "Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
+        "WARNING: multi-llm-debate ran in DEGRADED mode — these roles timed out, errored, or "
+        f"returned an empty/zero-confidence result: {', '.join(degraded_stages)}. The verdict is "
+        "PARTIAL. Re-run with a larger MULTILLM_TOTAL_DEADLINE / MULTILLM_CLI_TIMEOUT, a lower "
         "MULTILLM_REASONING_EFFORT, or a simpler topic.",
         file=sys.stderr,
     )

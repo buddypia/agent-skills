@@ -49,11 +49,20 @@ class Executor:
         self.id = id
 
     def _get_handler(self) -> Handler:
+        handlers: list[Handler] = []
         for attr in dir(self):
-            candidate = getattr(self, attr)
+            candidate = getattr(self, attr, None)
             if callable(candidate) and getattr(candidate, "_workflow_handler", False):
-                return candidate
-        raise RuntimeError(f"Executor {self.id} has no handler")
+                handlers.append(candidate)
+        if not handlers:
+            raise RuntimeError(f"Executor {self.id} has no handler")
+        if len(handlers) > 1:
+            names = ", ".join(sorted(h.__name__ for h in handlers))
+            raise RuntimeError(
+                f"Executor {self.id} defines multiple handlers ({names}); "
+                "exactly one @handler is required per executor"
+            )
+        return handlers[0]
 
 
 @dataclass(frozen=True)

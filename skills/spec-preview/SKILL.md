@@ -15,8 +15,7 @@ description: >-
   （コストカット）、skin.css で元 UI の見た目を再現する — 一度キャッシュを作れば
   「既存 UI とほぼ同じ画面」をソース再調査なしで一発生成できる。UI の新規・修正レビューでは人間が確認すべき項目を 5〜12 個に
   最適化したレビューチェックリスト（OK/要修正トグル + メモ + 進捗保存）を埋め込み、
-  判定は「結果をコピー」または review-bridge.mjs 経由の review-result.json で
-  Claude Code / Codex CLI / Cursor 等の CLI エージェントに構造化して還流できる。
+  判定は「結果をコピー」ボタンで Claude Code / Codex CLI / Cursor 等の CLI エージェントに構造化して還流できる。
   「HTMLで画面UIを提案して」「モックで見せて」「UIを改善案として見せて」
   「仕様を可視化して」「要件を整理して見せて」「複数案を比較したい」
   「before/afterを並べて」「UIレビューして/レビューできる形にして」「目視で確認できる
@@ -129,15 +128,7 @@ xdg-open <path>/index.html      # Linux
 start "" <path>\index.html      # Windows
 ```
 
-レビューチェックリストを含む成果物では、`open` の**前に**ブリッジをバックグラウンド起動
-しておくと、ブラウザでの判定・メモが `.tmp/<slug>/review-result.json` に自動同期され、
-そのまま修正タスクに使える（回収手順は `references/review-checklist.md`「CLI 連携」節）:
-
-```bash
-node <skill>/assets/review-bridge.mjs --out .tmp/<slug>/review-result.json   # 既定 port 7357
-```
-
-開けない環境（ヘッドレス/リモート）では、フルパスを提示して
+開けない環境（ヘッダレス/リモート）では、フルパスを提示して
 「ブラウザで開いてください」と案内する。作って終わりにしない。
 
 ## 仕上げ: 目視確認を促す
@@ -150,8 +141,7 @@ node <skill>/assets/review-bridge.mjs --out .tmp/<slug>/review-result.json   # �
 
 ユーザーの選択を、次のアクション（実装・修正）にそのまま渡す。
 レビューチェックリストがある場合、判定の回収は口頭に頼らず
-`references/review-checklist.md`「CLI 連携」節に従う
-（ブリッジ使用時は `review-result.json` を Read、未使用時は「結果をコピー」の貼り付け）。
+`references/review-checklist.md`「CLI 連携」節に従う（「結果をコピー」の貼り付け）。
 
 ## アンチパターン
 
@@ -164,8 +154,7 @@ node <skill>/assets/review-bridge.mjs --out .tmp/<slug>/review-result.json   # �
   「元 UI の再現」が嘘になる（`references/ui-cache.md`）。
 - **レビュー項目の全部盛り** — チェックリストはプール全項目ではなく変更種別に合った
   5〜12 個に絞る。確認方法のない一般論の項目は削る（`references/review-checklist.md`）。
-- **判定の回収忘れ** — ブリッジを起動したのに `review-result.json` を読まず口頭で
-  聞き直す、またはコピー結果を修正タスクに渡さない。連携の出口まで使い切る。
+- **判定の回収忘れ** — コピーした判定結果を修正タスクに渡さない。連携の出口まで使い切る。
 - **プレースホルダの置き残し** — `__LABEL_OPEN_FULL__` 等の生文字列が閲覧者に見えると
   信頼を失う。生成後の grep 検査（手順6）を省かない。
 - **巨大インラインCSSの重複** — 共通スタイルは `shared.css` に集約し各HTMLから `link`。

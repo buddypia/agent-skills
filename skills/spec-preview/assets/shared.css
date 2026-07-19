@@ -208,8 +208,6 @@ body[data-fullview="1"] { overflow: hidden; }
 .check-item:not([data-state="ng"]) .check-note { display: none; }
 .check-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
 .check-copy { font-size: 12.5px; }
-.check-bridge { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.check-bridge[data-connected="1"] { color: var(--ok); }
 
 /* ---- Target surface preview primitives ---------------------------------- */
 .surface-preview {

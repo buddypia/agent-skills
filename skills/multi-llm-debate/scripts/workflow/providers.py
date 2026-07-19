@@ -310,8 +310,9 @@ class ClaudeCliAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[claude] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -387,8 +388,9 @@ class CodexAdapter:
         if output_model is not None:
             try:
                 parsed_output = output_model.model_validate_json(_strip_code_fences(response_text))
-            except Exception:
-                pass
+            except Exception as exc:
+                import sys
+                print(f"[codex] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
             model=model_id,
@@ -429,6 +431,8 @@ class AntigravityCliAdapter:
 
         async def call_api() -> ProviderResponse:
             loop = asyncio.get_running_loop()
+            remaining = _deadline_remaining()
+            effective_timeout = min(timeout, remaining)
             response_text = await loop.run_in_executor(
                 None,
                 _call_gemini_api,
@@ -438,6 +442,7 @@ class AntigravityCliAdapter:
                 user_prompt,
                 temperature,
                 schema,
+                effective_timeout,
             )
             text = _strip_code_fences(response_text.strip())
             request = {
@@ -503,8 +508,9 @@ class AntigravityCliAdapter:
                         if output_model is not None:
                             try:
                                 parsed_output = output_model.model_validate_json(text)
-                            except Exception:
-                                pass
+                            except Exception as exc:
+                                import sys
+                                print(f"[gemini-cli] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
                         return ProviderResponse(
                             provider=self.name,
                             model=model,
@@ -550,13 +556,14 @@ def _call_gemini_api(
     user_prompt: str,
     temperature: float,
     schema: dict[str, Any],
+    timeout: float,
 ) -> str:
     import urllib.request
     import urllib.error
     import json
 
     model_name = model if model.startswith("models/") else f"models/{model}"
-    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent"
 
     # The Gemini REST API's responseSchema is an OpenAPI 3.0 subset: fields like
     # "additionalProperties" (present in the Pydantic-derived schemas in types.py) are rejected
@@ -587,11 +594,11 @@ def _call_gemini_api(
     req = urllib.request.Request(
         url,
         data=req_data,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
         method="POST"
     )
 
-    with urllib.request.urlopen(req, timeout=120) as response:
+    with urllib.request.urlopen(req, timeout=max(1.0, timeout)) as response:
         res_data = json.loads(response.read().decode("utf-8"))
 
     try:

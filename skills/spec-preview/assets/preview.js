@@ -109,6 +109,23 @@
   }
 
   function openFullview(href, title) {
+    // セキュリティ: javascript: 等の危険なスキームをブロックし DOM-based XSS を防ぐ
+    let isSafe = false;
+    try {
+      if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
+        isSafe = true; // 相対パスは安全
+      } else {
+        const url = new URL(href, window.location.href);
+        isSafe = ["http:", "https:", "file:"].includes(url.protocol);
+      }
+    } catch (_) {
+      isSafe = false;
+    }
+    if (!isSafe) {
+      console.error("Blocked unsafe fullview URL:", href);
+      return;
+    }
+
     const overlay = ensureFullview();
     fullviewLastFocus = document.activeElement;
     overlay.querySelector(".fullview-title").textContent = title || "";
@@ -154,8 +171,7 @@
         ok: "OK", ng: "要修正", unchecked: "未確認",
         progress: (n, m, k) => `確認 ${n}/${m} · 指摘 ${k}`,
         copy: "結果をコピー", copied: "コピーしました ✓",
-        notePh: "要修正の理由・箇所（CLI に渡されます）",
-        bridgeOn: "自動保存: 接続中", bridgeOff: "自動保存: 未接続",
+        notePh: "要修正の理由・箇所",
         resultTitle: "UIレビュー結果",
       };
     if (lang === "ko")
@@ -163,68 +179,17 @@
         ok: "OK", ng: "수정 필요", unchecked: "미확인",
         progress: (n, m, k) => `확인 ${n}/${m} · 지적 ${k}`,
         copy: "결과 복사", copied: "복사됨 ✓",
-        notePh: "수정 필요 사유·위치 (CLI로 전달됩니다)",
-        bridgeOn: "자동 저장: 연결됨", bridgeOff: "자동 저장: 미연결",
+        notePh: "수정 필요 사유·위치",
         resultTitle: "UI 리뷰 결과",
       };
     return {
       ok: "OK", ng: "Needs fix", unchecked: "Unchecked",
       progress: (n, m, k) => `${n}/${m} checked · ${k} issues`,
       copy: "Copy result", copied: "Copied ✓",
-      notePh: "Why it needs a fix (passed to the CLI)",
-      bridgeOn: "Auto-save: connected", bridgeOff: "Auto-save: off",
+      notePh: "Why it needs a fix",
       resultTitle: "UI review result",
     };
   })();
-
-  // review-bridge.mjs（起動していれば）への自動送信。未起動でもチェックリストは動作し、
-  // コピー経路にフォールバックする。port の既定は 7357（?bridge= / data-bridge-port で変更可）。
-  const fetchTimeout = (ms) =>
-    typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined;
-  const bridge = {
-    base: `http://127.0.0.1:${params.get("bridge") || document.body.dataset.bridgePort || "7357"}`,
-    connected: false,
-    statusEls: [],
-    lastPayloads: new Map(),
-    render() {
-      this.statusEls.forEach((el) => {
-        el.dataset.connected = this.connected ? "1" : "0";
-        el.textContent = this.connected ? checklistLabels.bridgeOn : checklistLabels.bridgeOff;
-      });
-    },
-    update(on) {
-      const was = this.connected;
-      this.connected = on;
-      this.render();
-      // 後からブリッジが起動された場合も、再接続時に最新状態を同期する
-      if (on && !was) this.lastPayloads.forEach((payload) => this.post(payload));
-    },
-    async ping() {
-      try {
-        const res = await fetch(`${this.base}/ping`, { signal: fetchTimeout(700) });
-        this.update(res.ok);
-      } catch (_) {
-        this.update(false);
-      }
-    },
-    async post(payload) {
-      try {
-        const res = await fetch(`${this.base}/review`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
-          signal: fetchTimeout(1500),
-        });
-        if (!res.ok) this.update(false);
-      } catch (_) {
-        this.update(false);
-      }
-    },
-    send(payload) {
-      this.lastPayloads.set(payload.checklist, payload);
-      if (this.connected) this.post(payload);
-    },
-  };
 
   function checklistToMarkdown(data) {
     const stateLabel = (s) =>
@@ -312,7 +277,6 @@
         progress.classList.toggle("badge-ok", done === items.length && issues === 0);
         progress.classList.toggle("badge-warn", issues > 0);
       }
-      bridge.send(collect());
     }
 
     items.forEach((item) => {
@@ -336,7 +300,7 @@
         });
         actions.appendChild(button);
       });
-      // ng 時のみ表示されるメモ欄（shared.css が data-state で切替）。指摘理由が CLI 連携の中身になる
+      // ng 時のみ表示されるメモ欄（shared.css が data-state で切替）
       const savedEntry = saved[item.dataset.checkItem];
       const initialState = typeof savedEntry === "string" ? savedEntry : savedEntry && savedEntry.state;
       const note = document.createElement("input");
@@ -356,7 +320,7 @@
       }
     });
 
-    // 回収 UI（コピー + ブリッジ状態）はテンプレート側マークアップ不要 — ここで生成する
+    // 回収 UI（コピー）はテンプレート側マークアップ不要 — ここで生成する
     const footer = document.createElement("div");
     footer.className = "check-footer";
     const copyBtn = document.createElement("button");
@@ -391,23 +355,12 @@
         }, 1600);
       }
     });
-    const status = document.createElement("span");
-    status.className = "check-bridge";
-    bridge.statusEls.push(status);
-    footer.append(copyBtn, status);
+    footer.appendChild(copyBtn);
     root.appendChild(footer);
-    bridge.render();
     persist();
   }
 
   document.querySelectorAll("[data-checklist]").forEach(initChecklist);
-  if (document.querySelector("[data-checklist]")) {
-    bridge.ping();
-    // ブリッジが後から起動されても拾えるよう、未接続の間だけ定期 ping
-    setInterval(() => {
-      if (!bridge.connected) bridge.ping();
-    }, 3000);
-  }
 
   // もう一方の軸は body の現在値を読む（初期値の closure を使うと切替が巻き戻る）
   document.querySelectorAll("[data-viewport-target]").forEach((button) => {

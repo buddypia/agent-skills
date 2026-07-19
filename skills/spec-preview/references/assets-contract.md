@@ -10,9 +10,8 @@
 | `index.template.html` | 比較/ダッシュボードページの骨格 | 中身を埋めて `index.html` として保存 |
 | `view.template.html` | フル画面ビューの骨格 | ビューごとに `view-*.html` として保存 |
 | `shared.css` | 共通スタイル + デザイントークン | コピー後、コピー先の `:root` を対象プロダクトに合わせ調整 |
-| `preview.js` | viewport / mode / embed / iframe fit / チェックリスト制御（メモ・コピー・ブリッジ送信含む） | **無編集で**コピー |
+| `preview.js` | viewport / mode / embed / iframe fit / チェックリスト制御（メモ・コピー含む） | **無編集で**コピー |
 | `ui-scan.mjs` | プロジェクト UI 資産のスキャン + キャッシュ鮮度判定 | コピーせず**スキル内から直接実行**（`references/ui-cache.md` 参照） |
-| `review-bridge.mjs` | チェックリスト判定の受信 → `review-result.json` 書き出し（CLI 連携） | コピーせず**スキル内から直接実行**（`references/review-checklist.md`「CLI 連携」節参照） |
 
 UI キャッシュ（`<project>/.tmp/spec-preview/ui-cache/`）に `skin.css` がある場合は
 `.tmp/<slug>/` にコピーし、各 HTML で `shared.css` の**後に** link する
@@ -38,7 +37,7 @@ UI キャッシュ（`<project>/.tmp/spec-preview/ui-cache/`）に `skin.css` �
 | view | `body[data-viewport]` | device-frame の端末寸法切替（shared.css が参照） |
 | view | `body[data-mode="app"\|"explainer"]` | app = 製品画面のみ / explainer = 説明文併記 |
 | view | `button[data-viewport-target]` / `button[data-mode-target]` | view 内の viewport / mode 切替ボタン |
-| index | `[data-checklist]` / `li[data-check-item]` / `.check-actions` / `[data-checklist-progress]` | レビューチェックリスト（OK/要修正トグル + localStorage 保存 + 進捗表示）。要修正時のメモ欄・回収 UI（結果をコピー / ブリッジ接続状態）は preview.js が自動生成する。マークアップ契約の正本は `references/review-checklist.md`。ボタンラベル・進捗文言は `html lang` から JS が自動選択（`__LABEL_*__` ではない） |
+| index | `[data-checklist]` / `li[data-check-item]` / `.check-actions` / `[data-checklist-progress]` | レビューチェックリスト（OK/要修正トグル + localStorage 保存 + 進捗表示）。要修正時のメモ欄・回収 UI（結果をコピー）は preview.js が自動生成する。マークアップ契約の正本は `references/review-checklist.md`。ボタンラベル・進捗文言は `html lang` から JS が自動選択（`__LABEL_*__` ではない） |
 
 ## 全画面モーダル（「全画面で開く」の挙動）
 
@@ -77,8 +76,6 @@ preview.js と shared.css の両方を揃えて更新する。
 - `?mode=app|explainer` — app = 製品画面のみ / explainer = 説明文併記。
   `comparison` は index.html（比較ページ）自体を指す論理モードで、view の `?mode` には現れない
 - `?embed=1` — ヘッダー・説明を隠し製品 surface だけ表示（index のミニプレビュー用）
-- `?bridge=<port>` — review-bridge.mjs の待受 port（既定 7357。既定 port で起動していれば
-  クエリ不要、ブリッジ未使用なら無視される）
 
 ## プレースホルダ一覧（`__*__` はすべて置換必須）
 

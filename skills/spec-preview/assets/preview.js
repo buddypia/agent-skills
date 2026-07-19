@@ -142,17 +142,103 @@
 
   // ---- レビューチェックリスト ----
   // DOM 契約は references/review-checklist.md を参照。
-  // [data-checklist] 内の li[data-check-item] に OK / 要修正ボタンを生成し、
+  // [data-checklist] 内の li[data-check-item] に OK / 要修正ボタンとメモ欄を生成し、
   // 判定を localStorage に保存、[data-checklist-progress] に進捗を表示する。
+  // 判定の回収（CLI 連携）は2経路: 「結果をコピー」(slug 付き Markdown) と、
+  // review-bridge.mjs への自動送信（.tmp/<slug>/review-result.json）。
   // ラベルは html lang から自動選択（fullviewLabels と同じパターン）。
   const checklistLabels = (() => {
     const lang = (document.documentElement.lang || "en").slice(0, 2);
     if (lang === "ja")
-      return { ok: "OK", ng: "要修正", progress: (n, m, k) => `確認 ${n}/${m} · 指摘 ${k}` };
+      return {
+        ok: "OK", ng: "要修正", unchecked: "未確認",
+        progress: (n, m, k) => `確認 ${n}/${m} · 指摘 ${k}`,
+        copy: "結果をコピー", copied: "コピーしました ✓",
+        notePh: "要修正の理由・箇所（CLI に渡されます）",
+        bridgeOn: "自動保存: 接続中", bridgeOff: "自動保存: 未接続",
+        resultTitle: "UIレビュー結果",
+      };
     if (lang === "ko")
-      return { ok: "OK", ng: "수정 필요", progress: (n, m, k) => `확인 ${n}/${m} · 지적 ${k}` };
-    return { ok: "OK", ng: "Needs fix", progress: (n, m, k) => `${n}/${m} checked · ${k} issues` };
+      return {
+        ok: "OK", ng: "수정 필요", unchecked: "미확인",
+        progress: (n, m, k) => `확인 ${n}/${m} · 지적 ${k}`,
+        copy: "결과 복사", copied: "복사됨 ✓",
+        notePh: "수정 필요 사유·위치 (CLI로 전달됩니다)",
+        bridgeOn: "자동 저장: 연결됨", bridgeOff: "자동 저장: 미연결",
+        resultTitle: "UI 리뷰 결과",
+      };
+    return {
+      ok: "OK", ng: "Needs fix", unchecked: "Unchecked",
+      progress: (n, m, k) => `${n}/${m} checked · ${k} issues`,
+      copy: "Copy result", copied: "Copied ✓",
+      notePh: "Why it needs a fix (passed to the CLI)",
+      bridgeOn: "Auto-save: connected", bridgeOff: "Auto-save: off",
+      resultTitle: "UI review result",
+    };
   })();
+
+  // review-bridge.mjs（起動していれば）への自動送信。未起動でもチェックリストは動作し、
+  // コピー経路にフォールバックする。port の既定は 7357（?bridge= / data-bridge-port で変更可）。
+  const fetchTimeout = (ms) =>
+    typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined;
+  const bridge = {
+    base: `http://127.0.0.1:${params.get("bridge") || document.body.dataset.bridgePort || "7357"}`,
+    connected: false,
+    statusEls: [],
+    lastPayloads: new Map(),
+    render() {
+      this.statusEls.forEach((el) => {
+        el.dataset.connected = this.connected ? "1" : "0";
+        el.textContent = this.connected ? checklistLabels.bridgeOn : checklistLabels.bridgeOff;
+      });
+    },
+    update(on) {
+      const was = this.connected;
+      this.connected = on;
+      this.render();
+      // 後からブリッジが起動された場合も、再接続時に最新状態を同期する
+      if (on && !was) this.lastPayloads.forEach((payload) => this.post(payload));
+    },
+    async ping() {
+      try {
+        const res = await fetch(`${this.base}/ping`, { signal: fetchTimeout(700) });
+        this.update(res.ok);
+      } catch (_) {
+        this.update(false);
+      }
+    },
+    async post(payload) {
+      try {
+        const res = await fetch(`${this.base}/review`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: fetchTimeout(1500),
+        });
+        if (!res.ok) this.update(false);
+      } catch (_) {
+        this.update(false);
+      }
+    },
+    send(payload) {
+      this.lastPayloads.set(payload.checklist, payload);
+      if (this.connected) this.post(payload);
+    },
+  };
+
+  function checklistToMarkdown(data) {
+    const stateLabel = (s) =>
+      s === "ok" ? checklistLabels.ok : s === "ng" ? checklistLabels.ng : checklistLabels.unchecked;
+    const lines = data.items.map((item) => {
+      const note = item.state === "ng" && item.note ? ` — ${item.note}` : "";
+      return `- [${stateLabel(item.state)}] ${item.label} (${item.slug})${note}`;
+    });
+    return [
+      `## ${checklistLabels.resultTitle} — ${data.checklist}`,
+      checklistLabels.progress(data.summary.checked, data.summary.total, data.summary.ng),
+      ...lines,
+    ].join("\n");
+  }
 
   function initChecklist(root) {
     const storeKey = `spec-preview-check:${window.location.pathname}:${root.dataset.checklist || "default"}`;
@@ -164,6 +250,38 @@
     }
     const items = [...root.querySelectorAll("[data-check-item]")];
     const progress = root.querySelector("[data-checklist-progress]");
+    const notes = new Map();
+    let noteTimer = null;
+
+    function collect() {
+      const entries = items.map((item) => {
+        const label = item.querySelector(".check-label b");
+        const desc = item.querySelector(".check-label .muted");
+        const note = notes.get(item);
+        return {
+          slug: item.dataset.checkItem,
+          label: label ? label.textContent.trim() : item.dataset.checkItem,
+          desc: desc ? desc.textContent.trim() : "",
+          state: item.dataset.state || null,
+          note: note ? note.value.trim() : "",
+        };
+      });
+      return {
+        tool: "spec-preview",
+        version: 1,
+        checklist: root.dataset.checklist || "default",
+        page: window.location.pathname,
+        lang: (document.documentElement.lang || "en").slice(0, 2),
+        updatedAt: new Date().toISOString(),
+        summary: {
+          total: entries.length,
+          checked: entries.filter((e) => e.state).length,
+          ok: entries.filter((e) => e.state === "ok").length,
+          ng: entries.filter((e) => e.state === "ng").length,
+        },
+        items: entries,
+      };
+    }
 
     function syncButtons(item) {
       item.querySelectorAll(".check-btn").forEach((b) => {
@@ -178,7 +296,9 @@
     function persist() {
       const state = {};
       items.forEach((item) => {
-        if (item.dataset.state) state[item.dataset.checkItem] = item.dataset.state;
+        const note = notes.get(item);
+        const entry = { state: item.dataset.state || null, note: note ? note.value.trim() : "" };
+        if (entry.state || entry.note) state[item.dataset.checkItem] = entry;
       });
       try {
         window.localStorage.setItem(storeKey, JSON.stringify(state));
@@ -192,6 +312,7 @@
         progress.classList.toggle("badge-ok", done === items.length && issues === 0);
         progress.classList.toggle("badge-warn", issues > 0);
       }
+      bridge.send(collect());
     }
 
     items.forEach((item) => {
@@ -215,16 +336,78 @@
         });
         actions.appendChild(button);
       });
-      const initial = saved[item.dataset.checkItem];
-      if (initial === "ok" || initial === "ng") {
-        item.dataset.state = initial;
+      // ng 時のみ表示されるメモ欄（shared.css が data-state で切替）。指摘理由が CLI 連携の中身になる
+      const savedEntry = saved[item.dataset.checkItem];
+      const initialState = typeof savedEntry === "string" ? savedEntry : savedEntry && savedEntry.state;
+      const note = document.createElement("input");
+      note.type = "text";
+      note.className = "check-note";
+      note.placeholder = checklistLabels.notePh;
+      note.value = (savedEntry && typeof savedEntry === "object" && savedEntry.note) || "";
+      note.addEventListener("input", () => {
+        clearTimeout(noteTimer);
+        noteTimer = setTimeout(persist, 400);
+      });
+      item.appendChild(note);
+      notes.set(item, note);
+      if (initialState === "ok" || initialState === "ng") {
+        item.dataset.state = initialState;
         syncButtons(item);
       }
     });
+
+    // 回収 UI（コピー + ブリッジ状態）はテンプレート側マークアップ不要 — ここで生成する
+    const footer = document.createElement("div");
+    footer.className = "check-footer";
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "btn check-copy";
+    copyBtn.textContent = checklistLabels.copy;
+    copyBtn.addEventListener("click", async () => {
+      const text = checklistToMarkdown(collect());
+      let done = false;
+      try {
+        await navigator.clipboard.writeText(text);
+        done = true;
+      } catch (_) {
+        /* file:// 等で Clipboard API 不可 → execCommand フォールバック */
+      }
+      if (!done) {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.appendChild(helper);
+        helper.select();
+        try {
+          done = document.execCommand("copy");
+        } catch (_) {}
+        helper.remove();
+      }
+      if (done) {
+        copyBtn.textContent = checklistLabels.copied;
+        setTimeout(() => {
+          copyBtn.textContent = checklistLabels.copy;
+        }, 1600);
+      }
+    });
+    const status = document.createElement("span");
+    status.className = "check-bridge";
+    bridge.statusEls.push(status);
+    footer.append(copyBtn, status);
+    root.appendChild(footer);
+    bridge.render();
     persist();
   }
 
   document.querySelectorAll("[data-checklist]").forEach(initChecklist);
+  if (document.querySelector("[data-checklist]")) {
+    bridge.ping();
+    // ブリッジが後から起動されても拾えるよう、未接続の間だけ定期 ping
+    setInterval(() => {
+      if (!bridge.connected) bridge.ping();
+    }, 3000);
+  }
 
   // もう一方の軸は body の現在値を読む（初期値の closure を使うと切替が巻き戻る）
   document.querySelectorAll("[data-viewport-target]").forEach((button) => {

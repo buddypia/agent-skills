@@ -184,7 +184,7 @@ body[data-fullview="1"] { overflow: hidden; }
 .checklist { padding: 20px 22px; }
 .check-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
 .check-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
   padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
   background: var(--surface-2);
 }
@@ -198,6 +198,18 @@ body[data-fullview="1"] { overflow: hidden; }
 .check-item[data-state="ok"] { border-color: rgba(52, 211, 153, 0.45); }
 .check-item[data-state="ng"] { border-color: rgba(248, 113, 113, 0.5); background: rgba(248, 113, 113, 0.06); }
 .check-progress { white-space: nowrap; }
+/* ng 判定時のみ表示されるメモ欄と、回収 UI（コピー + ブリッジ状態）。DOM は preview.js が生成 */
+.check-note {
+  flex-basis: 100%; font: inherit; font-size: 12.5px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 7px 10px; outline: none;
+}
+.check-note:focus { border-color: var(--accent); }
+.check-item:not([data-state="ng"]) .check-note { display: none; }
+.check-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
+.check-copy { font-size: 12.5px; }
+.check-bridge { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.check-bridge[data-connected="1"] { color: var(--ok); }
 
 /* ---- Target surface preview primitives ---------------------------------- */
 .surface-preview {

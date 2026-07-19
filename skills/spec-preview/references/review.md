@@ -19,9 +19,10 @@ before 自体が現状と違うと差分レビューの前提が崩れる。
 ```
 .tmp/<slug>/
 ├── shared.css
-├── skin.css          # UI キャッシュ由来の見た目上書き（shared.css の後に link）
-├── preview.js        # target surface / viewport / チェックリスト制御
-└── index.html        # before/after 並置 + 影響範囲 + レビューチェックリスト + 根拠
+├── skin.css            # UI キャッシュ由来の見た目上書き（shared.css の後に link）
+├── preview.js          # target surface / viewport / チェックリスト制御
+├── index.html          # before/after 並置 + 影響範囲 + レビューチェックリスト + 根拠
+└── review-result.json  # 実行時産物: review-bridge.mjs 起動時に判定が自動同期される
 ```
 
 UI 変更で「実画面の before/after」を見せたいときは `view-before.html` / `view-after.html` を作り、
@@ -68,11 +69,14 @@ index に 2 つの `.frame` を**横並び**で iframe 表示する（`fitFrames
 
 ## 仕上げ
 
+チェックリストを出す場合は `open` の**前に**ブリッジをバックグラウンド起動しておく
+（`node <skill>/assets/review-bridge.mjs --out .tmp/<slug>/review-result.json`）。
 `open index.html` 後、`AskUserQuestion`（レビューチェックリストがある場合はそれを踏まえる —
 正本は `references/review-checklist.md` の「仕上げ」節）:
 - Korean prompt / Trip Jarvis: 「체크리스트를 확인하고 진행해도 될까요?」 選択肢 = 「전 항목 OK, 진행」 / 「지적 있음」 / 「보류」。
 - Japanese prompt: 「チェックリストを確認して進めてよいですか？」 選択肢 = 「全項目 OK、進めて」 / 「指摘あり」 / 「保留」。
-- 「指摘あり」の場合はどの項目かを聞き、修正タスクにそのまま渡す。
+- 回答後、ブリッジ使用時は `review-result.json` を Read して ng 項目（slug + note）を
+  修正タスクへ。未使用時は「結果をコピー」の貼り付けを受け取るか、どの項目かを聞いて渡す。
 
 ## チェックリスト
 
@@ -84,4 +88,5 @@ index に 2 つの `.frame` を**横並び**で iframe 表示する（`fitFrames
 - [ ] 差分（追加/削除/変更）が視覚的に分かる
 - [ ] ロールバック手段を明記
 - [ ] 残存プレースホルダ 0 件（`grep -RnoE '__[A-Z0-9_]+__' .tmp/<slug>/`）
+- [ ] チェックリストを出す場合、`open` 前に review-bridge.mjs をバックグラウンド起動
 - [ ] 生成後に `open index.html` 実行

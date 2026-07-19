@@ -12,7 +12,6 @@ from .providers import get_adapter
 from .prompts import get_prompt
 from .raw import to_jsonable
 from .types import (
-    PromptPayload,
     ProponentOutput,
     OpponentOutput,
     StageRawData,
@@ -58,58 +57,12 @@ class OpponentExecutor(Executor):
         self.config = config
 
     @handler
-    async def analyze(self, prompt: PromptPayload, ctx: WorkflowContext[OpponentOutput]) -> None:
-        """Entry point used when the workflow sends the original PromptPayload."""
-        started = time.perf_counter()
-
-        await ctx.set_shared_state("opponent_model", self.config.model)
-
-        original_topic = await ctx.get_shared_state("original_topic") or prompt.text
-        proponent_output = await ctx.get_shared_state("proponent_output")
-
-        if not await ctx.get_shared_state("original_topic"):
-            await ctx.set_shared_state("original_topic", original_topic)
-
-        raw: StageRawData | None = None
-        try:
-            result = await self._call_opponent_with_raw(original_topic, proponent_output)
-        except Exception as exc:
-            parsed = OpponentOutput(
-                position=f"[Opponent: error ({exc})]",
-                counter_arguments=["An error occurred"],
-                risks=[],
-                weaknesses=[],
-                alternatives=[],
-                confidence=0.0,
-            )
-            raw = StageRawData(
-                provider=self.config.normalized_provider(),
-                model=self.config.model,
-                system_prompt=OPPONENT_SYSTEM_PROMPT,
-                user_prompt=original_topic,
-                request=to_jsonable({"temperature": self.config.temperature}),
-                parsed_output=parsed.model_dump(),
-                error=str(exc),
-            )
-            result = parsed
-        else:
-            result, raw = result
-
-        duration = time.perf_counter() - started
-
-        await ctx.set_shared_state("opponent_output", result.model_dump())
-        await ctx.set_shared_state("opponent_duration", duration)
-        if raw is not None:
-            raw.duration_sec = duration
-            await ctx.set_shared_state("opponent_raw", raw.model_dump())
-
-        await ctx.send_message(result)
-
-    @handler
-    async def analyze_from_proponent(
+    async def analyze(
         self, proponent_output: ProponentOutput, ctx: WorkflowContext[OpponentOutput]
     ) -> None:
-        """Entry point used when the workflow runs sequentially (proponent -> opponent)."""
+        """Sequential entry (proponent -> opponent): the proponent's structured output
+        arrives as the message and the debate topic comes from shared state. This is the
+        executor's single @handler — the engine requires exactly one per executor."""
         started = time.perf_counter()
 
         await ctx.set_shared_state("opponent_model", self.config.model)

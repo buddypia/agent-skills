@@ -161,8 +161,8 @@
   // DOM 契約は references/review-checklist.md を参照。
   // [data-checklist] 内の li[data-check-item] に OK / 要修正ボタンとメモ欄を生成し、
   // 判定を localStorage に保存、[data-checklist-progress] に進捗を表示する。
-  // 判定の回収（CLI 連携）は2経路: 「結果をコピー」(slug 付き Markdown) と、
-  // review-bridge.mjs への自動送信（.tmp/<slug>/review-result.json）。
+  // 判定の回収（CLI 連携）は「結果をコピー」ボタン: slug 付き Markdown を
+  // クリップボードへ書き出し、CLI エージェントに貼り付けて構造化指摘を還流する。
   // ラベルは html lang から自動選択（fullviewLabels と同じパターン）。
   const checklistLabels = (() => {
     const lang = (document.documentElement.lang || "en").slice(0, 2);

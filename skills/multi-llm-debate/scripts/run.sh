@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 # --- Preferred: uv (reproducible run following uv.lock) ---
 if command -v uv >/dev/null 2>&1; then
-    exec uv run --directory "$SCRIPT_DIR" --frozen main.py "$@"
+    exec uv run --project "$SCRIPT_DIR" --frozen "$SCRIPT_DIR/main.py" "$@"
 fi
 
 # --- Fallback: venv + pip (environments without uv) ---

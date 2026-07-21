@@ -8,7 +8,7 @@ For the skill definition (invocation summary), see [SKILL.md](./SKILL.md).
 ```
 [topic] → Proponent(for) → Opponent(against) → Moderator(neutral eval) → integrated output
           agy (Antigravity)   claude (Claude)   codex (Codex)
-          gemini-3.5-flash    claude-sonnet-5    gpt-5.5(xhigh)
+          gemini-3.6-flash    claude-sonnet-5    gpt-5.5(xhigh)
 ```
 
 Each role produces structured JSON based solely on its assigned role within an independent context, and each stage references the output of the previous one.
@@ -84,7 +84,7 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 ```bash
 # uv recommended (set cwd to scripts)
 uv run --directory scripts main.py "topic" \
-    --proponent-model gemini-3.5-flash \
+    --proponent-model gemini-3.6-flash \
     --opponent-model  claude-sonnet-5 \
     --moderator-model gpt-5.5
 # without uv: scripts/.venv/bin/python scripts/main.py ... (Windows: .venv\Scripts\python.exe)
@@ -115,7 +115,7 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 | Symptom | Resolution |
 |------|------|
 | `agy / claude / codex: command not found` | Install the relevant CLI and add it to your PATH (verify with `command -v`) |
-| `models/... is not found (404)` (gemini) | The default is `gemini-3.5-flash`. The `agy` CLI is used automatically since it's tried first |
+| `models/... is not found (404)` (gemini) | The default is `gemini-3.6-flash`. The `agy` CLI is used automatically since it's tried first |
 | Authentication error | Run the relevant CLI interactively to log in once, or set an API key |
 | `Direct Gemini API call failed` / API key silently used instead of OAuth | `agy` (OAuth) is always tried first regardless of whether `GEMINI_API_KEY` is set in your shell profile (e.g. exported for an unrelated tool) — the API key is only a fallback for when `agy` itself fails |
 | Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run the skill as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
@@ -153,6 +153,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.5-flash`, `claude-sonnet-5`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
+- **Model names.** Default model IDs (e.g. `gemini-3.6-flash`, `claude-sonnet-5`, `gpt-5.5`) reflect the latest models as of 2026-06 and change over time. Override them with the `--*-model` flags (see Usage) to match what your account can access.
 - **No quality guarantee.** Multi-model debate is a design choice intended to surface more perspectives; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

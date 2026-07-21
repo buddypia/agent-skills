@@ -35,7 +35,7 @@ def _gemini_requires_property_ordering(model_id: str | None) -> bool:
     # Some Gemini models are strict about JSON schema property ordering.
     # Keep this narrowly scoped to avoid adding non-standard keywords unnecessarily.
     model = (model_id or "").lower()
-    return any(token in model for token in ("gemini-3.5-flash",))
+    return any(token in model for token in ("gemini-3.6-flash", "gemini-3.5-flash"))
 
 
 def _apply_property_ordering(schema: dict[str, Any]) -> None:

@@ -19,7 +19,7 @@ Usage:
 
     # Specify custom models
     python main.py "debate topic" \\
-        --proponent-model gemini-3.5-flash \\
+        --proponent-model gemini-3.6-flash \\
         --opponent-model claude-sonnet-5 \\
         --moderator-model gpt-5.5
 

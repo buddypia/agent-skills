@@ -24,7 +24,7 @@ from .config import AgentConfig
 DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini: Antigravity default (Gemini 3.5 Flash, 2026-05)
     # Default for the agy CLI path. The pro line requires the "-preview" suffix in google-genai v1beta.
-    "gemini": "gemini-3.5-flash",
+    "gemini": "gemini-3.6-flash",
     # Anthropic Claude: latest Claude Agent SDK (Sonnet 5.0, 2026-06)
     "anthropic": "claude-sonnet-5",
     "claude": "claude-sonnet-5",
@@ -381,7 +381,7 @@ Default provider assignment strategy: shuffle (randomly assigns the 3 vendors 1:
     Switch to the fixed assignment below with --fixed, or to random-with-duplicates with --random.
 
 Default values (when fixed):
-    Proponent: gemini / gemini-3.5-flash
+    Proponent: gemini / gemini-3.6-flash
     Opponent:  anthropic / claude-sonnet-5
     Moderator: openai / gpt-5.5
 """)

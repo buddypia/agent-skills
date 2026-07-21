@@ -46,7 +46,7 @@ def get_shuffled_providers() -> tuple[str, str, str]:
 
 DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini: Antigravity CLI default (Gemini 3.5 Flash, 2026-05)
-    "gemini": "gemini-3.5-flash",
+    "gemini": "gemini-3.6-flash",
     # Anthropic Claude: Claude Code CLI latest (Sonnet 5.0, 2026-06)
     "anthropic": "claude-sonnet-5",
     "claude": "claude-sonnet-5",
@@ -77,7 +77,7 @@ class DefaultAgentSettings:
 
 
 # Default configurations for each agent role
-GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.5-flash")
+GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.6-flash")
 CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-sonnet-5")
 REFINER_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-5.5")
 
@@ -411,7 +411,7 @@ Environment variables:
     REFLECTION_DEVUI_PORT        : DevUI port (or DEVUI_PORT)
 
 Default values:
-    Generator: gemini / gemini-3.5-flash
+    Generator: gemini / gemini-3.6-flash
     Critic:    anthropic / claude-sonnet-5
     Refiner:   openai / gpt-5.5
 """)

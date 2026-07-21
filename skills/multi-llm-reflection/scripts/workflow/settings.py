@@ -50,8 +50,8 @@ DEFAULT_MODELS: dict[str, str] = {
     # Anthropic Claude: Claude Code CLI latest (Sonnet 5.0, 2026-06)
     "anthropic": "claude-sonnet-5",
     "claude": "claude-sonnet-5",
-    # OpenAI: Codex CLI latest flagship (2026-04)
-    "openai": "gpt-5.5",
+    # OpenAI: Codex CLI latest flagship (GPT-3.6 Luna, 2026-07)
+    "openai": "gpt-3.6-luna",
     # Mock provider (offline smoke tests)
     "mock": "mock-v1",
 }
@@ -73,13 +73,13 @@ class DefaultAgentSettings:
         if self.model:
             return self.model
         normalized = self.provider.strip().lower()
-        return DEFAULT_MODELS.get(normalized, "gpt-5.5")
+        return DEFAULT_MODELS.get(normalized, "gpt-3.6-luna")
 
 
 # Default configurations for each agent role
 GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.6-flash")
 CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-sonnet-5")
-REFINER_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-5.5")
+REFINER_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-3.6-luna")
 
 
 # =============================================================================
@@ -289,7 +289,7 @@ def create_agent_config_from_env(
             model = agent_config["model"]
         else:
             # Use provider default
-            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-5.5")
+            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-3.6-luna")
 
     # Resolve API key
     api_key = resolve_api_key_for_provider(provider, env_keys.api_key)
@@ -413,5 +413,5 @@ Environment variables:
 Default values:
     Generator: gemini / gemini-3.6-flash
     Critic:    anthropic / claude-sonnet-5
-    Refiner:   openai / gpt-5.5
+    Refiner:   openai / gpt-3.6-luna
 """)

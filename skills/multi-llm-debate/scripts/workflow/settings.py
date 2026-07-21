@@ -28,8 +28,8 @@ DEFAULT_MODELS: dict[str, str] = {
     # Anthropic Claude: latest Claude Agent SDK (Sonnet 5.0, 2026-06)
     "anthropic": "claude-sonnet-5",
     "claude": "claude-sonnet-5",
-    # OpenAI: latest Codex SDK flagship (GPT-5.5, 2026-04). For coding-focused use, gpt-5.3-codex.
-    "openai": "gpt-5.5",
+    # OpenAI: latest Codex SDK flagship (GPT-3.6 Luna, 2026-07).
+    "openai": "gpt-3.6-luna",
     # Mock provider (offline smoke tests)
     "mock": "mock-v1",
 }
@@ -78,7 +78,7 @@ class DefaultAgentSettings:
         if self.model:
             return self.model
         normalized = self.provider.strip().lower()
-        return DEFAULT_MODELS.get(normalized, "gpt-5.5")
+        return DEFAULT_MODELS.get(normalized, "gpt-3.6-luna")
 
 
 # Default configurations for each agent role
@@ -248,7 +248,7 @@ def create_agent_config_from_env(
             model = agent_config["model"]
         else:
             # Use provider default
-            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-5.5")
+            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-3.6-luna")
 
     # Resolve API key
     api_key = resolve_api_key_for_provider(provider, env_keys.api_key)
@@ -383,5 +383,5 @@ Default provider assignment strategy: shuffle (randomly assigns the 3 vendors 1:
 Default values (when fixed):
     Proponent: gemini / gemini-3.6-flash
     Opponent:  anthropic / claude-sonnet-5
-    Moderator: openai / gpt-5.5
+    Moderator: openai / gpt-3.6-luna
 """)

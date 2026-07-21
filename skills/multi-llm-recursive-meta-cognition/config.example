@@ -53,7 +53,7 @@ verifier:
 # -------------------------------------------
 integrator:
   provider: openai              # gemini, anthropic, openai, or mock
-  model: gpt-5.2
+  model: gpt-3.6-luna
   # api_key: your_key_here      # or use the OPENAI_API_KEY environment variable
   # base_url: null              # custom endpoint such as Azure OpenAI
   temperature: 0.7
@@ -65,7 +65,7 @@ integrator:
 # -------------------------------------------
 reflector:
   provider: openai              # gemini, anthropic, openai, or mock
-  model: gpt-5.2
+  model: gpt-3.6-luna
   # api_key: your_key_here      # or use the OPENAI_API_KEY environment variable
   # base_url: null
   temperature: 0.7

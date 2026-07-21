@@ -21,7 +21,7 @@ Usage:
     python main.py "Your prompt" \\
         --generator-model gemini-3.6-flash \\
         --critic-model claude-sonnet-5 \\
-        --refiner-model gpt-5.5
+        --refiner-model gpt-3.6-luna
 
 Configuration precedence:
     CLI arguments > environment variables > configuration file > default values
@@ -283,7 +283,7 @@ def _resolve_agent_config(
         or os.getenv(env_keys.model)
         or (os.getenv(provider_model_env) if provider_model_env else None)
         or agent_cfg.get("model")
-        or DEFAULT_MODELS.get(provider, "gpt-5.5")
+        or DEFAULT_MODELS.get(provider, "gpt-3.6-luna")
     )
 
     cli_api_key = None

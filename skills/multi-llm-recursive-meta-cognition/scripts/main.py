@@ -24,8 +24,8 @@ Usage:
         --decomposer-model gemini-3.6-flash \
         --solver-model gemini-3.6-flash \
         --verifier-model claude-sonnet-5 \
-        --integrator-model gpt-5.5 \
-        --reflector-model gpt-5.5
+        --integrator-model gpt-3.6-luna \
+        --reflector-model gpt-3.6-luna
 
 Configuration precedence:
     CLI arguments > environment variables > config file > default values
@@ -345,7 +345,7 @@ def _resolve_agent_config(
         or os.getenv(env_keys.model)
         or (os.getenv(provider_model_env) if provider_model_env else None)
         or agent_cfg.get("model")
-        or DEFAULT_MODELS.get(provider, "gpt-5.5")
+        or DEFAULT_MODELS.get(provider, "gpt-3.6-luna")
     )
 
     cli_api_key = None

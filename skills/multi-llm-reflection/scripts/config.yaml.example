@@ -40,7 +40,7 @@ critic:
 # -------------------------------------------
 refiner:
   provider: openai              # gemini, anthropic, openai, or random
-  model: gpt-5.2                # Model ID
+  model: gpt-3.6-luna                # Model ID
   # api_key: your_key_here      # Or use the OPENAI_API_KEY environment variable
   # base_url: null              # Custom endpoint such as Azure OpenAI
   temperature: 0.7

@@ -20,7 +20,7 @@ opponent:
 
 moderator:
   provider: openai
-  model: gpt-5.5
+  model: gpt-3.6-luna
   api_key: YOUR_OPENAI_API_KEY
   base_url: https://api.openai.com/v1
   temperature: 0.7

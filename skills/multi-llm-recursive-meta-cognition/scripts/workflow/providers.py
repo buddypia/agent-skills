@@ -681,7 +681,7 @@ class MockAdapter:
         schema_name: str,
         output_model: Any | None,
     ) -> ProviderResponse:
-        payload = _build_mock_payload(schema_name, user_prompt)
+        payload = _build_mock_payload(schema_name, schema)
         response_text = json.dumps(payload, ensure_ascii=False)
         request = {
             "model": model,
@@ -706,8 +706,41 @@ class MockAdapter:
         )
 
 
-def _build_mock_payload(schema_name: str, user_prompt: str) -> dict[str, Any]:
-    """Return deterministic payloads for contract tests."""
+def _mock_value_from_schema(schema: Any) -> Any:
+    """Build a minimal schema-valid value from a JSON Schema fragment.
+
+    The mock fallback for any schema_name without a hand-written payload (the
+    recursive/reflection stages). Deriving the value from the stage's own JSON
+    schema keeps the mock output valid against the Pydantic model, instead of the
+    old generic ``{"message": ...}`` blob that failed validation and leaked verbatim
+    into required string fields (e.g. integrated_answer / final_response) downstream.
+    """
+    if not isinstance(schema, dict):
+        return "mock"
+    schema_type = schema.get("type")
+    if isinstance(schema_type, list):
+        schema_type = next((t for t in schema_type if t != "null"), "string")
+    if schema_type == "object":
+        props = schema.get("properties", {})
+        required = schema.get("required", list(props.keys()))
+        return {key: _mock_value_from_schema(props[key]) for key in required if key in props}
+    if schema_type == "array":
+        return []
+    if schema_type == "integer":
+        return 0
+    if schema_type == "number":
+        return 0.5
+    if schema_type == "boolean":
+        return False
+    return "mock"
+
+
+def _build_mock_payload(schema_name: str, schema: dict[str, Any]) -> dict[str, Any]:
+    """Return deterministic payloads for contract tests.
+
+    The debate roles have hand-written payloads; any other stage (recursive /
+    reflection) is derived from its JSON schema so the mock output still validates.
+    """
     if schema_name == "proponent_output":
         return {
             "position": "pro (mock)",
@@ -735,7 +768,8 @@ def _build_mock_payload(schema_name: str, user_prompt: str) -> dict[str, Any]:
             "recommendation": "mock-recommendation",
             "confidence": 0.5,
         }
-    return {"message": f"mock-response for {schema_name}", "prompt": user_prompt}
+    value = _mock_value_from_schema(schema)
+    return value if isinstance(value, dict) else {"value": value}
 
 
 # =============================================================================

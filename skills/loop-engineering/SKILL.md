@@ -1,7 +1,7 @@
 ---
 name: loop-engineering
 description: |
-  Turn a project into a place where loops (self-prompting agent systems) can safely run — or prove it shouldn't have one yet. Applies the "Loop engineering: 14-step roadmap from prompter to loop designer" discipline (Anthropic engineering docs + Addy Osmani's loop-engineering essay + Geoffrey Huntley's Ralph Wiggum failure mode) to a real codebase in stages: SCAN the repo, ANALYZE candidate tasks against the 4-condition test and the 30-second check, then BUILD the minimum viable loop (one automation + one skill + one state file + one gate) in the mandated order, HARDEN it against the known failure modes (Ralph Wiggum loop, goal drift, self-preferential bias, comprehension debt, the security tax), and MEASURE cost-per-accepted-change. Use whenever someone wants to — automate a recurring agent task, "set up a loop / a /loop / a /goal / a routine / an automation / a cron for the agent", do CI-failure triage / dependency-bump / lint-and-fix / issue-to-PR automatically, "make the agent prompt itself", run agents unattended or in parallel (worktrees), add a maker/checker (evaluator-optimizer) split, write a STATE.md / VISION.md / AGENTS.md persistence layer, or audit an existing loop that "fails quietly", drifts, burns tokens, or ships unreviewed code. Trigger even without the word "loop" — on "automate this repetitive task for the agent", "schedule the agent", "run until the tests pass on its own", "stop me from having to re-prompt", and their Japanese equivalents (ループ化 / 自動化したい / エージェントに自分でプロンプトさせたい / 定期実行 / ループを設計 / loop engineering). Also fires on /loop-engineering.
+  Turn a project into a place where loops (self-prompting agent systems) can safely run — or prove it shouldn't have one yet: SCAN the repo, gate-test candidate tasks, BUILD the minimum viable loop (automation + skill + state file + gate), HARDEN it against the known failure modes, MEASURE cost-per-accepted-change. Use whenever someone wants to — automate a recurring agent task, "set up a loop / a /goal / a routine / a cron for the agent", do CI-failure triage / dependency-bump / lint-and-fix / issue-to-PR automatically, "make the agent prompt itself", run agents unattended or in parallel, add a maker/checker split, write a STATE.md / VISION.md / AGENTS.md persistence layer, or audit an existing loop that fails quietly, drifts, or burns tokens. Trigger even without the word "loop" — on "automate this repetitive task for the agent", "run until the tests pass on its own", "stop me from having to re-prompt", ループ化 / 自動化したい / 定期実行 / ループを設計. Also fires on /loop-engineering.
 trigger: /loop-engineering
 ---
 
@@ -13,10 +13,6 @@ trigger: /loop-engineering
 This skill applies that discipline to a real project **in stages**. It does not just build a loop on request — it first proves the project *should* have one, then builds the smallest one that works, then hardens it against the failure modes that turn loops into money pits.
 
 **The honest version, stated up front:** loop engineering is real, and **most projects don't need it yet.** A loop earns its cost only under four conditions (Phase 1). Miss one and the loop costs more than it returns — say so plainly and stop at a good manual prompt. Never build a loop just because you were asked to; build it only when the test passes.
-
-## When to use
-
-Fire proactively — even without the word "loop" — when the user wants to: automate a recurring agent task, schedule/cron an agent, run an agent "until the tests pass", set up `/loop` / `/goal` / a routine / an automation, do CI-triage / dependency-bumps / lint-and-fix / issue→PR drafting automatically, run agents in parallel (worktrees), split a maker from a checker, persist agent state (STATE.md / VISION.md / AGENTS.md), or **audit an existing loop** that fails quietly, drifts, burns tokens, or ships unreviewed code.
 
 ## The mental model (read once)
 

@@ -1,26 +1,16 @@
 ---
 name: spec-preview
 description: >-
-  仕様・要件・UI改善案を、人間がブラウザで目視確認できる自己完結HTML
-  （比較用 index + フル画面ビュー + 共通CSS）に起こして自動で開く。
-  target surface（mobile-app / tablet-app / web-app / desktop-app / document / diagram）を判定し、
-  スマホアプリでは phone-first のアプリ画面プレビューを既定にする。
-  Korean/Japanese prompt aware: 韓国語・日本語の依頼表現を target / language 判定に使い、
-  Trip Jarvis では Korean UI text を既定にする。
-  proposals(複数案を並べて比較) / spec(仕様・要件ダッシュボード) /
-  review(変更前後の差分) の3モード。対象プロジェクトの UI 資産（デザイントークン・
-  コンポーネント・UI文字列SSOT）を ui-scan.mjs でフレームワーク横断
-  （Web CSS / Tailwind / React / Next.js / React Native / Flutter / Android / iOS）に
-  スキャンして .tmp/spec-preview/ にキャッシュし、fresh なら再調査なしで再利用
-  （コストカット）、skin.css で元 UI の見た目を再現する — 一度キャッシュを作れば
-  「既存 UI とほぼ同じ画面」をソース再調査なしで一発生成できる。UI の新規・修正レビューでは人間が確認すべき項目を 5〜12 個に
-  最適化したレビューチェックリスト（OK/要修正トグル + メモ + 進捗保存）を埋め込み、
-  判定は「結果をコピー」ボタンで Claude Code / Codex CLI / Cursor 等の CLI エージェントに構造化して還流できる。
-  「HTMLで画面UIを提案して」「モックで見せて」「UIを改善案として見せて」
-  「仕様を可視化して」「要件を整理して見せて」「複数案を比較したい」
-  「before/afterを並べて」「UIレビューして/レビューできる形にして」「目視で確認できる
-  形にして」等で必ず発動する。/spec-preview でも起動。成果物は
-  .tmp/<slug>/ に作り、自動でブラウザに開いて選択・指摘を促す。
+  仕様・要件・UI改善案を、人間がブラウザで目視確認できる自己完結HTMLに起こして自動で開く。
+  proposals（複数案比較）/ spec（仕様ダッシュボード）/ review（before/after差分）の3モード。
+  target surface（mobile-app〜diagram）と言語（ja/ko/en）を判定し、
+  モバイルアプリでは phone-first プレビューを既定にする。対象プロジェクトの UI 資産を
+  スキャンして .tmp/spec-preview/ にキャッシュし、fresh なら再調査なしで元 UI の見た目を再現。
+  UI レビュー時は人間向けチェックリストを埋め込み、判定を CLI エージェントに構造化して還流できる。
+  「HTMLで画面UIを提案して」「モックで見せて」「UIを改善案として見せて」「仕様を可視化して」
+  「要件を整理して見せて」「複数案を比較したい」「before/afterを並べて」
+  「UIレビューして/レビューできる形にして」「目視で確認できる形にして」等で必ず発動する。
+  /spec-preview でも起動。
 ---
 
 # spec-preview — 目視確認できるHTMLに起こすスキル
@@ -143,33 +133,16 @@ start "" <path>\index.html      # Windows
 レビューチェックリストがある場合、判定の回収は口頭に頼らず
 `references/review-checklist.md`「CLI 連携」節に従う（「結果をコピー」の貼り付け）。
 
-## アンチパターン
+## アンチパターン（最終チェック）
 
-- **open 忘れ** — 目視確認が本スキルの目的。生成しただけで止めない。
-- **リポジトリ直下や `src/` に出力** — 必ず `.tmp/<slug>/`。
-- **スキル資産の直接編集** — `assets/` はスキル本体（全プロジェクト共通）。トークン調整は
-  UI キャッシュの `skin.css`（または `.tmp/<slug>/` のコピー側）で行う。
-- **fresh キャッシュの再スキャン / stale キャッシュの放置** — `ui-scan.mjs check` の
-  判定に従う。fresh なのに再調査すればコストカットが死に、stale のまま使えば
-  「元 UI の再現」が嘘になる（`references/ui-cache.md`）。
-- **レビュー項目の全部盛り** — チェックリストはプール全項目ではなく変更種別に合った
-  5〜12 個に絞る。確認方法のない一般論の項目は削る（`references/review-checklist.md`）。
-- **判定の回収忘れ** — コピーした判定結果を修正タスクに渡さない。連携の出口まで使い切る。
-- **プレースホルダの置き残し** — `__LABEL_OPEN_FULL__` 等の生文字列が閲覧者に見えると
-  信頼を失う。生成後の grep 検査（手順6）を省かない。
-- **巨大インラインCSSの重複** — 共通スタイルは `shared.css` に集約し各HTMLから `link`。
-  index 固有の比較レイアウト CSS だけ index 内 `<style>` に置く。
-- **過剰な作り込み** — これはモック/可視化であり本実装ではない。ダミーデータと簡易 JS で十分。
-- **推測で埋める** — 現状分析は実ファイルに基づく。分からない点は AskUser か、明示の TODO に。
-- **トークン浪費** — 案は通常 2〜4 個。網羅より要点。1案が長くなりすぎたら削る。
-- **Webページ化の取り違え** — モバイルアプリ対象なのに、最初のプレビューを Web hero /
-  dashboard / landing page として作らない。説明は explainer mode に分離し、app preview は
-  実際のアプリ surface を見せる。
-- **英語/日本語固定の流出** — 韓国語 prompt / 韓国語 product なのに、見出し・ボタン・
-  注意文が英語や日本語のまま残らないようにする。canonical flag 名だけ英語でよい。
+各規則の正本は上のワークフロー・出力規約と references。生成を終える前に再確認する:
 
-## 原型メモ
-
-このスキルの原型は slide-studio プロジェクトで作ったトップ画面UI改善の3案比較
-（一時成果物のため現存しない可能性がある）。その構成と作法は `assets/` のテンプレートと
-`references/proposals.md` に取り込み済みなので、外部ディレクトリを探す必要はない。
+- open 忘れ / `.tmp/<slug>/` 以外への出力 / スキル `assets/` の直接編集
+- fresh キャッシュの再スキャン・stale キャッシュの放置（`ui-scan.mjs check` に従う）
+- プレースホルダの置き残し（手順6の grep 検査を省かない）
+- チェックリストの全部盛り（変更種別に合った 5〜12 個に絞る）・判定の回収忘れ
+- 過剰な作り込み — モック/可視化であり本実装ではない。ダミーデータと簡易 JS、案は通常 2〜4 個
+- 巨大インラインCSSの重複 — 共通は `shared.css`、index 固有の比較レイアウトだけ index 内 `<style>`
+- Webページ化の取り違え（mobile-app なのに Web hero / landing で作る）・
+  韓国語 product への英語/日本語ラベルの流出
+- 推測で埋める — 現状分析は実ファイルに基づく。不明点は AskUser か明示の TODO に

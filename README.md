@@ -59,7 +59,7 @@ These skills orchestrate official CLIs that you install yourself; they do **not*
 
 "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is **not affiliated with, endorsed by, or sponsored by** Anthropic, OpenAI, or Google.
 
-Default model IDs (e.g. `gemini-3.6-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; override them per skill. Multi-model orchestration is a design choice and **does not guarantee better results**. Treat model outputs as untrusted and review them, and be mindful of prompt-injection when feeding in third-party content.
+Default model IDs (e.g. `gemini-3.6-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; override them per skill. Each skill defines them in one place (`scripts/workflow/models.py`) and refuses model IDs from retired or superseded generations before a run starts. Multi-model orchestration is a design choice and **does not guarantee better results**. Treat model outputs as untrusted and review them, and be mindful of prompt-injection when feeding in third-party content.
 
 ## License
 

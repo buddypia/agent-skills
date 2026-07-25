@@ -66,8 +66,13 @@ from workflow.config import AgentConfig
 from workflow.engine import WorkflowRunResult
 from workflow.workflow import build_debate_workflow
 from workflow.types import DebateResult
+from workflow.models import (
+    ModelPolicyError,
+    ensure_current_model,
+    resolve_default_model,
+    validate_backend_overrides,
+)
 from workflow.settings import (
-    DEFAULT_MODELS,
     AVAILABLE_PROVIDERS,
     get_random_providers,
     get_shuffled_providers,
@@ -247,6 +252,31 @@ def _resolve_temperature(
     return default
 
 
+def _resolve_model(
+    args: argparse.Namespace,
+    role: str,
+    env_keys: Any,
+    provider: str,
+    agent_cfg: dict[str, Any],
+) -> str:
+    """Resolve the model ID for a role and check it against the model policy.
+
+    Every candidate is paired with the channel it came from, so a rejected ID names the flag /
+    env var / config key that has to be edited instead of just complaining about a string.
+    """
+    _, provider_model_env = _resolve_provider_env_keys(provider)
+    candidates: tuple[tuple[Any, str], ...] = (
+        (getattr(args, f"{role}_model", None), f"--{role}-model"),
+        (os.getenv(env_keys.model), env_keys.model),
+        (os.getenv(provider_model_env) if provider_model_env else None, provider_model_env),
+        (agent_cfg.get("model"), f"the config file ({role}.model)"),
+    )
+    for candidate, source in candidates:
+        if candidate:
+            return ensure_current_model(str(candidate), provider=provider, source=source)
+    return resolve_default_model(provider)
+
+
 def _resolve_agent_config(
     *,
     args: argparse.Namespace,
@@ -268,15 +298,7 @@ def _resolve_agent_config(
     )
     provider = _normalize_provider(str(provider))
 
-    _, provider_model_env = _resolve_provider_env_keys(provider)
-
-    model = (
-        getattr(args, f"{role}_model", None)
-        or os.getenv(env_keys.model)
-        or (os.getenv(provider_model_env) if provider_model_env else None)
-        or agent_cfg.get("model")
-        or DEFAULT_MODELS.get(provider, "gpt-3.6-luna")
-    )
+    model = _resolve_model(args, role, env_keys, provider, agent_cfg)
 
     cli_api_key = None
     if provider == "gemini":
@@ -550,33 +572,42 @@ def get_runtime_config(args: argparse.Namespace) -> RuntimeConfig:
     elif provider_strategy == "shuffle":
         proponent_default_provider, opponent_default_provider, moderator_default_provider = get_shuffled_providers()
 
-    proponent = _resolve_agent_config(
-        args=args,
-        config_file=config_file,
-        name="Proponent",
-        role="proponent",
-        env_keys=PROPONENT_ENV_KEYS,
-        default_provider=proponent_default_provider,
-        default_temperature=PROPONENT_DEFAULTS.temperature,
-    )
-    opponent = _resolve_agent_config(
-        args=args,
-        config_file=config_file,
-        name="Opponent",
-        role="opponent",
-        env_keys=OPPONENT_ENV_KEYS,
-        default_provider=opponent_default_provider,
-        default_temperature=OPPONENT_DEFAULTS.temperature,
-    )
-    moderator = _resolve_agent_config(
-        args=args,
-        config_file=config_file,
-        name="Moderator",
-        role="moderator",
-        env_keys=MODERATOR_ENV_KEYS,
-        default_provider=moderator_default_provider,
-        default_temperature=MODERATOR_DEFAULTS.temperature,
-    )
+    # A bad provider or an out-of-date model ID is a configuration error, not a run failure:
+    # report it here and exit before a single vendor CLI is spawned. MULTILLM_CLAUDE_MODEL /
+    # MULTILLM_CODEX_MODEL are checked too — providers.py reads those directly, so they bypass
+    # everything else and would otherwise degrade each affected stage one at a time.
+    try:
+        validate_backend_overrides()
+        proponent = _resolve_agent_config(
+            args=args,
+            config_file=config_file,
+            name="Proponent",
+            role="proponent",
+            env_keys=PROPONENT_ENV_KEYS,
+            default_provider=proponent_default_provider,
+            default_temperature=PROPONENT_DEFAULTS.temperature,
+        )
+        opponent = _resolve_agent_config(
+            args=args,
+            config_file=config_file,
+            name="Opponent",
+            role="opponent",
+            env_keys=OPPONENT_ENV_KEYS,
+            default_provider=opponent_default_provider,
+            default_temperature=OPPONENT_DEFAULTS.temperature,
+        )
+        moderator = _resolve_agent_config(
+            args=args,
+            config_file=config_file,
+            name="Moderator",
+            role="moderator",
+            env_keys=MODERATOR_ENV_KEYS,
+            default_provider=moderator_default_provider,
+            default_temperature=MODERATOR_DEFAULTS.temperature,
+        )
+    except ModelPolicyError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     devui_port = _resolve_devui_port(args, config_file)
 

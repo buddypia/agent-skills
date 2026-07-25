@@ -32,11 +32,6 @@ def _strip_code_fences(text: str) -> str:
     return cleaned
 
 
-def _gemini_requires_property_ordering(model_id: str | None) -> bool:
-    model = (model_id or "").lower()
-    return any(token in model for token in ("gemini-3.6-flash", "gemini-3.5-flash"))
-
-
 def _apply_property_ordering(schema: dict[str, Any]) -> None:
     if not isinstance(schema, dict):
         return
@@ -53,10 +48,17 @@ def _apply_property_ordering(schema: dict[str, Any]) -> None:
         _apply_property_ordering(items)
 
 
-def _build_gemini_schema(model_id: str | None) -> dict[str, Any]:
+def _build_gemini_schema() -> dict[str, Any]:
+    """Add Gemini's "propertyOrdering" hint to a copy of the stage schema.
+
+    This used to be gated on a hardcoded list of model IDs ("gemini-3.6-flash",
+    "gemini-3.5-flash"), which silently stopped applying the workaround the moment the
+    default Gemini model moved on — the schema would then be sent without the hint and
+    nothing would say so. The key is additive and only meaningful to Gemini, and this
+    helper is already called only on the gemini path, so apply it unconditionally.
+    """
     schema = deepcopy(CRITIC_JSON_SCHEMA)
-    if _gemini_requires_property_ordering(model_id):
-        _apply_property_ordering(schema)
+    _apply_property_ordering(schema)
     return schema
 
 
@@ -128,7 +130,7 @@ class CriticExecutor(Executor):
 
         schema = CRITIC_JSON_SCHEMA
         if provider == "gemini":
-            schema = _build_gemini_schema(self.config.model)
+            schema = _build_gemini_schema()
 
         response = await adapter.generate_structured(
             model=self.config.model,

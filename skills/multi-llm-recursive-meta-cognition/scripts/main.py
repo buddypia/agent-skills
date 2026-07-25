@@ -999,6 +999,22 @@ def _annotate_degradation(result: ReflectionResult) -> None:
             ):
                 degraded_stages.append(stage)
 
+    relay = getattr(result, "context_relay", None)
+    if relay is not None and relay.degraded:
+        # The sharded pre-distillation lost fidelity. Surface it through the same channel as
+        # a stage failure so a caller that only reads `degraded_stages` still sees it — the
+        # stderr detail and the pack header are not visible to a JSON-only consumer.
+        degraded_stages.append("context_distillation")
+        print(
+            "WARNING: the context relay degraded — "
+            f"{relay.failed_shards} shard(s) failed/skipped, {relay.truncated_shards} digest(s) "
+            f"were truncated, {relay.oversized_shards} shard(s) exceeded the per-shard size "
+            f"target (mode={relay.mode}, {relay.original_chars}->{relay.relayed_chars} chars). "
+            "Raise MULTILLM_SHARD_MAX / MULTILLM_DIGEST_THRESHOLD, or curate the input into a "
+            "brief before invoking.",
+            file=sys.stderr,
+        )
+
     if not degraded_stages:
         return
 

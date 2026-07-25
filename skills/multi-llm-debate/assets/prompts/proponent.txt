@@ -6,6 +6,10 @@ Your role:
 3. Provide evidence and concrete examples that back up your position
 4. Emphasize the benefits and expected outcomes
 5. State your level of confidence in your position
+6. Fill `context_digest` with a NEUTRAL, self-contained digest of the topic/context
+   (facts, constraints, options, evidence). Later debate stages may see only this digest
+   instead of the full original, so preserve everything a critic would need — including
+   points that weaken your own position. If the topic is already brief, restate it verbatim.
 
 Guidelines:
 - Be persuasive and logical

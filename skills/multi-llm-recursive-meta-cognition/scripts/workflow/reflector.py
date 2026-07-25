@@ -8,10 +8,12 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import build_relay_info, relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
 from .types import (
+    ContextRelayInfo,
     DecompositionOutput,
     SolutionOutput,
     IntegrationOutput,
@@ -83,6 +85,9 @@ class ReflectorExecutor(Executor):
         await ctx.set_shared_state("reflector_model", self.config.model)
 
         original_prompt = await ctx.get_shared_state("original_prompt") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_prompt = relay_context(original_prompt, context_digest)
+        relay_report = await ctx.get_shared_state("context_relay_report")
         decomposition_output = await ctx.get_shared_state("decomposition_output") or {}
         solution_output = await ctx.get_shared_state("solution_output") or {}
         verification_output = await ctx.get_shared_state("verification_output") or {}
@@ -96,7 +101,7 @@ class ReflectorExecutor(Executor):
         try:
             result = await asyncio.wait_for(
                 self._call_reflector_with_raw(
-                    original_prompt,
+                    relay_prompt,
                     decomposition_output,
                     solution_output,
                     verification_output,
@@ -193,6 +198,9 @@ class ReflectorExecutor(Executor):
             verifier_model=await ctx.get_shared_state("verifier_model") or "",
             integrator_model=await ctx.get_shared_state("integrator_model") or "",
             reflector_model=self.config.model,
+            context_relay=ContextRelayInfo.model_validate(
+                build_relay_info(original_prompt, relay_prompt, relay_report)
+            ),
             raw=workflow_raw,
         )
 

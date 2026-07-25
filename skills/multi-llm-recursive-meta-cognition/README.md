@@ -77,6 +77,12 @@ uv run --directory scripts main.py "problem" \
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the 5-stage run under a typical 600s agent/Bash-tool ceiling; once spent, remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the process being killed |
 | `REFLECTION_{...}_TIMEOUT` / `REFLECTION_TIMEOUT` (`--timeout`) | `300` | Per-stage safety cap (seconds). Raised from 120, which used to silently degrade `high`/reasoning stages mid-run; the real total bound is `MULTILLM_TOTAL_DEADLINE` |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
+| `MULTILLM_DIGEST_THRESHOLD` | `8000` | Character threshold for the downstream context relay. When the problem/context exceeds it, the solver/verifier/integrator/reflector receive the decomposer's `context_digest` plus a short verbatim excerpt instead of the full original (which used to be re-sent to every stage — costly with 5 stages). `0` disables distillation; if the digest is missing (e.g. a degraded stage 1) the full original is relayed as before |
+| `MULTILLM_SHARD_THRESHOLD` | `3 x MULTILLM_DIGEST_THRESHOLD` (24000) | Above this, the context is **sharded and distilled in parallel before the decomposer runs**: it is split on Markdown headings → blank lines → size, and each shard is distilled concurrently by a different vendor (round-robin over the five stages). Every stage — the decomposer included — then works from the resulting digest pack, so no single call ever reads the whole original. This matters most here, where 5 stages would otherwise each re-read it. `0` keeps only the decomposer-digest tier |
+| `MULTILLM_SHARD_CHARS` | `12000` | Target maximum characters per shard — this is what sets the shard count, so shard size stays roughly constant as the input grows |
+| `MULTILLM_SHARD_MAX` | `16` | Maximum number of shards. When the input needs more than this many shards of `MULTILLM_SHARD_CHARS` to cover, the run warns and reports `context_relay.oversized_shards` — raise this, or curate the input into a brief |
+| `MULTILLM_SHARD_CONCURRENCY` | `8` | Maximum **simultaneous** distillation calls. Independent of the shard count: excess shards queue and run in later batches, so a large input never spawns a matching number of CLI processes |
+| `MULTILLM_DISTILL_EFFORT` | `low` | Reasoning effort for the shard-distillation calls only (the work is mechanical; stages keep `MULTILLM_REASONING_EFFORT`) |
 | `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override |
 | `REFLECTION_{DECOMPOSER,SOLVER,VERIFIER,INTEGRATOR,REFLECTOR}_{PROVIDER,MODEL}` | — | per-role override |
 
@@ -95,6 +101,7 @@ REFLECTION_INTEGRATOR_PROVIDER=mock REFLECTION_REFLECTOR_PROVIDER=mock \
 | `... failed (exit ...)` / login error | run the relevant CLI interactively once to log in |
 | Run is killed at ~10 min when launched by an agent | 5 sequential reasoning stages are heavy. The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling** — but prefer running this skill as a **background** task, and/or lower `MULTILLM_REASONING_EFFORT` to `medium`. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | A stage timed out or errored and returned placeholder text (e.g. `"A timeout occurred"`), so the final answer is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / per-stage `--timeout`, lower `MULTILLM_REASONING_EFFORT`, or simplify the prompt |
+| `degraded_stages` contains `context_distillation` | The **context relay** lost fidelity, not a stage. Read `context_relay` in the JSON result: `failed_shards` (a shard errored, timed out, or was skipped for budget), `truncated_shards` (digests cut to fit the relay budget), `oversized_shards` (input too large to cover at `MULTILLM_SHARD_MAX`). Raise `MULTILLM_SHARD_MAX` / `MULTILLM_DIGEST_THRESHOLD`, or curate the input into a brief |
 | `Prompt file not found` | check that `assets/prompts/*.txt` are bundled |
 | empty output / broken JSON | inspect each stage's raw output with `--verbose` |
 

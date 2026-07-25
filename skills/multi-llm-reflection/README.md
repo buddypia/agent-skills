@@ -74,6 +74,12 @@ uv run --directory scripts main.py "task" \
 | `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling; once spent, remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
+| `MULTILLM_DIGEST_THRESHOLD` | `8000` | Character threshold for the downstream context relay. When the request/context exceeds it, the critic/refiner receive the generator's `context_digest` plus a short verbatim excerpt instead of the full original (which used to be re-sent to every stage). `0` disables distillation; if the digest is missing (e.g. a degraded stage 1) the full original is relayed as before |
+| `MULTILLM_SHARD_THRESHOLD` | `3 x MULTILLM_DIGEST_THRESHOLD` (24000) | Above this, the context is **sharded and distilled in parallel before the generator runs**: it is split on Markdown headings → blank lines → size, and each shard is distilled concurrently by a different vendor (round-robin over the three stages). Every stage — the generator included — then works from the resulting digest pack, so no single call ever reads the whole original. `0` keeps only the generator-digest tier |
+| `MULTILLM_SHARD_CHARS` | `12000` | Target maximum characters per shard — this is what sets the shard count, so shard size stays roughly constant as the input grows |
+| `MULTILLM_SHARD_MAX` | `16` | Maximum number of shards. When the input needs more than this many shards of `MULTILLM_SHARD_CHARS` to cover, the run warns and reports `context_relay.oversized_shards` — raise this, or curate the input into a brief |
+| `MULTILLM_SHARD_CONCURRENCY` | `8` | Maximum **simultaneous** distillation calls. Independent of the shard count: excess shards queue and run in later batches, so a large input never spawns a matching number of CLI processes |
+| `MULTILLM_DISTILL_EFFORT` | `low` | Reasoning effort for the shard-distillation calls only (the work is mechanical; stages keep `MULTILLM_REASONING_EFFORT`) |
 | `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override |
 | `REFLECTION_{GENERATOR,CRITIC,REFINER}_{PROVIDER,MODEL}` | — | per-role override |
 
@@ -91,6 +97,7 @@ REFLECTION_GENERATOR_PROVIDER=mock REFLECTION_CRITIC_PROVIDER=mock REFLECTION_RE
 | `... failed (exit ...)` / authentication error | run the relevant CLI interactively once to log in |
 | Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | A stage timed out or errored and returned placeholder text, so the result is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the prompt |
+| `degraded_stages` contains `context_distillation` | The **context relay** lost fidelity, not a stage. Read `context_relay` in the JSON result: `failed_shards` (a shard errored, timed out, or was skipped for budget), `truncated_shards` (digests cut to fit the relay budget), `oversized_shards` (input too large to cover at `MULTILLM_SHARD_MAX`). Raise `MULTILLM_SHARD_MAX` / `MULTILLM_DIGEST_THRESHOLD`, or curate the input into a brief |
 | `Prompt file not found` | check that `assets/prompts/*.txt` are bundled |
 | Empty output / broken JSON | check each stage's raw output with `--verbose` |
 

@@ -47,8 +47,13 @@ def build_reflection_workflow(
     """
     builder = WorkflowBuilder(name=name)
 
+    # The generator also runs the optional sharded context pre-distillation, so it gets
+    # every stage's config to fan out across vendors.
     ingress = PromptIngress()
-    generator = GeneratorExecutor(generator_config)
+    generator = GeneratorExecutor(
+        generator_config,
+        distill_configs=[generator_config, critic_config, refiner_config],
+    )
     critic = CriticExecutor(critic_config)
     refiner = RefinerExecutor(refiner_config)
 

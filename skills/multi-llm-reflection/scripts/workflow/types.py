@@ -22,6 +22,14 @@ class GeneratorOutput(BaseModel):
     draft: str = Field(..., description="Initial draft created by the Generator")
     key_points: List[str] = Field(default_factory=list, description="Key points covered")
     confidence: float = Field(0.7, ge=0.0, le=1.0, description="Confidence level")
+    context_digest: str = Field(
+        "",
+        description=(
+            "Faithful, self-contained digest of the user's request/context (goals, "
+            "requirements, constraints, source material) for later stages that will not "
+            "see the full original."
+        ),
+    )
 
 
 class CriticOutput(BaseModel):
@@ -44,6 +52,27 @@ class RefinerOutput(BaseModel):
     final_content: str = Field(..., description="The final refined content")
     improvements_made: List[str] = Field(default_factory=list, description="List of improvements applied")
     quality_score: int = Field(8, ge=0, le=10, description="Final quality score")
+
+
+class ContextRelayInfo(BaseModel):
+    """How the original context reached the stages (see workflow/context_relay.py).
+
+    Makes relay degradation visible to a caller that only parses the JSON result: a shard
+    that failed, a digest truncated to fit the relay budget, or a shard too large to
+    summarize faithfully all raise `degraded`, which `main.py` folds into the run's
+    top-level `degraded_stages` as "context_distillation".
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: str = Field("verbatim", description="verbatim | digest | sharded")
+    original_chars: int = Field(0, description="Length of the user's original context")
+    relayed_chars: int = Field(0, description="Length of what each stage actually received")
+    shards: int = Field(0, description="Shards the context was split into (0 if not sharded)")
+    failed_shards: int = Field(0, description="Shards that errored, timed out, or were skipped")
+    truncated_shards: int = Field(0, description="Shard digests cut to fit the relay budget")
+    oversized_shards: int = Field(0, description="Shards above the per-shard size target")
+    degraded: bool = Field(False, description="True if the relay lost fidelity in any way")
 
 
 class StageRawData(BaseModel):
@@ -99,6 +128,13 @@ class ReflectionResult(BaseModel):
     improvements_made: List[str] = Field(default_factory=list)
     final_score: int = Field(8, description="Final quality score")
 
+    # Context relay provenance — how the original context reached the stages, and whether
+    # the relay itself lost fidelity (see `degraded_stages` for the folded-in signal).
+    context_relay: Optional[ContextRelayInfo] = Field(
+        default=None,
+        description="How the original context was relayed to each stage",
+    )
+
     # Degradation signal — set when one or more stages timed out or errored and returned
     # placeholder output, so callers can tell a real result from a partial/degraded one
     # (the process still exits 0 for backward compatibility; see the stderr warning in main.py).
@@ -135,8 +171,17 @@ GENERATOR_JSON_SCHEMA: dict[str, Any] = {
             "type": "number",
             "description": "Confidence level 0-1",
         },
+        "context_digest": {
+            "type": "string",
+            "description": (
+                "Faithful, self-contained digest of the user's request/context (goals, "
+                "requirements, constraints, source material) for later stages that will "
+                "not see the full original. If the request is already brief, restate it "
+                "verbatim."
+            ),
+        },
     },
-    "required": ["draft", "key_points", "confidence"],
+    "required": ["draft", "key_points", "confidence", "context_digest"],
     "additionalProperties": False,
 }
 

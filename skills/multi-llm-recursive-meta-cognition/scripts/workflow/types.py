@@ -24,6 +24,14 @@ class DecompositionOutput(BaseModel):
     constraints: List[str] = Field(default_factory=list, description="Constraint conditions")
     questions: List[str] = Field(default_factory=list, description="Missing information or items to confirm")
     confidence: float = Field(0.7, ge=0.0, le=1.0, description="Confidence of the decomposition")
+    context_digest: str = Field(
+        "",
+        description=(
+            "Faithful, self-contained digest of the original problem/context (goal, "
+            "givens, constraints, data) for later stages that will not see the full "
+            "original."
+        ),
+    )
 
 
 class SolutionItem(BaseModel):
@@ -80,6 +88,27 @@ class ReflectionOutput(BaseModel):
     reflection_notes: List[str] = Field(default_factory=list, description="Reflections on blind spots and alternative perspectives")
 
 
+class ContextRelayInfo(BaseModel):
+    """How the original context reached the stages (see workflow/context_relay.py).
+
+    Makes relay degradation visible to a caller that only parses the JSON result: a shard
+    that failed, a digest truncated to fit the relay budget, or a shard too large to
+    summarize faithfully all raise `degraded`, which `main.py` folds into the run's
+    top-level `degraded_stages` as "context_distillation".
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: str = Field("verbatim", description="verbatim | digest | sharded")
+    original_chars: int = Field(0, description="Length of the user's original context")
+    relayed_chars: int = Field(0, description="Length of what each stage actually received")
+    shards: int = Field(0, description="Shards the context was split into (0 if not sharded)")
+    failed_shards: int = Field(0, description="Shards that errored, timed out, or were skipped")
+    truncated_shards: int = Field(0, description="Shard digests cut to fit the relay budget")
+    oversized_shards: int = Field(0, description="Shards above the per-shard size target")
+    degraded: bool = Field(False, description="True if the relay lost fidelity in any way")
+
+
 class StageRawData(BaseModel):
     """Sanitized raw request/response data for a single LLM call."""
 
@@ -125,6 +154,13 @@ class ReflectionResult(BaseModel):
     verification: VerificationOutput
     integration: IntegrationOutput
     reflection: ReflectionOutput
+
+    # Context relay provenance — how the original context reached the stages, and whether
+    # the relay itself lost fidelity (see `degraded_stages` for the folded-in signal).
+    context_relay: Optional[ContextRelayInfo] = Field(
+        default=None,
+        description="How the original context was relayed to each stage",
+    )
 
     # Degradation signal — set when one or more stages timed out or errored and returned
     # placeholder output. Lets callers tell a real answer apart from a partial/degraded one
@@ -175,8 +211,16 @@ DECOMPOSITION_JSON_SCHEMA: dict[str, Any] = {
             "type": "number",
             "description": "Confidence of the decomposition 0-1",
         },
+        "context_digest": {
+            "type": "string",
+            "description": (
+                "Faithful, self-contained digest of the original problem/context (goal, "
+                "givens, constraints, data) for later stages that will not see the full "
+                "original. If the problem is already brief, restate it verbatim."
+            ),
+        },
     },
-    "required": ["subtasks", "assumptions", "constraints", "questions", "confidence"],
+    "required": ["subtasks", "assumptions", "constraints", "questions", "confidence", "context_digest"],
     "additionalProperties": False,
 }
 

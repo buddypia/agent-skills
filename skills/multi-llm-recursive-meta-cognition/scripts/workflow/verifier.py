@@ -8,6 +8,7 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
@@ -78,12 +79,14 @@ class VerifierExecutor(Executor):
         await ctx.set_shared_state("verifier_model", self.config.model)
 
         original_prompt = await ctx.get_shared_state("original_prompt") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_prompt = relay_context(original_prompt, context_digest)
         decomposition_output = await ctx.get_shared_state("decomposition_output") or {}
 
         raw: StageRawData | None = None
         try:
             result = await asyncio.wait_for(
-                self._call_verifier_with_raw(original_prompt, decomposition_output, solution),
+                self._call_verifier_with_raw(relay_prompt, decomposition_output, solution),
                 timeout=self.config.timeout_sec,
             )
         except asyncio.TimeoutError:

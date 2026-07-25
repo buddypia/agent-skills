@@ -8,6 +8,7 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import distill_context, relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
@@ -65,11 +66,18 @@ def _build_gemini_schema(model_id: str | None) -> dict[str, Any]:
 
 
 class DecomposerExecutor(Executor):
-    """Decomposes the problem."""
+    """Decomposes the problem.
 
-    def __init__(self, config: AgentConfig):
+    Also owns the optional sharded context pre-distillation (tier 2): being the first of
+    five stages, it is the only place that can shrink the context before *any* stage reads
+    it — and with five stages the saving compounds the most here.
+    """
+
+    def __init__(self, config: AgentConfig, distill_configs: list[AgentConfig] | None = None):
         super().__init__(id="decomposer_executor")
         self.config = config
+        # Vendors available to the pre-distillation fan-out (round-robin across stages).
+        self.distill_configs = list(distill_configs) if distill_configs else [config]
 
     @handler
     async def decompose(self, prompt: PromptPayload, ctx: WorkflowContext[DecompositionOutput]) -> None:
@@ -78,10 +86,20 @@ class DecomposerExecutor(Executor):
         await ctx.set_shared_state("original_prompt", prompt.text)
         await ctx.set_shared_state("decomposer_model", self.config.model)
 
+        # Tier 2: for very large context, shard it and distill the shards concurrently
+        # across vendors, then let every stage (this one included) work from that pack.
+        pack, relay_report = await distill_context(prompt.text, self.distill_configs)
+        if pack:
+            await ctx.set_shared_state("context_digest", pack)
+        if relay_report is not None:
+            # Carried to the final stage so per-shard degradation reaches the JSON result.
+            await ctx.set_shared_state("context_relay_report", relay_report)
+        relay_prompt = relay_context(prompt.text, pack or "")
+
         raw: StageRawData | None = None
         try:
             result = await asyncio.wait_for(
-                self._call_decomposer_with_raw(prompt.text),
+                self._call_decomposer_with_raw(relay_prompt),
                 timeout=self.config.timeout_sec,
             )
         except asyncio.TimeoutError:
@@ -96,7 +114,7 @@ class DecomposerExecutor(Executor):
                 provider=self.config.normalized_provider(),
                 model=self.config.model,
                 system_prompt=DECOMPOSER_SYSTEM_PROMPT,
-                user_prompt=prompt.text,
+                user_prompt=relay_prompt,
                 request=to_jsonable(
                     {"temperature": self.config.temperature, "timeout_sec": self.config.timeout_sec}
                 ),
@@ -116,7 +134,7 @@ class DecomposerExecutor(Executor):
                 provider=self.config.normalized_provider(),
                 model=self.config.model,
                 system_prompt=DECOMPOSER_SYSTEM_PROMPT,
-                user_prompt=prompt.text,
+                user_prompt=relay_prompt,
                 request=to_jsonable(
                     {"temperature": self.config.temperature, "timeout_sec": self.config.timeout_sec}
                 ),
@@ -130,6 +148,10 @@ class DecomposerExecutor(Executor):
         duration = time.perf_counter() - started
 
         await ctx.set_shared_state("decomposition_output", result.model_dump())
+        # With a tier-2 pack the downstream digest is already set; overwriting it with the
+        # decomposer's own field would be a digest of a digest, so only tier 1 sets it here.
+        if not pack:
+            await ctx.set_shared_state("context_digest", result.context_digest)
         await ctx.set_shared_state("decomposer_duration", duration)
         if raw is not None:
             raw.duration_sec = duration

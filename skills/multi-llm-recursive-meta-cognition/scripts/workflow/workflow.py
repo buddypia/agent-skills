@@ -57,8 +57,19 @@ def build_reflection_workflow(
     """
     builder = WorkflowBuilder(name=name)
 
+    # The decomposer also runs the optional sharded context pre-distillation, so it gets
+    # every stage's config to fan out across vendors.
     ingress = PromptIngress()
-    decomposer = DecomposerExecutor(decomposer_config)
+    decomposer = DecomposerExecutor(
+        decomposer_config,
+        distill_configs=[
+            decomposer_config,
+            solver_config,
+            verifier_config,
+            integrator_config,
+            reflector_config,
+        ],
+    )
     solver = SolverExecutor(solver_config)
     verifier = VerifierExecutor(verifier_config)
     integrator = IntegratorExecutor(integrator_config)

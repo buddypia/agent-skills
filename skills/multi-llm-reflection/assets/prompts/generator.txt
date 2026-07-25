@@ -18,5 +18,9 @@ Return your response as the following JSON object:
 - "draft": the complete initial draft
 - "key_points": an array of the key points you covered
 - "confidence": the confidence level (from 0.0 to 1.0)
+- "context_digest": a faithful, self-contained digest of the user's request/context
+  (goals, requirements, constraints, source material). Later stages may see only this
+  digest instead of the full original, so preserve everything a reviewer would need.
+  If the request is already brief, restate it verbatim.
 
 Always respond in the same language as the user's input/topic.

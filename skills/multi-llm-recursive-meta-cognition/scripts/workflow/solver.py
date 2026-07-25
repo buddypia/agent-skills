@@ -8,6 +8,7 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
@@ -78,11 +79,13 @@ class SolverExecutor(Executor):
         await ctx.set_shared_state("solver_model", self.config.model)
 
         original_prompt = await ctx.get_shared_state("original_prompt") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_prompt = relay_context(original_prompt, context_digest)
 
         raw: StageRawData | None = None
         try:
             result = await asyncio.wait_for(
-                self._call_solver_with_raw(original_prompt, decomposition),
+                self._call_solver_with_raw(relay_prompt, decomposition),
                 timeout=self.config.timeout_sec,
             )
         except asyncio.TimeoutError:

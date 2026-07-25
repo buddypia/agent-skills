@@ -16,23 +16,16 @@ from typing import Any, Optional
 
 from .config import AgentConfig
 
-
-# =============================================================================
-# Default Model IDs by Provider
-# =============================================================================
-
-DEFAULT_MODELS: dict[str, str] = {
-    # Google Gemini: Antigravity default (Gemini 3.5 Flash, 2026-05)
-    # Default for the agy CLI path. The pro line requires the "-preview" suffix in google-genai v1beta.
-    "gemini": "gemini-3.6-flash",
-    # Anthropic Claude: latest Claude Agent SDK (Opus 5, 2026-07)
-    "anthropic": "claude-opus-5",
-    "claude": "claude-opus-5",
-    # OpenAI: latest Codex SDK flagship (GPT-3.6 Luna, 2026-07).
-    "openai": "gpt-3.6-luna",
-    # Mock provider (offline smoke tests)
-    "mock": "mock-v1",
-}
+# Model IDs and the "no old models" policy live in models.py — the single source of truth.
+# Re-exported here because main.py and the config templates have always imported
+# DEFAULT_MODELS from this module.
+from .models import (  # noqa: F401  (DEFAULT_MODELS is re-exported)
+    ALLOW_LEGACY_ENV,
+    DEFAULT_MODELS,
+    ModelPolicyError,
+    ensure_current_model,
+    resolve_default_model,
+)
 
 # Available providers for random assignment
 AVAILABLE_PROVIDERS: list[str] = ["gemini", "anthropic", "openai"]
@@ -76,9 +69,10 @@ class DefaultAgentSettings:
     def get_model(self) -> str:
         """Get the model ID (uses the provider default if none is configured)"""
         if self.model:
-            return self.model
-        normalized = self.provider.strip().lower()
-        return DEFAULT_MODELS.get(normalized, "gpt-3.6-luna")
+            return ensure_current_model(
+                self.model, provider=self.provider, source="the built-in role default"
+            )
+        return resolve_default_model(self.provider)
 
 
 # Default configurations for each agent role
@@ -234,21 +228,24 @@ def create_agent_config_from_env(
     # Resolve provider
     provider = get_value("provider", env_keys.provider, defaults.provider)
 
-    # Resolve model
-    model_from_env = os.getenv(env_keys.model)
-    if model_from_env:
-        model = model_from_env
+    # Resolve model. Each candidate carries the channel it came from so that a rejected ID
+    # names the env var / config key that has to be edited.
+    _, provider_model_env = resolve_provider_api_key(provider)
+    model_candidates: list[tuple[Any, str]] = [
+        (os.getenv(env_keys.model), env_keys.model),
+        (os.getenv(provider_model_env) if provider_model_env else None, provider_model_env),
+        (
+            agent_config.get("model") if isinstance(agent_config, dict) else None,
+            f"the config file ({role}.model)",
+        ),
+    ]
+    model = ""
+    for candidate, source in model_candidates:
+        if candidate:
+            model = ensure_current_model(str(candidate), provider=provider, source=source)
+            break
     else:
-        # Check provider-specific model env var
-        _, provider_model_env = resolve_provider_api_key(provider)
-        model_from_provider = os.getenv(provider_model_env)
-        if model_from_provider:
-            model = model_from_provider
-        elif isinstance(agent_config, dict) and "model" in agent_config:
-            model = agent_config["model"]
-        else:
-            # Use provider default
-            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-3.6-luna")
+        model = resolve_default_model(provider)
 
     # Resolve API key
     api_key = resolve_api_key_for_provider(provider, env_keys.api_key)
@@ -379,9 +376,13 @@ Environment variables:
 
 Default provider assignment strategy: shuffle (randomly assigns the 3 vendors 1:1 to the 3 roles)
     Switch to the fixed assignment below with --fixed, or to random-with-duplicates with --random.
+""")
+    # Derived from DEFAULT_MODELS so this listing can never drift from what actually runs.
+    print(f"""Default values (when fixed):
+    Proponent: {PROPONENT_DEFAULTS.provider} / {PROPONENT_DEFAULTS.get_model()}
+    Opponent:  {OPPONENT_DEFAULTS.provider} / {OPPONENT_DEFAULTS.get_model()}
+    Moderator: {MODERATOR_DEFAULTS.provider} / {MODERATOR_DEFAULTS.get_model()}
 
-Default values (when fixed):
-    Proponent: gemini / gemini-3.6-flash
-    Opponent:  anthropic / claude-opus-5
-    Moderator: openai / gpt-3.6-luna
+Old model IDs (retired snapshots, superseded generations) are refused before the run starts.
+    Override with {ALLOW_LEGACY_ENV}=1 only if a gateway remaps the old name.
 """)

@@ -20,6 +20,7 @@ Environment variables:
                                   at the remaining budget and calls are skipped once it is exhausted)
   MULTILLM_AGY_PRINT_TIMEOUT      agy --print-timeout value (default 5m)
   MULTILLM_CLAUDE_MODEL / MULTILLM_CODEX_MODEL  per-backend model override (optional)
+  MULTILLM_ALLOW_LEGACY_MODELS    allow an out-of-date model ID instead of refusing it (see models.py)
 
 Context-size handling (thresholds, sharding, distillation effort) lives in context_relay.py:
   MULTILLM_DIGEST_THRESHOLD, MULTILLM_SHARD_THRESHOLD, MULTILLM_SHARD_CHARS,
@@ -47,6 +48,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from .models import ensure_current_model
 from .raw import to_jsonable
 
 
@@ -324,6 +326,20 @@ async def _run_cli(
     return rc, out.decode("utf-8", "replace"), err.decode("utf-8", "replace")
 
 
+def _backend_model(env_name: str | None, configured: str, provider: str) -> str:
+    """Resolve the model this backend will actually run, re-checking the model policy.
+
+    main.py validates the resolved config and the override env vars at startup, so this is a
+    backstop — but it is the last point before the ID becomes argv, and it also covers callers
+    that build an AgentConfig directly instead of going through the CLI. The per-backend
+    override in particular reaches a vendor without passing through any role config.
+    """
+    override = os.getenv(env_name) if env_name else None
+    if override and override.strip():
+        return ensure_current_model(override, provider=provider, source=env_name or "")
+    return ensure_current_model(configured, provider=provider, source="the resolved role config")
+
+
 @dataclass(slots=True)
 class ProviderResponse:
     provider: str
@@ -374,7 +390,7 @@ class ClaudeCliAdapter:
         output_model: Any | None,
     ) -> ProviderResponse:
         binary = shutil.which("claude") or "claude"
-        model_id = os.getenv("MULTILLM_CLAUDE_MODEL") or model
+        model_id = _backend_model("MULTILLM_CLAUDE_MODEL", model, "anthropic")
         effort = _reasoning_effort()
         timeout = _cli_timeout()
         with tempfile.TemporaryDirectory(prefix="mll_claude_") as tmp:
@@ -458,7 +474,7 @@ class CodexAdapter:
         output_model: Any | None,
     ) -> ProviderResponse:
         binary = shutil.which("codex") or "codex"
-        model_id = os.getenv("MULTILLM_CODEX_MODEL") or model
+        model_id = _backend_model("MULTILLM_CODEX_MODEL", model, "openai")
         effort = _reasoning_effort()
         timeout = _cli_timeout()
         with tempfile.TemporaryDirectory(prefix="mll_codex_") as tmp:
@@ -516,9 +532,11 @@ class CodexAdapter:
 
 
 # =============================================================================
-# Antigravity CLI  (gemini)  — successor to the Gemini CLI. Default model Gemini 3.5 Flash (High).
-#   agy 1.0.x does not support the --output-format/reasoning flags → it steers the
-#   plain-text output with a JSON-only directive and parses it through the executor's Pydantic validation path.
+# Antigravity CLI  (gemini)  — successor to the Gemini CLI. The model comes from the role
+#   config (default in models.py); this adapter does not pin one.
+#   agy has no --output-format/reasoning flags (checked against `agy --help` on 1.1.x), so it
+#   steers the plain-text output with a JSON-only directive and parses it through the executor's
+#   Pydantic validation path.
 #
 #   Auth priority is agy CLI (subscription OAuth) first, GEMINI_API_KEY second (fallback only).
 #   An incidental GEMINI_API_KEY exported for some unrelated tool must not silently steal traffic
@@ -541,6 +559,7 @@ class AntigravityCliAdapter:
         schema_name: str,
         output_model: Any | None,
     ) -> ProviderResponse:
+        model = _backend_model(None, model, "gemini")
         effective_api_key = api_key or os.getenv("GEMINI_API_KEY")
 
         async def call_api() -> ProviderResponse:

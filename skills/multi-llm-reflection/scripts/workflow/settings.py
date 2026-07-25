@@ -16,6 +16,17 @@ from typing import Any, Optional
 
 from .config import AgentConfig
 
+# Model IDs and the "no old models" policy live in models.py — the single source of truth.
+# Re-exported here because main.py and the config templates have always imported
+# DEFAULT_MODELS from this module.
+from .models import (  # noqa: F401  (DEFAULT_MODELS is re-exported)
+    ALLOW_LEGACY_ENV,
+    DEFAULT_MODELS,
+    ModelPolicyError,
+    ensure_current_model,
+    resolve_default_model,
+)
+
 
 # =============================================================================
 # Available Providers
@@ -41,23 +52,6 @@ def get_shuffled_providers() -> tuple[str, str, str]:
 
 
 # =============================================================================
-# Default Model IDs by Provider
-# =============================================================================
-
-DEFAULT_MODELS: dict[str, str] = {
-    # Google Gemini: Antigravity CLI default (Gemini 3.5 Flash, 2026-05)
-    "gemini": "gemini-3.6-flash",
-    # Anthropic Claude: Claude Code CLI latest (Sonnet 5.0, 2026-06)
-    "anthropic": "claude-opus-5",
-    "claude": "claude-opus-5",
-    # OpenAI: Codex CLI latest flagship (GPT-3.6 Luna, 2026-07)
-    "openai": "gpt-3.6-luna",
-    # Mock provider (offline smoke tests)
-    "mock": "mock-v1",
-}
-
-
-# =============================================================================
 # Default Agent Settings
 # =============================================================================
 
@@ -71,15 +65,17 @@ class DefaultAgentSettings:
     def get_model(self) -> str:
         """Get the model ID (uses the provider's default if not set)"""
         if self.model:
-            return self.model
-        normalized = self.provider.strip().lower()
-        return DEFAULT_MODELS.get(normalized, "gpt-3.6-luna")
+            return ensure_current_model(
+                self.model, provider=self.provider, source="the built-in role default"
+            )
+        return resolve_default_model(self.provider)
 
 
-# Default configurations for each agent role
-GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.6-flash")
-CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-opus-5")
-REFINER_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-3.6-luna")
+# Default configurations for each agent role. Model left unset on purpose: it resolves from
+# DEFAULT_MODELS, so a new model only has to be written down in models.py.
+GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini")
+CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic")
+REFINER_DEFAULTS = DefaultAgentSettings(provider="openai")
 
 
 # =============================================================================
@@ -275,21 +271,24 @@ def create_agent_config_from_env(
     # Resolve provider
     provider = get_value("provider", env_keys.provider, defaults.provider)
 
-    # Resolve model
-    model_from_env = os.getenv(env_keys.model)
-    if model_from_env:
-        model = model_from_env
+    # Resolve model. Each candidate carries the channel it came from so that a rejected ID
+    # names the env var / config key that has to be edited.
+    _, provider_model_env = resolve_provider_api_key(provider)
+    model_candidates: list[tuple[Any, str]] = [
+        (os.getenv(env_keys.model), env_keys.model),
+        (os.getenv(provider_model_env) if provider_model_env else None, provider_model_env),
+        (
+            agent_config.get("model") if isinstance(agent_config, dict) else None,
+            f"the config file ({role}.model)",
+        ),
+    ]
+    model = ""
+    for candidate, source in model_candidates:
+        if candidate:
+            model = ensure_current_model(str(candidate), provider=provider, source=source)
+            break
     else:
-        # Check provider-specific model env var
-        _, provider_model_env = resolve_provider_api_key(provider)
-        model_from_provider = os.getenv(provider_model_env)
-        if model_from_provider:
-            model = model_from_provider
-        elif isinstance(agent_config, dict) and "model" in agent_config:
-            model = agent_config["model"]
-        else:
-            # Use provider default
-            model = DEFAULT_MODELS.get(provider.strip().lower(), "gpt-3.6-luna")
+        model = resolve_default_model(provider)
 
     # Resolve API key
     api_key = resolve_api_key_for_provider(provider, env_keys.api_key)
@@ -409,9 +408,13 @@ Environment variables:
     REFLECTION_SHUFFLE_PROVIDERS : true/false
     REFLECTION_TEMPERATURE       : Temperature (or LLM_TEMPERATURE)
     REFLECTION_DEVUI_PORT        : DevUI port (or DEVUI_PORT)
+""")
+    # Derived from DEFAULT_MODELS so this listing can never drift from what actually runs.
+    print(f"""Default values:
+    Generator: {GENERATOR_DEFAULTS.provider} / {GENERATOR_DEFAULTS.get_model()}
+    Critic:    {CRITIC_DEFAULTS.provider} / {CRITIC_DEFAULTS.get_model()}
+    Refiner:   {REFINER_DEFAULTS.provider} / {REFINER_DEFAULTS.get_model()}
 
-Default values:
-    Generator: gemini / gemini-3.6-flash
-    Critic:    anthropic / claude-opus-5
-    Refiner:   openai / gpt-3.6-luna
+Old model IDs (retired snapshots, superseded generations) are refused before the run starts.
+    Override with {ALLOW_LEGACY_ENV}=1 only if a gateway remaps the old name.
 """)

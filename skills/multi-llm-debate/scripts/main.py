@@ -20,7 +20,7 @@ Usage:
     # Specify custom models
     python main.py "debate topic" \\
         --proponent-model gemini-3.6-flash \\
-        --opponent-model claude-sonnet-5 \\
+        --opponent-model claude-opus-5 \\
         --moderator-model gpt-3.6-luna
 
 Configuration precedence:

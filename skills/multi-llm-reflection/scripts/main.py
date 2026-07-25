@@ -20,7 +20,7 @@ Usage:
     # Custom model specification
     python main.py "Your prompt" \\
         --generator-model gemini-3.6-flash \\
-        --critic-model claude-sonnet-5 \\
+        --critic-model claude-opus-5 \\
         --refiner-model gpt-3.6-luna
 
 Configuration precedence:

@@ -25,9 +25,9 @@ DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini: Antigravity default (Gemini 3.5 Flash, 2026-05)
     # Default for the agy CLI path. The pro line requires the "-preview" suffix in google-genai v1beta.
     "gemini": "gemini-3.6-flash",
-    # Anthropic Claude: latest Claude Agent SDK (Sonnet 5.0, 2026-06)
-    "anthropic": "claude-sonnet-5",
-    "claude": "claude-sonnet-5",
+    # Anthropic Claude: latest Claude Agent SDK (Opus 5, 2026-07)
+    "anthropic": "claude-opus-5",
+    "claude": "claude-opus-5",
     # OpenAI: latest Codex SDK flagship (GPT-3.6 Luna, 2026-07).
     "openai": "gpt-3.6-luna",
     # Mock provider (offline smoke tests)
@@ -382,6 +382,6 @@ Default provider assignment strategy: shuffle (randomly assigns the 3 vendors 1:
 
 Default values (when fixed):
     Proponent: gemini / gemini-3.6-flash
-    Opponent:  anthropic / claude-sonnet-5
+    Opponent:  anthropic / claude-opus-5
     Moderator: openai / gpt-3.6-luna
 """)

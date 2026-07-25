@@ -48,8 +48,8 @@ DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini: Antigravity CLI default (Gemini 3.5 Flash, 2026-05)
     "gemini": "gemini-3.6-flash",
     # Anthropic Claude: Claude Code CLI latest (Sonnet 5.0, 2026-06)
-    "anthropic": "claude-sonnet-5",
-    "claude": "claude-sonnet-5",
+    "anthropic": "claude-opus-5",
+    "claude": "claude-opus-5",
     # OpenAI: Codex CLI latest flagship (GPT-3.6 Luna, 2026-07)
     "openai": "gpt-3.6-luna",
     # Mock provider (offline smoke tests)
@@ -78,7 +78,7 @@ class DefaultAgentSettings:
 
 # Default configurations for each agent role
 GENERATOR_DEFAULTS = DefaultAgentSettings(provider="gemini", model="gemini-3.6-flash")
-CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-sonnet-5")
+CRITIC_DEFAULTS = DefaultAgentSettings(provider="anthropic", model="claude-opus-5")
 REFINER_DEFAULTS = DefaultAgentSettings(provider="openai", model="gpt-3.6-luna")
 
 
@@ -412,6 +412,6 @@ Environment variables:
 
 Default values:
     Generator: gemini / gemini-3.6-flash
-    Critic:    anthropic / claude-sonnet-5
+    Critic:    anthropic / claude-opus-5
     Refiner:   openai / gpt-3.6-luna
 """)

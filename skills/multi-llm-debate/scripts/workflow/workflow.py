@@ -56,9 +56,13 @@ def build_debate_workflow(
     """
     builder = WorkflowBuilder(name=name)
 
-    # Create executors
+    # Create executors. The proponent also runs the optional sharded context
+    # pre-distillation, so it gets every role's config to fan out across vendors.
     ingress = PromptIngress()
-    proponent = ProponentExecutor(proponent_config)
+    proponent = ProponentExecutor(
+        proponent_config,
+        distill_configs=[proponent_config, opponent_config, moderator_config],
+    )
     opponent = OpponentExecutor(opponent_config)
     moderator = ModeratorExecutor(moderator_config)
 

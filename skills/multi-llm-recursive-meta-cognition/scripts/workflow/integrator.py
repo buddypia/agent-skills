@@ -8,6 +8,7 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
@@ -79,6 +80,8 @@ class IntegratorExecutor(Executor):
         await ctx.set_shared_state("integrator_model", self.config.model)
 
         original_prompt = await ctx.get_shared_state("original_prompt") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_prompt = relay_context(original_prompt, context_digest)
         solution_output = await ctx.get_shared_state("solution_output") or {}
         decomposition_output = await ctx.get_shared_state("decomposition_output") or {}
 
@@ -86,7 +89,7 @@ class IntegratorExecutor(Executor):
         try:
             result = await asyncio.wait_for(
                 self._call_integrator_with_raw(
-                    original_prompt, decomposition_output, solution_output, verification
+                    relay_prompt, decomposition_output, solution_output, verification
                 ),
                 timeout=self.config.timeout_sec,
             )

@@ -8,6 +8,7 @@ from typing import Any, Final
 from .engine import Executor, WorkflowContext, handler
 
 from .config import AgentConfig
+from .context_relay import relay_context
 from .providers import get_adapter
 from .prompts import get_prompt
 from .raw import to_jsonable
@@ -72,10 +73,12 @@ class OpponentExecutor(Executor):
         await ctx.set_shared_state("proponent_output", proponent_payload)
 
         original_topic = await ctx.get_shared_state("original_topic") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_topic = relay_context(original_topic, context_digest)
 
         raw: StageRawData | None = None
         try:
-            result = await self._call_opponent_with_raw(original_topic, proponent_payload)
+            result = await self._call_opponent_with_raw(relay_topic, proponent_payload)
         except Exception as exc:
             parsed = OpponentOutput(
                 position=f"[Opponent: error ({exc})]",

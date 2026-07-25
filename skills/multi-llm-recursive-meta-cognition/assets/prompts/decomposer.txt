@@ -16,5 +16,9 @@ Return your answer as the following JSON object:
 - "constraints": an array of constraint conditions
 - "questions": an array of missing information or items to confirm
 - "confidence": the confidence of the decomposition (from 0.0 to 1.0)
+- "context_digest": a faithful, self-contained digest of the original problem/context
+  (goal, givens, constraints, data). Later stages may see only this digest instead of
+  the full original, so preserve everything a solver or verifier would need.
+  If the problem is already brief, restate it verbatim.
 
 Always respond in the same language as the user's input/topic.

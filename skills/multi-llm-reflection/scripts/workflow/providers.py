@@ -21,6 +21,10 @@ Environment variables:
   MULTILLM_AGY_PRINT_TIMEOUT      agy --print-timeout value (default 5m)
   MULTILLM_CLAUDE_MODEL / MULTILLM_CODEX_MODEL  per-backend model override (optional)
 
+Context-size handling (thresholds, sharding, distillation effort) lives in context_relay.py:
+  MULTILLM_DIGEST_THRESHOLD, MULTILLM_SHARD_THRESHOLD, MULTILLM_SHARD_CHARS,
+  MULTILLM_SHARD_MAX, MULTILLM_SHARD_CONCURRENCY, MULTILLM_DISTILL_EFFORT
+
 Gemini auth priority: the agy CLI (subscription OAuth) is always tried first, even if
 GEMINI_API_KEY happens to be set (e.g. exported by an unrelated tool) — an incidental API key
 must not silently override the user's OAuth session. GEMINI_API_KEY is only used as a fallback
@@ -32,6 +36,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import contextvars
 import json
 import os
 import random
@@ -56,10 +61,28 @@ def _cli_timeout() -> float:
         return 360.0
 
 
+# Per-task reasoning-effort override. A ContextVar (not a global) because the sharded
+# context-distillation pre-stage in context_relay.py runs many adapter calls concurrently
+# under asyncio.gather at a cheap effort while the main pipeline stages keep the configured
+# effort: each Task copies the context at creation, so a set() inside one distillation task
+# cannot leak into another task or into the main flow.
+_effort_override: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "multillm_reasoning_effort_override", default=None
+)
+
+
+def set_reasoning_effort_override(effort: str | None) -> None:
+    """Override the reasoning effort for the current asyncio Task only."""
+    _effort_override.set(effort.strip() if isinstance(effort, str) and effort.strip() else None)
+
+
 def _reasoning_effort() -> str:
     # Default "high" (not "xhigh"): under the whole-pipeline wall-clock budget each stage gets a
     # limited slice, and xhigh routinely exceeds it. "high" is the balanced default; override with
     # MULTILLM_REASONING_EFFORT=xhigh|max when you have the time budget.
+    override = _effort_override.get()
+    if override:
+        return override
     return os.getenv("MULTILLM_REASONING_EFFORT", "high").strip() or "high"
 
 
@@ -87,6 +110,15 @@ def _deadline_remaining() -> float:
     if _deadline_mono is None:
         _deadline_mono = now + _total_deadline()
     return _deadline_mono - now
+
+
+def deadline_remaining() -> float:
+    """Public view of the remaining whole-pipeline budget (seconds).
+
+    Used by context_relay.py to decide whether an optional pre-stage still fits in the
+    budget. Note that calling this anchors the deadline if it has not been anchored yet.
+    """
+    return _deadline_remaining()
 
 
 def _agy_print_timeout() -> str:
@@ -221,6 +253,32 @@ async def _terminate_process_tree(proc: "asyncio.subprocess.Process") -> None:
         await proc.wait()
 
 
+def _kill_process_tree_nowait(proc: "asyncio.subprocess.Process") -> None:
+    """SIGKILL the child's process group synchronously, without awaiting.
+
+    Used from a cancellation handler, where awaiting is unreliable: the outer canceller is
+    already waiting for us to unwind. The asyncio child watcher reaps the process afterwards.
+    """
+    if _POSIX:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            return
+        except (ProcessLookupError, PermissionError):
+            pass
+    else:
+        import subprocess
+        with contextlib.suppress(Exception):
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+        return
+    with contextlib.suppress(Exception):
+        proc.kill()
+
+
 async def _run_cli(
     cmd: list[str],
     *,
@@ -254,6 +312,14 @@ async def _run_cli(
     except asyncio.TimeoutError:
         await _terminate_process_tree(proc)
         raise RuntimeError(f"CLI timeout after {effective_timeout:.0f}s: {cmd[0]}")
+    except asyncio.CancelledError:
+        # An OUTER canceller reached us: the per-stage asyncio.wait_for cap, or the
+        # context-distillation budget in context_relay.py. CancelledError derives from
+        # BaseException, so without this handler it sails past the TimeoutError branch and
+        # the child CLI — plus the node/bun grandchildren it spawned — is orphaned, quietly
+        # burning CPU and vendor quota for the rest of the run.
+        _kill_process_tree_nowait(proc)
+        raise
     rc = proc.returncode if proc.returncode is not None else 0
     return rc, out.decode("utf-8", "replace"), err.decode("utf-8", "replace")
 

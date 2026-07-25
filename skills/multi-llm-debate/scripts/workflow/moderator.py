@@ -8,10 +8,12 @@ from typing import Any, Final
 from .engine import Executor, WorkflowContext, handler
 
 from .config import AgentConfig
+from .context_relay import build_relay_info, relay_context
 from .providers import get_adapter
 from .prompts import get_prompt
 from .raw import to_jsonable
 from .types import (
+    ContextRelayInfo,
     OpponentOutput,
     ModeratorOutput,
     DebateResult,
@@ -65,13 +67,16 @@ class ModeratorExecutor(Executor):
         await ctx.set_shared_state("moderator_model", self.config.model)
 
         original_topic = await ctx.get_shared_state("original_topic") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_topic = relay_context(original_topic, context_digest)
+        relay_report = await ctx.get_shared_state("context_relay_report")
         proponent_output = await ctx.get_shared_state("proponent_output") or {}
         proponent_duration = await ctx.get_shared_state("proponent_duration") or 0.0
         opponent_duration = await ctx.get_shared_state("opponent_duration") or 0.0
 
         raw: StageRawData | None = None
         try:
-            result = await self._call_moderator_with_raw(original_topic, proponent_output, opponent_output)
+            result = await self._call_moderator_with_raw(relay_topic, proponent_output, opponent_output)
         except Exception as exc:
             parsed = ModeratorOutput(
                 summary=f"[Moderator: error ({exc})]",
@@ -143,6 +148,9 @@ class ModeratorExecutor(Executor):
             opponent_model=await ctx.get_shared_state("opponent_model") or "",
             moderator_model=self.config.model,
             # Raw data
+            context_relay=ContextRelayInfo.model_validate(
+                build_relay_info(original_topic, relay_topic, relay_report)
+            ),
             raw=debate_raw,
         )
 

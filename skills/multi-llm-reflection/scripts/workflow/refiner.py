@@ -7,10 +7,12 @@ from typing import Any, Final
 
 from .engine import Executor, WorkflowContext, handler
 from .config import AgentConfig
+from .context_relay import build_relay_info, relay_context
 from .prompts import get_prompt
 from .providers import get_adapter
 from .raw import to_jsonable
 from .types import (
+    ContextRelayInfo,
     CriticOutput,
     RefinerOutput,
     ReflectionRawData,
@@ -75,13 +77,16 @@ class RefinerExecutor(Executor):
         await ctx.set_shared_state("refiner_model", self.config.model)
 
         original_prompt = await ctx.get_shared_state("original_prompt") or ""
+        context_digest = await ctx.get_shared_state("context_digest") or ""
+        relay_prompt = relay_context(original_prompt, context_digest)
+        relay_report = await ctx.get_shared_state("context_relay_report")
         generator_output = await ctx.get_shared_state("generator_output") or {}
         generator_duration = await ctx.get_shared_state("generator_duration") or 0.0
         critic_duration = await ctx.get_shared_state("critic_duration") or 0.0
 
         raw: StageRawData | None = None
         try:
-            result = await self._call_refiner_with_raw(original_prompt, generator_output, critic_output)
+            result = await self._call_refiner_with_raw(relay_prompt, generator_output, critic_output)
         except Exception as exc:
             parsed = RefinerOutput(
                 final_content=(
@@ -140,6 +145,9 @@ class RefinerExecutor(Executor):
             generator_model=await ctx.get_shared_state("generator_model") or "",
             critic_model=await ctx.get_shared_state("critic_model") or "",
             refiner_model=self.config.model,
+            context_relay=ContextRelayInfo.model_validate(
+                build_relay_info(original_prompt, relay_prompt, relay_report)
+            ),
             raw=workflow_raw,
         )
 

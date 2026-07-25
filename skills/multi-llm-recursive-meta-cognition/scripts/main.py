@@ -23,7 +23,7 @@ Usage:
     python main.py "Your prompt" \
         --decomposer-model gemini-3.6-flash \
         --solver-model gemini-3.6-flash \
-        --verifier-model claude-sonnet-5 \
+        --verifier-model claude-opus-5 \
         --integrator-model gpt-3.6-luna \
         --reflector-model gpt-3.6-luna
 

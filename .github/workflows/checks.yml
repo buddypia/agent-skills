@@ -1,0 +1,25 @@
+name: checks
+
+# The repository invariants are enforced for Claude Code sessions by a PostToolUse hook
+# (.claude/settings.json). This job is the same check for everyone else — a plain push or a PR
+# opened outside that workflow. See CLAUDE.md for what is being enforced and why.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # No dependency install on purpose: check_invariants.py is stdlib-only and loads
+      # workflow/models.py straight from its path, so it never needs pydantic or a venv.
+      - run: python3 tools/check_invariants.py

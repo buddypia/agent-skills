@@ -21,8 +21,8 @@ Usage:
 
     # Custom model selection
     python main.py "Your prompt" \
-        --decomposer-model gemini-3.6-flash \
-        --solver-model gemini-3.6-flash \
+        --decomposer-model gemini-3.7-flash \
+        --solver-model gemini-3.7-flash \
         --verifier-model claude-opus-5 \
         --integrator-model gpt-3.6-luna \
         --reflector-model gpt-3.6-luna

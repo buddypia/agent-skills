@@ -99,7 +99,7 @@ MUST_REJECT = (
 # than one that misses yesterday's, so these are the more important half of the fixture.
 MUST_ACCEPT = (
     "claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-haiku-4-5",
-    "claude-opus-4-8", "claude-sonnet-4-6", "gemini-3.6-flash", "gemini-3.5-flash",
+    "claude-opus-4-8", "claude-sonnet-4-6", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash",
     "gpt-3.6-luna", "mock-v1",
     "claude-opus-6", "claude-sonnet-6-1", "gemini-4-flash", "gemini-3.7-pro",
     "gpt-3.7-nova", "o5-turbo",

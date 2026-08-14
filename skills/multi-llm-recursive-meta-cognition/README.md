@@ -7,7 +7,7 @@ For the skill definition (invocation summary) see [SKILL.md](./SKILL.md).
 
 ```
 [problem] → Decomposer → Solver → Verifier → Integrator → Reflector → final result
-            agy/gemini-3.6 agy/gemini-3.6  claude/opus-5    codex/gpt-3.6-luna codex/gpt-3.6-luna(xhigh)
+            agy/gemini-3.7 agy/gemini-3.7  claude/opus-5    codex/gpt-3.6-luna codex/gpt-3.6-luna(xhigh)
 ```
 Each stage runs in an independent context and emits structured JSON; the integrate and reflect stages incorporate the points raised by verification.
 
@@ -59,8 +59,8 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 ```bash
 # uv recommended (cwd set to scripts)
 uv run --directory scripts main.py "problem" \
-    --decomposer-model gemini-3.6-flash \
-    --solver-model     gemini-3.6-flash \
+    --decomposer-model gemini-3.7-flash \
+    --solver-model     gemini-3.7-flash \
     --verifier-model   claude-opus-5 \
     --integrator-model gpt-3.6-luna \
     --reflector-model  gpt-3.6-luna
@@ -137,6 +137,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.6-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; they are defined in one place (`scripts/workflow/models.py`). Override them with the `--*-model` flags (see Usage) to match what your account can access. Model IDs from retired or superseded generations are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if you need to override that.
+- **Model names.** Default model IDs (e.g. `gemini-3.7-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; they are defined in one place (`scripts/workflow/models.py`). Override them with the `--*-model` flags (see Usage) to match what your account can access. Model IDs from retired or superseded generations are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if you need to override that.
 - **No quality guarantee.** The multi-stage pipeline is a design choice intended to add rigor; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

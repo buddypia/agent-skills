@@ -40,7 +40,7 @@ import sys
 
 DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini via the agy (Antigravity) CLI.
-    "gemini": "gemini-3.6-flash",
+    "gemini": "gemini-3.7-flash",
     # Anthropic via the claude CLI.
     "anthropic": "claude-opus-5",
     "claude": "claude-opus-5",

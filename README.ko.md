@@ -59,7 +59,7 @@ npx skills add buddypia/agent-skills
 
 "Claude" / "Claude Code"(Anthropic), "GPT" / "ChatGPT" / "Codex"(OpenAI), "Gemini" / "Antigravity"(Google)는 각 소유자의 상표입니다. 본 프로젝트는 독립적인 프로젝트이며 Anthropic, OpenAI, Google과 **제휴 관계가 없고, 이들로부터 보증받거나 후원받지 않습니다.**
 
-기본 모델 ID(예: `gemini-3.6-flash`, `claude-opus-5`, `gpt-3.6-luna`)는 2026-07 기준 최신 모델을 반영하며 시간이 지남에 따라 변경됩니다. 스킬별로 오버라이드하세요. 각 스킬은 모델 ID를 한 곳(`scripts/workflow/models.py`)에 정의하며, 지원이 종료되거나 세대가 지난 모델 ID는 실행 전에 거부합니다. 멀티 모델 오케스트레이션은 하나의 설계상 선택일 뿐이며 **더 나은 결과를 보장하지 않습니다.** 모델 출력은 신뢰할 수 없는 것으로 간주하여 검토하고, 제3자 콘텐츠를 입력할 때는 프롬프트 인젝션(prompt-injection)에 유의하세요.
+기본 모델 ID(예: `gemini-3.7-flash`, `claude-opus-5`, `gpt-3.6-luna`)는 2026-07 기준 최신 모델을 반영하며 시간이 지남에 따라 변경됩니다. 스킬별로 오버라이드하세요. 각 스킬은 모델 ID를 한 곳(`scripts/workflow/models.py`)에 정의하며, 지원이 종료되거나 세대가 지난 모델 ID는 실행 전에 거부합니다. 멀티 모델 오케스트레이션은 하나의 설계상 선택일 뿐이며 **더 나은 결과를 보장하지 않습니다.** 모델 출력은 신뢰할 수 없는 것으로 간주하여 검토하고, 제3자 콘텐츠를 입력할 때는 프롬프트 인젝션(prompt-injection)에 유의하세요.
 
 ## License
 

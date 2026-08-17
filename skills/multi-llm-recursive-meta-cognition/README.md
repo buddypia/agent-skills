@@ -72,7 +72,7 @@ uv run --directory scripts main.py "problem" \
 
 | Variable | Default | Purpose |
 |------|------|------|
-| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude (`--effort`) and Codex (none/low/medium/high/xhigh/max). With **5 sequential stages** the budget is tightest here — `xhigh` routinely exceeds it, so prefer `high` (or `medium` for speed) |
+| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude, Codex, and agy. agy supports low/medium/high; higher-only Codex values are clamped to `high` for agy. With **5 sequential stages** the budget is tightest here — `xhigh` routinely exceeds it, so prefer `high` (or `medium` for speed) |
 | `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the 5-stage run under a typical 600s agent/Bash-tool ceiling; once spent, remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the process being killed |
 | `REFLECTION_{...}_TIMEOUT` / `REFLECTION_TIMEOUT` (`--timeout`) | `300` | Per-stage safety cap (seconds). Raised from 120, which used to silently degrade `high`/reasoning stages mid-run; the real total bound is `MULTILLM_TOTAL_DEADLINE` |
@@ -111,8 +111,8 @@ REFLECTION_INTEGRATOR_PROVIDER=mock REFLECTION_REFLECTOR_PROVIDER=mock \
 ## Architecture (summary)
 
 - The 3 adapters (Claude/Codex/Antigravity) in `scripts/workflow/providers.py` implement `generate_structured()`. The role executors and workflow are unmodified.
-- Structured output: claude uses `--output-format json --json-schema` (native), codex uses `--output-schema` (native), and agy uses plain-text-to-JSON instructions + Pydantic validation.
-- Long inputs always go through stdin (avoiding ARG_MAX/escaping). agy is isolated with a tempdir cwd.
+- Structured output: claude uses `--output-format json --json-schema`, codex uses `--output-schema`, and agy uses `--output-format json --json-schema`; all three use native structured output.
+- Claude and Codex receive long inputs through stdin. agy's `-p` mode does not consume stdin as task content, so its complete task is passed in the print prompt; agy is isolated with a tempdir cwd.
 - Gemini uses the `agy` CLI (subscription OAuth) first; it only falls back to the direct API via the standard library `urllib` when `agy` itself fails and `GEMINI_API_KEY` is available. An incidental `GEMINI_API_KEY` exported for some unrelated tool never overrides the OAuth session. The direct-API path strips schema fields (e.g. `additionalProperties`) that the Gemini REST `responseSchema` (an OpenAPI 3.0 subset) doesn't support.
 - Dependency management uses uv (`pyproject.toml` + `uv.lock`), with a venv + pip fallback. Uses each CLI's existing login by default; API keys are also supported.
 

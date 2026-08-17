@@ -1,7 +1,7 @@
 """Provider adapters — subscription-authenticated CLI backends (pure CLI).
 
 Calls the latest models using the user's subscription authentication, with no separate API key:
-  - gemini             → Antigravity CLI (`agy -p`)    : plain-text output → JSON-only directive + Pydantic validation
+  - gemini             → Antigravity CLI (`agy -p`)    : native JSON schema output
   - anthropic / claude → Claude Code     (`claude -p`) : --json-schema native structured output
   - openai             → Codex           (`codex exec`): --output-schema native structured output
 
@@ -13,7 +13,7 @@ each SDK bundled OS/architecture-specific CLI binaries (hundreds of MB), causing
 so it was unified to a lightweight approach that calls the user's globally installed CLI directly via subprocess (same as reflection/recursive).
 
 Environment variables:
-  MULTILLM_REASONING_EFFORT       reasoning effort (default high; applied to both Claude and Codex)
+  MULTILLM_REASONING_EFFORT       reasoning effort (default high; applied to Claude, Codex, and agy)
   MULTILLM_CLI_TIMEOUT            per-CLI-call timeout (seconds) (default 360)
   MULTILLM_TOTAL_DEADLINE         whole-pipeline wall-clock budget in seconds (default 540; keeps the
                                   run under a typical 600s agent/Bash tool ceiling — each call is capped
@@ -140,17 +140,11 @@ def _strip_code_fences(text: str) -> str:
 def _extract_json_payload(text: str) -> str:
     """Best-effort extraction of a single JSON value from CLI output wrapped in prose.
 
-    The Antigravity CLI (`agy -p`) has no `--output-format json` mode (confirmed via
-    `agy --help` on 1.1.x and the upstream docs) — it returns free-form text and
-    *non-deterministically* prepends agentic narration (e.g. "I have started the
-    background task ...") before the JSON object. Stripping code fences alone leaves
-    that prose in place, so `model_validate_json` fails and the entire prose+JSON blob
-    leaks downstream as the stage's content, polluting the context the next model
-    cooperates on. Here we locate the first balanced top-level ``{...}`` / ``[...]``
-    value — skipping braces that appear inside JSON strings — and return just that
-    slice. Trailing narration after the closing brace is dropped the same way. If
-    nothing balanced is found the input is returned unchanged so the caller's existing
-    validation/fallback path still runs.
+    This is a compatibility fallback for older agy versions or a non-schema response.
+    Current agy versions support ``--output-format json --json-schema`` and are handled
+    by :func:`_extract_agy_response` below. The fallback locates the first balanced
+    top-level ``{...}`` / ``[...]`` value — skipping braces inside JSON strings — so
+    narration around a legacy plain-text result does not pollute the next stage.
     """
     cleaned = _strip_code_fences(text).strip()
     start = -1
@@ -185,6 +179,33 @@ def _extract_json_payload(text: str) -> str:
     return cleaned
 
 
+def _extract_agy_response(output: str) -> str:
+    """Return the model payload from agy's JSON envelope.
+
+    agy 1.1.x provides native structured output with ``--output-format json`` and
+    ``--json-schema``. Its stdout is an envelope whose ``structured_output`` holds the
+    JSON value required by the schema; treating the whole envelope as model text makes
+    Pydantic validation fail. Fall back to the legacy balanced-JSON extraction when a
+    caller has an older CLI or returns an unexpected envelope.
+    """
+    try:
+        envelope = json.loads(output)
+    except json.JSONDecodeError:
+        return _extract_json_payload(output)
+
+    if not isinstance(envelope, dict):
+        return _extract_json_payload(output)
+
+    structured = envelope.get("structured_output")
+    if structured is not None:
+        return json.dumps(structured, ensure_ascii=False)
+
+    response = envelope.get("response")
+    if isinstance(response, str):
+        return _extract_json_payload(response)
+    return _extract_json_payload(output)
+
+
 def _strip_unsupported_schema_fields(schema: Any) -> Any:
     """Drop JSON-Schema fields the Gemini REST API's responseSchema (an OpenAPI 3.0
     subset) doesn't understand — notably "additionalProperties", which the API
@@ -203,6 +224,7 @@ def _strip_unsupported_schema_fields(schema: Any) -> Any:
 
 
 _CLAUDE_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
+_AGY_EFFORTS = {"low", "medium", "high"}
 
 
 def _claude_effort(effort: str) -> str:
@@ -213,6 +235,45 @@ def _claude_effort(effort: str) -> str:
     if e in {"none", "minimal"}:
         return "low"
     return "high"
+
+
+def _agy_model_and_effort(model: str, effort: str) -> tuple[str, str]:
+    """Translate the shared effort setting to agy's three supported levels.
+
+    agy 1.1.x requires ``--effort`` for base Gemini model aliases such as
+    ``gemini-3.7-flash``. Its model picker also displays the aliases with a trailing
+    ``-low`` / ``-medium`` / ``-high`` suffix, so accept either spelling while ensuring
+    that a caller's explicit model tier wins over the common effort environment variable.
+    """
+    normalized_model = model.strip()
+    for tier in _AGY_EFFORTS:
+        suffix = f"-{tier}"
+        if normalized_model.lower().endswith(suffix):
+            return normalized_model[: -len(suffix)], tier
+    normalized_effort = (effort or "").strip().lower()
+    return normalized_model, normalized_effort if normalized_effort in _AGY_EFFORTS else "high"
+
+
+def _agy_failure_detail(output: str) -> str:
+    """Extract agy's JSON error text when it writes diagnostics to stdout.
+
+    A nonempty ``response`` is normal in a successful legacy envelope, so it is only
+    considered a failure detail when agy explicitly reports a failing status.
+    """
+    try:
+        envelope = json.loads(output)
+    except json.JSONDecodeError:
+        return ""
+    if not isinstance(envelope, dict):
+        return ""
+    status = str(envelope.get("status") or "").strip().upper()
+    if status not in {"ERROR", "FAILED", "FAILURE"} and not envelope.get("error"):
+        return ""
+    for key in ("error", "message", "response"):
+        value = envelope.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()[:500]
+    return ""
 
 
 async def _terminate_process_tree(proc: "asyncio.subprocess.Process") -> None:
@@ -533,10 +594,9 @@ class CodexAdapter:
 
 # =============================================================================
 # Antigravity CLI  (gemini)  — successor to the Gemini CLI. The model comes from the role
-#   config (default in models.py); this adapter does not pin one.
-#   agy has no --output-format/reasoning flags (checked against `agy --help` on 1.1.x), so it
-#   steers the plain-text output with a JSON-only directive and parses it through the executor's
-#   Pydantic validation path.
+#   config (default in models.py) and is passed to agy explicitly.
+#   agy 1.1.x supports --model, --json-schema, and --output-format json, so it can return
+#   schema-native structured output just like the Claude and Codex adapters.
 #
 #   Auth priority is agy CLI (subscription OAuth) first, GEMINI_API_KEY second (fallback only).
 #   An incidental GEMINI_API_KEY exported for some unrelated tool must not silently steal traffic
@@ -604,45 +664,51 @@ class AntigravityCliAdapter:
         async def call_agy() -> ProviderResponse:
             binary = shutil.which("agy") or "agy"
             timeout = _cli_timeout()
-            directive = (
-                f"{system_prompt}\n\n"
-                "[Important] The task content is provided on stdin below — read it in full and "
-                "base your answer on it. Then respond with EXACTLY one JSON object that strictly "
-                "conforms to the JSON schema below. Output ONLY that JSON object: no code fences, "
-                "and no narration, preamble, status message, or commentary before or after it "
-                "(do not describe what you are about to do):\n"
-                f"{json.dumps(schema, ensure_ascii=False)}"
-            )
+            effort = _reasoning_effort()
+            model_id, agy_effort = _agy_model_and_effort(model, effort)
+            # agy does not read stdin as print-mode task content: it starts a request from the
+            # -p argument only. Passing user_prompt through stdin therefore yields a successful
+            # but empty/unrelated answer. Keep the complete task in the prompt argument instead.
+            directive = f"{system_prompt}\n\n=== Task content ===\n{user_prompt}"
             cmd = [
                 binary, "-p", directive,
-                "--dangerously-skip-permissions",
+                "--model", model_id,
+                "--effort", agy_effort,
+                "--json-schema", json.dumps(schema, ensure_ascii=False),
+                "--output-format", "json",
+                "--disable-slash-commands",
                 "--print-timeout", _agy_print_timeout(),
             ]
             # agy creates an .antigravitycli/ working directory in cwd, so isolate it in a tempdir.
+            # No tool access or permission bypass is required because the complete task is argv.
             tmp = tempfile.mkdtemp(prefix="mll_agy_")
             last_err = ""
             max_attempts = 2
             try:
                 for attempt in range(max_attempts):
                     try:
-                        rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
+                        rc, out, err = await _run_cli(cmd, stdin_text=None, cwd=tmp, timeout=timeout)
                     except RuntimeError as exc:
                         # Timeout / exhausted deadline: re-running only burns more of the shared
                         # budget against the same wall-clock ceiling, so do not retry.
                         last_err = str(exc)
                         break
-                    # agy -p has no JSON output mode and may wrap the object in narration;
-                    # pull the balanced JSON value out of whatever prose it emitted.
-                    text = _extract_json_payload(out)
-                    if rc == 0 and text:
+                    failure_detail = _agy_failure_detail(out)
+                    text = _extract_agy_response(out)
+                    if rc == 0 and not failure_detail and text:
                         request = {
                             "backend": "antigravity-cli",
-                            "model": model,
+                            "model": model_id,
                             "directive_chars": len(directive),
                             "user_prompt_chars": len(user_prompt),
                             "attempt": attempt + 1,
                         }
-                        meta = {"backend": "antigravity-cli", "model": model, "attempt": attempt + 1}
+                        meta = {
+                            "backend": "antigravity-cli",
+                            "model": model_id,
+                            "reasoning_effort": agy_effort,
+                            "attempt": attempt + 1,
+                        }
                         parsed_output = None
                         if output_model is not None:
                             try:
@@ -652,13 +718,13 @@ class AntigravityCliAdapter:
                                 print(f"[gemini-cli] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
                         return ProviderResponse(
                             provider=self.name,
-                            model=model,
+                            model=model_id,
                             request=to_jsonable(request),
                             response_text=text,
                             response_meta=meta,
                             parsed_output=parsed_output,
                         )
-                    last_err = err.strip()[:300] or f"exit {rc}"
+                    last_err = err.strip()[:500] or failure_detail or f"exit {rc}"
                     # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
                     if attempt + 1 < max_attempts and _deadline_remaining() > _MIN_CALL_FLOOR_SEC + 5:
                         await asyncio.sleep(1.0 + random.random())

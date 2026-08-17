@@ -59,7 +59,7 @@ npx skills add buddypia/agent-skills
 
 "Claude" / "Claude Code"（Anthropic）、"GPT" / "ChatGPT" / "Codex"（OpenAI）以及 "Gemini" / "Antigravity"（Google）均为其各自所有者的商标。本项目为独立项目，**与** Anthropic、OpenAI 或 Google **无任何关联，未获其认可，也未受其赞助**。
 
-默认的模型 ID（例如 `gemini-3.7-flash`、`claude-opus-5`、`gpt-3.6-luna`）反映的是截至 2026-07 时的最新模型，且会随时间变化；请按各技能逐一进行覆盖。每个技能都在同一处（`scripts/workflow/models.py`）定义模型 ID，并会在运行前拒绝已停用或已被取代的旧世代模型 ID。多模型编排是一种设计选择，**并不保证能带来更好的结果**。请将模型输出视为不可信内容并加以审查，同时在输入第三方内容时务必警惕提示注入（prompt-injection）风险。
+Gemini 和 Claude 的默认值（例如 `gemini-3.7-flash`、`claude-opus-5`）在各技能的 `scripts/workflow/models.py` 中统一定义。Codex 默认使用 `codex-default`，刻意让已认证的 CLI 选择其支持的模型，而不是固定可能与账户不兼容的 ID。已停用或过时的具体模型 ID 会在运行前被拒绝。多模型编排是一种设计选择，**并不保证能带来更好的结果**。请将模型输出视为不可信内容并加以审查，同时在输入第三方内容时务必警惕提示注入（prompt-injection）风险。
 
 ## License
 

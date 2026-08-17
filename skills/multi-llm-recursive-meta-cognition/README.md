@@ -7,7 +7,7 @@ For the skill definition (invocation summary) see [SKILL.md](./SKILL.md).
 
 ```
 [problem] → Decomposer → Solver → Verifier → Integrator → Reflector → final result
-            agy/gemini-3.7 agy/gemini-3.7  claude/opus-5    codex/gpt-3.6-luna codex/gpt-3.6-luna(xhigh)
+            agy/gemini-3.7 agy/gemini-3.7  claude/opus-5    codex/account-default codex/account-default
 ```
 Each stage runs in an independent context and emits structured JSON; the integrate and reflect stages incorporate the points raised by verification.
 
@@ -62,8 +62,8 @@ uv run --directory scripts main.py "problem" \
     --decomposer-model gemini-3.7-flash \
     --solver-model     gemini-3.7-flash \
     --verifier-model   claude-opus-5 \
-    --integrator-model gpt-3.6-luna \
-    --reflector-model  gpt-3.6-luna
+    --integrator-model codex-default \
+    --reflector-model  codex-default
 # without uv: source scripts/.venv/bin/activate && python scripts/main.py ...
 # swap provider: --decomposer-provider {gemini|anthropic|openai|mock}
 ```
@@ -83,7 +83,7 @@ uv run --directory scripts main.py "problem" \
 | `MULTILLM_SHARD_MAX` | `16` | Maximum number of shards. When the input needs more than this many shards of `MULTILLM_SHARD_CHARS` to cover, the run warns and reports `context_relay.oversized_shards` — raise this, or curate the input into a brief |
 | `MULTILLM_SHARD_CONCURRENCY` | `8` | Maximum **simultaneous** distillation calls. Independent of the shard count: excess shards queue and run in later batches, so a large input never spawns a matching number of CLI processes |
 | `MULTILLM_DISTILL_EFFORT` | `low` | Reasoning effort for the shard-distillation calls only (the work is mechanical; stages keep `MULTILLM_REASONING_EFFORT`) |
-| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override (checked against the same policy as every other channel) |
+| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override. OpenAI defaults to `codex-default`, using the authenticated Codex CLI's supported default. |
 | `MULTILLM_ALLOW_LEGACY_MODELS` | unset | Allow an out-of-date model ID instead of refusing it. By default a retired snapshot or a superseded generation (`claude-3-*`, `gpt-4*`, `gemini-2.*`, …) is rejected **before the run starts**, naming the flag / env var / config key it came from — otherwise it only surfaces later as an opaque vendor 404 that a stage swallows into placeholder text. Set to `1` only when a gateway remaps the old name |
 | `REFLECTION_{DECOMPOSER,SOLVER,VERIFIER,INTEGRATOR,REFLECTOR}_{PROVIDER,MODEL}` | — | per-role override |
 
@@ -101,6 +101,7 @@ REFLECTION_INTEGRATOR_PROVIDER=mock REFLECTION_REFLECTOR_PROVIDER=mock \
 | `agy/claude/codex: command not found` | the install steps above + check PATH |
 | `Error: model '...' is out of date` (exit 1, nothing ran) | The model ID is a retired snapshot or a superseded generation. The message names the flag / env var / config key that supplied it — point that at a current ID (`--show-config` lists the defaults). Only set `MULTILLM_ALLOW_LEGACY_MODELS=1` if a gateway remaps the old name |
 | `Error: unknown provider '...'` (exit 1) | Typo in a `provider:` value. Valid: `gemini`, `anthropic` (alias `claude`), `openai`, `mock`. This used to silently pair the typo with an OpenAI model ID and fail much later, inside a stage |
+| Codex says a configured model is unsupported | Remove the model override or set it to `codex-default` to let the authenticated Codex CLI select a supported model; use a concrete ID only when your account exposes it |
 | `... failed (exit ...)` / login error | run the relevant CLI interactively once to log in |
 | Run is killed at ~10 min when launched by an agent | 5 sequential reasoning stages are heavy. The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling** — but prefer running this skill as a **background** task, and/or lower `MULTILLM_REASONING_EFFORT` to `medium`. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | A stage timed out or errored and returned placeholder text (e.g. `"A timeout occurred"`), so the final answer is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / per-stage `--timeout`, lower `MULTILLM_REASONING_EFFORT`, or simplify the prompt |
@@ -137,6 +138,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.7-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; they are defined in one place (`scripts/workflow/models.py`). Override them with the `--*-model` flags (see Usage) to match what your account can access. Model IDs from retired or superseded generations are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if you need to override that.
+- **Model names.** Gemini and Claude have explicit defaults (`gemini-3.7-flash`, `claude-opus-5`). OpenAI defaults to `codex-default`, deliberately letting the authenticated Codex CLI choose a model it supports instead of pinning an account-incompatible ID. Defaults live in one place (`scripts/workflow/models.py`); use `--*-model` flags to select a concrete model when needed. Retired or superseded concrete model IDs are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if a gateway remaps one.
 - **No quality guarantee.** The multi-stage pipeline is a design choice intended to add rigor; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

@@ -5,7 +5,7 @@ Calls the latest models using the user's subscription authentication, with no se
   - anthropic / claude → Claude Code     (`claude -p`) : --json-schema native structured output
   - openai             → Codex           (`codex exec`): --output-schema native structured output
 
-All long-form input goes through stdin (to avoid ARG_MAX / shell escaping).
+Claude and Codex receive long-form input through stdin (to avoid ARG_MAX / shell escaping).
 The role executors (proponent/opponent/moderator) are untouched — they only receive a ProviderResponse via the generate_structured() interface.
 
 Previously this used vendor SDKs (claude-agent-sdk / openai-codex / google-antigravity), but
@@ -48,7 +48,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from .models import ensure_current_model
+from .models import ensure_current_model, uses_codex_cli_default
 from .raw import to_jsonable
 
 
@@ -276,6 +276,78 @@ def _agy_failure_detail(output: str) -> str:
     return ""
 
 
+def _cli_failure_detail(stdout: str, stderr: str) -> str:
+    """Classify a CLI failure without copying untrusted diagnostic text into workflow output."""
+    details: list[str] = []
+    for output in (stdout, stderr):
+        try:
+            envelope = json.loads(output)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(envelope, dict) and envelope.get("is_error"):
+            for key in ("result", "error", "message"):
+                value = envelope.get(key)
+                if isinstance(value, str) and value.strip():
+                    details.append(value)
+    for output in (stderr, stdout):
+        for line in reversed(output.splitlines()):
+            candidate = line.strip()
+            lowered = candidate.lower()
+            if (
+                lowered.startswith(("error:", "error ", "fatal:", "fatal "))
+                or "invalid_request_error" in lowered
+                or "authentication error" in lowered
+                or "rate limit" in lowered
+            ):
+                details.append(candidate)
+    combined = "\n".join(details).lower()
+    if "model is not supported" in combined or "invalid_request_error" in combined:
+        return "invalid request (check that the configured model is supported by this CLI account)"
+    if "authentication" in combined or "unauthorized" in combined or "forbidden" in combined:
+        return "authentication or authorization failure"
+    if "rate limit" in combined or "too many requests" in combined:
+        return "rate limited"
+    if details:
+        return "CLI reported an error; diagnostic text was withheld to avoid leaking prompt content"
+    return "no diagnostic emitted by CLI"
+
+
+def _codex_actual_model(event_output: str) -> str | None:
+    """Read Codex's resolved model from its JSONL lifecycle events, if exposed by this CLI version."""
+    for line in event_output.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        for container in (event, event.get("thread"), event.get("turn")):
+            if not isinstance(container, dict):
+                continue
+            model = container.get("model")
+            if isinstance(model, str) and model.strip():
+                return model.strip()
+    return None
+
+
+_CLI_VERSION_CACHE: dict[str, str] = {}
+
+
+async def _cli_version(binary: str, *, cwd: str, timeout: float) -> str:
+    """Return a deadline-bounded CLI version once per binary, without affecting the result."""
+    if binary in _CLI_VERSION_CACHE:
+        return _CLI_VERSION_CACHE[binary]
+    try:
+        _rc, out, err = await _run_cli(
+            [binary, "--version"], stdin_text=None, cwd=cwd, timeout=min(timeout, 5)
+        )
+        version = (out or err).strip() or "unknown"
+    except Exception:
+        version = "unknown"
+    _CLI_VERSION_CACHE[binary] = version
+    return version
+
+
 async def _terminate_process_tree(proc: "asyncio.subprocess.Process") -> None:
     """Kill the whole process tree of a timed-out CLI, not just the direct child.
 
@@ -471,13 +543,18 @@ class ClaudeCliAdapter:
             # cwd=tmp → avoids loading the project's CLAUDE.md/hooks. Does not use --bare so subscription auth still applies.
             rc, out, err = await _run_cli(cmd, stdin_text=user_prompt, cwd=tmp, timeout=timeout)
         if rc != 0:
-            raise RuntimeError(f"claude -p failed (exit {rc}): {err.strip()[:500]}")
+            raise RuntimeError(
+                f"claude -p failed (exit {rc}): {_cli_failure_detail(out, err)}"
+            )
         try:
             data = json.loads(out)
         except json.JSONDecodeError as exc:
-            raise RuntimeError(f"claude -p JSON envelope parse failed: {out[:300]}") from exc
+            raise RuntimeError(
+                "claude -p returned an invalid JSON envelope; diagnostic text was withheld "
+                "to avoid leaking prompt content"
+            ) from exc
         if data.get("is_error"):
-            raise RuntimeError(f"claude -p error: {str(data.get('result', ''))[:300]}")
+            raise RuntimeError(f"claude -p error: {_cli_failure_detail(out, err)}")
         structured = data.get("structured_output")
         if structured is not None:
             response_text = json.dumps(structured, ensure_ascii=False)
@@ -543,12 +620,14 @@ class CodexAdapter:
             out_file = os.path.join(tmp, "out.json")
             with open(schema_file, "w", encoding="utf-8") as fh:
                 json.dump(schema, fh, ensure_ascii=False)
+            model_args = [] if uses_codex_cli_default(model_id) else ["-m", model_id]
             cmd = [
                 binary, "exec",
                 system_prompt,                      # role directive = prompt arg
                 "--output-schema", schema_file,
                 "-o", out_file,
-                "-m", model_id,
+                "--json",
+                *model_args,
                 "-c", f"model_reasoning_effort={effort}",
                 "-s", "read-only",
                 "--skip-git-repo-check",
@@ -562,19 +641,34 @@ class CodexAdapter:
                     response_text = fh.read().strip()
             except FileNotFoundError:
                 response_text = ""
+            actual_model = _codex_actual_model(out)
+            cli_version = await _cli_version(binary, cwd=tmp, timeout=timeout)
         if not response_text:
             if rc != 0:
-                raise RuntimeError(f"codex exec failed (exit {rc}): {err.strip()[:500]}")
-            raise RuntimeError(f"codex exec produced no structured output: {err.strip()[:300]}")
+                raise RuntimeError(
+                    f"codex exec failed (exit {rc}): {_cli_failure_detail(out, err)}"
+                )
+            raise RuntimeError(
+                "codex exec produced no structured output: "
+                f"{_cli_failure_detail(out, err)}"
+            )
         request = {
             "backend": "codex-cli",
             "model": model_id,
+            "actual_model": actual_model or "unknown",
             "reasoning_effort": effort,
             "argv": cmd,
             "system_prompt_chars": len(system_prompt),
             "user_prompt_chars": len(user_prompt),
         }
-        meta = {"backend": "codex-cli", "model": model_id, "reasoning_effort": effort}
+        meta = {
+            "backend": "codex-cli",
+            "model": model_id,
+            "actual_model": actual_model or "unknown",
+            "actual_model_resolution": "reported_by_cli" if actual_model else "not_exposed_by_cli",
+            "cli_version": cli_version,
+            "reasoning_effort": effort,
+        }
         parsed_output = None
         if output_model is not None:
             try:
@@ -584,7 +678,7 @@ class CodexAdapter:
                 print(f"[codex] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
-            model=model_id,
+            model=actual_model or model_id,
             request=to_jsonable(request),
             response_text=response_text,
             response_meta=meta,

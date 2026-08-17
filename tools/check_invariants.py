@@ -100,7 +100,7 @@ MUST_REJECT = (
 MUST_ACCEPT = (
     "claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-haiku-4-5",
     "claude-opus-4-8", "claude-sonnet-4-6", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash",
-    "gpt-3.6-luna", "mock-v1",
+    "codex-default", "mock-v1",
     "claude-opus-6", "claude-sonnet-6-1", "gemini-4-flash", "gemini-3.7-pro",
     "gpt-3.7-nova", "o5-turbo",
 )
@@ -245,6 +245,16 @@ def check_templates_match_defaults(policy, paths: list[Path] | None = None) -> l
             # Placeholders and env-var indirection are fine.
             if value.startswith(("$", "<", "{", "your")) or value in {"null", "PATH", "MODEL"}:
                 continue
+            # codex-default is a deliberate routing sentinel, not a vendor model ID. It must
+            # still match DEFAULT_MODELS so a config template cannot silently re-pin Codex to an
+            # account-incompatible model.
+            if value == "codex-default":
+                if value not in current:
+                    failures.append(
+                        f"{relpath}:{lineno} configures {value!r}, but it is not the current "
+                        "OpenAI default in DEFAULT_MODELS."
+                    )
+                continue
             if not MODEL_TOKEN.fullmatch(value):
                 continue
             if value not in current:
@@ -276,6 +286,12 @@ def check_policy_fixtures(policy) -> list[str]:
         failures.append("resolve_default_model() accepted an unknown provider instead of raising")
     except policy.ModelPolicyError:
         pass
+    if policy.DEFAULT_MODELS["openai"] != policy.CODEX_DEFAULT_SENTINEL:
+        failures.append("the OpenAI default no longer equals CODEX_DEFAULT_SENTINEL")
+    if not policy.uses_codex_cli_default(policy.CODEX_DEFAULT_SENTINEL):
+        failures.append("the OpenAI default no longer selects the authenticated Codex CLI default")
+    if policy.uses_codex_cli_default("some-concrete-model"):
+        failures.append("uses_codex_cli_default() accepts a concrete model override")
     return failures
 
 

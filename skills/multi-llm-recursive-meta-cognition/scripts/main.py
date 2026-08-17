@@ -24,8 +24,8 @@ Usage:
         --decomposer-model gemini-3.7-flash \
         --solver-model gemini-3.7-flash \
         --verifier-model claude-opus-5 \
-        --integrator-model gpt-3.6-luna \
-        --reflector-model gpt-3.6-luna
+        --integrator-model codex-default \
+        --reflector-model codex-default
 
 Configuration precedence:
     CLI arguments > environment variables > config file > default values

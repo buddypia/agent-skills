@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # No dependency install on purpose: check_invariants.py is stdlib-only and loads
-      # workflow/models.py straight from its path, so it never needs pydantic or a venv.
       - run: python3 tools/check_invariants.py
+      # Provider contracts use in-process fakes: no vendor credential or network call is made.
+      # All three skills share this dependency set, so one install is sufficient.
+      - run: python3 -m pip install -r skills/multi-llm-debate/scripts/requirements.txt
+      - run: python3 tools/check_provider_contracts.py

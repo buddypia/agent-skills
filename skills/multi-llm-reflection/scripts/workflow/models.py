@@ -35,8 +35,11 @@ import sys
 
 
 # =============================================================================
-# Current defaults (2026-07) — the ONLY place in the code that names a model ID
+# Current defaults (2026-08) — the ONLY place in the code that names a model ID
 # =============================================================================
+
+CODEX_DEFAULT_SENTINEL = "codex-default"
+
 
 DEFAULT_MODELS: dict[str, str] = {
     # Google Gemini via the agy (Antigravity) CLI.
@@ -44,8 +47,10 @@ DEFAULT_MODELS: dict[str, str] = {
     # Anthropic via the claude CLI.
     "anthropic": "claude-opus-5",
     "claude": "claude-opus-5",
-    # OpenAI via the codex CLI.
-    "openai": "gpt-3.6-luna",
+    # OpenAI via the codex CLI. This sentinel intentionally omits ``codex exec -m`` so
+    # the authenticated account's supported Codex default is selected. Hard-coding a
+    # model here made the skill fail for ChatGPT accounts whose CLI did not expose it.
+    "openai": CODEX_DEFAULT_SENTINEL,
     # Offline contract tests; never reaches a vendor.
     "mock": "mock-v1",
 }
@@ -89,8 +94,7 @@ _RETIRED_MODELS: dict[str, str] = {
 }
 
 # Whole generations that will not come back. Anchored at the start so a *newer* ID can never
-# match by accident — note that "gpt-3.6-luna" is deliberately unreachable by every pattern
-# here (`^gpt-3(?:$|-)` stops at the "." and `^gpt-3\.5` needs a 5).
+# match by accident.
 _LEGACY_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"^claude-(?:instant|1|2)(?:$|[.\-])"), "Claude 1/2 generation"),
     (re.compile(r"^claude-3(?:$|[.\-])"), "Claude 3 generation (including 3.5 / 3.7)"),
@@ -134,10 +138,9 @@ def legacy_reason(model: str) -> str | None:
 def resolve_default_model(provider: str) -> str:
     """Default model for ``provider``.
 
-    Raises on an unknown provider instead of the old ``DEFAULT_MODELS.get(p, "gpt-3.6-luna")``
-    fallback, which paired an OpenAI model ID with a provider that has no adapter — a typo in
-    ``provider:`` surfaced much later as "Unknown provider" from inside a stage, after the
-    run had already started.
+    Raises on an unknown provider instead of silently pairing a model with a provider that has
+    no adapter — a typo in ``provider:`` would otherwise surface much later from inside a stage,
+    after the run had already started.
     """
     normalized = (provider or "").strip().lower()
     model = DEFAULT_MODELS.get(normalized)
@@ -147,6 +150,16 @@ def resolve_default_model(provider: str) -> str:
             f"{', '.join(sorted(DEFAULT_MODELS))}"
         )
     return model
+
+
+def uses_codex_cli_default(model: str) -> bool:
+    """Whether the OpenAI role should omit ``codex exec -m``.
+
+    ``codex-default`` is a routing sentinel, not a vendor model ID; keeping it in
+    ``DEFAULT_MODELS`` makes the default visible to config resolution and documentation while
+    preserving a single source of truth.
+    """
+    return (model or "").strip() == CODEX_DEFAULT_SENTINEL
 
 
 def ensure_current_model(model: str, *, provider: str = "", source: str = "configuration") -> str:

@@ -8,7 +8,7 @@ For the skill definition (invocation summary), see [SKILL.md](./SKILL.md).
 ```
 [topic] → Proponent(for) → Opponent(against) → Moderator(neutral eval) → integrated output
           agy (Antigravity)   claude (Claude)   codex (Codex)
-          gemini-3.7-flash    claude-opus-5     gpt-3.6-luna(xhigh)
+          gemini-3.7-flash    claude-opus-5     Codex account default
 ```
 
 Each role produces structured JSON based solely on its assigned role within an independent context, and each stage references the output of the previous one.
@@ -86,7 +86,7 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 uv run --directory scripts main.py "topic" \
     --proponent-model gemini-3.7-flash \
     --opponent-model  claude-opus-5 \
-    --moderator-model gpt-3.6-luna
+    --moderator-model codex-default
 # without uv: scripts/.venv/bin/python scripts/main.py ... (Windows: .venv\Scripts\python.exe)
 # per-role provider: --{proponent,opponent,moderator}-provider {gemini|anthropic|openai|mock}
 ```
@@ -106,7 +106,7 @@ uv run --directory scripts main.py "topic" \
 | `MULTILLM_SHARD_MAX` | `16` | Maximum number of shards. When the input needs more than this many shards of `MULTILLM_SHARD_CHARS` to cover, the run warns and reports `context_relay.oversized_shards` — raise this, or curate the input into a brief |
 | `MULTILLM_SHARD_CONCURRENCY` | `8` | Maximum **simultaneous** distillation calls. Independent of the shard count: excess shards queue and run in later batches, so a large input never spawns a matching number of CLI processes |
 | `MULTILLM_DISTILL_EFFORT` | `low` | Reasoning effort for the shard-distillation calls only (the work is mechanical; roles keep `MULTILLM_REASONING_EFFORT`) |
-| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | Per-backend model override (checked against the same policy as every other channel) |
+| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | Per-backend model override. The OpenAI default is `codex-default`, which omits `codex exec -m` and uses the authenticated account's supported default. |
 | `MULTILLM_ALLOW_LEGACY_MODELS` | unset | Allow an out-of-date model ID instead of refusing it. By default a retired snapshot or a superseded generation (`claude-3-*`, `gpt-4*`, `gemini-2.*`, …) is rejected **before the run starts**, naming the flag / env var / config key it came from — otherwise it only surfaces later as an opaque vendor 404 that a stage swallows into placeholder text. Set to `1` only when a gateway remaps the old name |
 | `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | — | API keys (when not using CLI login / when running in a sandbox). Only Gemini uses it for direct API calls, and only as a fallback when the `agy` CLI itself fails |
 | `DEBATE_{PROPONENT,OPPONENT,MODERATOR}_{PROVIDER,MODEL}` | — | Per-role override |
@@ -130,6 +130,7 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 | Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run the skill as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | One or more roles timed out or errored and returned placeholder text, so the verdict is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the topic, then re-run |
 | `degraded_stages` contains `context_distillation` | The **context relay** lost fidelity, not a stage. Read `context_relay` in the JSON result: `failed_shards` (a shard errored, timed out, or was skipped for budget), `truncated_shards` (digests cut to fit the relay budget), `oversized_shards` (input too large to cover at `MULTILLM_SHARD_MAX`). Raise `MULTILLM_SHARD_MAX` / `MULTILLM_DIGEST_THRESHOLD`, or curate the input into a brief |
+| Codex says a configured model is unsupported | Remove the model override or set it to `codex-default` to use the authenticated Codex CLI's supported default; use a concrete ID only when your account exposes it |
 | Codex/Claude slow | Lower `MULTILLM_REASONING_EFFORT` (`high`→`medium`); `xhigh` is the slowest tier |
 | Empty output / corrupted JSON | Use `--verbose` to inspect the raw output of each stage |
 
@@ -163,6 +164,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Default model IDs (e.g. `gemini-3.7-flash`, `claude-opus-5`, `gpt-3.6-luna`) reflect the latest models as of 2026-07 and change over time; they are defined in one place (`scripts/workflow/models.py`). Override them with the `--*-model` flags (see Usage) to match what your account can access. Model IDs from retired or superseded generations are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if you need to override that.
+- **Model names.** Gemini and Claude have explicit defaults (`gemini-3.7-flash`, `claude-opus-5`). OpenAI defaults to `codex-default`, which deliberately lets the authenticated Codex CLI choose a model it supports instead of pinning an account-incompatible ID. Defaults live in one place (`scripts/workflow/models.py`); override them with `--*-model` flags when needed. Retired or superseded concrete model IDs are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if a gateway remaps one.
 - **No quality guarantee.** Multi-model debate is a design choice intended to surface more perspectives; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

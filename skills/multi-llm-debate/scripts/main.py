@@ -21,7 +21,7 @@ Usage:
     python main.py "debate topic" \\
         --proponent-model gemini-3.7-flash \\
         --opponent-model claude-opus-5 \\
-        --moderator-model gpt-3.6-luna
+        --moderator-model codex-default
 
 Configuration precedence:
     CLI arguments > environment variables > config file > default values

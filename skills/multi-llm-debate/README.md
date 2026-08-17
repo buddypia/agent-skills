@@ -20,7 +20,7 @@ Each role produces structured JSON based solely on its assigned role within an i
 |------|------|------|------|
 | anthropic | `claude` (`npm i -g @anthropic-ai/claude-code`) | `claude` login (subscription) | `claude -p --json-schema` → `structured_output` |
 | openai | `codex` (`npm i -g @openai/codex`) | `codex login` (ChatGPT) | `codex exec --output-schema` |
-| gemini | `agy` (https://antigravity.google → `agy install`) | `agy` first-run OAuth | `agy -p` (plain text → JSON extraction + Pydantic validation) |
+| gemini | `agy` (https://antigravity.google → `agy install`) | `agy` first-run OAuth | `agy -p --output-format json --json-schema` → `structured_output` |
 
 Each CLI runs under the user's existing login, so no API key is required by default (except when running inside an agent sandbox, where API keys can be supplied). Please follow each CLI's and provider's terms of service — see the [Disclaimer](#disclaimer).
 
@@ -96,7 +96,7 @@ uv run --directory scripts main.py "topic" \
 | Variable | Default | Purpose |
 |------|------|------|
 | `DEBATE_PROVIDER_STRATEGY` | `shuffle` | Assignment strategy (shuffle / random / fixed) |
-| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude (`--effort`) and Codex (none/minimal/low/medium/high/xhigh/max). `xhigh` is the slowest and routinely exceeds the wall-clock budget — raise it only when you have the time |
+| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude, Codex, and agy. agy supports low/medium/high; higher-only Codex values are clamped to `high` for agy. `xhigh` is the slowest and routinely exceeds the wall-clock budget — raise it only when you have the time |
 | `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling: each call is capped at the time remaining, and once the budget is spent the remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the whole process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
@@ -136,7 +136,7 @@ DEBATE_PROPONENT_PROVIDER=mock DEBATE_OPPONENT_PROVIDER=mock DEBATE_MODERATOR_PR
 ## Architecture (summary)
 
 - The three adapters in `scripts/workflow/providers.py` (`ClaudeCliAdapter` / `CodexAdapter` / `AntigravityCliAdapter`) implement `generate_structured()`. The role executors and workflow are unchanged.
-- Each CLI is invoked via `asyncio.create_subprocess_exec`, and long inputs are passed through stdin (no `shell=True`, OS-independent). claude/codex produce native JSON schema output; Antigravity extracts JSON from plain-text output and validates it with Pydantic.
+- Each CLI is invoked via `asyncio.create_subprocess_exec` (no `shell=True`, OS-independent). Claude/Codex/Antigravity all use their native JSON-schema output. agy receives the complete task in its print prompt because its `-p` mode does not consume stdin as task content.
 - claude uses `--allowed-tools "" --permission-mode dontAsk`, and each CLI runs with a working tempdir as its cwd so that project settings and hooks are not read — pure generation.
 - Gemini uses the `agy` CLI (subscription OAuth) first; it only falls back to the direct API via the standard library `urllib` when `agy` itself fails and `GEMINI_API_KEY` is available. The direct-API path strips schema fields (e.g. `additionalProperties`) that the Gemini REST `responseSchema` (an OpenAPI 3.0 subset) doesn't support.
 - Provider assignment is handled by `settings.get_{shuffled,random}_providers()`, and strategy selection by `main._resolve_provider_strategy()` (default shuffle).

@@ -1,0 +1,114 @@
+<!-- ============================================================================
+MODULE: business-model-canvas                              lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: The classic 9-block Business Model Canvas on one page (pure CSS grid,
+         NO SVG). The canonical Osterwalder arrangement: Key Partners / Key
+         Activities / Key Resources / Value Propositions / Customer Relationships
+         / Channels / Customer Segments across the top band, Cost Structure and
+         Revenue Streams across the bottom. Each block = a mono kicker title over
+         bullet items. For business-model design / review on a single canvas.
+         Distinction: swot is 4 strategic quadrants (S/W/O/T); capability-map
+         inventories competencies by domain; business-model-canvas is the
+         nine-block business-model-on-one-page template.
+VARIABLES: {{TITLE}}; per block only its {{ITEM}} bullets. The nine block titles
+           (Key Partners … Revenue Streams) are the fixed canonical BMC slots and
+           stay as printed - you fill each block's bullet items only.
+SCALING:  the canvas is a 10-col × 3-row grid so blocks keep BMC proportions:
+          grid-template-columns: repeat(10,1fr); grid-template-rows: repeat(2,auto) auto.
+          Placement - Key Partners 1/3 · rows1-2; Key Activities 3/5 · row1;
+          Key Resources 3/5 · row2; Value Propositions 5/7 · rows1-2; Customer
+          Relationships 7/9 · row1; Channels 7/9 · row2; Customer Segments 9/11 ·
+          rows1-2; Cost Structure 1/6 · row3; Revenue Streams 6/11 · row3. On
+          narrow screens the grid collapses to one column (blocks stack in order).
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --bg-surface,
+          --bg-muted, --border-*, --text-*, --font-mono, --radius-*, --sp-*,
+          --type-*, --shadow-sm, --tracking-eyebrow, --dur-fast, --ease)
+MODULE CSS: inline the data-module="business-model-canvas" style block once.
+INTERACTION: hover lifts a block's border toward the accent (paint-only, guarded).
+USAGE: keep the nine .bmc-block cells in the given order; each is placed by its
+       own class (.bmc-partners … .bmc-revenue). Add/remove <li> bullets per block.
+============================================================================ -->
+<style data-module="business-model-canvas">
+  .bmc { margin: 0; }
+  .bmc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .bmc-grid { display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(2, minmax(84px, auto)) minmax(72px, auto); gap: var(--sp-2); }
+  /* block: mono kicker eyebrow over a bulleted list, faint surface tile */
+  .bmc-block { display: grid; grid-template-rows: auto 1fr; gap: var(--sp-2); padding: var(--sp-3); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-sm); transition: border-color var(--dur-fast) var(--ease); }
+  .bmc-block:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default)); }
+  .bmc-kicker { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--accent); }
+  .bmc-items { margin: 0; padding-left: var(--sp-4); display: grid; gap: 3px; font: var(--type-small); color: var(--text-secondary); }
+  .bmc-items li { line-height: 1.4; }
+  /* value proposition sits at the heart - a slightly warmer tile */
+  .bmc-value { background: color-mix(in srgb, var(--accent) 7%, var(--bg-surface)); border-color: color-mix(in srgb, var(--accent) 30%, var(--border-default)); }
+  /* canonical BMC placement (10 cols × 3 rows) */
+  .bmc-partners { grid-column: 1 / 3;  grid-row: 1 / 3; }
+  .bmc-activities{ grid-column: 3 / 5;  grid-row: 1 / 2; }
+  .bmc-resources { grid-column: 3 / 5;  grid-row: 2 / 3; }
+  .bmc-value     { grid-column: 5 / 7;  grid-row: 1 / 3; }
+  .bmc-relations { grid-column: 7 / 9;  grid-row: 1 / 2; }
+  .bmc-channels  { grid-column: 7 / 9;  grid-row: 2 / 3; }
+  .bmc-segments  { grid-column: 9 / 11; grid-row: 1 / 3; }
+  .bmc-cost      { grid-column: 1 / 6;  grid-row: 3 / 4; }
+  .bmc-revenue   { grid-column: 6 / 11; grid-row: 3 / 4; }
+  @media (max-width: 720px) { .bmc-grid { grid-template-columns: 1fr; grid-template-rows: none; } .bmc-block { grid-column: 1 / -1 !important; grid-row: auto !important; } }
+</style>
+
+<figure class="bmc card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="bmc-title">{{TITLE}}</figcaption> <!-- e.g. サブスク型学習アプリ ビジネスモデル -->
+  <div class="bmc-grid">
+
+    <section class="bmc-block bmc-partners">
+      <span class="bmc-kicker">Key Partners</span>
+      <ul class="bmc-items">
+        <li>{{ITEM}}</li> <!-- e.g. 教材コンテンツ提供者 -->
+        <li>{{ITEM}}</li> <!-- e.g. 決済プラットフォーム -->
+      </ul>
+    </section>
+
+    <section class="bmc-block bmc-activities">
+      <span class="bmc-kicker">Key Activities</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. 学習体験の開発 -->
+    </section>
+
+    <section class="bmc-block bmc-resources">
+      <span class="bmc-kicker">Key Resources</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. 学習データと推薦エンジン -->
+    </section>
+
+    <section class="bmc-block bmc-value">
+      <span class="bmc-kicker">Value Propositions</span>
+      <ul class="bmc-items">
+        <li>{{ITEM}}</li> <!-- e.g. 1日15分で続く学習習慣 -->
+        <li>{{ITEM}}</li> <!-- e.g. 個人最適化されたカリキュラム -->
+      </ul>
+    </section>
+
+    <section class="bmc-block bmc-relations">
+      <span class="bmc-kicker">Customer Relationships</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. アプリ内コーチング -->
+    </section>
+
+    <section class="bmc-block bmc-channels">
+      <span class="bmc-kicker">Channels</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. App Store / Web -->
+    </section>
+
+    <section class="bmc-block bmc-segments">
+      <span class="bmc-kicker">Customer Segments</span>
+      <ul class="bmc-items">
+        <li>{{ITEM}}</li> <!-- e.g. 資格取得を目指す社会人 -->
+        <li>{{ITEM}}</li> <!-- e.g. 学び直し層 -->
+      </ul>
+    </section>
+
+    <section class="bmc-block bmc-cost">
+      <span class="bmc-kicker">Cost Structure</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. コンテンツ制作・インフラ費 -->
+    </section>
+
+    <section class="bmc-block bmc-revenue">
+      <span class="bmc-kicker">Revenue Streams</span>
+      <ul class="bmc-items"><li>{{ITEM}}</li></ul> <!-- e.g. 月額サブスクリプション -->
+    </section>
+
+  </div>
+</figure>

@@ -1,0 +1,95 @@
+<!-- ============================================================================
+MODULE: hub-spoke                               lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG hub-and-spoke (radial) diagram (NO external libs). One
+         central HUB node with 5-8 peripheral nodes evenly placed on a circle, each
+         joined to the hub by a spoke that can carry a relation label. Every arm is
+         tinted by --cat. For ecosystems, integration maps, a stakeholder ring, a
+         platform + its satellites.
+         Distinction: node-graph is an arbitrary many-to-many network; mindmap is a
+         multi-level idea tree - hub-spoke is exactly ONE center with direct,
+         single-hop satellites (no peripheral-to-peripheral links).
+VARIABLES: {{TITLE}}; hub {{HUB}}; per arm {{NODE}} + optional {{RELATION}}.
+GEOMETRY:  viewBox 0 0 640 600, center (320,300), ring radius R=200. A node at angle
+           θ (from top, clockwise) sits at x=320+R·sinθ, y=300−R·cosθ; for 6 nodes
+           θ = 0,60,120,180,240,300° → (320,100)(493,200)(493,400)(320,500)(147,400)
+           (147,200). Spoke = M320,300 L node; relation label at the spoke midpoint
+           ((320+nx)/2,(300+ny)/2) with a page-colored halo. Node box 120×48 centered
+           on its point; hub circle r=54. For N nodes step θ by 360/N and recompute.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --on-accent, --bg-card,
+           --border-default, --text-*, --font-mono, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="hub-spoke" style block once.
+INTERACTION: none (static). Hovering an arm firms its spoke + node (paint/width
+             only, reduced-motion guarded). role="img" + <title> a11y; real text.
+USAGE: one <g class="hs-arm cat-N"> per satellite (line.hs-spoke + optional
+       text.hs-rel + rect.hs-node-box + text.hs-node-label); hub drawn LAST on top.
+============================================================================ -->
+<style data-module="hub-spoke">
+  .hs { width: 100%; }
+  .hs svg { width: 100%; height: auto; max-width: 560px; margin-inline: auto; display: block; font-family: var(--font-sans); overflow: visible; }
+  .hs-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .hs-spoke { stroke: color-mix(in srgb, var(--accent) 26%, var(--border-default)); stroke-width: 1.6; stroke-linecap: round; transition: stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  .hs-rel { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; paint-order: stroke; stroke: var(--bg-card); stroke-width: 3px; stroke-linejoin: round; }
+  /* satellite node: --cat-tinted card centered on its ring point */
+  .hs-node-box { fill: color-mix(in srgb, var(--nc, var(--accent)) 12%, var(--bg-card)); stroke: color-mix(in srgb, var(--nc, var(--accent)) 46%, var(--border-default)); stroke-width: 1.5; transition: fill var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  .hs-node-label { fill: var(--text-primary); font-size: 12px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+  .hs-arm.cat-1 { --nc: var(--cat-1); } .hs-arm.cat-2 { --nc: var(--cat-2); }
+  .hs-arm.cat-3 { --nc: var(--cat-3); } .hs-arm.cat-4 { --nc: var(--cat-4); }
+  .hs-arm.cat-5 { --nc: var(--cat-5); }
+  .hs-arm:hover .hs-spoke { stroke: color-mix(in srgb, var(--nc, var(--accent)) 60%, var(--border-default)); stroke-width: 2.4; }
+  .hs-arm:hover .hs-node-box { fill: color-mix(in srgb, var(--nc, var(--accent)) 20%, var(--bg-card)); stroke-width: 2.2; }
+  /* hub: the single center everything points to */
+  .hs-hub { fill: var(--accent); stroke: color-mix(in srgb, var(--on-accent) 24%, var(--accent)); stroke-width: 1.5; }
+  .hs-hub-label { fill: var(--on-accent); font-size: 14px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+  @media (prefers-reduced-motion: reduce) { .hs-spoke, .hs-node-box { transition: none; } }
+</style>
+
+<figure class="hs card-outlined">
+  <figcaption class="hs-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 640 600" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── arms - one <g class="hs-arm cat-N"> per satellite (spoke then node) ── -->
+    <g class="hs-arm cat-1">
+      <line class="hs-spoke" x1="320" y1="300" x2="320" y2="100"/>
+      <text class="hs-rel" x="320" y="200">{{RELATION}}</text>          <!-- e.g. 認証 -->
+      <rect class="hs-node-box" x="260" y="76" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="320" y="100">{{NODE}}</text>       <!-- e.g. IDプロバイダ -->
+    </g>
+    <g class="hs-arm cat-2">
+      <line class="hs-spoke" x1="320" y1="300" x2="493" y2="200"/>
+      <text class="hs-rel" x="406" y="250">{{RELATION}}</text>          <!-- e.g. 決済 -->
+      <rect class="hs-node-box" x="433" y="176" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="493" y="200">{{NODE}}</text>       <!-- e.g. 決済ゲートウェイ -->
+    </g>
+    <g class="hs-arm cat-3">
+      <line class="hs-spoke" x1="320" y1="300" x2="493" y2="400"/>
+      <text class="hs-rel" x="406" y="350">{{RELATION}}</text>          <!-- e.g. 配送 -->
+      <rect class="hs-node-box" x="433" y="376" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="493" y="400">{{NODE}}</text>       <!-- e.g. 配送API -->
+    </g>
+    <g class="hs-arm cat-4">
+      <line class="hs-spoke" x1="320" y1="300" x2="320" y2="500"/>
+      <text class="hs-rel" x="320" y="400">{{RELATION}}</text>          <!-- e.g. 分析 -->
+      <rect class="hs-node-box" x="260" y="476" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="320" y="500">{{NODE}}</text>       <!-- e.g. 分析基盤 -->
+    </g>
+    <g class="hs-arm cat-5">
+      <line class="hs-spoke" x1="320" y1="300" x2="147" y2="400"/>
+      <text class="hs-rel" x="233" y="350">{{RELATION}}</text>          <!-- e.g. 通知 -->
+      <rect class="hs-node-box" x="87" y="376" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="147" y="400">{{NODE}}</text>       <!-- e.g. 通知サービス -->
+    </g>
+    <g class="hs-arm cat-1">
+      <line class="hs-spoke" x1="320" y1="300" x2="147" y2="200"/>
+      <text class="hs-rel" x="233" y="250">{{RELATION}}</text>          <!-- e.g. 在庫 -->
+      <rect class="hs-node-box" x="87" y="176" width="120" height="48" rx="12"/>
+      <text class="hs-node-label" x="147" y="200">{{NODE}}</text>       <!-- e.g. 在庫管理 -->
+    </g>
+    <!-- ↑ repeat: one arm per satellite; step angle by 360/N and recompute points -->
+
+    <!-- ── hub (drawn last, on top of the spoke inner ends) ─────────────────── -->
+    <circle class="hs-hub" cx="320" cy="300" r="54"/>
+    <text class="hs-hub-label" x="320" y="300">{{HUB}}</text>           <!-- e.g. コア基盤 -->
+  </svg>
+</figure>

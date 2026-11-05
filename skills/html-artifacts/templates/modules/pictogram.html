@@ -1,0 +1,77 @@
+<!-- ============================================================================
+MODULE: pictogram                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: An icon-unit / ISOTYPE chart (pure CSS - no SVG). Each row is a label plus a
+         strip of repeated unit glyphs (● or a 人 glyph in spans) where the FILLED
+         units are accent/cat-tinted and the remainder are dimmed, with a value label
+         ("7/10人"). Counts discrete units with a repeated icon, infographic-style.
+         Distinction: waffle is an abstract 100-cell grid for a part-of-100 share;
+         progress is one continuous bar toward a goal; this counts DISCRETE whole
+         units with a meaningful glyph so "7 of 10 people" reads as seven icons.
+VARIABLES: {{TITLE}}; per row {{LABEL}} {{VALUE}} (e.g. 7/10人) + a strip of .pgm-u
+           unit glyphs where filled ones carry .on + a .cat-N tint and the rest .off.
+SCALING:   one .pgm-u per unit (glyph is the span's text - swap ● for 人/★/etc.).
+           Mark the first {filled} units .on and the rest .off; keep the same unit
+           COUNT per row so rows align. .cat-N on the .pgm-units sets the row's fill hue.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --bg-surface, --border-*, --text-*,
+           --font-mono, --sp-*, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="pictogram" style block once.
+INTERACTION: hover lifts a filled unit (paint only, reduced-motion guarded).
+             aria-label on the figure; labels + value readouts are real text; the
+             glyph strip is aria-hidden (the value carries the count).
+USAGE: one .pgm-row per metric; inside .pgm-units emit N .pgm-u glyph spans, .on for
+       filled + .off for empty. Give .pgm-units a .cat-N to tint that row's filled units.
+============================================================================ -->
+<style data-module="pictogram">
+  .pgm { margin: 0; }
+  .pgm-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .pgm-rows { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .pgm-row { display: grid; grid-template-columns: minmax(84px, auto) 1fr auto; align-items: center; gap: var(--sp-3); }
+  .pgm-label { font: var(--type-small); font-weight: 600; color: var(--text-primary); }
+  .pgm-units { --uc: var(--accent); display: flex; flex-wrap: wrap; gap: var(--sp-1); font-size: 20px; line-height: 1; }
+  .pgm-u { display: inline-block; transition: transform var(--dur-fast) var(--ease); }
+  .pgm-u.on { color: color-mix(in srgb, var(--uc) 82%, var(--text-primary)); }
+  .pgm-u.off { color: color-mix(in srgb, var(--text-muted) 40%, var(--border-default)); }
+  .pgm-u.on:hover { transform: translateY(-2px); }
+  .pgm-units.cat-1 { --uc: var(--cat-1); } .pgm-units.cat-2 { --uc: var(--cat-2); }
+  .pgm-units.cat-3 { --uc: var(--cat-3); } .pgm-units.cat-4 { --uc: var(--cat-4); }
+  .pgm-units.cat-5 { --uc: var(--cat-5); }
+  .pgm-val { font: var(--type-small); font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-secondary); text-align: right; white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .pgm-u { transition: none; } }
+</style>
+
+<figure class="pgm card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="pgm-title">{{TITLE}}</figcaption>
+  <div class="pgm-rows">
+    <!-- ↓ one .pgm-row per metric; keep the unit COUNT equal across rows so they align.
+         The glyph is each span's text - swap ● for 人 / ★ / etc. -->
+    <div class="pgm-row">
+      <span class="pgm-label">{{LABEL}}</span>   <!-- e.g. 継続利用 -->
+      <span class="pgm-units cat-1" aria-hidden="true">
+        <span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span>
+      </span>
+      <span class="pgm-val">{{VALUE}}</span>     <!-- e.g. 7/10人 -->
+    </div>
+    <div class="pgm-row">
+      <span class="pgm-label">{{LABEL}}</span>   <!-- e.g. 満足度 -->
+      <span class="pgm-units cat-3" aria-hidden="true">
+        <span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span>
+      </span>
+      <span class="pgm-val">{{VALUE}}</span>     <!-- e.g. 8/10人 -->
+    </div>
+    <div class="pgm-row">
+      <span class="pgm-label">{{LABEL}}</span>   <!-- e.g. 推奨意向 -->
+      <span class="pgm-units cat-4" aria-hidden="true">
+        <span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span>
+      </span>
+      <span class="pgm-val">{{VALUE}}</span>     <!-- e.g. 5/10人 -->
+    </div>
+    <div class="pgm-row">
+      <span class="pgm-label">{{LABEL}}</span>   <!-- e.g. 解約意向 -->
+      <span class="pgm-units cat-5" aria-hidden="true">
+        <span class="pgm-u on">●</span><span class="pgm-u on">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span><span class="pgm-u off">●</span>
+      </span>
+      <span class="pgm-val">{{VALUE}}</span>     <!-- e.g. 2/10人 -->
+    </div>
+    <!-- ↑ repeat: one .pgm-row per metric -->
+  </div>
+</figure>

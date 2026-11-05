@@ -1,0 +1,73 @@
+<!-- ============================================================================
+MODULE: form-fields                                        lineage: html-artifacts v2 (form-controls)
+PURPOSE: Themed prototype form - request-access / settings / signup / contact.
+         Uses the core/elements.css field primitives (themed text input, email,
+         number, select, textarea, checkbox) wrapped in the .field label+control
+         stack. The submit button is wired by [data-form-mock] (HA.formMock): it
+         intercepts submit, reveals .form-status, and never navigates - so the
+         form is a real, non-dead interactive prototype, not bare OS controls.
+VARIABLES (builder section type "form"):
+  { type:"form", title?, desc?, columns?:1|2, submit?:{label}|false,
+    fields:[{ label, kind?:"text"|"email"|"password"|"number"|"tel"|"url"|"date"|
+                       "select"|"textarea"|"checkbox",
+              placeholder?, options?:[…] (select), help?, required?, optional?,
+              checked? (checkbox), full? (span both columns) }] }
+REQUIRES: core/elements.css (input/select/textarea/checkbox primitives, .field,
+          .field-label, .field-hint, .field-req, .option-row, .card-outlined, .btn)
+          + core/interactions.js (HA.formMock wires [data-form-mock]).
+MODULE CSS: inline the data-module="form-fields" style block once (grid + the
+            submit-confirmation state).
+============================================================================ -->
+<style data-module="form-fields">
+  .form-fields { display: grid; gap: var(--sp-5); }
+  .form-fields > .lede { margin-top: calc(-1 * var(--sp-3)); }
+  .form-grid { display: grid; gap: var(--sp-4); grid-template-columns: repeat(var(--form-cols, 1), minmax(0, 1fr)); }
+  .form-grid .field-full { grid-column: 1 / -1; }
+  .form-grid > .option-row { grid-column: 1 / -1; }
+  .field-opt { font: var(--type-caption); color: var(--text-muted); font-weight: 400; }
+  .form-actions { display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; margin-top: var(--sp-1); }
+  /* confirmation revealed by HA.formMock on submit (no navigation) */
+  .form-status { font: var(--type-small); font-weight: 600; color: var(--color-success); opacity: 0; transform: translateY(-2px); transition: opacity var(--dur-mid) var(--ease), transform var(--dur-mid) var(--ease-out); }
+  .form-fields.is-submitted .form-status { opacity: 1; transform: none; }
+  @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<form class="form-fields card-outlined" data-form-mock aria-label="Request access">
+  <h2>Request access</h2>
+  <p class="lede">Tell us who you are and we will provision your workspace.</p>
+
+  <div class="form-grid" style="--form-cols:2">
+    <!-- ↓ one .field per control; textarea/checkbox span both columns -->
+    <div class="field">
+      <label for="fm-name">Full name <span class="field-req" aria-hidden="true">*</span></label>
+      <input type="text" id="fm-name" placeholder="Jane Doe" required aria-required="true">
+    </div>
+    <div class="field">
+      <label for="fm-email">Email <span class="field-req" aria-hidden="true">*</span></label>
+      <input type="email" id="fm-email" placeholder="jane@example.com" required aria-required="true">
+    </div>
+    <div class="field">
+      <label for="fm-team">Team</label>
+      <select id="fm-team"><option>Platform</option><option>Growth</option><option>Data</option></select>
+    </div>
+    <div class="field">
+      <label for="fm-role">Role <span class="field-opt">(Optional)</span></label>
+      <input type="text" id="fm-role" placeholder="e.g. Engineer">
+    </div>
+    <div class="field field-full">
+      <label for="fm-notes">Notes</label>
+      <textarea id="fm-notes" aria-describedby="fm-notes-h"></textarea>
+      <span class="field-hint" id="fm-notes-h">Optional context for the reviewer.</span>
+    </div>
+    <div class="option-row field-full">
+      <input type="checkbox" id="fm-agree" required aria-required="true">
+      <label class="ck-text" for="fm-agree"><span class="option-label">I agree to the acceptable-use policy</span></label>
+    </div>
+    <!-- ↑ repeat -->
+  </div>
+
+  <div class="form-actions">
+    <button class="btn" type="submit">Send request</button>
+    <span class="form-status" role="status" aria-hidden="true">Submitted ✓</span>
+  </div>
+</form>

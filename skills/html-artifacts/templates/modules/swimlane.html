@@ -1,0 +1,107 @@
+<!-- ============================================================================
+MODULE: swimlane                                            lineage: v3 diagrams expansion
+PURPOSE: Self-contained SVG swimlane process map (NO external libs). Horizontal
+         lanes (one per actor / department; the lane name rides a colored band on
+         the left edge), process boxes placed within lanes across step columns,
+         and arrows that hand the flow off BETWEEN lanes. For cross-functional
+         approval / hand-off workflows.
+VARIABLES: {{TITLE}}; per lane {{LANE_NAME}}; per step {{PROCESS}} (box label).
+GEOMETRY:  lanes are stacked horizontal bands of H=84: lane i top = 8 + i*84,
+           its midline = top+42 (50, 134, 218 …). The left name-band is x=4 W=40;
+           lane bodies span x=44 → 812. Step columns are centered at 110, 260,
+           410, 560, 710 (spacing 150); faint dashed separators sit on the column
+           boundaries (185, 335, 485, 635). A process box is W=110 H=44 centered
+           on (colCenter, laneMid): x=colCenter-55, y=laneMid-22. A hand-off arrow
+           is a straight line from the source box right edge (cx+55) to the target
+           box left edge (cx-55). Add a lane by extending every band + the viewBox
+           height by +84; add a step column at prevCenter+150 and widen viewBox.
+REQUIRES:  core/tokens.css (--bg-card, --bg-muted, --accent, --cat-1..5,
+           --border-default, --border-subtle, --text-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="swimlane" style block once.
+INTERACTION: none (static). role="img" + <title> a11y.
+USAGE: one lane = a <rect class="sw-lane"> body + a <rect class="sw-band cat-n"> +
+       a rotated <text class="sw-lane-label">. One step = a <g> (rect.sw-box +
+       text.sw-box-label). Marker id is namespaced "swimlane-arrow". Draw lanes,
+       then column separators, then arrows, then boxes on top.
+============================================================================ -->
+<style data-module="swimlane">
+  .sw { width: 100%; }
+  .sw svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  .sw-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .sw .sw-lane { fill: color-mix(in srgb, var(--bg-muted) 45%, transparent); stroke: var(--border-subtle); stroke-width: 1; }
+  .sw .sw-lane.-alt { fill: transparent; }
+  /* left name-band: a cat-tinted strip carrying the actor's name vertically */
+  .sw .sw-band.cat-1 { fill: color-mix(in srgb, var(--cat-1) 30%, var(--bg-card)); }
+  .sw .sw-band.cat-2 { fill: color-mix(in srgb, var(--cat-2) 30%, var(--bg-card)); }
+  .sw .sw-band.cat-3 { fill: color-mix(in srgb, var(--cat-3) 30%, var(--bg-card)); }
+  .sw .sw-lane-label { fill: var(--text-primary); font-size: 12px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; letter-spacing: .02em; }
+  .sw .sw-col { stroke: var(--border-subtle); stroke-width: 1; stroke-dasharray: 3 5; }
+  /* process boxes: card slabs whose edge/fill warm toward the accent on hover */
+  .sw .sw-box { fill: var(--bg-card); stroke: var(--border-default); stroke-width: 1.5; transition: stroke var(--dur-fast) var(--ease), fill var(--dur-fast) var(--ease); }
+  .sw .sw-node:hover .sw-box { stroke: color-mix(in srgb, var(--accent) 55%, var(--border-default)); fill: color-mix(in srgb, var(--accent) 6%, var(--bg-card)); }
+  .sw .sw-box-label { fill: var(--text-primary); font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+  .sw .sw-flow { fill: none; stroke: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); stroke-width: 1.75; stroke-linecap: round; }
+  .sw .sw-arrow { fill: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); }
+  @media (prefers-reduced-motion: reduce) { .sw .sw-box { transition: none; } }
+</style>
+
+<figure class="sw card-outlined">
+  <figcaption class="sw-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 820 268" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <defs>
+      <marker id="swimlane-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="sw-arrow" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+    </defs>
+
+    <!-- ── LANES (body band + left name-band + rotated label) ──────────────
+         one lane per actor; alternate .-alt for a faint zebra. -->
+    <rect class="sw-lane" x="44" y="8" width="768" height="84"/>
+    <rect class="sw-band cat-1" x="4" y="8" width="40" height="84" rx="6"/>
+    <text class="sw-lane-label" transform="rotate(-90 24 50)" x="24" y="50">{{LANE_NAME}}</text> <!-- e.g. Requester -->
+    <rect class="sw-lane -alt" x="44" y="92" width="768" height="84"/>
+    <rect class="sw-band cat-2" x="4" y="92" width="40" height="84" rx="6"/>
+    <text class="sw-lane-label" transform="rotate(-90 24 134)" x="24" y="134">{{LANE_NAME}}</text> <!-- e.g. Manager -->
+    <rect class="sw-lane" x="44" y="176" width="768" height="84"/>
+    <rect class="sw-band cat-3" x="4" y="176" width="40" height="84" rx="6"/>
+    <text class="sw-lane-label" transform="rotate(-90 24 218)" x="24" y="218">{{LANE_NAME}}</text> <!-- e.g. Finance -->
+    <!-- ↑ repeat one lane trio per actor (top += 84) -->
+
+    <!-- ── STEP COLUMN SEPARATORS (on the column boundaries) ──────────────── -->
+    <line class="sw-col" x1="185" y1="8" x2="185" y2="260"/>
+    <line class="sw-col" x1="335" y1="8" x2="335" y2="260"/>
+    <line class="sw-col" x1="485" y1="8" x2="485" y2="260"/>
+    <line class="sw-col" x1="635" y1="8" x2="635" y2="260"/>
+
+    <!-- ── HAND-OFF ARROWS (source box right edge → target box left edge) ─── -->
+    <line class="sw-flow" x1="165" y1="50"  x2="205" y2="134" marker-end="url(#swimlane-arrow)"/>
+    <line class="sw-flow" x1="315" y1="134" x2="355" y2="218" marker-end="url(#swimlane-arrow)"/>
+    <line class="sw-flow" x1="465" y1="218" x2="505" y2="134" marker-end="url(#swimlane-arrow)"/>
+    <line class="sw-flow" x1="615" y1="134" x2="655" y2="50"  marker-end="url(#swimlane-arrow)"/>
+
+    <!-- ── PROCESS BOXES (centered on colCenter × laneMid) ────────────────── -->
+    <g class="sw-node">
+      <rect class="sw-box" x="55" y="28" width="110" height="44" rx="8"/>
+      <text class="sw-box-label" x="110" y="50">{{PROCESS}}</text> <!-- e.g. Submit request -->
+    </g>
+    <g class="sw-node">
+      <rect class="sw-box" x="205" y="112" width="110" height="44" rx="8"/>
+      <text class="sw-box-label" x="260" y="134">{{PROCESS}}</text> <!-- e.g. Review -->
+    </g>
+    <g class="sw-node">
+      <rect class="sw-box" x="355" y="196" width="110" height="44" rx="8"/>
+      <text class="sw-box-label" x="410" y="218">{{PROCESS}}</text> <!-- e.g. Budget check -->
+    </g>
+    <g class="sw-node">
+      <rect class="sw-box" x="505" y="112" width="110" height="44" rx="8"/>
+      <text class="sw-box-label" x="560" y="134">{{PROCESS}}</text> <!-- e.g. Approve -->
+    </g>
+    <g class="sw-node">
+      <rect class="sw-box" x="655" y="28" width="110" height="44" rx="8"/>
+      <text class="sw-box-label" x="710" y="50">{{PROCESS}}</text> <!-- e.g. Notify -->
+    </g>
+    <!-- ↑ repeat one <g class="sw-node"> per step; place it in the acting lane -->
+  </svg>
+</figure>

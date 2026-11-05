@@ -1,0 +1,98 @@
+<!-- ============================================================================
+MODULE: raci-matrix                                        lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS RACI responsibility table (NO SVG). Rows are tasks / deliverables,
+         columns are roles, and each cell holds an R / A / C / I badge in a distinct
+         token color (A = accent solid, R = --cat-1, C = --cat-2, I = muted); a
+         legend spells out the letters. For responsibility assignment across a team.
+         Distinction: decision-matrix SCORES options against weighted criteria;
+         swimlane shows the process FLOW handed between roles; this assigns a
+         responsibility LABEL (who is Responsible / Accountable / Consulted / Informed).
+VARIABLES: {{TITLE}}; per role column {{ROLE}}; per task row {{TASK}}; each cell a
+           badge (.rci-a / .rci-r / .rci-c / .rci-i or blank); legend meanings
+           {{R_MEANING}} {{A_MEANING}} {{C_MEANING}} {{I_MEANING}}.
+SCALING:   a normal <table>: first column = task names (th scope=row), one column
+           per role. Each responsibility cell centers one .rci-badge. A is styled
+           solid (accent + --on-accent) so the single Accountable owner reads
+           loudest even where --cat-1 resolves to the accent hue; R/C are tinted.
+REQUIRES:  core/tokens.css (--accent, --on-accent, --cat-1, --cat-2, --bg-surface,
+           --bg-muted, --border-default, --border-subtle, --text-*, --font-mono,
+           --radius-*, --sp-*, --shadow-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="raci-matrix" style block once.
+INTERACTION: hover tints the whole task row (paint-only, reduced-motion guarded).
+USAGE: one row per task, one column per role. Put exactly ONE .rci-a per row (a
+       single Accountable owner); leave a cell empty when a role has no involvement.
+============================================================================ -->
+<style data-module="raci-matrix">
+  .rci { width: 100%; }
+  .rci-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .rci-scroll { overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+  .rci-table { width: 100%; border-collapse: collapse; font: var(--type-small); }
+  .rci-table th, .rci-table td { padding: var(--sp-3); border-bottom: 1px solid var(--border-subtle); transition: background var(--dur-fast) var(--ease); }
+  .rci-table thead th { font: var(--type-caption); text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); text-align: center; border-bottom: 2px solid var(--border-default); background: color-mix(in srgb, var(--bg-muted) 50%, transparent); }
+  .rci-table thead th.rci-corner { text-align: left; }
+  .rci-table th + th, .rci-table td + td { border-left: 1px solid var(--border-subtle); }
+  .rci-task { font-weight: 600; color: var(--text-primary); text-align: left; white-space: nowrap; }
+  .rci-cell { text-align: center; }
+  .rci-table tbody tr:hover td, .rci-table tbody tr:hover th { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  /* badges: A solid (the one owner), R/C tinted, I muted */
+  .rci-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; font-family: var(--font-mono); }
+  .rci-a { background: var(--accent); color: var(--on-accent); }
+  .rci-r { background: color-mix(in srgb, var(--cat-1) 20%, var(--bg-surface)); color: var(--text-primary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cat-1) 52%, var(--border-default)); }
+  .rci-c { background: color-mix(in srgb, var(--cat-2) 20%, var(--bg-surface)); color: var(--text-primary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cat-2) 52%, var(--border-default)); }
+  .rci-i { background: var(--bg-muted); color: var(--text-muted); box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  /* legend: one key per letter */
+  .rci-legend { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3); font: var(--type-caption); color: var(--text-secondary); }
+  .rci-key { display: inline-flex; align-items: center; gap: var(--sp-2); }
+  @media (prefers-reduced-motion: reduce) { .rci-table th, .rci-table td { transition: none; } }
+</style>
+
+<figure class="rci card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="rci-title">{{TITLE}}</figcaption>
+  <div class="rci-scroll">
+    <table class="rci-table">
+      <thead>
+        <tr>
+          <th class="rci-corner" scope="col">{{TITLE}}</th> <!-- e.g. タスク \ 役割 -->
+          <!-- ↓ one th per role -->
+          <th scope="col">{{ROLE}}</th> <!-- e.g. PM -->
+          <th scope="col">{{ROLE}}</th> <!-- e.g. デザイナー -->
+          <th scope="col">{{ROLE}}</th> <!-- e.g. エンジニア -->
+          <th scope="col">{{ROLE}}</th> <!-- e.g. QA -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ↓ one tr per task; exactly one .rci-a per row, blank cells allowed -->
+        <tr>
+          <th class="rci-task" scope="row">{{TASK}}</th> <!-- e.g. 要件定義 -->
+          <td class="rci-cell"><span class="rci-badge rci-a">A</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-c">C</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-r">R</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-i">I</span></td>
+        </tr>
+        <tr>
+          <th class="rci-task" scope="row">{{TASK}}</th> <!-- e.g. UI設計 -->
+          <td class="rci-cell"><span class="rci-badge rci-c">C</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-a">A</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-r">R</span></td>
+          <td class="rci-cell"></td>
+        </tr>
+        <tr>
+          <th class="rci-task" scope="row">{{TASK}}</th> <!-- e.g. 実装 -->
+          <td class="rci-cell"><span class="rci-badge rci-i">I</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-c">C</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-a">A</span></td>
+          <td class="rci-cell"><span class="rci-badge rci-r">R</span></td>
+        </tr>
+        <!-- ↑ repeat: one tr per task -->
+      </tbody>
+    </table>
+  </div>
+  <!-- ── LEGEND (R / A / C / I meanings) ─────────────────────────────────────── -->
+  <div class="rci-legend">
+    <span class="rci-key"><span class="rci-badge rci-r">R</span>{{R_MEANING}}</span> <!-- e.g. 実行担当 -->
+    <span class="rci-key"><span class="rci-badge rci-a">A</span>{{A_MEANING}}</span> <!-- e.g. 説明責任 -->
+    <span class="rci-key"><span class="rci-badge rci-c">C</span>{{C_MEANING}}</span> <!-- e.g. 相談先 -->
+    <span class="rci-key"><span class="rci-badge rci-i">I</span>{{I_MEANING}}</span> <!-- e.g. 情報共有 -->
+  </div>
+</figure>

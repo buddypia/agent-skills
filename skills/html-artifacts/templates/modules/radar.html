@@ -1,0 +1,77 @@
+<!-- ============================================================================
+MODULE: radar                                               lineage: unified-system original (comparison/decision/dashboard)
+PURPOSE: Self-contained SVG radar / spider chart. N axes radiate from a centre;
+         concentric grid rings + spokes + axis labels; each data series is a
+         translucent polygon tinted with --cat-1..5, with a colored-dot legend.
+         For multi-axis comparison (skills, criteria, capability profiles).
+VARIABLES: {{TITLE}} + per axis {{AXIS_LABEL}} + per series {{SERIES_LABEL}} {{CAT}}
+           {{POINTS}} (the polygon "x,y x,y …" computed from the values)
+REQUIRES: core/tokens.css (--cat-1..5, --text-*, --border-default, --bg-surface, --sp-*)
+MODULE CSS: inline the data-module="radar" style block once.
+INTERACTION: none (static). role="img" + aria-label on the SVG.
+USAGE: GEOMETRY - centre (160,160), R=110. axis i angle = (−90 + i·360/N)°.
+       point = (cx + cos(angle)·R·frac, cy + sin(angle)·R·frac), frac = value/max (0..1).
+       Grid rings are polygons at frac 0.25/0.5/0.75/1; spokes go centre→frac 1;
+       axis labels sit at frac≈1.14 (font-size 17 user units; > 10 chars wrap at a space into
+       two <tspan>s). {{VIEWBOX}} = the bounding box of rings + labels + 6 padding (the builder
+       measures it) and the svg's max-width = 0.8 × its width, so the drawing is only shrunk as
+       far as its longest label demands. One <polygon class="radar-area cat-N"> per series.
+============================================================================ -->
+<style data-module="radar">
+  .radar { margin: 0; container-type: inline-size; }
+  /* chart + legend side by side when there is room, stacked in a narrow card */
+  .radar-body { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: var(--sp-5); align-items: center; }
+  @container (max-width: 560px) { .radar-body { grid-template-columns: minmax(0, 1fr); } }
+  .radar-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); letter-spacing: var(--tracking-tight); }
+  .radar svg { width: 100%; height: auto; max-width: 400px; margin-inline: auto; display: block; overflow: visible; } /* the builder sets max-width = 0.8 × viewBox width */
+  /* concentric rings recede; the outer ring (frac 1.0) firms up via its own rule below */
+  .radar .radar-ring, .radar .radar-spoke { fill: none; stroke: var(--border-default); stroke-width: 1; opacity: .5; }
+  .radar .radar-ring { stroke: var(--border-subtle); }
+  /* the last ring in the grid reads as the chart's outer boundary - give it a hairline accent rail */
+  .radar .radar-ring:last-of-type { stroke: color-mix(in srgb, var(--accent) 22%, var(--border-default)); opacity: .7; }
+  .radar .radar-spoke { stroke-linecap: round; }
+  /* font-size is in SVG user units (17): drawn at ≤0.8 scale → ≈13.6px, ≥10px down to a ~300px-wide chart */
+  .radar .radar-axis { fill: var(--text-secondary); font: var(--type-caption); font-size: 17px; letter-spacing: .01em; }
+  .radar .radar-area { fill-opacity: .15; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; transition: fill-opacity var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .radar .radar-area.cat-1 { stroke: var(--cat-1); fill: var(--cat-1); }
+  .radar .radar-area.cat-2 { stroke: var(--cat-2); fill: var(--cat-2); }
+  .radar .radar-area.cat-3 { stroke: var(--cat-3); fill: var(--cat-3); }
+  .radar .radar-area.cat-4 { stroke: var(--cat-4); fill: var(--cat-4); }
+  .radar .radar-area.cat-5 { stroke: var(--cat-5); fill: var(--cat-5); }
+  /* hover lifts the hovered polygon's fill + a soft accent-neutral glow; siblings recede */
+  @media (hover: hover) {
+    .radar svg:hover .radar-area { fill-opacity: .08; }
+    .radar svg .radar-area:hover { fill-opacity: .26; filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--text-primary) 22%, transparent)); }
+  }
+  .radar-legend { margin: 0; padding: 0; list-style: none; }
+  .radar-legend .legend-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); margin-inline: calc(-1 * var(--sp-2)); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .radar-legend .legend-row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .radar-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: 0 0 auto; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 14%, transparent); transition: box-shadow var(--dur-fast) var(--ease); }
+  .radar-legend .legend-row:hover .dot { box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 22%, transparent); }
+  .radar-legend .dot.cat-1 { background: var(--cat-1); color: var(--cat-1); }
+  .radar-legend .dot.cat-2 { background: var(--cat-2); color: var(--cat-2); }
+  .radar-legend .dot.cat-3 { background: var(--cat-3); color: var(--cat-3); }
+  .radar-legend .dot.cat-4 { background: var(--cat-4); color: var(--cat-4); }
+  .radar-legend .dot.cat-5 { background: var(--cat-5); color: var(--cat-5); }
+  .radar-legend .legend-label { font: var(--type-small); color: var(--text-secondary); }
+  .radar-legend .legend-row:hover .legend-label { color: var(--text-primary); }
+</style>
+
+<figure class="radar card-outlined">
+  <figcaption class="radar-title">{{TITLE}}</figcaption>
+  <div class="radar-body">
+    <svg viewBox="{{VIEWBOX}}" role="img" aria-label="{{TITLE}}">
+      <!-- grid rings (one <polygon class="radar-ring"> per ring 0.25/0.5/0.75/1) -->
+      <polygon class="radar-ring" points="{{RING_POINTS}}"/>
+      <!-- spokes (one <line class="radar-spoke"> per axis) -->
+      <line class="radar-spoke" x1="160" y1="160" x2="{{AXIS_X}}" y2="{{AXIS_Y}}"/>
+      <!-- axis labels (one <text class="radar-axis"> per axis) -->
+      <text class="radar-axis" x="{{LABEL_X}}" y="{{LABEL_Y}}" text-anchor="{{ANCHOR}}">{{AXIS_LABEL}}</text>
+      <!-- series (one <polygon class="radar-area cat-N"> per series) -->
+      <polygon class="radar-area cat-1" points="{{POINTS}}"><title>{{SERIES_LABEL}}</title></polygon>
+    </svg>
+    <ul class="radar-legend stack" aria-hidden="true">
+      <li class="legend-row"><span class="dot cat-1"></span><span class="legend-label">{{SERIES_LABEL}}</span></li>
+    </ul>
+  </div>
+</figure>

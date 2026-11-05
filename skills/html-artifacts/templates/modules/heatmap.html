@@ -1,0 +1,72 @@
+<!-- ============================================================================
+MODULE: heatmap                                             lineage: unified-system original (dashboard/report)
+PURPOSE: A matrix heatmap - a real <table> of cells whose background intensity
+         encodes each value (cohort retention, activity by day×hour, correlation,
+         risk matrix). Color is a token-only color-mix of --accent over --bg-muted,
+         so it follows the theme; row/col labels are real <th> for accessibility.
+VARIABLES: {{TITLE}} + column headers {{X_LABEL}} + per row {{Y_LABEL}}
+           + per cell {{PCT}} (8..70 intensity), {{VALUE}}, {{CELL_TITLE}} (tooltip)
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --bg-muted,
+          --text-*, --radius-xs, --sp-*)
+MODULE CSS: inline the data-module="heatmap" style block once. It overrides the
+            base table borders/hover so cells read as a grid, not a data table.
+INTERACTION: none (static). Each cell carries a title="…" tooltip with its value.
+USAGE: INTENSITY - normalize each value to 0..1 across [min,max], then
+       PCT = round(8 + frac·62) so even the lightest cell stays visible and the
+       darkest stays text-legible. Cell bg = color-mix(in srgb, var(--accent) PCT%,
+       var(--bg-muted)). Values are printed in the cell AND in the title tooltip.
+============================================================================ -->
+<style data-module="heatmap">
+  .heatmap { margin: 0; }
+  .heatmap .hm-scroll { overflow-x: auto; }
+  .heatmap .hm-title { caption-side: top; text-align: left; font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .hm-table { border-collapse: separate; border-spacing: 3px; width: auto; }
+  .hm-table th { border: none; padding: var(--sp-1) var(--sp-2); font: var(--type-caption); color: var(--text-muted); font-weight: 600; text-transform: none; letter-spacing: 0; }
+  .hm-table .hm-x { text-align: center; }
+  .hm-table .hm-y { text-align: right; white-space: nowrap; }
+  .hm-table .hm-corner { background: transparent; }
+  .hm-table td { border: none; padding: 0; }
+  .hm-table tbody tr:hover { background: transparent; }
+  /* row/col labels firm up to the accent as you read across the matrix */
+  .hm-table tbody tr:hover .hm-y,
+  .hm-table .hm-x:hover { color: var(--accent); transition: color var(--dur-fast) var(--ease); }
+  .hm-cell {
+    width: 46px; height: 38px; text-align: center; border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-subtle) 60%, transparent);
+    transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out);
+  }
+  /* accent-tied hover: hairline firms to an accent ring + gentle lift/depth, so
+     the focused cell reads clearly without disturbing the calm dense grid */
+  .hm-cell:hover {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent),
+                0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+                var(--shadow-sm);
+    position: relative; z-index: 1;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .hm-cell:hover { transform: translateY(-1px); }
+  }
+  .hm-v { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-primary); }
+</style>
+
+<figure class="heatmap card-outlined">
+  <div class="hm-scroll">
+    <table class="hm-table">
+      <caption class="hm-title">{{TITLE}}</caption>
+      <thead>
+        <tr>
+          <td class="hm-corner"></td>
+          <!-- one <th scope="col" class="hm-x"> per column -->
+          <th scope="col" class="hm-x">{{X_LABEL}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- one <tr> per row: a row header + one .hm-cell per column -->
+        <tr>
+          <th scope="row" class="hm-y">{{Y_LABEL}}</th>
+          <td class="hm-cell" style="background:color-mix(in srgb, var(--accent) {{PCT}}%, var(--bg-muted))" title="{{CELL_TITLE}}"><span class="hm-v">{{VALUE}}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</figure>

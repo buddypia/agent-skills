@@ -1,0 +1,98 @@
+<!-- ============================================================================
+MODULE: boxplot                                    lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG box-and-whisker plot (NO external libs). 3-5 vertical
+         boxplots on a shared value axis: min/max whiskers with caps, a Q1-Q3 box
+         (--cat-N tinted), a median line, and optional outlier dots; a left Y axis
+         carries mono gridline labels. Summarizes a DISTRIBUTION per category.
+         Distinction: chart-bar compares single values as bar length; chart-scatter
+         plots every individual point in 2D; boxplot condenses a whole distribution
+         (spread + median + outliers) into one glyph per category.
+VARIABLES: {{TITLE}}; Y ticks {{Y_MIN}} {{Y_MID}} {{Y_MAX}}; per box {{CATEGORY}}
+           (+ .cat-N and the five y-coords max/Q3/med/Q1/min, optional outlier).
+GEOMETRY:  Y axis x=64; plot y 40(top)→300(baseline). Map a value with
+           y = 300 − (v − MIN)/(MAX − MIN) * 260. Box centers spread across the
+           field (example: x=168, 330, 492, 654). Whisker = vertical line minY→maxY
+           at the center; caps = ±14 px; box = rect x=cx−30 w=60 from Q3y down to
+           Q1y (height Q1y−Q3y); median line spans the box width.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --text-*, --border-subtle,
+           --border-default, --bg-surface, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="boxplot" style block once.
+INTERACTION: none required. Boxes brighten on hover (paint only, reduced-motion
+           guarded). role="img" + <title> a11y.
+USAGE: duplicate one <g class="bp-box-g"> per category; set the box .cat-N and the
+       five y-coords from the scaling map. Delete the <circle class="bp-outlier"> if none.
+============================================================================ -->
+<style data-module="boxplot">
+  .bp { margin: 0; }
+  .bp-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .bp svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .bp { overflow-x: auto; } .bp svg { min-width: 720px; } }
+  .bp .bp-grid { stroke: var(--border-subtle); stroke-width: 1; }
+  .bp .bp-axis { stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; }
+  .bp .bp-tick { fill: var(--text-muted); font-size: 10.5px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-anchor: end; }
+  .bp .bp-whisker { stroke: var(--text-secondary); stroke-width: 1.25; }
+  .bp .bp-cap { stroke: var(--text-secondary); stroke-width: 1.5; stroke-linecap: round; }
+  .bp .bp-box { stroke-width: 1.25; transition: filter var(--dur-fast) var(--ease); }
+  .bp .bp-box.cat-1 { fill: color-mix(in srgb, var(--cat-1) 26%, var(--bg-surface)); stroke: color-mix(in srgb, var(--cat-1) 62%, var(--border-default)); }
+  .bp .bp-box.cat-2 { fill: color-mix(in srgb, var(--cat-2) 26%, var(--bg-surface)); stroke: color-mix(in srgb, var(--cat-2) 62%, var(--border-default)); }
+  .bp .bp-box.cat-3 { fill: color-mix(in srgb, var(--cat-3) 26%, var(--bg-surface)); stroke: color-mix(in srgb, var(--cat-3) 62%, var(--border-default)); }
+  .bp .bp-box.cat-4 { fill: color-mix(in srgb, var(--cat-4) 26%, var(--bg-surface)); stroke: color-mix(in srgb, var(--cat-4) 62%, var(--border-default)); }
+  .bp .bp-box.cat-5 { fill: color-mix(in srgb, var(--cat-5) 26%, var(--bg-surface)); stroke: color-mix(in srgb, var(--cat-5) 62%, var(--border-default)); }
+  .bp .bp-median { stroke: var(--text-primary); stroke-width: 2; stroke-linecap: round; }
+  .bp .bp-outlier { fill: var(--text-muted); stroke: var(--bg-surface); stroke-width: 1; }
+  .bp .bp-cat { fill: var(--text-secondary); font-size: 12px; text-anchor: middle; letter-spacing: var(--tracking-tight); }
+  .bp .bp-box-g:hover .bp-box { filter: brightness(1.08); }
+  @media (prefers-reduced-motion: reduce) { .bp .bp-box { transition: none; } }
+</style>
+
+<figure class="bp card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="bp-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 720 340" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- Y gridlines + mono ticks (baseline 300 = MIN, top 40 = MAX) -->
+    <line class="bp-grid" x1="64" y1="105" x2="700" y2="105"/>
+    <line class="bp-grid" x1="64" y1="170" x2="700" y2="170"/>
+    <line class="bp-grid" x1="64" y1="235" x2="700" y2="235"/>
+    <line class="bp-axis" x1="64" y1="40"  x2="64"  y2="300"/>
+    <line class="bp-axis" x1="64" y1="300" x2="700" y2="300"/>
+    <text class="bp-tick" x="58" y="44">{{Y_MAX}}</text>  <!-- e.g. 100 -->
+    <text class="bp-tick" x="58" y="174">{{Y_MID}}</text> <!-- e.g. 50 -->
+    <text class="bp-tick" x="58" y="304">{{Y_MIN}}</text> <!-- e.g. 0 -->
+
+    <!-- ↓ repeat one <g> per category; y-coords from y = 300 − (v−MIN)/(MAX−MIN)*260 -->
+    <g class="bp-box-g">
+      <line class="bp-whisker" x1="168" y1="97"  x2="168" y2="248"/>
+      <line class="bp-cap" x1="154" y1="97"  x2="182" y2="97"/>
+      <line class="bp-cap" x1="154" y1="248" x2="182" y2="248"/>
+      <rect class="bp-box cat-1" x="138" y="139" width="60" height="70"/>
+      <line class="bp-median" x1="138" y1="170" x2="198" y2="170"/>
+      <circle class="bp-outlier" cx="168" cy="61" r="3"/>
+      <text class="bp-cat" x="168" y="320">{{CATEGORY}}</text> <!-- e.g. チームA -->
+    </g>
+    <g class="bp-box-g">
+      <line class="bp-whisker" x1="330" y1="79"  x2="330" y2="196"/>
+      <line class="bp-cap" x1="316" y1="79"  x2="344" y2="79"/>
+      <line class="bp-cap" x1="316" y1="196" x2="344" y2="196"/>
+      <rect class="bp-box cat-2" x="300" y="118" width="60" height="47"/>
+      <line class="bp-median" x1="300" y1="144" x2="360" y2="144"/>
+      <text class="bp-cat" x="330" y="320">{{CATEGORY}}</text> <!-- e.g. チームB -->
+    </g>
+    <g class="bp-box-g">
+      <line class="bp-whisker" x1="492" y1="149" x2="492" y2="274"/>
+      <line class="bp-cap" x1="478" y1="149" x2="506" y2="149"/>
+      <line class="bp-cap" x1="478" y1="274" x2="506" y2="274"/>
+      <rect class="bp-box cat-3" x="462" y="186" width="60" height="57"/>
+      <line class="bp-median" x1="462" y1="222" x2="522" y2="222"/>
+      <text class="bp-cat" x="492" y="320">{{CATEGORY}}</text> <!-- e.g. チームC -->
+    </g>
+    <g class="bp-box-g">
+      <line class="bp-whisker" x1="654" y1="66"  x2="654" y2="157"/>
+      <line class="bp-cap" x1="640" y1="66"  x2="668" y2="66"/>
+      <line class="bp-cap" x1="640" y1="157" x2="668" y2="157"/>
+      <rect class="bp-box cat-4" x="624" y="92" width="60" height="42"/>
+      <line class="bp-median" x1="624" y1="113" x2="684" y2="113"/>
+      <text class="bp-cat" x="654" y="320">{{CATEGORY}}</text> <!-- e.g. チームD -->
+    </g>
+    <!-- ↑ repeat -->
+  </svg>
+</figure>

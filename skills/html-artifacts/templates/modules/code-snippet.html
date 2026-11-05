@@ -1,0 +1,55 @@
+<!-- ============================================================================
+MODULE: code-snippet                                        lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A single syntax-highlighted code listing (pure CSS - no SVG, no JS, no
+         highlighter lib). A dark-tinted panel (derived from --text-primary mixed
+         with the page, so it stays theme-following with NO raw hex), a header bar
+         with a mono filename + a language badge, a line-number gutter, and span
+         classes for token roles (.cs-kw / .cs-str / .cs-com / .cs-fn) mapped to
+         --cat-* / --color-* tokens. For docs, tutorials, and API examples.
+         Distinction: diff-block shows +/- CHANGE lines for a review with add/
+         remove tinting; code-snippet presents ONE finished listing whose color
+         carries syntax roles, not change status.
+VARIABLES: {{FILE}} path, {{LANG}} badge; per line {{N}} gutter number + the code
+           (wrap tokens in <span class="cs-kw|cs-str|cs-com|cs-fn">).
+SCALING:  panel bg = color-mix(--text-primary → --bg-page); code text lifts back
+          toward --bg-surface for contrast on the dark field. Rows are a grid:
+          fixed gutter + code cell. Token spans mix their --cat/--color hue with
+          --bg-surface so the hue reads bright on the dark panel.
+REQUIRES: core/tokens.css (--text-primary, --bg-page, --bg-surface, --accent,
+          --cat-2, --color-success, --font-mono, --radius-md, --sp-*,
+          --border-subtle, --type-caption); no elements.css primitive needed.
+MODULE CSS: inline the data-module="code-snippet" style block once.
+INTERACTION: none (static). Real <pre>/<code>; the language badge is text.
+USAGE: repeat one <span class="cs-row"> per line inside <code>; set the gutter
+       number and tag keywords/strings/comments/functions with the role spans.
+============================================================================ -->
+<style data-module="code-snippet">
+  .cs { margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); background: color-mix(in srgb, var(--text-primary) 91%, var(--bg-page)); }
+  /* header bar: a slightly lighter slab off the panel, filename + language chip */
+  .cs-head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-4); background: color-mix(in srgb, var(--text-primary) 84%, var(--bg-page)); border-bottom: 1px solid color-mix(in srgb, var(--bg-surface) 16%, transparent); }
+  .cs-file { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: color-mix(in srgb, var(--bg-surface) 82%, var(--text-primary)); }
+  .cs-lang { margin-left: auto; padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; color: color-mix(in srgb, var(--accent) 60%, var(--bg-surface)); background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .cs-body { margin: 0; padding: var(--sp-3) 0; overflow-x: auto; }
+  .cs-body code { display: block; font-family: var(--font-mono); font-size: 13px; line-height: 1.65; }
+  /* each line: fixed gutter + code cell; code lifts toward the surface tone */
+  .cs-row { display: grid; grid-template-columns: 3em 1fr; align-items: baseline; }
+  .cs-ln { text-align: right; padding-right: var(--sp-3); color: color-mix(in srgb, var(--bg-surface) 34%, var(--text-primary)); user-select: none; }
+  .cs-code { padding-right: var(--sp-4); white-space: pre; color: color-mix(in srgb, var(--bg-surface) 86%, var(--text-primary)); }
+  /* token roles: each hue mixed with the surface so it reads bright on the dark panel */
+  .cs-kw  { color: color-mix(in srgb, var(--accent) 62%, var(--bg-surface)); font-weight: 600; }
+  .cs-str { color: color-mix(in srgb, var(--color-success) 62%, var(--bg-surface)); }
+  .cs-com { color: color-mix(in srgb, var(--bg-surface) 46%, var(--text-primary)); font-style: italic; }
+  .cs-fn  { color: color-mix(in srgb, var(--cat-2) 66%, var(--bg-surface)); }
+</style>
+
+<figure class="cs" aria-label="{{FILE}}">
+  <figcaption class="cs-head">
+    <span class="cs-file">{{FILE}}</span> <!-- e.g. src/pricing.ts -->
+    <span class="cs-lang">{{LANG}}</span> <!-- e.g. TypeScript -->
+  </figcaption>
+  <pre class="cs-body"><code><!-- ↓ repeat one .cs-row per line; tag tokens with the role spans --><span class="cs-row"><span class="cs-ln">{{N}}</span><span class="cs-code"><span class="cs-com">// 税込みの合計を返す</span></span></span>
+<span class="cs-row"><span class="cs-ln">{{N}}</span><span class="cs-code"><span class="cs-kw">export function</span> <span class="cs-fn">totalWithTax</span>(subtotal, rate) {</span></span>
+<span class="cs-row"><span class="cs-ln">{{N}}</span><span class="cs-code">  <span class="cs-kw">const</span> label = <span class="cs-str">"合計金額"</span>;</span></span>
+<span class="cs-row"><span class="cs-ln">{{N}}</span><span class="cs-code">  <span class="cs-kw">return</span> <span class="cs-fn">Math.round</span>(subtotal * (1 + rate));</span></span>
+<span class="cs-row"><span class="cs-ln">{{N}}</span><span class="cs-code">}</span></span><!-- ↑ repeat: one .cs-row per line --></code></pre>
+</figure>

@@ -1,0 +1,253 @@
+<!-- ============================================================================
+MODULE: screen-flow                              lineage: mockup-frame (device chrome) + wireframe-block (lo-fi idiom)
+PURPOSE: STATIC app screen-flow map - N target-aware lo-fi wireframe screens laid
+         side by side, each pair connected by a labeled transition arrow, each
+         screen captioned with a human-readable name + description. This is the
+         canonical answer to "show the whole app flow": the reader sees every
+         screen's structure (real labels, no lorem) AND why/when the user moves
+         between them. Grayscale lo-fi; mobile targets use phone/tablet chrome,
+         while web-app targets use browser-window chrome.
+         For an EDITABLE flow use wireframe-block instead; for a single hi-fi
+         screen use mockup-frame. The deterministic builder renders this module
+         from data via the `screenflow` section type (reference/07-build-spec.md).
+VARIABLES: per screen: {{SCREEN_NAME}} {{SCREEN_CAPTION}} {{APPBAR_TITLE}}
+           per transition: {{FLOW_LABEL}} (why/when the user moves to the next screen)
+           per element: {{EL_LABEL}} (real UI text - never lorem)
+           tab bar: {{TAB_LABEL}} (repeat per tab; mark the current one .active)
+REQUIRES:  core/reset.css + core/tokens.css + core/elements.css (.lede h2)
+MODULE CSS: inline the data-module="screen-flow" style block once.
+INTERACTION: none (fully static - safe to print / screenshot / share).
+USAGE: repeat one .sf-step per screen and one .sf-arrow between each adjacent
+       pair (arrow label = transition condition). Compose each .sf-body from the
+       lo-fi element classes (.sf-heading .sf-bar .sf-img .sf-input .sf-btn
+       .sf-search .sf-list .sf-chips .sf-card .sf-divider). data-device-frame on
+       the section satisfies the mobile-app validator contract. Add
+       data-device="tablet" on .sf-flow for wider mobile frames, or
+       data-frame="browser" data-device="desktop" for web-app flows.
+============================================================================ -->
+<style data-module="screen-flow">
+  /* track: horizontally scrollable strip of screen + arrow + screen … */
+  .sf-track { display: flex; align-items: flex-start; gap: var(--sp-4);
+    overflow-x: auto; padding: var(--sp-4) var(--sp-1) var(--sp-5); }
+  .sf-step { flex: 0 0 auto; width: 250px; display: flex; flex-direction: column; gap: var(--sp-3); }
+  .sf-flow[data-device="tablet"] .sf-step { width: 340px; }
+  .sf-flow[data-frame="browser"] .sf-step { width: min(520px, calc(100vw - var(--sp-8))); }
+
+  /* mobile chrome - pure CSS bezel + notch + status bar + app bar + tab bar */
+  .sf-phone { position: relative; box-sizing: border-box; width: 100%;
+    border: 6px solid var(--text-primary); border-radius: 30px;
+    background: var(--bg-page); overflow: hidden; box-shadow: var(--shadow-md);
+    transition: box-shadow var(--dur-mid) var(--ease-out), border-color var(--dur-fast) var(--ease), transform var(--dur-mid) var(--ease-out); }
+  /* browser chrome - pure CSS window frame for web-app flows */
+  .sf-browser { position: relative; box-sizing: border-box; width: 100%;
+    border: 1.5px solid var(--border-default); border-radius: var(--radius-lg);
+    background: var(--bg-page); overflow: hidden; box-shadow: var(--shadow-md);
+    transition: box-shadow var(--dur-mid) var(--ease-out), border-color var(--dur-fast) var(--ease), transform var(--dur-mid) var(--ease-out); }
+  .sf-browser-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center; gap: var(--sp-2); padding: var(--sp-2);
+    border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .sf-traffic { display: inline-flex; gap: 5px; align-items: center; }
+  .sf-traffic i { width: 10px; height: 10px; border-radius: 50%;
+    border: 1px solid var(--border-default); background: var(--bg-muted); }
+  .sf-traffic i:nth-child(2) { background: color-mix(in srgb, var(--accent) 18%, var(--bg-muted)); }
+  .sf-traffic i:nth-child(3) { background: color-mix(in srgb, var(--accent) 30%, var(--bg-muted)); }
+  .sf-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+    background: var(--bg-page); padding: 2px var(--sp-3);
+    font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); }
+  .sf-browser-title { max-width: 12ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: var(--type-caption); color: var(--text-muted); }
+  /* hover: the screen comes forward & its bezel tints toward the accent - keeps the
+     lo-fi grayscale calm, just enough depth to read "this is the focused screen". */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .sf-step:hover .sf-phone, .sf-step:hover .sf-browser {       box-shadow: var(--shadow-lg); border-color: color-mix(in srgb, var(--accent) 32%, var(--text-primary)); }
+  }
+  @media (hover: hover) {
+    .sf-step:hover .sf-phone, .sf-step:hover .sf-browser { border-color: color-mix(in srgb, var(--accent) 32%, var(--text-primary)); }
+  }
+  .sf-notch { position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 84px; height: 14px; background: var(--text-primary);
+    border-radius: 0 0 8px 8px; z-index: 2; }
+  .sf-status { display: flex; justify-content: space-between; align-items: center;
+    padding: var(--sp-2) var(--sp-4) var(--sp-1);
+    font: var(--type-caption); font-weight: 600; color: var(--text-primary); }
+  .sf-status-ic { width: 34px; height: 8px;
+    background-image: radial-gradient(var(--text-primary) 1.6px, transparent 1.9px);
+    background-size: 11px 8px; background-repeat: repeat-x; opacity: .7; }
+  .sf-appbar { padding: var(--sp-2) var(--sp-4); font: var(--type-small); font-weight: 700;
+    color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .sf-body { display: flex; flex-direction: column; gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-3) var(--sp-4); min-height: 300px; }
+  .sf-flow[data-frame="browser"] .sf-body { min-height: 260px; padding: var(--sp-4); }
+  .sf-tabbar { display: flex; border-top: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .sf-webnav { display: flex; gap: var(--sp-2); border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface); padding: var(--sp-2) var(--sp-3); }
+  .sf-tab { flex: 1; padding: var(--sp-2) 0; text-align: center;
+    font: var(--type-caption); color: var(--text-muted); }
+  .sf-webnav .sf-tab { flex: 0 0 auto; min-width: 72px; border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill); padding: 3px var(--sp-2); background: var(--bg-page); }
+  .sf-tab.active { color: var(--text-primary); font-weight: 700;
+    box-shadow: inset 0 2px 0 var(--accent); }
+
+  /* caption under each phone: numbered name + human-readable description.
+     A hairline accent rail on the name ties each screen to the theme & reads as
+     a "you are here" tick without coloring the lo-fi screen itself. */
+  .sf-caption { display: flex; flex-direction: column; gap: var(--sp-1); padding-inline: var(--sp-1); }
+  .sf-name { font: var(--type-small); font-weight: 700; color: var(--text-primary);
+    transition: border-color var(--dur-fast) var(--ease); }
+  .sf-step:hover .sf-name { border-left-color: var(--accent); }
+  .sf-desc { margin: 0; padding-left: var(--sp-3); font: var(--type-caption); color: var(--text-secondary); }
+
+  /* transition arrow between adjacent screens, label = condition/trigger */
+  .sf-arrow { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
+    gap: var(--sp-1); max-width: 110px; margin-top: 190px; }
+  .sf-flow[data-frame="browser"] .sf-arrow { margin-top: 155px; }
+  .sf-arrow svg { display: block; }
+  .sf-arrow line { stroke: var(--text-secondary); stroke-width: 2.5; stroke-dasharray: 7 4; stroke-linecap: round;
+    transition: stroke var(--dur-fast) var(--ease); }
+  .sf-arrow path { fill: var(--text-secondary); transition: fill var(--dur-fast) var(--ease); }
+  /* hovering the arrow lights the connector in the accent - makes the transition
+     itself feel like a live, traceable edge of the flow. */
+  .sf-arrow:hover line { stroke: var(--accent); }
+  .sf-arrow:hover path { fill: var(--accent); }
+  .sf-arrow-label { font: var(--type-caption); font-family: var(--font-mono);
+    color: var(--text-secondary); text-align: center;
+    padding: 1px var(--sp-2); border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .sf-arrow:hover .sf-arrow-label { color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+  /* ── lo-fi elements (grayscale; real labels, no lorem) ── */
+  .sf-heading { font: var(--type-small); font-weight: 800; color: var(--text-primary); }
+  .sf-bar { display: block; height: 9px; border-radius: var(--radius-pill);
+    background: var(--bg-muted); margin: var(--sp-1) 0; }
+  .sf-bar.-w90 { width: 90%; } .sf-bar.-w75 { width: 75%; } .sf-bar.-w60 { width: 60%; }
+  .sf-note { margin: 0; font: var(--type-caption); color: var(--text-secondary); }
+  .sf-img { position: relative; }
+  .sf-img svg { display: block; width: 100%; height: 76px; background: var(--bg-muted); }
+  .sf-img rect { fill: none; stroke: var(--border-default); stroke-width: 2; stroke-dasharray: 6 4; }
+  .sf-img line { stroke: var(--text-muted); stroke-width: 2; }
+  .sf-img-label { position: absolute; right: var(--sp-2); bottom: var(--sp-1);
+    font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  .sf-input { min-height: 30px; display: flex; align-items: center; padding: 0 var(--sp-3);
+    border: 1.5px solid var(--border-default); border-radius: var(--radius-sm);
+    font: var(--type-caption); color: var(--text-muted); background: var(--bg-surface);
+    transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .sf-input:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .sf-btn { min-height: 32px; display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--text-secondary); border-radius: var(--radius-sm);
+    font: var(--type-caption); font-weight: 700; color: var(--text-secondary); background: var(--bg-surface);
+    transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .sf-btn:hover { border-color: var(--accent); color: var(--accent);
+    box-shadow: var(--shadow-sm); }
+  .sf-btn.-primary { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-surface); }
+  .sf-btn.-primary:hover { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .sf-search { min-height: 28px; display: flex; align-items: center; gap: var(--sp-2);
+    padding: 0 var(--sp-3); border: 1.5px solid var(--border-default); border-radius: var(--radius-pill);
+    font: var(--type-caption); color: var(--text-muted); background: var(--bg-surface);
+    transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .sf-search:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .sf-search-ic { position: relative; width: 9px; height: 9px; flex: 0 0 auto;
+    border: 1.5px solid var(--text-muted); border-radius: 50%; opacity: .7; }
+  .sf-search-ic::after { content: ""; position: absolute; right: -3px; bottom: -1px;
+    width: 5px; border-top: 1.5px solid var(--text-muted); transform: rotate(45deg); transform-origin: left; }
+  .sf-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+  .sf-listrow { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2);
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-surface);
+    transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .sf-listrow:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border-subtle));
+    background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); }
+  .sf-avatar { width: 26px; height: 26px; flex: 0 0 auto; border-radius: 50%;
+    background: var(--bg-muted); border: 1.5px solid var(--border-default); }
+  .sf-listbody { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .sf-listlabel { font: var(--type-caption); font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sf-listbody .sf-bar { margin: 0; height: 7px; }
+  .sf-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+  .sf-chip { padding: 2px var(--sp-2); border: 1.5px solid var(--border-default);
+    border-radius: var(--radius-pill); font: var(--type-caption); color: var(--text-muted);
+    transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .sf-chip:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default));
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .sf-divider { border: none; border-top: 1.5px dashed var(--border-default); margin: var(--sp-1) 0; }
+  .sf-card { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3);
+    border: 1.5px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-surface);
+    transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .sf-card:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border-default));
+    box-shadow: var(--shadow-sm); }
+  .sf-card-title { font: var(--type-caption); font-weight: 700; color: var(--text-primary); }
+
+  @media print { .sf-track { overflow: visible; flex-wrap: wrap; } }
+</style>
+
+<section class="sf-flow" data-device-frame aria-label="{{FLOW_TITLE}}">
+  <h2>{{FLOW_TITLE}}</h2>
+  <p class="lede">{{FLOW_DESC}}</p>
+
+  <div class="sf-track">
+
+    <!-- ↓ repeat one .sf-step per screen -->
+    <div class="sf-step">
+      <div class="sf-phone">
+        <span class="sf-notch" aria-hidden="true"></span>
+        <div class="sf-status"><span>9:41</span><span class="sf-status-ic" aria-hidden="true"></span></div>
+        <div class="sf-appbar">{{APPBAR_TITLE}}</div>
+        <div class="sf-body">
+          <div class="sf-heading">{{EL_LABEL}}</div>
+          <div class="sf-input">{{EL_LABEL}}</div>
+          <div class="sf-input">{{EL_LABEL}}</div>
+          <div class="sf-btn -primary">{{EL_LABEL}}</div>
+          <div class="sf-btn">{{EL_LABEL}}</div>
+        </div>
+        <!-- tab bar is optional - include it on screens that sit inside the app shell -->
+        <nav class="sf-tabbar" aria-hidden="true">
+          <span class="sf-tab active">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+        </nav>
+      </div>
+      <div class="sf-caption">
+        <span class="sf-name">1. {{SCREEN_NAME}}</span>
+        <p class="sf-desc">{{SCREEN_CAPTION}}</p>
+      </div>
+    </div>
+    <!-- ↑ repeat -->
+
+    <!-- ↓ one .sf-arrow between each adjacent screen pair; label = transition condition -->
+    <div class="sf-arrow">
+      <svg viewBox="0 0 56 16" width="56" height="16" aria-hidden="true"><line x1="0" y1="8" x2="44" y2="8"/><path d="M44 2 L55 8 L44 14 Z"/></svg>
+      <span class="sf-arrow-label">{{FLOW_LABEL}}</span>
+    </div>
+    <!-- ↑ repeat -->
+
+    <div class="sf-step">
+      <div class="sf-phone">
+        <span class="sf-notch" aria-hidden="true"></span>
+        <div class="sf-status"><span>9:41</span><span class="sf-status-ic" aria-hidden="true"></span></div>
+        <div class="sf-appbar">{{APPBAR_TITLE_2}}</div>
+        <div class="sf-body">
+          <div class="sf-search"><span class="sf-search-ic" aria-hidden="true"></span>{{EL_LABEL}}</div>
+          <div class="sf-list">
+            <div class="sf-listrow"><span class="sf-avatar" aria-hidden="true"></span><div class="sf-listbody"><span class="sf-listlabel">{{EL_LABEL}}</span><span class="sf-bar -w60"></span></div></div>
+            <div class="sf-listrow"><span class="sf-avatar" aria-hidden="true"></span><div class="sf-listbody"><span class="sf-listlabel">{{EL_LABEL}}</span><span class="sf-bar -w60"></span></div></div>
+          </div>
+        </div>
+        <nav class="sf-tabbar" aria-hidden="true">
+          <span class="sf-tab active">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+          <span class="sf-tab">{{TAB_LABEL}}</span>
+        </nav>
+      </div>
+      <div class="sf-caption">
+        <span class="sf-name">2. {{SCREEN_NAME_2}}</span>
+        <p class="sf-desc">{{SCREEN_CAPTION_2}}</p>
+      </div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,79 @@
+<!-- ============================================================================
+MODULE: capability-map                                     lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS business capability map (NO SVG). 3-4 top-level DOMAIN blocks sit
+         side by side, each with a tinted header and a grid of capability TILES;
+         tiles can carry optional heat via data-level (1 mature → success, 2 gap →
+         warning, 3 at-risk → danger). For capability inventories, target operating
+         models, portfolio heat maps.
+         Distinction: treemap encodes numeric size by area; org-chart shows reporting
+         lines; this is a nested COMPETENCE inventory (domains → capabilities), with
+         heat as an optional maturity overlay, not a measured quantity.
+VARIABLES: {{TITLE}}; {{N}} (domain count → --cpm-cols); per domain {{DOMAIN}}
+           header, tinted .cat-N; per tile {{CAPABILITY}} with optional data-level.
+SCALING:   .cpm-grid is `repeat(N,1fr)` domains. Each domain body is its own
+           2-col tile grid (`repeat(auto-fit,minmax(0,1fr))` via --cpm-tiles).
+           data-level tints a tile: 1=success, 2=warning, 3=danger; omit it for a
+           neutral tile. Set --cpm-cols = N.
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --color-success, --color-warning,
+           --color-danger, --bg-surface, --bg-muted, --border-default,
+           --border-subtle, --text-*, --radius-*, --sp-*, --shadow-*, --dur-fast,
+           --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="capability-map" style block once.
+INTERACTION: hover brightens a tile (paint-only, reduced-motion guarded).
+USAGE: set --cpm-cols. One .cpm-domain per top-level domain; fill .cpm-tiles with
+       .cpm-tile capability tiles, adding data-level="1|2|3" only when heat-coding.
+============================================================================ -->
+<style data-module="capability-map">
+  .cpm { width: 100%; --cpm-cols: 3; }
+  .cpm-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cpm-grid { display: grid; grid-template-columns: repeat(var(--cpm-cols), 1fr); gap: var(--sp-4); }
+  /* domain block: cat-tinted header over a tile grid */
+  .cpm-domain { --dc: var(--accent); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid color-mix(in srgb, var(--dc) 38%, var(--border-default)); background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+  .cpm-domain-head { padding: var(--sp-2) var(--sp-3); font: var(--type-small); font-weight: 700; color: var(--text-primary); background: color-mix(in srgb, var(--dc) 20%, var(--bg-surface)); border-bottom: 1px solid color-mix(in srgb, var(--dc) 30%, var(--border-default)); }
+  .cpm-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); padding: var(--sp-3); }
+  .cpm-domain.cat-1 { --dc: var(--cat-1); }
+  .cpm-domain.cat-2 { --dc: var(--cat-2); }
+  .cpm-domain.cat-3 { --dc: var(--cat-3); }
+  .cpm-domain.cat-4 { --dc: var(--cat-4); }
+  .cpm-domain.cat-5 { --dc: var(--cat-5); }
+  /* capability tile: neutral by default; data-level paints a maturity heat */
+  .cpm-tile { padding: var(--sp-2); font: var(--type-caption); font-weight: 600; line-height: 1.34; color: var(--text-primary); background: var(--bg-muted); border-radius: var(--radius-xs); box-shadow: inset 0 0 0 1px var(--border-subtle); transition: filter var(--dur-fast) var(--ease); }
+  .cpm-tile:hover { filter: brightness(1.05); }
+  .cpm-tile[data-level="1"] { background: color-mix(in srgb, var(--color-success) 16%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 44%, var(--border-subtle)); }
+  .cpm-tile[data-level="2"] { background: color-mix(in srgb, var(--color-warning) 16%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-warning) 44%, var(--border-subtle)); }
+  .cpm-tile[data-level="3"] { background: color-mix(in srgb, var(--color-danger) 16%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger) 44%, var(--border-subtle)); }
+  @media (prefers-reduced-motion: reduce) { .cpm-tile { transition: none; } }
+</style>
+
+<figure class="cpm card-outlined" style="--cpm-cols:{{N}}" aria-label="{{TITLE}}"> <!-- N = domain count, e.g. 3 -->
+  <figcaption class="cpm-title">{{TITLE}}</figcaption>
+  <div class="cpm-grid">
+    <!-- ↓ one .cpm-domain per top-level domain -->
+    <div class="cpm-domain cat-1">
+      <div class="cpm-domain-head">{{DOMAIN}}</div> <!-- e.g. 顧客管理 -->
+      <div class="cpm-tiles">
+        <div class="cpm-tile" data-level="1">{{CAPABILITY}}</div> <!-- e.g. 顧客プロファイル (成熟) -->
+        <div class="cpm-tile" data-level="2">{{CAPABILITY}}</div> <!-- e.g. セグメント分析 (課題) -->
+        <div class="cpm-tile" data-level="3">{{CAPABILITY}}</div> <!-- e.g. ロイヤルティ (要改善) -->
+        <div class="cpm-tile">{{CAPABILITY}}</div>                <!-- e.g. 問い合わせ管理 -->
+      </div>
+    </div>
+    <div class="cpm-domain cat-2">
+      <div class="cpm-domain-head">{{DOMAIN}}</div> <!-- e.g. 商品・在庫 -->
+      <div class="cpm-tiles">
+        <div class="cpm-tile" data-level="1">{{CAPABILITY}}</div> <!-- e.g. カタログ管理 -->
+        <div class="cpm-tile" data-level="2">{{CAPABILITY}}</div> <!-- e.g. 需要予測 -->
+        <div class="cpm-tile">{{CAPABILITY}}</div>                <!-- e.g. 在庫最適化 -->
+      </div>
+    </div>
+    <div class="cpm-domain cat-3">
+      <div class="cpm-domain-head">{{DOMAIN}}</div> <!-- e.g. フルフィルメント -->
+      <div class="cpm-tiles">
+        <div class="cpm-tile" data-level="1">{{CAPABILITY}}</div> <!-- e.g. 出荷管理 -->
+        <div class="cpm-tile" data-level="3">{{CAPABILITY}}</div> <!-- e.g. 返品処理 (要改善) -->
+        <div class="cpm-tile">{{CAPABILITY}}</div>                <!-- e.g. 配送追跡 -->
+      </div>
+    </div>
+    <!-- ↑ repeat: one .cpm-domain per domain (3-4); data-level optional per tile -->
+  </div>
+</figure>

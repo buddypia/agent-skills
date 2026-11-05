@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: maturity-ladder                                    lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A maturity-model staircase (pure CSS, NO SVG). 4-5 ascending level steps
+         (Lv1 初期 → Lv5 最適化), each a block with a level number, a level name and
+         a short traits list. The steps rise left → right; the CURRENT level is
+         highlighted with an accent ring and a "現在" badge. For capability /
+         process maturity assessments (CMMI-style scales).
+         Distinction: stepper is a numbered PROCESS sequence a user walks through
+         once; pyramid is a compositional HIERARCHY of stacked tiers; maturity-
+         ladder is an assessment SCALE you climb over time, with a marked current rung.
+VARIABLES: {{TITLE}}; per level {{LV}} (Lv1…), {{LEVEL_NAME}}, and {{TRAIT}}
+           bullets. The current step gets class .is-current (adds ring + badge)
+           and inline style="--mtl-lv:N" sets its rise; N runs 1..count.
+SCALING:  .mtl-steps is a flex row, align-items:flex-end, so every step sits on a
+          shared baseline. Each step's height = calc(var(--mtl-base) + N × var(--mtl-rise))
+          via the inline --mtl-lv, producing the ascending staircase. Steps flex to
+          equal widths; on narrow screens they wrap and the baseline resets per row.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --cat-1..5,
+          --bg-surface, --bg-muted, --border-*, --text-*, --font-mono, --radius-*,
+          --sp-*, --type-*, --shadow-sm, --shadow-md, --tracking-eyebrow, --dur-fast, --ease)
+MODULE CSS: inline the data-module="maturity-ladder" style block once.
+INTERACTION: hover lifts a step (paint-only shadow, reduced-motion guarded).
+USAGE: one <div class="mtl-step" style="--mtl-lv:N"> per level, in ascending order.
+       Mark the assessed level with class="mtl-step is-current". Keep --mtl-lv in
+       step with the visual order (1 = lowest/shortest).
+============================================================================ -->
+<style data-module="maturity-ladder">
+  .mtl { margin: 0; --mtl-base: 150px; --mtl-rise: 34px; }
+  .mtl-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .mtl-steps { display: flex; align-items: flex-end; gap: var(--sp-2); }
+  /* step: a rising block; taller = more mature. lv sets the rise. */
+  .mtl-step { --mtl-c: var(--accent); position: relative; flex: 1 1 0; min-width: 130px; height: calc(var(--mtl-base) + var(--mtl-lv, 1) * var(--mtl-rise)); display: grid; grid-template-rows: auto auto 1fr; gap: var(--sp-2); padding: var(--sp-3); background: var(--bg-surface); border: 1px solid var(--border-default); border-bottom: 3px solid color-mix(in srgb, var(--mtl-c) 55%, var(--border-default)); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease); }
+  .mtl-step:hover { box-shadow: var(--shadow-md); }
+  .mtl-lv { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--mtl-c); }
+  .mtl-name { margin: 0; font: var(--type-body); font-weight: 650; color: var(--text-primary); }
+  .mtl-traits { margin: 0; padding-left: var(--sp-4); display: grid; gap: 2px; align-content: start; font: var(--type-caption); font-weight: 400; color: var(--text-secondary); }
+  .mtl-traits li { line-height: 1.4; }
+  /* current rung: accent ring + a floating badge */
+  .mtl-step.is-current { border-color: color-mix(in srgb, var(--accent) 55%, var(--border-default)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent), var(--shadow-md); background: color-mix(in srgb, var(--accent) 7%, var(--bg-surface)); }
+  .mtl-badge { position: absolute; top: calc(-1 * var(--sp-3)); left: var(--sp-3); padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; color: var(--bg-surface); background: var(--accent); box-shadow: var(--shadow-sm); }
+  @media (prefers-reduced-motion: reduce) { .mtl-step { transition: none; } }
+  @media (max-width: 720px) { .mtl-steps { flex-wrap: wrap; } .mtl-step { height: auto; min-height: var(--mtl-base); } }
+</style>
+
+<figure class="mtl card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="mtl-title">{{TITLE}}</figcaption> <!-- e.g. データ活用 成熟度モデル -->
+  <div class="mtl-steps">
+
+    <!-- ── one .mtl-step per level, ascending (lowest first). --mtl-lv = 1..count ─ -->
+    <div class="mtl-step" style="--mtl-lv:1">
+      <span class="mtl-lv">{{LV}}</span>          <!-- e.g. Lv1 -->
+      <h3 class="mtl-name">{{LEVEL_NAME}}</h3>     <!-- e.g. 初期 -->
+      <ul class="mtl-traits">
+        <li>{{TRAIT}}</li> <!-- e.g. 手作業・属人的 -->
+        <li>{{TRAIT}}</li> <!-- e.g. データが散在 -->
+      </ul>
+    </div>
+
+    <div class="mtl-step" style="--mtl-lv:2">
+      <span class="mtl-lv">{{LV}}</span>          <!-- e.g. Lv2 -->
+      <h3 class="mtl-name">{{LEVEL_NAME}}</h3>     <!-- e.g. 反復可能 -->
+      <ul class="mtl-traits"><li>{{TRAIT}}</li></ul> <!-- e.g. 一部で手順化 -->
+    </div>
+
+    <!-- current level: add .is-current for the ring + 現在 badge -->
+    <div class="mtl-step is-current" style="--mtl-lv:3">
+      <span class="mtl-badge">現在</span>
+      <span class="mtl-lv">{{LV}}</span>          <!-- e.g. Lv3 -->
+      <h3 class="mtl-name">{{LEVEL_NAME}}</h3>     <!-- e.g. 定義済み -->
+      <ul class="mtl-traits">
+        <li>{{TRAIT}}</li> <!-- e.g. 全社で標準化 -->
+        <li>{{TRAIT}}</li> <!-- e.g. 指標を定点観測 -->
+      </ul>
+    </div>
+
+    <div class="mtl-step" style="--mtl-lv:4">
+      <span class="mtl-lv">{{LV}}</span>          <!-- e.g. Lv4 -->
+      <h3 class="mtl-name">{{LEVEL_NAME}}</h3>     <!-- e.g. 定量管理 -->
+      <ul class="mtl-traits"><li>{{TRAIT}}</li></ul> <!-- e.g. 予測に基づく判断 -->
+    </div>
+
+    <div class="mtl-step" style="--mtl-lv:5">
+      <span class="mtl-lv">{{LV}}</span>          <!-- e.g. Lv5 -->
+      <h3 class="mtl-name">{{LEVEL_NAME}}</h3>     <!-- e.g. 最適化 -->
+      <ul class="mtl-traits"><li>{{TRAIT}}</li></ul> <!-- e.g. 継続的に自己改善 -->
+    </div>
+    <!-- ↑ repeat: one .mtl-step per level (4-5 typical); update --mtl-lv in order -->
+
+  </div>
+</figure>

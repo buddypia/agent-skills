@@ -1,0 +1,64 @@
+<!-- ============================================================================
+MODULE: tag-cloud                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A weighted tag / word cloud (pure CSS - no SVG). Inline-flex tags that wrap,
+         each SIZED by a weight class (.w1-.w5 mapping onto the type scale) and
+         cat-tinted, with an optional count. Makes the relative frequency / prominence
+         of topics readable at a glance.
+         Distinction: treemap encodes EXACT proportions as tile areas you can compare
+         precisely; feature-grid explains items with descriptions; this is the loose,
+         at-a-glance frequency/topic cloud where bigger = more prominent, no exact area.
+VARIABLES: {{TITLE}}; per tag {{TAG}} with a weight class .w1..w5 and a .cat-N tint,
+           plus an optional {{COUNT}} in a .tgc-n span.
+SCALING:   five weight buckets map onto the type scale: .w1 caption → .w2 small →
+           .w3 body → .w4 h3 → .w5 h2. Assign each tag a bucket by its weight rank
+           (heaviest → .w5). Tint is chosen with a .cat-N class; the cloud wraps
+           naturally via flex-wrap.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --bg-surface, --border-*, --text-*,
+           --font-mono, --type-*, --radius-*, --sp-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="tag-cloud" style block once.
+INTERACTION: hover deepens a tag's tint (paint only, reduced-motion guarded).
+             aria-label on the figure; tags + counts are real text.
+USAGE: one .tgc-tag per topic; give it a weight class (.w1..w5) by its rank and a
+       .cat-N tint. Add a trailing <span class="tgc-n"> for an optional count.
+============================================================================ -->
+<style data-module="tag-cloud">
+  .tgc { margin: 0; }
+  .tgc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .tgc-cloud { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2) var(--sp-3); }
+  /* tag chip - cat-tinted; --tc drives fill + text mix */
+  .tgc-tag { --tc: var(--accent); display: inline-flex; align-items: baseline; gap: var(--sp-1); padding: var(--sp-1) var(--sp-3); border-radius: var(--radius-pill); line-height: 1.25; color: color-mix(in srgb, var(--tc) 60%, var(--text-primary)); background: color-mix(in srgb, var(--tc) 12%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--tc) 30%, var(--border-default)); transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+  .tgc-tag:hover { background: color-mix(in srgb, var(--tc) 22%, var(--bg-surface)); border-color: color-mix(in srgb, var(--tc) 50%, var(--border-default)); }
+  /* weight buckets → type scale (heaviest = .w5) */
+  .tgc-tag.w1 { font: var(--type-caption); }
+  .tgc-tag.w2 { font: var(--type-small); }
+  .tgc-tag.w3 { font: var(--type-body); font-weight: 600; }
+  .tgc-tag.w4 { font: var(--type-h3); }
+  .tgc-tag.w5 { font: var(--type-h2); }
+  .tgc-tag.cat-1 { --tc: var(--cat-1); } .tgc-tag.cat-2 { --tc: var(--cat-2); }
+  .tgc-tag.cat-3 { --tc: var(--cat-3); } .tgc-tag.cat-4 { --tc: var(--cat-4); }
+  .tgc-tag.cat-5 { --tc: var(--cat-5); }
+  .tgc-n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: max(.72em, 10px); font-weight: 400; color: var(--text-muted); }
+  @media (prefers-reduced-motion: reduce) { .tgc-tag { transition: none; } }
+</style>
+
+<figure class="tgc card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="tgc-title">{{TITLE}}</figcaption>
+  <div class="tgc-cloud">
+    <!-- ↓ one .tgc-tag per topic; weight class .w1..w5 by rank, .cat-N tint, optional .tgc-n count -->
+    <span class="tgc-tag w5 cat-1">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. React 128 -->
+    <span class="tgc-tag w4 cat-2">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. TypeScript 96 -->
+    <span class="tgc-tag w3 cat-3">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. CSS 74 -->
+    <span class="tgc-tag w4 cat-4">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Node.js 88 -->
+    <span class="tgc-tag w2 cat-5">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. GraphQL 41 -->
+    <span class="tgc-tag w3 cat-1">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Vite 63 -->
+    <span class="tgc-tag w1 cat-2">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Deno 18 -->
+    <span class="tgc-tag w2 cat-4">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Rust 39 -->
+    <span class="tgc-tag w4 cat-3">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Docker 82 -->
+    <span class="tgc-tag w1 cat-5">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. WASM 15 -->
+    <span class="tgc-tag w2 cat-1">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Prisma 34 -->
+    <span class="tgc-tag w3 cat-2">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Tailwind 58 -->
+    <span class="tgc-tag w1 cat-4">{{TAG}} <span class="tgc-n">{{COUNT}}</span></span>  <!-- e.g. Bun 12 -->
+    <!-- ↑ repeat: one .tgc-tag per topic; drop .tgc-n to omit the count -->
+  </div>
+</figure>

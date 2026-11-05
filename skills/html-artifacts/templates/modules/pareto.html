@@ -1,0 +1,92 @@
+<!-- ============================================================================
+MODULE: pareto                                              lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Self-contained SVG Pareto chart (NO external libs). Descending bars encode
+         counts (defects / causes) on the left axis; an overlaid cumulative-percentage
+         line + dots rides a 0-100% right axis, with a dashed 80% reference rule. Sorts
+         causes so the "vital few" that make up most of the effect stand out (80/20).
+         Distinction: chart-bar has no cumulative overlay and no forced sort; funnel
+         shows stage-to-stage conversion of one flow; this pairs sorted magnitudes with
+         a cumulative % to locate the 80% threshold.
+VARIABLES: {{TITLE}}; axis titles {{COUNT_AXIS}}; left ticks {{L_MID}} {{L_MAX}}; per
+           category {{CAT}} {{COUNT}} (bar) {{CUM}} (cumulative %, right axis).
+GEOMETRY:  viewBox 640×360. Left axis x=52, right axis x=588, baseline y=300, top y=36
+           (264px range). 6 category centers: 97,186,275,365,454,543 (bar width 48,
+           x = center−24). Bar H = COUNT/L_MAX×264, Y = 300−H. Cumulative dot
+           CY = 300 − CUM/100×264. 80% rule at y = 300 − 0.8×264 = 88.8 ≈ 89.
+REQUIRES:  core/tokens.css (--cat-1, --cat-4, --accent, --color-warning, --text-*,
+           --border-subtle, --border-default, --bg-surface, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="pareto" style block once.
+INTERACTION: none required. Bars/dots highlight on hover (paint only, reduced-motion
+             guarded). role="img" + <title> a11y; per-mark <title> tooltips.
+USAGE: sort categories DESCENDING by count; duplicate one bar <g> + one cumulative
+       <circle> per category; keep the cum-line polyline in sync with the dots.
+============================================================================ -->
+<style data-module="pareto">
+  .prt { width: 100%; }
+  .prt svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .prt { overflow-x: auto; } .prt svg { min-width: 640px; } }
+  .prt-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .prt .grid-line { stroke: var(--border-subtle); stroke-width: 1; }
+  .prt .axis { stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; }
+  /* descending bars = counts (left axis); transition paint only */
+  .prt .bar { fill: color-mix(in srgb, var(--cat-1) 74%, var(--bg-surface)); stroke: color-mix(in srgb, var(--accent) 22%, transparent); stroke-width: 1; transition: fill var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .prt .bar:hover { fill: var(--accent); filter: brightness(1.06); }
+  /* cumulative % line + dots (right axis) */
+  .prt .cum-line { fill: none; stroke: var(--cat-4); stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+  .prt .cum-dot { fill: var(--cat-4); stroke: var(--bg-surface); stroke-width: 2; transition: r var(--dur-fast) var(--ease); }
+  .prt .cum-dot:hover { r: 6; }
+  /* dashed 80% reference - the vital-few threshold */
+  .prt .ref80 { stroke: color-mix(in srgb, var(--color-warning) 65%, var(--border-default)); stroke-width: 1.25; stroke-dasharray: 6 4; }
+  .prt .ref80-tag { fill: var(--color-warning); font-size: 10.5px; font-family: var(--font-mono); }
+  .prt .tick { fill: var(--text-muted); font-size: 10.5px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .prt .cat { fill: var(--text-muted); font-size: 12px; text-anchor: middle; letter-spacing: var(--tracking-tight); }
+  .prt .axis-label { fill: var(--text-secondary); font-size: 11.5px; font-weight: 600; text-anchor: middle; }
+  @media (prefers-reduced-motion: reduce) { .prt .bar, .prt .cum-dot { transition: none; } }
+</style>
+
+<figure class="prt card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="prt-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 640 360" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- gridlines (thirds of the 264px plot; baseline 300, top 36) -->
+    <line class="grid-line" x1="52" y1="124" x2="588" y2="124"/>
+    <line class="grid-line" x1="52" y1="212" x2="588" y2="212"/>
+    <!-- axes: left = counts, right = cumulative %, baseline -->
+    <line class="axis" x1="52" y1="36" x2="52" y2="300"/>
+    <line class="axis" x1="588" y1="36" x2="588" y2="300"/>
+    <line class="axis" x1="52" y1="300" x2="588" y2="300"/>
+    <!-- left ticks (counts) -->
+    <text class="tick" x="46" y="304" text-anchor="end">0</text>
+    <text class="tick" x="46" y="216" text-anchor="end">{{L_MID}}</text> <!-- e.g. 30 -->
+    <text class="tick" x="46" y="40"  text-anchor="end">{{L_MAX}}</text> <!-- e.g. 60 -->
+    <!-- right ticks (cumulative %) -->
+    <text class="tick" x="594" y="304">0%</text>
+    <text class="tick" x="594" y="172">50%</text>
+    <text class="tick" x="594" y="40">100%</text>
+    <!-- axis title (left) -->
+    <text class="axis-label" x="20" y="168" transform="rotate(-90 20 168)">{{COUNT_AXIS}}</text> <!-- e.g. 件数 -->
+
+    <!-- dashed 80% reference rule -->
+    <line class="ref80" x1="52" y1="89" x2="588" y2="89"/>
+    <text class="ref80-tag" x="586" y="84" text-anchor="end">80%</text>
+
+    <!-- ↓ BARS: descending counts (one <g> per category; H = COUNT/L_MAX×264) -->
+    <g><rect class="bar" x="73"  y="89"  width="48" height="211" rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="97"  y="318">{{CAT}}</text></g> <!-- e.g. 位置ずれ -->
+    <g><rect class="bar" x="162" y="168" width="48" height="132" rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="186" y="318">{{CAT}}</text></g>
+    <g><rect class="bar" x="251" y="221" width="48" height="79"  rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="275" y="318">{{CAT}}</text></g>
+    <g><rect class="bar" x="341" y="247" width="48" height="53"  rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="365" y="318">{{CAT}}</text></g>
+    <g><rect class="bar" x="430" y="265" width="48" height="35"  rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="454" y="318">{{CAT}}</text></g>
+    <g><rect class="bar" x="519" y="282" width="48" height="18"  rx="4"><title>{{CAT}}: {{COUNT}}</title></rect><text class="cat" x="543" y="318">{{CAT}}</text></g>
+    <!-- ↑ repeat -->
+
+    <!-- CUMULATIVE % line + dots (CY = 300 − CUM/100×264) -->
+    <polyline class="cum-line" points="97,194 186,128 275,89 365,62 454,45 543,36"/>
+    <circle class="cum-dot" cx="97"  cy="194" r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <circle class="cum-dot" cx="186" cy="128" r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <circle class="cum-dot" cx="275" cy="89"  r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <circle class="cum-dot" cx="365" cy="62"  r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <circle class="cum-dot" cx="454" cy="45"  r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <circle class="cum-dot" cx="543" cy="36"  r="4"><title>{{CAT}}: {{CUM}}</title></circle>
+    <!-- ↑ repeat -->
+  </svg>
+</figure>

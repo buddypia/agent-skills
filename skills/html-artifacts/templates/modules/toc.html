@@ -1,0 +1,91 @@
+<!-- ============================================================================
+MODULE: toc                                                 lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A table of contents (pure CSS - no SVG, no JS). Numbered chapters with a
+         dotted leader running to a page number / anchor label, plus one level of
+         indented subsections. Every row is a real <a href="#..."> so it doubles
+         as in-document navigation. For reports, specs, handbooks, long docs.
+         Distinction: glossary pairs TERMS with prose definitions; stepper walks
+         a PROCESS forward step-by-step; toc is a two-level navigational index of
+         a document's own sections. ROOT EXCEPTION (spec rule 8): the root is a
+         <nav aria-label> - a table of contents IS a navigation landmark, so a
+         semantic <nav> beats a <figure> here (documented, intentional).
+VARIABLES: {{TITLE}}; per chapter {{NUM}} + {{CHAPTER}} + {{PAGE}} + {{ANCHOR}};
+           per subsection {{SUBNUM}} + {{SUB}} + {{PAGE}} + {{ANCHOR}}.
+SCALING:  an <ol> of chapters; each chapter may nest an <ol class="toc-subs">.
+          A row is a flex line: number, label, a flex-growing dotted leader, then
+          the page. Subsections indent under the chapter number column.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --bg-card,
+          --text-*, --border-*, --font-mono, --radius-*, --sp-*, --type-*,
+          --shadow-sm, --dur-fast, --ease)
+MODULE CSS: inline the data-module="toc" style block once.
+INTERACTION: paint-only hover (row label + page warm toward the accent), guarded
+             for reduced motion. Each row is a keyboard-focusable anchor link.
+USAGE: one <li class="toc-chapter"> per chapter; nest an <ol class="toc-subs">
+       with <li> subsection rows. Point every href at the section's id/anchor.
+============================================================================ -->
+<style data-module="toc">
+  .toc { margin: 0; }
+  .toc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .toc-list, .toc-subs { list-style: none; margin: 0; padding: 0; }
+  .toc-chapter { padding: var(--sp-2) 0; border-bottom: 1px solid var(--border-subtle); }
+  .toc-chapter:last-child { border-bottom: none; }
+  /* a row: number · label · dotted leader · page - baseline-aligned link */
+  .toc-row { display: flex; align-items: baseline; gap: var(--sp-2); text-decoration: none; color: var(--text-primary); transition: color var(--dur-fast) var(--ease); }
+  .toc-num { flex: none; width: 2.2em; font-family: var(--font-mono); font-weight: 700; color: var(--accent); font-size: 13px; }
+  .toc-label { font: var(--type-body); }
+  .toc-dots { flex: 1 1 auto; margin: 0 var(--sp-1) 5px; border-bottom: 1px dotted color-mix(in srgb, var(--text-muted) 60%, transparent); }
+  .toc-page { flex: none; font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); transition: color var(--dur-fast) var(--ease); }
+  .toc-row:hover .toc-label, .toc-row:hover .toc-page { color: var(--accent); }
+  /* subsections: quieter type, indented under the chapter number column */
+  .toc-subs { margin-top: var(--sp-1); }
+  .toc-sub { padding: 3px 0 3px var(--sp-6); }
+  .toc-sub .toc-num { width: 2.6em; font-weight: 600; color: var(--text-muted); }
+  .toc-sub .toc-label { font: var(--type-small); color: var(--text-secondary); }
+  @media (prefers-reduced-motion: reduce) { .toc-row { transition: none; } }
+</style>
+
+<nav class="toc card-outlined" aria-label="{{TITLE}}">
+  <p class="toc-title">{{TITLE}}</p> <!-- e.g. 目次 -->
+  <ol class="toc-list">
+
+    <!-- ── one .toc-chapter per top-level section (nest .toc-subs as needed) ── -->
+    <li class="toc-chapter">
+      <a class="toc-row" href="#{{ANCHOR}}">
+        <span class="toc-num">{{NUM}}</span>       <!-- e.g. 01 -->
+        <span class="toc-label">{{CHAPTER}}</span> <!-- e.g. はじめに -->
+        <span class="toc-dots"></span>
+        <span class="toc-page">{{PAGE}}</span>     <!-- e.g. 3 -->
+      </a>
+      <ol class="toc-subs">
+        <li>
+          <a class="toc-row toc-sub" href="#{{ANCHOR}}">
+            <span class="toc-num">{{SUBNUM}}</span> <!-- e.g. 1.1 -->
+            <span class="toc-label">{{SUB}}</span>   <!-- e.g. 本書の対象読者 -->
+            <span class="toc-dots"></span>
+            <span class="toc-page">{{PAGE}}</span>   <!-- e.g. 4 -->
+          </a>
+        </li>
+        <li>
+          <a class="toc-row toc-sub" href="#{{ANCHOR}}">
+            <span class="toc-num">{{SUBNUM}}</span> <!-- e.g. 1.2 -->
+            <span class="toc-label">{{SUB}}</span>   <!-- e.g. 記法について -->
+            <span class="toc-dots"></span>
+            <span class="toc-page">{{PAGE}}</span>   <!-- e.g. 5 -->
+          </a>
+        </li>
+        <!-- ↑ repeat: one <li> per subsection -->
+      </ol>
+    </li>
+
+    <li class="toc-chapter">
+      <a class="toc-row" href="#{{ANCHOR}}">
+        <span class="toc-num">{{NUM}}</span>       <!-- e.g. 02 -->
+        <span class="toc-label">{{CHAPTER}}</span> <!-- e.g. 導入手順 -->
+        <span class="toc-dots"></span>
+        <span class="toc-page">{{PAGE}}</span>     <!-- e.g. 8 -->
+      </a>
+    </li>
+    <!-- ↑ repeat: one .toc-chapter per section -->
+
+  </ol>
+</nav>

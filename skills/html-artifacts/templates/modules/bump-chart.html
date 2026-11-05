@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: bump-chart                                 lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG bump chart / rank-trajectory (NO external libs). Y axis
+         is ORDINAL RANK (1 on top → N at the bottom), X is 3-5 time points; one
+         polyline per item connects its rank at each point with a dot at every
+         vertex, and the item label sits at both ends - line crossings read as
+         overtakes. Distinction: chart-line plots raw VALUES on a continuous axis;
+         slope-chart compares exactly two points; bump-chart tracks position in a
+         RANKING across several periods (league tables, priority shifts).
+VARIABLES: {{TITLE}}; per time point {{PERIOD}}; per item {{ITEM}} (label at both
+           ends) + a rank polyline (.cat-N) with a dot per vertex.
+GEOMETRY:  time points at x=160,260,360,460,560; rank rows y = 52 + (rank−1)*58
+           (rank1=52 … rank5=284). A vertex for item at (period i, rank r) is
+           (x_i, 52+(r−1)*58). Left label at the first vertex (x=148, end); right
+           label at the last vertex (x=572, start). Faint gridline per rank row.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --text-*, --border-subtle,
+           --bg-surface, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="bump-chart" style block once.
+INTERACTION: none required. On svg:hover sibling trajectories fade so one path reads
+           (paint only, reduced-motion guarded). role="img" + <title> a11y.
+USAGE: duplicate one <g class="bump-item cat-N"> per item: a polyline through its
+       per-period vertices, a dot at each, and a left + right label. Add rank rows
+       and {{PERIOD}} labels to match your point count.
+============================================================================ -->
+<style data-module="bump-chart">
+  .bump { margin: 0; }
+  .bump-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .bump svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .bump { overflow-x: auto; } .bump svg { min-width: 720px; } }
+  .bump .bump-grid { stroke: var(--border-subtle); stroke-width: 1; stroke-dasharray: 3 5; }
+  .bump .bump-rank { fill: var(--text-muted); font-size: 11px; font-family: var(--font-mono); dominant-baseline: middle; }
+  .bump .bump-period { fill: var(--text-secondary); font-size: 12px; text-anchor: middle; font-weight: 600; }
+  .bump .bump-line { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .bump .bump-dot { stroke: var(--bg-surface); stroke-width: 2; }
+  .bump .bump-name { fill: var(--text-primary); font-size: 12.5px; font-weight: 600; dominant-baseline: middle; }
+  .bump .bump-item.cat-1 .bump-line { stroke: var(--cat-1); } .bump .bump-item.cat-1 .bump-dot { fill: var(--cat-1); }
+  .bump .bump-item.cat-2 .bump-line { stroke: var(--cat-2); } .bump .bump-item.cat-2 .bump-dot { fill: var(--cat-2); }
+  .bump .bump-item.cat-3 .bump-line { stroke: var(--cat-3); } .bump .bump-item.cat-3 .bump-dot { fill: var(--cat-3); }
+  .bump .bump-item.cat-4 .bump-line { stroke: var(--cat-4); } .bump .bump-item.cat-4 .bump-dot { fill: var(--cat-4); }
+  .bump .bump-item.cat-5 .bump-line { stroke: var(--cat-5); } .bump .bump-item.cat-5 .bump-dot { fill: var(--cat-5); }
+  .bump svg:hover .bump-item { opacity: .3; transition: opacity var(--dur-fast) var(--ease); }
+  .bump svg:hover .bump-item:hover { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .bump svg:hover .bump-item { transition: none; } }
+</style>
+
+<figure class="bump card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="bump-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 720 340" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- rank gridlines + rank numbers (rank 1 on top) -->
+    <line class="bump-grid" x1="160" y1="52"  x2="560" y2="52"/>  <text class="bump-rank" x="28" y="52">1</text>
+    <line class="bump-grid" x1="160" y1="110" x2="560" y2="110"/> <text class="bump-rank" x="28" y="110">2</text>
+    <line class="bump-grid" x1="160" y1="168" x2="560" y2="168"/> <text class="bump-rank" x="28" y="168">3</text>
+    <line class="bump-grid" x1="160" y1="226" x2="560" y2="226"/> <text class="bump-rank" x="28" y="226">4</text>
+    <line class="bump-grid" x1="160" y1="284" x2="560" y2="284"/> <text class="bump-rank" x="28" y="284">5</text>
+    <!-- time-point labels -->
+    <text class="bump-period" x="160" y="322">{{PERIOD}}</text> <!-- e.g. Q1 -->
+    <text class="bump-period" x="260" y="322">{{PERIOD}}</text> <!-- e.g. Q2 -->
+    <text class="bump-period" x="360" y="322">{{PERIOD}}</text> <!-- e.g. Q3 -->
+    <text class="bump-period" x="460" y="322">{{PERIOD}}</text> <!-- e.g. Q4 -->
+    <text class="bump-period" x="560" y="322">{{PERIOD}}</text> <!-- e.g. Q5 -->
+
+    <!-- ↓ repeat one <g> per item; vertices = (x_i, 52+(rank−1)*58) -->
+    <g class="bump-item cat-1">
+      <polyline class="bump-line" points="160,52 260,52 360,110 460,168 560,110"/>
+      <circle class="bump-dot" cx="160" cy="52" r="5"/><circle class="bump-dot" cx="260" cy="52" r="5"/><circle class="bump-dot" cx="360" cy="110" r="5"/><circle class="bump-dot" cx="460" cy="168" r="5"/><circle class="bump-dot" cx="560" cy="110" r="5"/>
+      <text class="bump-name" x="148" y="52" text-anchor="end">{{ITEM}}</text>   <!-- e.g. 製品A -->
+      <text class="bump-name" x="572" y="110" text-anchor="start">{{ITEM}}</text> <!-- e.g. 製品A -->
+    </g>
+    <g class="bump-item cat-2">
+      <polyline class="bump-line" points="160,110 260,168 360,52 460,52 560,52"/>
+      <circle class="bump-dot" cx="160" cy="110" r="5"/><circle class="bump-dot" cx="260" cy="168" r="5"/><circle class="bump-dot" cx="360" cy="52" r="5"/><circle class="bump-dot" cx="460" cy="52" r="5"/><circle class="bump-dot" cx="560" cy="52" r="5"/>
+      <text class="bump-name" x="148" y="110" text-anchor="end">{{ITEM}}</text>  <!-- e.g. 製品B -->
+      <text class="bump-name" x="572" y="52" text-anchor="start">{{ITEM}}</text>  <!-- e.g. 製品B -->
+    </g>
+    <g class="bump-item cat-3">
+      <polyline class="bump-line" points="160,168 260,110 360,168 460,110 560,226"/>
+      <circle class="bump-dot" cx="160" cy="168" r="5"/><circle class="bump-dot" cx="260" cy="110" r="5"/><circle class="bump-dot" cx="360" cy="168" r="5"/><circle class="bump-dot" cx="460" cy="110" r="5"/><circle class="bump-dot" cx="560" cy="226" r="5"/>
+      <text class="bump-name" x="148" y="168" text-anchor="end">{{ITEM}}</text>  <!-- e.g. 製品C -->
+      <text class="bump-name" x="572" y="226" text-anchor="start">{{ITEM}}</text> <!-- e.g. 製品C -->
+    </g>
+    <g class="bump-item cat-4">
+      <polyline class="bump-line" points="160,226 260,226 360,226 460,226 560,168"/>
+      <circle class="bump-dot" cx="160" cy="226" r="5"/><circle class="bump-dot" cx="260" cy="226" r="5"/><circle class="bump-dot" cx="360" cy="226" r="5"/><circle class="bump-dot" cx="460" cy="226" r="5"/><circle class="bump-dot" cx="560" cy="168" r="5"/>
+      <text class="bump-name" x="148" y="226" text-anchor="end">{{ITEM}}</text>  <!-- e.g. 製品D -->
+      <text class="bump-name" x="572" y="168" text-anchor="start">{{ITEM}}</text> <!-- e.g. 製品D -->
+    </g>
+    <!-- ↑ repeat -->
+  </svg>
+</figure>

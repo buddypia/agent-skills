@@ -1,0 +1,83 @@
+<!-- ============================================================================
+MODULE: chart-bubble                                        lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Self-contained SVG bubble chart (NO external libs). A scatter where each
+         point's RADIUS encodes a third measure (e.g. market size), 5-8 labelled
+         bubbles filled with translucent --cat-N, X & Y axes with ticks + titles, and
+         optional dashed quadrant midlines. Plots three dimensions at once.
+         Distinction: chart-scatter encodes only x/y position (fixed dot size); this
+         adds magnitude via bubble size and names each bubble in place, so position
+         AND weight read together.
+VARIABLES: {{TITLE}}; axis titles {{X_AXIS}} {{Y_AXIS}}; ticks {{X_MIN}} {{X_MID}}
+           {{X_MAX}} {{Y_MIN}} {{Y_MID}} {{Y_MAX}}; per bubble {{LABEL}} {{VALUE}}.
+GEOMETRY:  viewBox 640×400. Plot box x∈[56,600] (width 544), y∈[40,340] (height 300,
+           baseline 340). CX = 56 + (vx−X_MIN)/(X_MAX−X_MIN)×544.
+           CY = 340 − (vy−Y_MIN)/(Y_MAX−Y_MIN)×300. R = 12 + (vz/Z_MAX)×34 → 12..46.
+           Quadrant midlines at x=328, y=190 (delete if not splitting the field).
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --text-*, --border-subtle,
+           --border-default, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="chart-bubble" style block once.
+INTERACTION: none required. Bubbles brighten and siblings recede on hover (paint only,
+             reduced-motion guarded). role="img" + <title> a11y; per-bubble <title>.
+USAGE: duplicate one bubble <g> per point; set .cat-N and CX/CY/R from the maps above.
+       Delete the two .mid lines if the field is not divided into quadrants.
+============================================================================ -->
+<style data-module="chart-bubble">
+  .bub { width: 100%; }
+  .bub svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .bub { overflow-x: auto; } .bub svg { min-width: 640px; } }
+  .bub-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .bub .grid-line { stroke: var(--border-subtle); stroke-width: 1; }
+  .bub .axis { stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; }
+  .bub .mid { stroke: color-mix(in srgb, var(--text-muted) 50%, transparent); stroke-width: 1; stroke-dasharray: 5 4; }
+  .bub .tick { fill: var(--text-muted); font-size: 10.5px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .bub .axis-label { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
+  /* bubbles: translucent cat fill (size encodes the 3rd measure); paint-only hover */
+  .bub .bubble { stroke-width: 1.5; transition: fill-opacity var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .bub .bubble.cat-1 { fill: color-mix(in srgb, var(--cat-1) 44%, transparent); stroke: color-mix(in srgb, var(--cat-1) 72%, var(--border-default)); }
+  .bub .bubble.cat-2 { fill: color-mix(in srgb, var(--cat-2) 44%, transparent); stroke: color-mix(in srgb, var(--cat-2) 72%, var(--border-default)); }
+  .bub .bubble.cat-3 { fill: color-mix(in srgb, var(--cat-3) 44%, transparent); stroke: color-mix(in srgb, var(--cat-3) 72%, var(--border-default)); }
+  .bub .bubble.cat-4 { fill: color-mix(in srgb, var(--cat-4) 44%, transparent); stroke: color-mix(in srgb, var(--cat-4) 72%, var(--border-default)); }
+  .bub .bubble.cat-5 { fill: color-mix(in srgb, var(--cat-5) 44%, transparent); stroke: color-mix(in srgb, var(--cat-5) 72%, var(--border-default)); }
+  .bub .bubble:hover { filter: brightness(1.04); }
+  .bub svg:hover .bubble { fill-opacity: .55; }
+  .bub svg:hover .bubble:hover { fill-opacity: 1; }
+  .bub .b-label { fill: var(--text-primary); font-size: 11px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; pointer-events: none; paint-order: stroke; stroke: var(--bg-surface); stroke-width: 3px; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: reduce) { .bub .bubble { transition: none; } }
+</style>
+
+<figure class="bub card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="bub-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 640 400" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- gridlines (plot box x 56→600, y 40→340; off-centre so the mids read) -->
+    <line class="grid-line" x1="56" y1="115" x2="600" y2="115"/>
+    <line class="grid-line" x1="56" y1="265" x2="600" y2="265"/>
+    <line class="grid-line" x1="192" y1="40" x2="192" y2="340"/>
+    <line class="grid-line" x1="464" y1="40" x2="464" y2="340"/>
+    <!-- optional quadrant midlines (delete if not splitting the field) -->
+    <line class="mid" x1="328" y1="40" x2="328" y2="340"/>
+    <line class="mid" x1="56" y1="190" x2="600" y2="190"/>
+    <!-- axes -->
+    <line class="axis" x1="56" y1="40"  x2="56"  y2="340"/>
+    <line class="axis" x1="56" y1="340" x2="600" y2="340"/>
+    <!-- ticks -->
+    <text class="tick" x="50" y="344" text-anchor="end">{{Y_MIN}}</text>
+    <text class="tick" x="50" y="194" text-anchor="end">{{Y_MID}}</text>
+    <text class="tick" x="50" y="44"  text-anchor="end">{{Y_MAX}}</text>
+    <text class="tick" x="56"  y="356" text-anchor="middle">{{X_MIN}}</text>
+    <text class="tick" x="328" y="356" text-anchor="middle">{{X_MID}}</text>
+    <text class="tick" x="600" y="356" text-anchor="middle">{{X_MAX}}</text>
+    <!-- axis titles -->
+    <text class="axis-label" x="328" y="378">{{X_AXIS}}</text> <!-- e.g. 成長率 -->
+    <text class="axis-label" x="18" y="190" transform="rotate(-90 18 190)">{{Y_AXIS}}</text> <!-- e.g. 収益性 -->
+
+    <!-- ↓ one <g> per bubble. For small bubbles (r < 34), place y = cy + r + 13 so labels sit cleanly below the circle -->
+    <g><circle class="bubble cat-1" cx="140" cy="120" r="40"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="140" y="120">{{LABEL}}</text></g> <!-- e.g. 製品A -->
+    <g><circle class="bubble cat-2" cx="250" cy="240" r="26"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="250" y="279">{{LABEL}}</text></g>
+    <g><circle class="bubble cat-3" cx="380" cy="160" r="34"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="380" y="160">{{LABEL}}</text></g>
+    <g><circle class="bubble cat-4" cx="300" cy="300" r="18"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="300" y="331">{{LABEL}}</text></g>
+    <g><circle class="bubble cat-5" cx="470" cy="210" r="46"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="470" y="210">{{LABEL}}</text></g>
+    <g><circle class="bubble cat-1" cx="528" cy="110" r="22"><title>{{LABEL}}: {{VALUE}}</title></circle><text class="b-label" x="528" y="145">{{LABEL}}</text></g>
+    <!-- ↑ repeat (5-8 bubbles) -->
+  </svg>
+</figure>

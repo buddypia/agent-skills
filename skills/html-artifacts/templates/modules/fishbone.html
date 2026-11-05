@@ -1,0 +1,93 @@
+<!-- ============================================================================
+MODULE: fishbone                                lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG Ishikawa (cause-and-effect / fishbone) diagram (NO
+         external libs). A horizontal spine ends in a problem-statement HEAD box on
+         the right; four angled major bones (2 up, 2 down) each carry a category
+         label at the tip and 2-3 rib lines carrying cause labels. For root-cause
+         analysis grouped by category (6M / people-process-tools, defect drivers).
+         Distinction: mindmap radiates ideas from a topic and org-chart/tree nest a
+         hierarchy - fishbone attributes many CAUSES (grouped) to one EFFECT.
+VARIABLES: {{TITLE}}; effect {{EFFECT}}; per bone {{CATEGORY}}; per rib {{CAUSE}}.
+GEOMETRY:  viewBox 0 0 760 420. Spine y=210 from x=40→606 into a head rect
+           x=606 y=174 w=150 h=72. Bones angle back from the head at slope ±0.5:
+           a top bone at spine x=ax runs (ax,210)→(ax-70,70); a bottom bone runs
+           (ax,210)→(ax-70,350). Along a top bone the x at height y is ax-70+0.5·(y-70);
+           a rib is a short horizontal tick from that point leftward, cause text
+           end-anchored at the tick's left tip. Category text sits just past the tip
+           (y=58 top / y=368 bottom). Add a bone by picking a free spine x and
+           cat-N; add a rib by ticking the bone at a new y.
+REQUIRES:  core/tokens.css (--cat-1..4, --accent, --bg-card, --border-default,
+           --text-*, --font-mono, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="fishbone" style block once.
+INTERACTION: none (static). Hover thickens a bone + its ribs (paint/width only,
+             reduced-motion guarded). role="img" + <title> a11y; labels are real text.
+USAGE: one <g class="fb-bone cat-N"> per category (line.fb-major + text.fb-cat +
+       per rib line.fb-rib + text.fb-cause). No arrowheads → no marker ids.
+============================================================================ -->
+<style data-module="fishbone">
+  .fb { width: 100%; }
+  .fb svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .fb { overflow-x: auto; } .fb svg { min-width: 760px; } }
+  .fb-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .fb-spine { fill: none; stroke: var(--text-secondary); stroke-width: 2.5; stroke-linecap: round; }
+  /* major bones + category tint by --cat-N; ribs stay neutral hairlines */
+  .fb-major { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; transition: stroke-width var(--dur-fast) var(--ease); }
+  .fb-rib { stroke: var(--border-default); stroke-width: 1.25; stroke-linecap: round; transition: stroke var(--dur-fast) var(--ease); }
+  .fb-cat { fill: var(--accent); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .fb-cause { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: end; }
+  .fb-bone.cat-1 .fb-major { stroke: var(--cat-1); } .fb-bone.cat-1 .fb-cat { fill: var(--cat-1); }
+  .fb-bone.cat-2 .fb-major { stroke: var(--cat-2); } .fb-bone.cat-2 .fb-cat { fill: var(--cat-2); }
+  .fb-bone.cat-3 .fb-major { stroke: var(--cat-3); } .fb-bone.cat-3 .fb-cat { fill: var(--cat-3); }
+  .fb-bone.cat-4 .fb-major { stroke: var(--cat-4); } .fb-bone.cat-4 .fb-cat { fill: var(--cat-4); }
+  .fb-bone:hover .fb-major { stroke-width: 3; }
+  .fb-bone:hover .fb-rib { stroke: color-mix(in srgb, var(--accent) 40%, var(--border-default)); }
+  /* head: the EFFECT - an accent-tinted slab the spine drives into */
+  .fb-head { fill: color-mix(in srgb, var(--accent) 16%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 55%, var(--border-default)); stroke-width: 1.5; rx: 10; }
+  .fb-head-label { fill: var(--text-primary); font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+  @media (prefers-reduced-motion: reduce) { .fb-major, .fb-rib { transition: none; } }
+</style>
+
+<figure class="fb card-outlined">
+  <figcaption class="fb-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 760 420" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── spine + effect head (drawn first) ───────────────────────────────── -->
+    <line class="fb-spine" x1="40" y1="210" x2="606" y2="210"/>
+    <g>
+      <rect class="fb-head" x="606" y="174" width="150" height="72"/>
+      <text class="fb-head-label" x="681" y="210">{{EFFECT}}</text> <!-- e.g. 出荷遅延の増加 -->
+    </g>
+
+    <!-- ── bones - 2 up, 2 down; one <g class="fb-bone cat-N"> per category ──── -->
+    <!-- TOP bone A (attach x=240) - cat-1 -->
+    <g class="fb-bone cat-1">
+      <line class="fb-major" x1="240" y1="210" x2="170" y2="70"/>
+      <text class="fb-cat" x="170" y="58">{{CATEGORY}}</text>          <!-- e.g. 人 -->
+      <line class="fb-rib" x1="210" y1="150" x2="154" y2="150"/><text class="fb-cause" x="150" y="153">{{CAUSE}}</text> <!-- e.g. 教育不足 -->
+      <line class="fb-rib" x1="190" y1="110" x2="134" y2="110"/><text class="fb-cause" x="130" y="113">{{CAUSE}}</text> <!-- e.g. 引継ぎ漏れ -->
+    </g>
+    <!-- TOP bone B (attach x=470) - cat-2 -->
+    <g class="fb-bone cat-2">
+      <line class="fb-major" x1="470" y1="210" x2="400" y2="70"/>
+      <text class="fb-cat" x="400" y="58">{{CATEGORY}}</text>          <!-- e.g. 方法 -->
+      <line class="fb-rib" x1="440" y1="150" x2="384" y2="150"/><text class="fb-cause" x="380" y="153">{{CAUSE}}</text> <!-- e.g. 手順が曖昧 -->
+      <line class="fb-rib" x1="420" y1="110" x2="364" y2="110"/><text class="fb-cause" x="360" y="113">{{CAUSE}}</text> <!-- e.g. 検査基準なし -->
+    </g>
+    <!-- BOTTOM bone C (attach x=355) - cat-3 -->
+    <g class="fb-bone cat-3">
+      <line class="fb-major" x1="355" y1="210" x2="285" y2="350"/>
+      <text class="fb-cat" x="285" y="368">{{CATEGORY}}</text>         <!-- e.g. 設備 -->
+      <line class="fb-rib" x1="325" y1="270" x2="269" y2="270"/><text class="fb-cause" x="265" y="273">{{CAUSE}}</text> <!-- e.g. 老朽化 -->
+      <line class="fb-rib" x1="305" y1="310" x2="249" y2="310"/><text class="fb-cause" x="245" y="313">{{CAUSE}}</text> <!-- e.g. 保守遅れ -->
+    </g>
+    <!-- BOTTOM bone D (attach x=585) - cat-4 -->
+    <g class="fb-bone cat-4">
+      <line class="fb-major" x1="585" y1="210" x2="515" y2="350"/>
+      <text class="fb-cat" x="515" y="368">{{CATEGORY}}</text>         <!-- e.g. 材料 -->
+      <line class="fb-rib" x1="555" y1="270" x2="499" y2="270"/><text class="fb-cause" x="495" y="273">{{CAUSE}}</text> <!-- e.g. 仕入ばらつき -->
+      <line class="fb-rib" x1="535" y1="310" x2="479" y2="310"/><text class="fb-cause" x="475" y="313">{{CAUSE}}</text> <!-- e.g. 在庫劣化 -->
+    </g>
+    <!-- ↑ repeat: one <g class="fb-bone cat-N"> per category; add ribs by ticking the bone -->
+  </svg>
+</figure>

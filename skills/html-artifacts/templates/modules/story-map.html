@@ -1,0 +1,74 @@
+<!-- ============================================================================
+MODULE: story-map                                          lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS user story map (NO SVG). A backbone row of activities (the user's
+         tasks left → right) tops a grid; under each activity, story cards stack in
+         release rows (MVP / Next / Later) so scope reads as horizontal slices. For
+         release planning, backlog slicing, MVP scoping.
+         Distinction: journey-map tracks emotion / touchpoints along stages;
+         kanban-board tracks live work status (To do / Doing / Done); this is
+         forward-looking scoped RELEASE planning, not sentiment or live status.
+VARIABLES: {{TITLE}}; {{N}} (activity count → --smp-cols); per activity {{ACTIVITY}};
+           per release {{RELEASE}} (row label, tone .-mvp | .-next | .-later);
+           per story {{STORY}} card with a .cat-N tint.
+SCALING:   the grid is `var(--smp-rel) repeat(N,1fr)`: a release-label gutter plus
+           N activity columns. Row 1 is the backbone (corner + activity headers).
+           Each release is a row: its label cell in the gutter, then one .smp-cell
+           per activity holding 0..n stacked .smp-card. Set --smp-cols = N.
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --color-success, --bg-surface,
+           --bg-muted, --border-default, --border-subtle, --text-*, --font-mono,
+           --radius-*, --sp-*, --shadow-*, --tracking-eyebrow, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="story-map" style block once.
+INTERACTION: hover lifts a story card (paint-only, reduced-motion guarded).
+USAGE: set --smp-cols. One .smp-activity per backbone task; one release row per
+       slice (.smp-rel gutter label + N .smp-cell, each with its .smp-card stack).
+============================================================================ -->
+<style data-module="story-map">
+  .smp { width: 100%; --smp-cols: 4; --smp-rel: 96px; }
+  .smp-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .smp-grid { display: grid; grid-template-columns: var(--smp-rel) repeat(var(--smp-cols), 1fr); gap: var(--sp-2); }
+  .smp-corner { }
+  /* backbone: accent-tinted activity headers reading left → right */
+  .smp-activity { padding: var(--sp-2) var(--sp-3); text-align: center; font: var(--type-small); font-weight: 700; color: var(--text-primary); background: color-mix(in srgb, var(--accent) 12%, var(--bg-muted)); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border-default)); }
+  /* release gutter label: tone by scope band */
+  .smp-rel { display: flex; align-items: center; justify-content: center; padding: var(--sp-2); font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-secondary); border-radius: var(--radius-sm); background: var(--bg-muted); box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .smp-rel.-mvp { color: var(--text-primary); background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 40%, var(--border-subtle)); }
+  .smp-rel.-next { color: var(--text-primary); background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 34%, var(--border-subtle)); }
+  .smp-cell { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-1); }
+  /* story card: cat-keyed left rail, lifts on hover */
+  .smp-card { --sc: var(--accent); padding: var(--sp-2) var(--sp-3); font: var(--type-caption); line-height: 1.4; color: var(--text-primary); background: var(--bg-surface); border-radius: var(--radius-xs); border: 1px solid color-mix(in srgb, var(--sc) 36%, var(--border-subtle)); box-shadow: var(--shadow-sm); transition: border-color var(--dur-fast) var(--ease); }
+  .smp-card:hover { border-color: color-mix(in srgb, var(--sc) 64%, var(--border-default)); }
+  .smp-card.cat-1 { --sc: var(--cat-1); }
+  .smp-card.cat-2 { --sc: var(--cat-2); }
+  .smp-card.cat-3 { --sc: var(--cat-3); }
+  .smp-card.cat-4 { --sc: var(--cat-4); }
+  .smp-card.cat-5 { --sc: var(--cat-5); }
+  @media (prefers-reduced-motion: reduce) { .smp-card { transition: none; } }
+</style>
+
+<figure class="smp card-outlined" style="--smp-cols:{{N}}" aria-label="{{TITLE}}"> <!-- N = activity count, e.g. 4 -->
+  <figcaption class="smp-title">{{TITLE}}</figcaption>
+  <div class="smp-grid">
+    <!-- ── BACKBONE (corner gutter + one .smp-activity per user task) ────────── -->
+    <div class="smp-corner"></div>
+    <div class="smp-activity">{{ACTIVITY}}</div> <!-- e.g. 探す -->
+    <div class="smp-activity">{{ACTIVITY}}</div> <!-- e.g. 比較する -->
+    <div class="smp-activity">{{ACTIVITY}}</div> <!-- e.g. 購入する -->
+    <div class="smp-activity">{{ACTIVITY}}</div> <!-- e.g. 受け取る -->
+
+    <!-- ── RELEASE ROW: MVP ─────────────────────────────────────────────────── -->
+    <div class="smp-rel -mvp">{{RELEASE}}</div> <!-- e.g. MVP -->
+    <div class="smp-cell"><span class="smp-card cat-1">{{STORY}}</span><span class="smp-card cat-1">{{STORY}}</span></div> <!-- e.g. キーワード検索 -->
+    <div class="smp-cell"><span class="smp-card cat-2">{{STORY}}</span></div> <!-- e.g. 価格で並べ替え -->
+    <div class="smp-cell"><span class="smp-card cat-3">{{STORY}}</span></div> <!-- e.g. カート決済 -->
+    <div class="smp-cell"><span class="smp-card cat-4">{{STORY}}</span></div> <!-- e.g. 配送状況 -->
+
+    <!-- ── RELEASE ROW: Next ────────────────────────────────────────────────── -->
+    <div class="smp-rel -next">{{RELEASE}}</div> <!-- e.g. Next -->
+    <div class="smp-cell"><span class="smp-card cat-1">{{STORY}}</span></div> <!-- e.g. 絞り込み検索 -->
+    <div class="smp-cell"><span class="smp-card cat-2">{{STORY}}</span></div> <!-- e.g. お気に入り比較 -->
+    <div class="smp-cell"><span class="smp-card cat-3">{{STORY}}</span></div> <!-- e.g. 分割払い -->
+    <div class="smp-cell"></div>
+    <!-- ↑ repeat: one release row (.smp-rel + N .smp-cell) per slice; empty cells allowed -->
+  </div>
+</figure>

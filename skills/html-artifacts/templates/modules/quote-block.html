@@ -1,0 +1,54 @@
+<!-- ============================================================================
+MODULE: quote-block                                         lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A pull-quote / testimonial (pure CSS - no SVG, no image).
+         ANTI-SLOP (design-taste-frontend):
+         - Max 3 lines of quote body (fits at a glance, no rambling AI essays).
+         - Attribution clean: name + role + org with hyphen separator (zero em-dashes).
+         - Eliminates generic placeholder names ("Acme", etc.).
+VARIABLES (per quote): {{QUOTE}} {{NAME}} {{ROLE}} + optional {{ORG}}.
+SCALING:  .qb-row = repeat(var(--qb-cols,1),1fr), one column below 680px.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --bg-card, --text-*, --border-*, --font-serif, --font-mono, --radius-*,
+          --sp-*, --type-*)
+MODULE CSS: inline the data-module="quote-block" style block once. Set
+            style="--qb-cols:2" on .qb-row for a side-by-side pair.
+INTERACTION: none (static).
+USAGE: one <figure class="qb card-outlined"> per quote; blockquote holds the words,
+       figcaption holds the attribution.
+============================================================================ -->
+<style data-module="quote-block">
+  .qb-row { display: grid; grid-template-columns: repeat(var(--qb-cols, 1), 1fr); gap: var(--sp-4); }
+  @media (max-width: 680px) { .qb-row { grid-template-columns: 1fr; } }
+  .qb { position: relative; margin: 0; padding: var(--sp-5) var(--sp-5) var(--sp-4); overflow: hidden; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+  .qb.qb-accent { border-color: color-mix(in srgb, var(--accent) 32%, var(--border-default)); background: color-mix(in srgb, var(--accent) 2%, var(--bg-surface)); }
+  .qb-text { position: relative; z-index: 1; margin: 0; font: var(--type-h3); font-weight: 500; line-height: 1.5; color: var(--text-primary); max-width: 58ch; }
+  .qb-figcap { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-4); font: var(--type-small); }
+  .qb-figcap::before { content: ""; align-self: center; flex: 0 0 auto; width: 14px; height: 1px; background: color-mix(in srgb, var(--accent) 55%, var(--border-default)); }
+  .qb-name { font-weight: 700; color: var(--text-primary); }
+  .qb-role { color: var(--text-secondary); }
+  .qb-org { font-family: var(--font-mono); font-size: 0.9em; color: var(--text-muted); }
+</style>
+
+<div class="qb-row" style="--qb-cols:2">
+
+  <!-- One quote per figure (drop second for single pull-quote) -->
+  <figure class="qb qb-accent" aria-label="{{NAME}}の引用">
+    <blockquote class="qb-text">{{QUOTE}}</blockquote>
+    <!-- e.g. 導入初週から問い合わせ対応の所要時間が半減し、重要タスクへの集中時間が確保できました。 -->
+    <figcaption class="qb-figcap">
+      <span class="qb-name">{{NAME}}</span>   <!-- e.g. 佐藤 健一 -->
+      <span class="qb-role">{{ROLE}}</span>   <!-- e.g. カスタマーサポート責任者 -->
+      <span class="qb-org">{{ORG}}</span>     <!-- e.g. テックロジック株式会社（省略可） -->
+    </figcaption>
+  </figure>
+
+  <figure class="qb qb-accent" aria-label="{{NAME}}の引用">
+    <blockquote class="qb-text">{{QUOTE}}</blockquote>
+    <!-- e.g. メトリクスを毎朝ダッシュボードで一元確認できるようになり、意思決定が圧倒的に早まりました。 -->
+    <figcaption class="qb-figcap">
+      <span class="qb-name">{{NAME}}</span>   <!-- e.g. 鈴木 みなみ -->
+      <span class="qb-role">{{ROLE}}</span>   <!-- e.g. プロダクトマネージャー -->
+      <span class="qb-org">{{ORG}}</span>     <!-- e.g. クラウドネクスト社 -->
+    </figcaption>
+  </figure>
+</div>

@@ -1,0 +1,182 @@
+<!-- ============================================================================
+MODULE: node-graph                                           lineage: html-visual(diagram/graph) + demo2(arch/erd interactive)
+PURPOSE: General reusable INTERACTIVE node-edge graph (NO external libs). A
+         zoom/pan stage wraps a draggable SVG: edges auto-track node centres,
+         nodes are rounded rects tinted by group via --cat-*, a cross-filter
+         legend dims nodes by group, and a reset button restores the layout.
+         Pan+zoom the canvas, drag nodes (edges follow), filter by group.
+VARIABLES: per node {{ID}} {{LABEL}} {{X}} {{Y}} {{GROUP}}  (GROUP = g-1|g-2|g-3)
+           per edge {{FROM}} {{TO}} {{REL}}                 (FROM/TO = node IDs)
+           {{TITLE}} (aria-label for the canvas)
+LAYOUT:    viewBox 0 0 1000 600. Place nodes by (X,Y) = the <g> translate (its
+           top-left corner). Node box is 160x60; centre = (X+80, Y+30) - that is
+           where interactions.js routes edge endpoints automatically.
+REQUIRES:  core/elements.css   (.stage .zoom-controls .zoom-readout .chip .cluster
+                                 .btn .btn-ghost .btn-sm  +  [data-series].dimmed)
+           core/tokens.css     (--cat-* --accent --bg-* --text-* --border-*)
+           core/interactions.js ([data-zoompan] [data-draggable] [data-crossfilter])
+MODULE CSS: inline the data-module="node-graph" style block once.
+INTERACTION:
+   * Zoom/pan  : .stage[data-zoompan] (wheel-zoom, drag-pan) + .zoom-controls.
+   * Drag      : svg[data-draggable]; each g[data-node="ID"] is draggable
+                 (mouse + keyboard arrows); line[data-edge][data-from][data-to]
+                 re-routes to node centres; [data-drag-reset] restores layout.
+                 EDGES ARE DRAWN BEFORE NODES so connectors sit behind boxes.
+   * Filter    : [data-crossfilter] legend chips [data-filter-key="g-N"] dim every
+                 node g[data-series="g-N"] that is not selected (multi-select).
+USAGE: tint a node by giving its <g> a group class .g-1|.g-2|.g-3 AND the matching
+       data-series. Repeat the <line data-edge> per edge (with optional label),
+       then the <g data-node> per node. Keep every control .no-print.
+============================================================================ -->
+<style data-module="node-graph">
+  .node-graph { width: 100%; }
+  .node-graph .stage { width: 100%; aspect-ratio: 5 / 3; box-shadow: var(--shadow-sm); }
+  .node-graph svg { font-family: var(--font-sans); }
+
+  /* edges (drawn first → behind nodes) - hairline connectors with a faint accent
+     warmth; rounded caps so endpoints read as soft ticks, not cut wires. */
+  .node-graph .ng-edge { stroke: color-mix(in srgb, var(--accent) 16%, var(--border-default));
+                         stroke-width: 1.6; stroke-linecap: round;
+                         transition: stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease); }
+  /* the edge label sits over connectors: a thin page-coloured halo keeps it legible
+     without a drawn pill (paint-order is render-only, no geometry change). */
+  .node-graph .ng-edge-label { fill: var(--text-secondary); font-size: 11px;
+                               font-family: var(--font-mono); text-anchor: middle;
+                               paint-order: stroke; stroke: var(--bg-card); stroke-width: 3px;
+                               stroke-linejoin: round;
+                               transition: fill var(--dur-fast) var(--ease); }
+
+  /* node boxes - group identity via border colour + a subtle fill tint
+     (no protruding accent bar: a straight bar over a rounded rect reads as slop) */
+  .node-graph .ng-node { transition: opacity var(--dur-fast) var(--ease); }
+  .node-graph .ng-box { fill: color-mix(in srgb, var(--gc, var(--border-default)) 8%, var(--bg-card));
+                        stroke: var(--gc, var(--border-default)); stroke-width: 1.6;
+                        transition: fill var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .node-graph .ng-label { fill: var(--text-primary); font: var(--type-small); font-weight: 600; }
+  /* hover/focus: firm the group edge + deepen the tint, and surface a gentle
+     elevation - confident, not loud. focus-within covers keyboard drag. */
+  .node-graph .ng-node:hover .ng-box,
+  .node-graph .ng-node:focus-within .ng-box {
+    fill: color-mix(in srgb, var(--gc, var(--accent)) 14%, var(--bg-card));
+    stroke-width: 2.2; filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--gc, var(--accent)) 22%, transparent)); }
+  .node-graph .ng-node:hover .ng-edge-rel { fill: var(--text-primary); }
+  .node-graph .ng-node.dragging .ng-box { filter: brightness(1.05) drop-shadow(0 4px 9px color-mix(in srgb, var(--gc, var(--accent)) 28%, transparent)); stroke-width: 2.4; }
+
+  /* group tints (series tokens) - keep legend chips in sync */
+  .node-graph .g-1 { --gc: var(--cat-1); }
+  .node-graph .g-2 { --gc: var(--cat-2); }
+  .node-graph .g-3 { --gc: var(--cat-3); }
+
+  /* legend chips echo the group colour via a dot; hover/active tie to the group
+     hue so the cross-filter feels alive (the .active outline comes from elements.css). */
+  .node-graph .ng-legend .chip { cursor: pointer;
+                                 transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .node-graph .ng-legend .chip:hover {
+    border-color: color-mix(in srgb, var(--gc, var(--accent)) 55%, var(--border-default));
+    background: color-mix(in srgb, var(--gc, var(--accent)) 9%, transparent);
+    color: var(--text-primary); }
+  .node-graph .ng-legend .ng-dot { width: 9px; height: 9px; border-radius: 50%;
+                                   display: inline-block; margin-right: var(--sp-1); background: var(--gc, var(--accent));
+                                   box-shadow: 0 0 0 3px color-mix(in srgb, var(--gc, var(--accent)) 16%, transparent); }
+</style>
+
+<section class="node-graph stack" data-crossfilter aria-label="{{TITLE}}">
+
+  <!-- cross-filter legend (one chip per group; data-filter-key === node data-series) -->
+  <div class="cluster ng-legend no-print" role="group" aria-label="Filter nodes by group">
+    <!-- ↓ repeat one chip per group -->
+    <span class="chip g-1" data-filter-key="g-1"><span class="ng-dot"></span>Group A</span>
+    <span class="chip g-2" data-filter-key="g-2"><span class="ng-dot"></span>Group B</span>
+    <span class="chip g-3" data-filter-key="g-3"><span class="ng-dot"></span>Group C</span>
+    <!-- ↑ repeat -->
+  </div>
+
+  <!-- zoom + pan stage wrapping the draggable SVG -->
+  <div class="stage" data-zoompan data-zoom-min="0.4" data-zoom-max="2.6" tabindex="0">
+    <div class="zoom-controls no-print">
+      <button class="btn btn-ghost btn-sm" data-zoom-in aria-label="Zoom in">+</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-out aria-label="Zoom out">&minus;</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-reset aria-label="Reset view">&#10530;</button>
+      <span class="zoom-readout" data-zoom-readout>100%</span>
+    </div>
+
+    <svg viewBox="0 0 1000 600" data-draggable role="img" aria-label="{{TITLE}} (draggable graph)">
+      <g data-viewport>
+
+        <!-- ===== EDGES FIRST (sit behind the node boxes) =================== -->
+        <!-- ↓ repeat one <line> per edge; add the <text> only when a relation label is wanted.
+             data-from/data-to MUST match a node's data-node ID; data-edge-label="FROM-TO". -->
+        <line class="ng-edge" data-edge data-from="{{FROM}}" data-to="{{TO}}"/>
+        <text class="ng-edge-label" data-edge-label="{{FROM}}-{{TO}}">{{REL}}</text>
+        <!-- ↑ repeat edge -->
+
+        <!-- worked example: 6 edges across 3 groups -->
+        <line class="ng-edge" data-edge data-from="ingest"  data-to="queue"/>
+        <text class="ng-edge-label" data-edge-label="ingest-queue">emits</text>
+
+        <line class="ng-edge" data-edge data-from="queue"   data-to="worker"/>
+        <text class="ng-edge-label" data-edge-label="queue-worker">consumes</text>
+
+        <line class="ng-edge" data-edge data-from="worker"  data-to="store"/>
+        <text class="ng-edge-label" data-edge-label="worker-store">writes</text>
+
+        <line class="ng-edge" data-edge data-from="store"   data-to="api"/>
+        <text class="ng-edge-label" data-edge-label="store-api">reads</text>
+
+        <line class="ng-edge" data-edge data-from="api"     data-to="dashboard"/>
+        <text class="ng-edge-label" data-edge-label="api-dashboard">serves</text>
+
+        <line class="ng-edge" data-edge data-from="worker"  data-to="api"/>
+        <text class="ng-edge-label" data-edge-label="worker-api">notifies</text>
+
+        <!-- ===== NODES AFTER (on top of edges) ============================= -->
+        <!-- ↓ repeat one <g> per node. data-node=ID, class .g-N + data-series="g-N"
+             (so the legend can dim it). transform=translate(X,Y) = top-left corner;
+             box is 160x60 → centre (X+80, Y+30) is where edges attach. -->
+        <g class="ng-node {{GROUP}}" data-node="{{ID}}" data-series="{{GROUP}}"
+           transform="translate({{X}},{{Y}})" role="group" aria-label="{{LABEL}} (group {{GROUP}}, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">{{LABEL}}</text>
+        </g>
+        <!-- ↑ repeat node -->
+
+        <!-- worked example: 6 nodes / 3 groups -->
+        <g class="ng-node g-1" data-node="ingest" data-series="g-1"
+           transform="translate(60,90)" role="group" aria-label="Ingest (group A, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">Ingest</text>
+        </g>
+        <g class="ng-node g-1" data-node="queue" data-series="g-1"
+           transform="translate(60,330)" role="group" aria-label="Queue (group A, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">Queue</text>
+        </g>
+        <g class="ng-node g-2" data-node="worker" data-series="g-2"
+           transform="translate(400,210)" role="group" aria-label="Worker (group B, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">Worker</text>
+        </g>
+        <g class="ng-node g-2" data-node="store" data-series="g-2"
+           transform="translate(400,420)" role="group" aria-label="Store (group B, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">Store</text>
+        </g>
+        <g class="ng-node g-3" data-node="api" data-series="g-3"
+           transform="translate(740,210)" role="group" aria-label="API (group C, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">API</text>
+        </g>
+        <g class="ng-node g-3" data-node="dashboard" data-series="g-3"
+           transform="translate(740,420)" role="group" aria-label="Dashboard (group C, draggable)">
+          <rect class="ng-box" width="160" height="60" rx="12"/>
+          <text class="ng-label" x="22" y="35">Dashboard</text>
+        </g>
+
+      </g>
+    </svg>
+  </div>
+
+  <!-- restore the initial node layout -->
+  <button class="btn btn-ghost btn-sm no-print" data-drag-reset>Reset layout</button>
+
+</section>

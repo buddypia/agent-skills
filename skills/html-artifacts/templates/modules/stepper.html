@@ -1,0 +1,155 @@
+<!-- ============================================================================
+MODULE: stepper                                              lineage: staged-enforcement-stepper.template.html (tokenised)
+PURPOSE: Numbered VERTICAL stepper / timeline. Each step = a rounded number
+         badge (coloured by its level), a title + event pill, a one-line
+         mechanism (with inline <code>), and a row of outcome "branch chips"
+         (pass / block / advisory). Pure CSS - no SVG, no JS. Theme-aware:
+         every colour is a semantic token, so it follows data-theme + custom
+         --accent. The badge is fully rounded and the spine is a thin rail -
+         no protruding bars.
+VARIABLES: per step {{N}} {{STEP_TITLE}} {{EVENT_TAG}} {{MECHANISM_FN}} {{MECHANISM_DESC}}
+           per branch {{BRANCH_LABEL}} {{BRANCH_DESC}}
+           {{STEPPER_TITLE}} {{STEPPER_DESC}}
+LEVELS (set on .step → badge colour):
+   .lvl-critical = hard block / forced   → --color-danger
+   .lvl-block    = exit / post block      → --color-warning
+   .lvl-soft     = soft / advisory        → --accent
+   .lvl-info     = context / info         → --color-info
+   .lvl-neutral  = neutral / auto         → --text-muted
+BRANCH CHIPS (set on .br): .go = pass (success) · .stop = blocked (danger) · .warn = advisory (warning)
+REQUIRES:  core/tokens.css + core/elements.css (semantic tokens, code styling)
+MODULE CSS: inline the data-module="stepper" style block once.
+INTERACTION: static. Optional: add [data-reveal] (+ [data-reveal-delay]) to each
+             .step for a staggered scroll-in; behavior from interactions.js.
+USAGE: ONE step = one <div class="step lvl-LEVEL" data-n="N">. data-n is the badge
+       number (manual, sequential). The spine line is drawn by .step::after and
+       hidden on the last step automatically. Copy a .step block to add a stage.
+============================================================================ -->
+<style data-module="stepper">
+  .stepper { position: relative; padding-left: var(--sp-2); }
+  .step { position: relative; margin: 0 0 var(--sp-4) 46px; padding: var(--sp-4) var(--sp-5);
+          background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md);
+          transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  /* hover: firm up the edge toward the step's own level hue + lift gently on a hairline shadow */
+  @media (hover: hover) {
+    .step:hover { border-color: color-mix(in srgb, var(--lvl, var(--accent)) 42%, var(--border-default));
+                  box-shadow: var(--shadow-sm), inset 2px 0 0 color-mix(in srgb, var(--lvl, var(--accent)) 60%, transparent); }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .step:hover { transform: translateY(-1px); }
+  }
+  /* number badge - fully rounded, level-coloured (content from data-n) */
+  .step::before { content: attr(data-n); position: absolute; left: -46px; top: var(--sp-4);
+                  width: 34px; height: 34px; border-radius: var(--radius-sm);
+                  display: flex; align-items: center; justify-content: center;
+                  font-family: var(--font-mono); font-weight: 700; font-size: 14px;
+                  color: var(--bg-page); background: var(--lvl, var(--text-muted));
+                  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lvl, var(--text-muted)) 14%, transparent), var(--shadow-sm);
+                  transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  /* hover: the badge ring blooms toward its level hue, anchoring the whole row */
+  @media (hover: hover) {
+    .step:hover::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--lvl, var(--text-muted)) 24%, transparent), var(--shadow-md); }
+  }
+  /* connecting spine (thin rail, not a bar over the card) - a soft top-to-bottom hairline */
+  .step::after { content: ""; position: absolute; left: -29px; top: 52px;
+                 bottom: calc(-1 * var(--sp-4) - 4px); width: 2px; border-radius: var(--radius-pill);
+                 background: linear-gradient(to bottom,
+                   color-mix(in srgb, var(--lvl, var(--border-default)) 55%, var(--border-default)) 0%,
+                   var(--border-subtle) 100%); }
+  .step:last-child::after { display: none; }
+  /* enforcement levels → badge colour token */
+  .step.lvl-critical { --lvl: var(--color-danger); }
+  .step.lvl-block    { --lvl: var(--color-warning); }
+  .step.lvl-soft     { --lvl: var(--accent); }
+  .step.lvl-info     { --lvl: var(--color-info); }
+  .step.lvl-neutral  { --lvl: var(--text-muted); }
+  /* step content */
+  .step h4 { margin: 0; font: var(--type-h3); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+  .step .ev { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted);
+              border: 1px solid var(--border-subtle); padding: 1px var(--sp-2); border-radius: var(--radius-pill);
+              background: color-mix(in srgb, var(--lvl, var(--text-muted)) 6%, var(--bg-muted));
+              transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+  /* hover: event pill picks up its level hue so the whole row reads as one unit */
+  @media (hover: hover) {
+    .step:hover .ev { color: var(--lvl, var(--text-secondary));
+                      border-color: color-mix(in srgb, var(--lvl, var(--border-default)) 40%, var(--border-subtle)); }
+  }
+  .step .mech { color: var(--text-secondary); font: var(--type-small); margin: var(--sp-2) 0 0; }
+  /* outcome branch chips */
+  .stepper .branchrow { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .stepper .br { flex: 1 1 200px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+                 background: var(--bg-muted); padding: var(--sp-2) var(--sp-3); font: var(--type-small); color: var(--text-secondary);
+                 transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .stepper .br b { display: block; font: var(--type-caption); font-family: var(--font-mono);
+                   letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
+  /* each branch carries a faint left rail in its own outcome hue, firmed on hover */
+  .stepper .br.go   { border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+                      box-shadow: inset 2px 0 0 color-mix(in srgb, var(--color-success) 40%, transparent); }
+  .stepper .br.go b { color: var(--color-success); }
+  .stepper .br.stop { border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+                      box-shadow: inset 2px 0 0 color-mix(in srgb, var(--color-danger) 40%, transparent); }
+  .stepper .br.stop b { color: var(--color-danger); }
+  .stepper .br.warn { border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+                      box-shadow: inset 2px 0 0 color-mix(in srgb, var(--color-warning) 40%, transparent); }
+  .stepper .br.warn b { color: var(--color-warning); }
+  @media (hover: hover) {
+    .stepper .br.go:hover   { border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
+                              background: color-mix(in srgb, var(--color-success) 8%, var(--bg-muted));
+                              box-shadow: inset 2px 0 0 var(--color-success); }
+    .stepper .br.stop:hover { border-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
+                              background: color-mix(in srgb, var(--color-danger) 8%, var(--bg-muted));
+                              box-shadow: inset 2px 0 0 var(--color-danger); }
+    .stepper .br.warn:hover { border-color: color-mix(in srgb, var(--color-warning) 55%, transparent);
+                              background: color-mix(in srgb, var(--color-warning) 8%, var(--bg-muted));
+                              box-shadow: inset 2px 0 0 var(--color-warning); }
+  }
+</style>
+
+<section class="stepper-wrap stack" aria-label="{{STEPPER_TITLE}}">
+  <div class="stack" style="--sp-4: var(--sp-1);">
+    <h2>{{STEPPER_TITLE}}</h2>
+    <p class="lede">{{STEPPER_DESC}}</p>
+  </div>
+
+  <div class="stepper" role="list">
+
+    <!-- ↓ repeat one .step per stage. class lvl-* picks the badge colour; data-n = number -->
+    <div class="step lvl-info" data-n="{{N}}" role="listitem">
+      <h4>{{STEP_TITLE}} <span class="ev">{{EVENT_TAG}}</span></h4>
+      <p class="mech"><code>{{MECHANISM_FN}}</code> {{MECHANISM_DESC}}</p>
+      <div class="branchrow">
+        <!-- one .br per outcome: .go pass · .stop blocked · .warn advisory -->
+        <div class="br go"><b>{{BRANCH_LABEL}}</b>{{BRANCH_DESC}}</div>
+      </div>
+    </div>
+    <!-- ↑ repeat step -->
+
+    <!-- worked example: a 3-stage release gate -->
+    <div class="step lvl-info" data-n="1" role="listitem">
+      <h4>Validate changes <span class="ev">on: pre-commit</span></h4>
+      <p class="mech"><code>lint &amp; typecheck</code> Run static analysis locally before committing and inject the context.</p>
+      <div class="branchrow">
+        <div class="br warn"><b>advisory</b>Warnings pass through but a summary is shown</div>
+      </div>
+    </div>
+
+    <div class="step lvl-critical" data-n="2" role="listitem">
+      <h4>CI gate <span class="ev">on: pull-request</span></h4>
+      <p class="mech"><code>test --coverage</code> Test failures or coverage drops are hard-blocked (merge not allowed).</p>
+      <div class="branchrow">
+        <div class="br stop"><b>blocked</b>On failure, the merge is hard-rejected</div>
+        <div class="br go"><b>pass</b>All green advances to the next stage</div>
+      </div>
+    </div>
+
+    <div class="step lvl-block" data-n="3" role="listitem">
+      <h4>Production deploy <span class="ev">on: merge → main</span></h4>
+      <p class="mech"><code>deploy --canary</code> If canary metrics exceed the threshold, auto-rollback then force continuation.</p>
+      <div class="branchrow">
+        <div class="br stop"><b>rollback</b>Automatic revert on SLO violation</div>
+        <div class="br warn"><b>watch</b>Monitor metrics for 10 minutes</div>
+      </div>
+    </div>
+
+  </div>
+</section>

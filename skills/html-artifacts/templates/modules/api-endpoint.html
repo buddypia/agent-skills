@@ -1,0 +1,111 @@
+<!-- ============================================================================
+MODULE: api-endpoint                                       lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Pure-CSS REST endpoint reference (NO SVG). Per endpoint: a header line with a
+         method badge (GET / POST / PUT / DELETE tinted success / accent / warning /
+         danger) and a mono path with highlighted :params, a short description, a
+         compact params table (name / type / required / description), and a response
+         row (status chip + description). Two endpoint blocks ship in the template.
+         Distinction: code-snippet is a raw code listing; data-table is a generic,
+         possibly interactive table; api-endpoint is the structured, self-labeling
+         API-reference unit (method+path+params+response) for tech specs / API docs.
+VARIABLES: {{TITLE}}; per endpoint {{METHOD}} (badge tone via .-get/-post/-put/-delete)
+           {{PATH}} (mono, wrap :params in .api-param) {{DESC}}; per param row {{PNAME}}
+           {{PTYPE}} {{PREQ}} {{PDESC}}; per response {{STATUS}} (chip, tone via
+           .-ok/-warn/-err) {{RDESC}}.
+REQUIRES: core/tokens.css (--accent, --color-success/-warning/-danger, --bg-surface,
+          --bg-muted, --border-*, --text-*, --font-mono, --radius-*, --sp-*), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="api-endpoint" style block once.
+INTERACTION: hover tints a param-table row (paint-only, reduced-motion guarded).
+USAGE: one .api-ep per endpoint; tone the method badge and status chip with the tone
+       classes above; one .api-prow per parameter inside .api-params.
+============================================================================ -->
+<style data-module="api-endpoint">
+  .api { margin: 0; }
+  .api-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .api-ep { padding: var(--sp-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-surface); }
+  .api-ep + .api-ep { margin-top: var(--sp-4); }
+  /* header: method badge + mono path (with highlighted params) */
+  .api-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .api-method { --mc: var(--accent); font: var(--type-caption); font-weight: 700; letter-spacing: .05em; padding: 3px var(--sp-2); border-radius: var(--radius-xs); color: var(--mc); background: color-mix(in srgb, var(--mc) 15%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--mc) 46%, var(--border-default)); }
+  .api-method.-get { --mc: var(--color-success); } .api-method.-post { --mc: var(--accent); } .api-method.-put { --mc: var(--color-warning); } .api-method.-delete { --mc: var(--color-danger); }
+  .api-path { font: var(--type-small); font-family: var(--font-mono); color: var(--text-primary); word-break: break-all; }
+  .api-param { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 0 3px; border-radius: var(--radius-xs); }
+  .api-desc { font: var(--type-small); color: var(--text-secondary); margin: var(--sp-3) 0 0; }
+  /* params table: name / type / required / description */
+  .api-params { width: 100%; border-collapse: collapse; margin-top: var(--sp-3); }
+  .api-params caption { text-align: left; font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); padding-bottom: var(--sp-2); }
+  .api-params th { text-align: left; font: var(--type-caption); color: var(--text-muted); font-weight: 600; padding: var(--sp-2); border-bottom: 1px solid var(--border-default); }
+  .api-prow td { font: var(--type-small); color: var(--text-secondary); padding: var(--sp-2); border-bottom: 1px solid var(--border-subtle); vertical-align: top; transition: background var(--dur-fast) var(--ease); }
+  .api-pn { font-family: var(--font-mono); color: var(--text-primary); font-weight: 600; }
+  .api-pt { font-family: var(--font-mono); color: var(--text-muted); }
+  .api-req { font: var(--type-caption); font-weight: 700; color: var(--color-danger); }
+  .api-opt { font: var(--type-caption); color: var(--text-muted); }
+  /* response row: status chip + description */
+  .api-res { display: flex; align-items: baseline; gap: var(--sp-3); margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px dashed var(--border-subtle); }
+  .api-status { --sc: var(--color-success); font: var(--type-caption); font-weight: 700; font-family: var(--font-mono); padding: 2px var(--sp-2); border-radius: var(--radius-pill); color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--sc) 44%, var(--border-default)); }
+  .api-status.-ok { --sc: var(--color-success); } .api-status.-warn { --sc: var(--color-warning); } .api-status.-err { --sc: var(--color-danger); }
+  .api-rdesc { font: var(--type-small); color: var(--text-secondary); }
+  @media (hover: hover) { .api-prow:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .api-prow td { transition: none; } }
+</style>
+
+<figure class="api card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="api-title">{{TITLE}}</figcaption> <!-- e.g. ユーザーAPI -->
+
+  <!-- ── one .api-ep per endpoint ────────────────────────────────────────── -->
+  <section class="api-ep">
+    <div class="api-head">
+      <span class="api-method -get">{{METHOD}}</span>  <!-- e.g. GET -->
+      <span class="api-path">{{PATH}}</span>            <!-- e.g. /users/<span class="api-param">:id</span> -->
+    </div>
+    <p class="api-desc">{{DESC}}</p>                    <!-- e.g. 指定IDのユーザー情報を取得する。 -->
+    <table class="api-params">
+      <caption>Parameters</caption>
+      <thead><tr><th>name</th><th>type</th><th>required</th><th>description</th></tr></thead>
+      <tbody>
+        <tr class="api-prow">
+          <td class="api-pn">{{PNAME}}</td>             <!-- e.g. id -->
+          <td class="api-pt">{{PTYPE}}</td>             <!-- e.g. string -->
+          <td><span class="api-req">{{PREQ}}</span></td> <!-- e.g. 必須 (任意なら .api-opt に) -->
+          <td>{{PDESC}}</td>                            <!-- e.g. ユーザーの一意ID -->
+        </tr>
+        <!-- ↑ repeat: one .api-prow per parameter -->
+      </tbody>
+    </table>
+    <div class="api-res">
+      <span class="api-status -ok">{{STATUS}}</span>    <!-- e.g. 200 -->
+      <span class="api-rdesc">{{RDESC}}</span>          <!-- e.g. Userオブジェクトを返す -->
+    </div>
+  </section>
+
+  <section class="api-ep">
+    <div class="api-head">
+      <span class="api-method -post">{{METHOD}}</span>  <!-- e.g. POST -->
+      <span class="api-path">{{PATH}}</span>            <!-- e.g. /users -->
+    </div>
+    <p class="api-desc">{{DESC}}</p>                    <!-- e.g. 新規ユーザーを作成する。 -->
+    <table class="api-params">
+      <caption>Parameters</caption>
+      <thead><tr><th>name</th><th>type</th><th>required</th><th>description</th></tr></thead>
+      <tbody>
+        <tr class="api-prow">
+          <td class="api-pn">{{PNAME}}</td>             <!-- e.g. email -->
+          <td class="api-pt">{{PTYPE}}</td>             <!-- e.g. string -->
+          <td><span class="api-req">{{PREQ}}</span></td> <!-- e.g. 必須 -->
+          <td>{{PDESC}}</td>                            <!-- e.g. ログイン用メールアドレス -->
+        </tr>
+        <tr class="api-prow">
+          <td class="api-pn">{{PNAME}}</td>             <!-- e.g. name -->
+          <td class="api-pt">{{PTYPE}}</td>             <!-- e.g. string -->
+          <td><span class="api-opt">{{PREQ}}</span></td> <!-- e.g. 任意 -->
+          <td>{{PDESC}}</td>                            <!-- e.g. 表示名 -->
+        </tr>
+      </tbody>
+    </table>
+    <div class="api-res">
+      <span class="api-status -warn">{{STATUS}}</span>  <!-- e.g. 400 -->
+      <span class="api-rdesc">{{RDESC}}</span>          <!-- e.g. バリデーションエラー時に返す -->
+    </div>
+  </section>
+  <!-- ↑ repeat: one .api-ep per endpoint -->
+</figure>

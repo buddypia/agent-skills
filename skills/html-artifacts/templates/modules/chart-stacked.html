@@ -1,0 +1,41 @@
+<!-- ============================================================================
+MODULE: chart-stacked                                       lineage: unified-system original (dashboard/report) - extends chart-bar/line
+PURPOSE: Multi-series charts for part-to-whole over categories/time on the HTML-hybrid
+         plot frame. Serves TWO builder section types: `barstacked` (stacked / grouped /
+         100%-stacked bars) and `areastacked` (stacked / single / 100% filled areas).
+         Series coloured with --cat-1..5, shared x labels, legend below. No SVG text.
+VARIABLES: {{TITLE}} + per segment .hc-bar.hc-seg.cat-N (bottom/height %) or per series
+           .hc-area/.hc-line paths in 0-100 space + x labels + legend entries.
+REQUIRES: core/elements.css (.hc frame, .hc-legend), core/tokens.css (--cat-1..5 …)
+MODULE CSS: inline the data-module="chart-stacked" style block once.
+INTERACTION: [data-chart-tip] + data-tip per segment / per area point (.hc-hit) → HA.tooltip.
+USAGE: rendered from data by build.mjs `barstacked` / `areastacked` - geometry computed.
+============================================================================ -->
+<style data-module="chart-stacked">
+  .chart-stacked { margin: 0; }
+  .chart-stacked .chart-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-2); letter-spacing: var(--tracking-tight); }
+  .chart-stacked .hc-legend { padding-top: var(--sp-3); border-top: 1px solid var(--border-subtle); }
+  /* hovering one segment recedes the rest of its stack so the part reads */
+  .chart-stacked .hc-slot:hover .hc-seg:not(:hover) { opacity: .7; }
+  .hc-areachart .hc-line { stroke-width: 1.5px; }
+</style>
+
+<figure class="chart chart-stacked hc card-outlined" data-chart-tip>
+  <figcaption class="chart-title">{{TITLE}}</figcaption>
+  <div class="hc-body" role="img" aria-label="{{TITLE}}: …" style="--hc-h:240px;--hc-yw:{{YW}}px">
+    <div class="hc-y" aria-hidden="true"><span style="bottom:{{TICK_PCT}}%">{{TICK_LABEL}}</span></div>
+    <div class="hc-plot">
+      <div class="hc-grid" aria-hidden="true"><i class="hc-base" style="bottom:0%"></i><i style="bottom:{{TICK_PCT}}%"></i></div>
+      <div class="hc-bars">
+        <!-- ↓ one slot per category; segments stack upward (bottom = running total %) -->
+        <div class="hc-slot">
+          <div class="hc-bar hc-seg cat-1" style="bottom:0%;height:{{H1}}%" data-tip="{{SERIES_1}} · {{CAT_LABEL}}: {{V1}}"></div>
+          <div class="hc-bar hc-seg hc-top cat-2" style="bottom:{{H1}}%;height:{{H2}}%" data-tip="{{SERIES_2}} · {{CAT_LABEL}}: {{V2}}"></div>
+        </div>
+        <!-- ↑ repeat -->
+      </div>
+    </div>
+    <div class="hc-x" aria-hidden="true"><span>{{CAT_LABEL}}</span></div>
+  </div>
+  <div class="hc-legend" aria-hidden="true"><span class="cat-1"><i></i>{{SERIES_1}}</span><span class="cat-2"><i></i>{{SERIES_2}}</span></div>
+</figure>

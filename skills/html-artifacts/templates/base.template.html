@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+  base.template.html - Layer 4 / Shape skeleton
+  The single entry point for every artifact. Fill the {{VARIABLES}}, inline the
+  core CSS/JS, drop modules into {{CONTENT}}. Produces ONE self-contained .html
+  file: no CDN, no build step, opens offline in any browser.
+
+  VARIABLES (replace all):
+    {{LANG}}      document language        e.g. "ko", "ja", "en"; infer from prompt/project if possible
+    {{THEME}}     birchline | dark-focus | interactive-warm | minimal | midnight | slate | forest | rose | nord | sunset
+    {{TARGET}}    mobile-app | tablet-app | web-app | desktop-app | document | diagram
+    {{VIEWPORT}}  phone | tablet | desktop
+    {{LAYOUT}}    stack | bento | sidebar | split   (page layout - also the layout-{{LAYOUT}} class on <main>)
+    {{DENSITY}}   comfortable | compact | spacious  (spacing axis - scales --sp-unit via data-density)
+    {{TITLE}}     <title> + H1
+    {{EYEBROW}}   mono uppercase kicker above the title (optional; drop when unneeded)
+    {{SUBTITLE}}  one-line lede under the title (optional; <=20 words)
+    {{CONTENT}}   compose modules from templates/modules/ here
+    {{FOOTER}}    footer line (source, date, author...)
+    {{LABEL_*}}   visible control labels localized to the user/product language
+
+  PAGE AXES (anti-sameness - pick deliberately, not by default):
+    layouts (4): stack    single column; <main class="container layout-stack">
+                 bento    12-col grid; give EACH direct child style="--span:N" (N=1-12;
+                          defaults: kpi 12, chart/callout/collapsible/timeline/stepper 6, rest 12)
+                 sidebar  <aside class="layout-side">...</aside> + <div class="layout-main">...</div>
+                          inside <main class="container layout-sidebar">
+                 split    12-col grid; hero section gets style="--span:12" + class "section-hero",
+                          other children style="--span:6" (or an explicit --span)
+    header variants (5):
+                 standard <header class="page-header container"> eyebrow/H1/lede (+ optional
+                          <dl class="header-meta"><dt>k</dt><dd>v</dd>...</dl>)
+                 compact  add class "header-compact" - one baseline row, smaller H1
+                 banner   <header class="page-header header-banner"><div class="container
+                          header-banner-inner">...eyebrow/H1/lede/meta + controls...</div></header>
+                 split    add class "header-split" - title block left, <dl class="header-meta"> right
+                 none     no title header; only <header class="page-controls no-print"> holding the
+                          theme toggle / viewport controls
+    densities (3): comfortable (default) | compact | spacious - set data-density on <html>
+    emphasis: add class "section-hero" (tinted feature panel) or "section-quiet" (de-emphasized)
+              to any section's root element, in any layout
+
+  INLINE ORDER (paste file contents in this exact order inside <style>):
+    1. core/reset.css   2. core/tokens.css   3. core/themes.css
+    4. core/elements.css   5. any module CSS used in {{CONTENT}}
+  INLINE inside <script>:  core/interactions.js  (last, before </body>)
+
+  CUSTOM PALETTE: add style="--accent:#HEX;--on-accent:#fff" to <html>.
+
+  SURFACE + MOTION: inlining elements.css gives every artifact a clean, high-contrast
+  architectural paper/carbon surface (--bg-page / --bg-surface) with zero synthetic
+  noise or mesh overlays, and restrained interactive transitions that respect
+  prefers-reduced-motion.
+-->
+<html lang="{{LANG}}" data-theme="{{THEME}}" data-target="{{TARGET}}" data-viewport="{{VIEWPORT}}" data-layout="{{LAYOUT}}" data-density="{{DENSITY}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>{{TITLE}}</title>
+  <style>
+    /* INLINE: reset.css -> tokens.css -> themes.css -> elements.css -> module CSS */
+    /* {{CORE_CSS}} */
+    /* {{MODULE_CSS}} */
+  </style>
+</head>
+<body>
+  <header class="page-header container">
+    <button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="{{LABEL_TOGGLE_THEME}}"
+            style="position:absolute;top:var(--sp-5);right:var(--sp-5)">◐ {{LABEL_THEME}}</button>
+    <div class="ha-viewport-controls no-print" data-target-controls aria-label="{{LABEL_VIEWPORT_CONTROLS}}">
+      <button class="btn-ghost btn-sm" data-viewport-target="phone" type="button">{{LABEL_PHONE}}</button>
+      <button class="btn-ghost btn-sm" data-viewport-target="tablet" type="button">{{LABEL_TABLET}}</button>
+      <button class="btn-ghost btn-sm" data-viewport-target="desktop" type="button">{{LABEL_DESKTOP}}</button>
+    </div>
+    <p class="eyebrow">{{EYEBROW}}</p>
+    <h1>{{TITLE}}</h1>
+    <p class="lede">{{SUBTITLE}}</p>
+  </header>
+
+  <main class="container layout-{{LAYOUT}}">
+    <!-- {{CONTENT}} - compose named modules here
+         bento/split: style="--span:N" on each direct child
+         sidebar: wrap children in <aside class="layout-side"> + <div class="layout-main"> -->
+  </main>
+
+  <footer class="page-footer container">{{FOOTER}}</footer>
+
+  <script>
+    /* INLINE: interactions.js */
+    /* {{INTERACTIONS_JS}} */
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!-- ============================================================================
+MODULE: comparison-grid                                      lineage: html-artifacts(spec) + html-over-markdown(comparison)
+PURPOSE: Side-by-side option comparison. A .grid of option cards; each card holds
+         a title, a pro list, a con list, a key-metric <dl>, and a .btn CTA. The
+         recommended option is marked .card-accent + a .badge-accent "Recommended".
+VARIABLES (per option): {{OPTION}} {{PRO}} {{CON}} {{METRIC_LABEL}} {{METRIC_VALUE}} {{CTA}} {{CTA_HREF}}
+           {{CTA_HREF}} = where the CTA goes ("#pricing", "https://…"). No destination? Replace the
+           <a> with <span class="chip option-cta">label</span> - an illustrative CTA must not be a dead link.
+REQUIRES: core/elements.css (.grid .grid-3 .card-outlined .card-accent .badge
+          .badge-accent .pro .con .btn .small .muted)
+MODULE CSS: inline the data-module="comparison-grid" style block once
+          (column layout + pro/con/metric list styling; tokens only).
+INTERACTION: none.
+USAGE: repeat the .option article once per option (give 3); set .card-accent +
+       show the .badge-accent on the recommended one only.
+============================================================================ -->
+<style data-module="comparison-grid">
+  .cmp-grid { align-items: stretch; }
+  /* auto columns - builder sets style="--cmp-cols:N" (N = min(options, 4)) */
+  .cmp-grid { grid-template-columns: repeat(var(--cmp-cols, 3), 1fr); }
+  @media (max-width: 900px) { .cmp-grid { grid-template-columns: 1fr; } }
+
+  /* card shell - hairline-rounded, gains a calm accent-tinted edge + sm depth on
+     hover (the .card-outlined hover from elements.css already firms the border;
+     this layers a faint surface tint so the focused option reads as "lifted"
+     without motion in dense 3-4 column comparisons). */
+  .option { position: relative; display: flex; flex-direction: column; gap: var(--sp-4); border-radius: var(--radius-md); transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .option:hover { background: color-mix(in srgb, var(--accent) 4%, var(--bg-surface)); }
+
+  /* recommended option - a top accent rail + gentle accent halo so it leads the
+     eye before the badge does. Sits on .card-accent (left rail from elements.css). */
+  .option.card-accent { box-shadow: var(--shadow-sm), inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .option.card-accent::before { content: ""; position: absolute; left: var(--sp-4); right: var(--sp-4); top: 0; height: 2px; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 24%, transparent)); }
+  .option.card-accent:hover { box-shadow: var(--shadow-md), inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+  .option-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+  .option-head h3 { margin: 0; letter-spacing: var(--tracking-tight); }
+
+  .option ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+  /* pro/con rows - each gets a hairline baseline so the list reads as a scannable
+     ledger; the marker (✓/✗ from elements.css) firms up on row hover. */
+  .option li { font: var(--type-small); color: var(--text-secondary); padding: calc(var(--sp-1) + 1px) var(--sp-1); border-radius: var(--radius-xs); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .option li + li { border-top: 1px solid var(--border-subtle); }
+  .option li:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); color: var(--text-primary); }
+
+  /* metric ledger - accent tick anchors the divider; values stay tabular + mono. */
+  .option dl { position: relative; margin: 0; margin-top: auto; padding-top: var(--sp-4); border-top: 1px solid var(--border-subtle); display: grid; grid-template-columns: minmax(5.5em, auto) minmax(0, 1fr); gap: var(--sp-2) var(--sp-3); }
+  .option dl::before { content: ""; position: absolute; top: -1px; left: 0; width: var(--sp-5); height: 2px; border-radius: var(--radius-pill); background: var(--accent); }
+  .option dt { font: var(--type-caption); text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); align-self: center; }
+  .option dd { margin: 0; font: var(--type-small); font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+
+  /* CTA pins to the card foot; margin-top:auto also covers the no-metric case. */
+  .option .btn { margin-top: auto; justify-content: center; }
+</style>
+
+<section aria-label="Option comparison">
+  <div class="grid grid-3 cmp-grid">
+
+    <!-- ↓ repeat one article per option (give 3); recommended one = .card-accent + visible .badge-accent -->
+    <article class="card-outlined option">
+      <header class="option-head">
+        <h3>{{OPTION}}</h3>
+        <span class="badge badge-accent">Recommended</span>   <!-- show on the recommended card only; drop on others -->
+      </header>
+
+      <ul aria-label="Pros">
+        <li class="pro">{{PRO}}</li>   <!-- ↺ repeat one .pro per advantage -->
+      </ul>
+
+      <ul aria-label="Cons">
+        <li class="con">{{CON}}</li>   <!-- ↺ repeat one .con per drawback -->
+      </ul>
+
+      <dl>
+        <dt>{{METRIC_LABEL}}</dt><dd>{{METRIC_VALUE}}</dd>   <!-- ↺ repeat dt/dd per key metric -->
+      </dl>
+
+      <a class="btn" href="{{CTA_HREF}}">{{CTA}}</a>
+    </article>
+    <!-- ↑ repeat -->
+
+  </div>
+</section>

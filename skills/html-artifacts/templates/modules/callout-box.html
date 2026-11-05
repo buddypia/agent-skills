@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: callout-box                                          lineage: html-artifacts(report) + html-over-markdown(document)
+PURPOSE: Boxed admonitions built on the .callout primitive - a small inline-SVG
+         glyph + .callout-title + body. Four variants: TL;DR (--accent),
+         Note (--color-info), Warning (--color-warning), Success (--color-success).
+VARIABLES (per box): {{TITLE}}  {{BODY}}
+REQUIRES: core/elements.css (.callout .callout-title), core/tokens.css (--accent,
+          --color-info/-warning/-success, --bg-surface, --sp-*, --radius-*)
+MODULE CSS: inline the data-module="callout-box" style block once. Variant
+            modifiers re-tint the .callout left border + bg via color-mix.
+INTERACTION: none.
+USAGE: drop ONE .callout block per admonition. Swap the modifier class
+       (.callout-tldr / -note / -warning / -success) and matching glyph.
+============================================================================ -->
+<style data-module="callout-box">
+  /* shared: glyph sizing + body rhythm (base .callout supplies layout/border).
+     A hairline edge + faint shadow give the box quiet atmospheric depth; the
+     transition carries the per-variant hover lift (color/shadow only → reduced-
+     motion safe, no geometry animated). Each box exposes its own --cl-tint hue
+     so the shared rules below stay theme- and variant-agnostic. */
+  .callout-box { --cl-tint: var(--accent); border: 1px solid color-mix(in srgb, var(--cl-tint) 32%, var(--border-subtle)); box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .callout-box .callout-glyph { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; }
+  .callout-box .callout-glyph path, .callout-box .callout-glyph circle { transition: stroke var(--dur-fast) var(--ease); }
+  .callout-box .callout-title { letter-spacing: var(--tracking-tight); }
+  .callout-box .callout-body  { color: var(--text-secondary); font: var(--type-small); }
+  .callout-box .callout-body :last-child { margin-bottom: 0; }
+
+  /* variant = border color + faint surface tint (theme-agnostic via color-mix) */
+  .callout-tldr    { --cl-tint: var(--accent);        background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); }
+  .callout-note    { --cl-tint: var(--color-info);    background: color-mix(in srgb, var(--color-info) 5%, var(--bg-surface)); }
+  .callout-warning { --cl-tint: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 5%, var(--bg-surface)); }
+  .callout-success { --cl-tint: var(--color-success); background: color-mix(in srgb, var(--color-success) 5%, var(--bg-surface)); }
+
+  .callout-tldr    .callout-glyph { color: var(--accent); }
+  .callout-note    .callout-glyph { color: var(--color-info); }
+  .callout-warning .callout-glyph { color: var(--color-warning); }
+  .callout-success .callout-glyph { color: var(--color-success); }
+
+  /* hover - variant-tinted: the box deepens its own hue and border slightly. */
+  @media (hover: hover) {
+    .callout-box:hover { border-color: color-mix(in srgb, var(--cl-tint) 52%, var(--border-subtle)); }
+  }
+</style>
+
+<!-- ── TL;DR ─────────────────────────────────────────────────────────────── -->
+<div class="callout callout-box callout-tldr">
+  <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Summary">
+    <path d="M5 4h14v16l-7-3-7 3z"/>
+  </svg>
+  <div>
+    <p class="callout-title">{{TITLE}}</p>
+    <div class="callout-body"><p>{{BODY}}</p></div>
+  </div>
+</div>
+
+<!-- ── Note ──────────────────────────────────────────────────────────────── -->
+<div class="callout callout-box callout-note">
+  <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Note">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 11v5M12 7.5h.01"/>
+  </svg>
+  <div>
+    <p class="callout-title">{{TITLE}}</p>
+    <div class="callout-body"><p>{{BODY}}</p></div>
+  </div>
+</div>
+
+<!-- ── Warning ───────────────────────────────────────────────────────────── -->
+<div class="callout callout-box callout-warning">
+  <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Warning">
+    <path d="M12 3 2 20h20z"/>
+    <path d="M12 9v5M12 17h.01"/>
+  </svg>
+  <div>
+    <p class="callout-title">{{TITLE}}</p>
+    <div class="callout-body"><p>{{BODY}}</p></div>
+  </div>
+</div>
+
+<!-- ── Success ───────────────────────────────────────────────────────────── -->
+<div class="callout callout-box callout-success">
+  <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Success">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="m8 12 3 3 5-6"/>
+  </svg>
+  <div>
+    <p class="callout-title">{{TITLE}}</p>
+    <div class="callout-body"><p>{{BODY}}</p></div>
+  </div>
+</div>

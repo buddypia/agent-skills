@@ -1,0 +1,63 @@
+<!-- ============================================================================
+MODULE: diff-block                                           lineage: html-artifacts(code-review) + html-over-markdown(PR writeup)
+PURPOSE: Annotated code-review diff hunk. File header (mono path + add/remove
+         stat badges), a <pre> with a line-number gutter and per-line
+         .diff-add / .diff-remove / context rows, plus a margin .callout note
+         carrying a severity class.
+VARIABLES: {{FILE}}  {{ADDED}}  {{REMOVED}}  +  per line: {{N}} {{CODE}}  +  {{NOTE}}
+           ({{N}} = line number in the gutter; mark each row .diff-add / .diff-remove
+            / nothing for context. Sign the code with +/- to match the row class.)
+REQUIRES: core/elements.css (pre, code, .badge*, .callout*, .sev-*, .diff-add/.diff-remove)
+          core/tokens.css   (--font-mono, --color-*, --text-*, --border-*, --sp-*)
+MODULE CSS: inline the data-module="diff-block" style block once (gutter + header layout).
+INTERACTION: none.
+USAGE: repeat one .dl row per diff line inside <pre>; repeat the whole .diff-block per file.
+============================================================================ -->
+<style data-module="diff-block">
+  .diff-block { border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+  /* header: hairline-quiet bar with a left accent rail tying the file to the theme */
+  .diff-head { position: relative; display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; background: var(--bg-muted); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  .diff-head::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: color-mix(in srgb, var(--accent) 70%, transparent); }
+  .diff-file { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: var(--tracking-tight); }
+  .diff-stats { margin-left: auto; display: flex; gap: var(--sp-2); }
+  .diff-block pre { margin: 0; border: none; border-radius: 0; padding-block: var(--sp-2); background: transparent; }
+  /* a diff row: signed change rows carry a tinted fill + an accent-neutral gutter tick;
+     hover warms the whole row toward the accent so a reader can track a line calmly. */
+  .dl { position: relative; display: grid; grid-template-columns: 3.5em 1fr; align-items: baseline; transition: background var(--dur-fast) var(--ease); }
+  .dl:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .dl .ln { text-align: right; padding: 0 var(--sp-3) 0 var(--sp-2); color: var(--text-muted); user-select: none; border-right: 1px solid var(--border-subtle); transition: color var(--dur-fast) var(--ease); }
+  .dl .code { padding: 0 var(--sp-4); white-space: pre; }
+  /* signed rows: stronger-than-default tint + a rounded-cap colored rail in the gutter edge */
+  .dl.diff-add    { background: color-mix(in srgb, var(--color-success) 13%, transparent); }
+  .dl.diff-remove { background: color-mix(in srgb, var(--color-danger) 13%, transparent); }
+  .dl.diff-add:hover    { background: color-mix(in srgb, var(--color-success) 20%, transparent); }
+  .dl.diff-remove:hover { background: color-mix(in srgb, var(--color-danger) 20%, transparent); }
+  .dl.diff-add .ln, .dl.diff-remove .ln { color: var(--text-secondary); position: relative; }
+  .dl.diff-add .ln::after, .dl.diff-remove .ln::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 2px; height: 1.05em; border-radius: var(--radius-pill); }
+  .dl.diff-add .ln::after    { background: var(--color-success); }
+  .dl.diff-remove .ln::after { background: var(--color-danger); }
+  .diff-note { border-radius: 0; }
+</style>
+
+<figure class="diff-block">
+  <figcaption class="diff-head">
+    <span class="diff-file">{{FILE}}</span>
+    <span class="diff-stats">
+      <span class="badge badge-success">+{{ADDED}}</span>
+      <span class="badge badge-danger">-{{REMOVED}}</span>
+    </span>
+  </figcaption>
+
+  <pre><code><!-- ↓ repeat one .dl row per diff line (context | .diff-add | .diff-remove) --><span class="dl"><span class="ln">{{N}}</span><span class="code">  return total;</span></span>
+<span class="dl diff-remove"><span class="ln">{{N}}</span><span class="code">- const tax = total * 0.1;</span></span>
+<span class="dl diff-add"><span class="ln">{{N}}</span><span class="code">+ const tax = subtotal * region.taxRate;</span></span>
+<span class="dl diff-add"><span class="ln">{{N}}</span><span class="code">+ return Math.round((subtotal + tax) * 100) / 100;</span></span>
+<span class="dl"><span class="ln">{{N}}</span><span class="code">}</span></span><!-- ↑ repeat --></code></pre>
+
+  <!-- margin annotation: swap .sev-high / .sev-med / .sev-low for the finding's severity -->
+  <aside class="callout diff-note sev-high">
+    <div>
+      <span class="callout-title">{{NOTE}}</span>
+    </div>
+  </aside>
+</figure>

@@ -1,0 +1,1124 @@
+{
+  "title": "CloudPlatform 分散システムアーキテクチャ仕様書",
+  "theme": "dark-focus",
+  "layout": "stack",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "SYSTEM ARCHITECTURE BLUEPRINT",
+  "subtitle": "高スループット・低遅延を実現するイベント駆動型マイクロサービス基盤の設計仕様",
+  "footer": "Core Architecture Team / 2026-09",
+  "meta": [
+    {
+      "k": "Version",
+      "v": "3.2.0"
+    },
+    {
+      "k": "Status",
+      "v": "Approved"
+    },
+    {
+      "k": "Target SLO",
+      "v": "99.99%"
+    },
+    {
+      "k": "Throughput",
+      "v": "50,000 req/sec"
+    }
+  ],
+  "sections": [
+    {
+      "type": "callout",
+      "variant": "tldr",
+      "title": "システム概要 & アーキテクチャ原則",
+      "body": "本システムは、急激なトラフィック変動に対応するイベント駆動型分散アーキテクチャを採用しています。ステートレスなAPIゲートウェイ、BullMQ/Kafkaベースの非同期バッファリング、水平スケール可能なワーカープール、および読み取り最適化された分散キャッシュ/OLAPストレージによって、データ整合性を担保しつつP99遅延50ms未満を実現します。"
+    },
+    {
+      "type": "kpi",
+      "title": "主要アーキテクチャ指標",
+      "items": [
+        {
+          "value": "50k+",
+          "label": "ピーク処理スループット",
+          "delta": "前四半期比 2.4倍",
+          "dir": "up"
+        },
+        {
+          "value": "38ms",
+          "label": "P99 エンドツーエンド遅延",
+          "delta": "18ms 短縮",
+          "dir": "down",
+          "tone": "good"
+        },
+        {
+          "value": "99.99%",
+          "label": "可用性実績 (30日)",
+          "delta": "目標達成",
+          "dir": "up"
+        },
+        {
+          "value": "0 件",
+          "label": "メッセージ欠落 (Zero Data Loss)",
+          "delta": "ACK / DLQ で保証",
+          "dir": "up"
+        }
+      ]
+    },
+    {
+      "type": "arch-explorer",
+      "title": "エンドツーエンド・システムトポロジー & シナリオ探索",
+      "desc": "クライアントから外部プロバイダーまでの全コンポーネント。上部タブでシナリオを切り替えてデータの流れを追跡し、ノードをクリックして技術仕様を確認できます。",
+      "zones": [
+        {
+          "id": "clients",
+          "name": "Clients & Ingress",
+          "sub": "Web / モバイル / エッジ"
+        },
+        {
+          "id": "gateway",
+          "name": "API & Ingestion",
+          "sub": "認証・レート制限・検証"
+        },
+        {
+          "id": "orchestration",
+          "name": "Event Bus & Workers",
+          "sub": "キュー消費とバッチ実行"
+        },
+        {
+          "id": "persistence",
+          "name": "Persistence & Cache",
+          "sub": "状態・キャッシュ・分析"
+        },
+        {
+          "id": "external",
+          "name": "External Integration",
+          "sub": "サードパーティ連携"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "web",
+          "label": "Web Client",
+          "sub": "Next.js SPA",
+          "zone": "clients",
+          "type": "client",
+          "icon": "laptop",
+          "tech": "React 19 / Next.js",
+          "desc": "ブラウザからREST API呼び出しおよびWebSocketリアルタイム購読を行うフロントエンド。",
+          "inputs": [
+            "ユーザー操作",
+            "WebSocket Push"
+          ],
+          "outputs": [
+            "HTTPS REST API"
+          ]
+        },
+        {
+          "id": "mobile",
+          "label": "Mobile App",
+          "sub": "iOS / Android",
+          "zone": "clients",
+          "type": "client",
+          "icon": "smartphone",
+          "tech": "Flutter / Swift",
+          "desc": "モバイル端末向けアプリケーション。プッシュ通知を受信し、同期APIをコール。",
+          "inputs": [
+            "APNs / FCM Push"
+          ],
+          "outputs": [
+            "HTTPS REST API"
+          ]
+        },
+        {
+          "id": "edge",
+          "label": "API Gateway",
+          "sub": "Kong / Envoy",
+          "zone": "gateway",
+          "type": "gateway",
+          "icon": "router",
+          "tech": "Envoy / Go",
+          "desc": "トラフィックの集中管理、JWT認証検証、WAF、レート制限を実施。",
+          "inputs": [
+            "HTTPS :443"
+          ],
+          "outputs": [
+            "gRPC (internal)",
+            "Job Enqueue"
+          ]
+        },
+        {
+          "id": "core_api",
+          "label": "Core API Service",
+          "sub": "NestJS Application",
+          "zone": "gateway",
+          "type": "gateway",
+          "icon": "server",
+          "tech": "NestJS / TypeScript",
+          "desc": "業務トランザクションの一次受付とバリデーション、DBメタデータ読み書きを担当。",
+          "inputs": [
+            "gRPC / HTTP"
+          ],
+          "outputs": [
+            "Redis Enqueue",
+            "PostgreSQL Write"
+          ]
+        },
+        {
+          "id": "queue",
+          "label": "Message Queue",
+          "sub": "Redis / BullMQ",
+          "zone": "orchestration",
+          "type": "queue",
+          "icon": "queue",
+          "tech": "Redis 7 / BullMQ",
+          "desc": "非同期タスクの高信頼バッファリング。プライオリティキューおよびデッドレター対応。",
+          "inputs": [
+            "Producer Push"
+          ],
+          "outputs": [
+            "Worker Consumer Pull"
+          ]
+        },
+        {
+          "id": "worker",
+          "label": "Distributed Worker",
+          "sub": "Execution Engine",
+          "zone": "orchestration",
+          "type": "worker",
+          "icon": "gear",
+          "tech": "Node.js Cluster",
+          "desc": "キューからジョブを取り出し、テンプレートコンパイル、外部APIコールを実行。",
+          "inputs": [
+            "BullMQ Job"
+          ],
+          "outputs": [
+            "DB Write",
+            "External HTTP",
+            "WebSocket Push"
+          ]
+        },
+        {
+          "id": "db",
+          "label": "PostgreSQL Primary",
+          "sub": "Transactional DB",
+          "zone": "persistence",
+          "type": "database",
+          "icon": "database",
+          "tech": "PostgreSQL 16",
+          "desc": "テナント情報、設定マスタ、ユーザープロファイルを保持する高可用性RDBMS。",
+          "inputs": [
+            "SQL Read/Write"
+          ],
+          "outputs": [
+            "Read Replicas Replication"
+          ]
+        },
+        {
+          "id": "cache",
+          "label": "Redis Cache",
+          "sub": "In-Memory Store",
+          "zone": "persistence",
+          "type": "database",
+          "icon": "database",
+          "tech": "Redis Cluster",
+          "desc": "セッション、ホットデータキャッシュ、分散ロック、レート制限カウンター。",
+          "inputs": [
+            "RESP Protocol"
+          ],
+          "outputs": [
+            "Memory Snapshot"
+          ]
+        },
+        {
+          "id": "analytics",
+          "label": "ClickHouse OLAP",
+          "sub": "Event Telemetry",
+          "zone": "persistence",
+          "type": "database",
+          "icon": "database",
+          "tech": "ClickHouse Cloud",
+          "desc": "ミリ秒単位の監査ログ、配信成功率、パフォーマンス分析用列指向データベース。",
+          "inputs": [
+            "Batch Event Stream"
+          ],
+          "outputs": [
+            "Grafana / Dashboard Query"
+          ]
+        },
+        {
+          "id": "third_party",
+          "label": "Third-Party APIs",
+          "sub": "SendGrid / Twilio",
+          "zone": "external",
+          "type": "external",
+          "icon": "cloud",
+          "tech": "HTTPS REST",
+          "desc": "外部SaaS連携プロバイダー。メール、SMS、Push通知の最終配信を担当。",
+          "inputs": [
+            "Worker Outbound HTTP"
+          ],
+          "outputs": [
+            "Delivery Webhook Callback"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "web",
+          "to": "edge",
+          "label": "HTTPS :443",
+          "flows": [
+            "standard",
+            "all"
+          ]
+        },
+        {
+          "from": "mobile",
+          "to": "edge",
+          "label": "HTTPS :443",
+          "flows": [
+            "standard",
+            "all"
+          ]
+        },
+        {
+          "from": "edge",
+          "to": "core_api",
+          "label": "Internal gRPC",
+          "flows": [
+            "standard",
+            "all"
+          ]
+        },
+        {
+          "from": "core_api",
+          "to": "cache",
+          "label": "Auth Cache",
+          "flows": [
+            "standard",
+            "all"
+          ]
+        },
+        {
+          "from": "core_api",
+          "to": "queue",
+          "label": "Enqueue Job",
+          "flows": [
+            "standard",
+            "batch",
+            "all"
+          ]
+        },
+        {
+          "from": "queue",
+          "to": "worker",
+          "label": "Consume Job",
+          "flows": [
+            "standard",
+            "batch",
+            "all"
+          ]
+        },
+        {
+          "from": "worker",
+          "to": "db",
+          "label": "State Update",
+          "flows": [
+            "standard",
+            "batch",
+            "all"
+          ]
+        },
+        {
+          "from": "worker",
+          "to": "analytics",
+          "label": "Async Log",
+          "flows": [
+            "standard",
+            "batch",
+            "all"
+          ]
+        },
+        {
+          "from": "worker",
+          "to": "third_party",
+          "label": "Dispatch",
+          "flows": [
+            "standard",
+            "all"
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "standard",
+          "name": "1. 通常リクエスト処理フロー",
+          "desc": "クライアントのHTTPリクエストを認証後、ジョブキューを経由して非同期ワーカーが外部連携まで完遂する標準E2Eフロー",
+          "steps": [
+            {
+              "step": 1,
+              "from": "web",
+              "to": "edge",
+              "title": "クライアント要求",
+              "desc": "ユーザー端末からエッジゲートウェイへのリクエスト送信",
+              "proto": "HTTPS / TLS 1.3"
+            },
+            {
+              "step": 2,
+              "from": "edge",
+              "to": "core_api",
+              "title": "APIルーティング",
+              "desc": "JWT検証後、内部マイクロサービスへgRPCルーティング",
+              "proto": "gRPC"
+            },
+            {
+              "step": 3,
+              "from": "core_api",
+              "to": "queue",
+              "title": "非同期キューイング",
+              "desc": "即時レスポンスを返し、実際の重い処理をBullMQキューへ委譲",
+              "proto": "Redis BullMQ"
+            },
+            {
+              "step": 4,
+              "from": "queue",
+              "to": "worker",
+              "title": "ワーカーデキュー",
+              "desc": "稼働中のワーカープールが順次タスクを取得して実行開始",
+              "proto": "Worker Pull"
+            },
+            {
+              "step": 5,
+              "from": "worker",
+              "to": "third_party",
+              "title": "外部サービス配信",
+              "desc": "外部APIコールを行い、結果ステータスをDBおよび分析ストアへ反映",
+              "proto": "HTTPS REST"
+            }
+          ]
+        },
+        {
+          "id": "batch",
+          "name": "2. 大規模バッチ・監査ログフロー",
+          "desc": "複数ジョブの集約実行と、ClickHouseへのゼロオーバーヘッド非同期テレメトリ蓄積",
+          "steps": [
+            {
+              "step": 1,
+              "from": "core_api",
+              "to": "queue",
+              "title": "バッチ一括エンキュー",
+              "desc": "大口ジョブをチャンク分割してキューに投入",
+              "proto": "BullMQ Pipeline"
+            },
+            {
+              "step": 2,
+              "from": "queue",
+              "to": "worker",
+              "title": "並列ワーカー処理",
+              "desc": "スケールアウトしたワーカーが並列にジョブを消費",
+              "proto": "Worker Cluster"
+            },
+            {
+              "step": 3,
+              "from": "worker",
+              "to": "analytics",
+              "title": "テレメトリ転送",
+              "desc": "実行トレースとメトリクスをClickHouseへ非同期一括インサート",
+              "proto": "Native TCP"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "pipeline-flow",
+      "title": "データ処理ライフサイクル (5段階パイプライン)",
+      "desc": "リクエスト受信からバリデーション、非同期変換、外部連携、フィードバックまでのデータモデル遷移",
+      "stages": [
+        {
+          "num": 1,
+          "name": "Ingestion",
+          "proto": "HTTPS / Edge",
+          "cards": [
+            {
+              "title": "エッジ受付 & WAF",
+              "desc": "DDoS対策、レートリミット、JWTシグネチャ検証",
+              "in": "Raw HTTPS Packet",
+              "out": "Authenticated Request",
+              "branches": [
+                {
+                  "type": "go",
+                  "label": "Valid"
+                },
+                {
+                  "type": "stop",
+                  "label": "401/429 Reject"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "num": 2,
+          "name": "Validation & Enqueue",
+          "proto": "JSON Schema",
+          "cards": [
+            {
+              "title": "スキーマバリデーション",
+              "desc": "Zodによる型チェックと必須メタデータの付与",
+              "in": "Payload JSON",
+              "out": "Enqueued Job Data",
+              "branches": [
+                {
+                  "type": "go",
+                  "label": "Queue Push"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "name": "Worker Execution",
+          "proto": "Node.js Engine",
+          "cards": [
+            {
+              "title": "テンプレートコンパイル",
+              "desc": "受信者プロファイルと変数をマージし動的コンテンツ生成",
+              "in": "Job Data",
+              "out": "Compiled Request",
+              "branches": [
+                {
+                  "type": "go",
+                  "label": "Success"
+                },
+                {
+                  "type": "warn",
+                  "label": "Retry (3x)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "name": "Dispatch",
+          "proto": "REST / Socket",
+          "cards": [
+            {
+              "title": "マルチチャネル配信",
+              "desc": "プロバイダーAPIコールおよびリアルタイムWebSocket配信",
+              "in": "Compiled Message",
+              "out": "Provider Response",
+              "branches": [
+                {
+                  "type": "go",
+                  "label": "Delivered"
+                },
+                {
+                  "type": "stop",
+                  "label": "DLQ Failover"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "name": "Observability",
+          "proto": "ClickHouse / OLAP",
+          "cards": [
+            {
+              "title": "監査証跡 & メトリクス",
+              "desc": "ミリ秒精度の配信追跡ログとレイテンシの集約保存",
+              "in": "Execution Trace",
+              "out": "Dashboard Ready",
+              "branches": [
+                {
+                  "type": "go",
+                  "label": "Indexed"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "service-catalog",
+      "title": "主要システムコンポーネント一覧",
+      "desc": "本アーキテクチャを構成する各サービスの役割、リポジトリパス、技術スタック、非機能要件一覧",
+      "services": [
+        {
+          "name": "API Gateway",
+          "path": "apps/gateway",
+          "role": "Edge Gateway",
+          "desc": "外部トラフィックの境界防衛、SSL終端、JWT認証、およびルーティングを担うリバースプロキシ。",
+          "tech": "Envoy / Go / OpenSSL",
+          "port": ":443 / :8080",
+          "storage": "Redis (Rate limit)",
+          "tags": [
+            "Stateless",
+            "Multi-AZ",
+            "Low-Latency"
+          ]
+        },
+        {
+          "name": "Core API Service",
+          "path": "apps/api",
+          "role": "Business Logic",
+          "desc": "ビジネスドメインの検証、CRUD操作、およびイベントジョブのエンキューを担当するコアサービス。",
+          "tech": "NestJS / TypeScript / Prisma",
+          "port": ":3000 (Internal)",
+          "storage": "PostgreSQL, Redis",
+          "tags": [
+            "Stateless",
+            "Auto-scaled",
+            "gRPC / REST"
+          ]
+        },
+        {
+          "name": "Worker Execution Pool",
+          "path": "apps/worker",
+          "role": "Background Worker",
+          "desc": "BullMQキューからタスクを継続消費し、重いビジネス処理やサードパーティAPIコールを実行。",
+          "tech": "Node.js / BullMQ / React Email",
+          "port": "None (Consumer)",
+          "storage": "Redis, ClickHouse",
+          "tags": [
+            "High-Concurrency",
+            "Graceful-Shutdown"
+          ]
+        },
+        {
+          "name": "Redis Queue & Cache",
+          "path": "infra/redis",
+          "role": "Queue & Cache",
+          "desc": "ミリ秒以下のレスポンスを誇るインメモリデータストア。BullMQタスクキューおよびセッションキャッシュ。",
+          "tech": "Redis 7.2 Cluster",
+          "port": ":6379",
+          "storage": "RAM + AOF Persistence",
+          "tags": [
+            "Sub-millisecond",
+            "High-Availability",
+            "Cluster-Mode"
+          ]
+        },
+        {
+          "name": "PostgreSQL Primary/Replica",
+          "path": "infra/postgres",
+          "role": "RDBMS Storage",
+          "desc": "ACID特性を保証するプライマリデータストア。自動フェイルオーバー構成を備えたマネージドDB。",
+          "tech": "PostgreSQL 16 (Patroni)",
+          "port": ":5432",
+          "storage": "NVMe SSD (EBS gp3)",
+          "tags": [
+            "ACID",
+            "Point-in-Time-Recovery",
+            "Read-Replicas"
+          ]
+        },
+        {
+          "name": "ClickHouse Analytics",
+          "path": "infra/clickhouse",
+          "role": "OLAP Telemetry",
+          "desc": "数十億行の配信ログやメトリクスを数秒で集計・クエリ可能な列指向アナリティクスエンジン。",
+          "tech": "ClickHouse Cloud / Keeper",
+          "port": ":8123 / :9000",
+          "storage": "Tiered Object Storage (S3)",
+          "tags": [
+            "Columnar",
+            "Massive-Compression",
+            "Vectorized"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "request-trace",
+      "title": "1リクエストのレイテンシ内訳 (p95)",
+      "desc": "API 受付から外部連携の完了までを区間分解。合計値ではなくどの区間が支配的かを見るための断面。",
+      "unit": "ms",
+      "hops": [
+        {
+          "component": "API Gateway",
+          "op": "TLS終端 / 認証トークン検証",
+          "start": 0,
+          "dur": 14,
+          "kind": "network"
+        },
+        {
+          "component": "Core API Service",
+          "op": "リクエスト検証とルーティング",
+          "start": 14,
+          "dur": 22,
+          "kind": "compute"
+        },
+        {
+          "component": "Redis Cache",
+          "op": "テナント設定の参照",
+          "start": 36,
+          "dur": 3,
+          "kind": "cache",
+          "note": "キャッシュミス時は PostgreSQL へ約 40ms"
+        },
+        {
+          "component": "PostgreSQL Primary",
+          "op": "ジョブレコードの書き込み",
+          "start": 39,
+          "dur": 31,
+          "kind": "db"
+        },
+        {
+          "component": "Message Queue",
+          "op": "BullMQ への投入",
+          "start": 70,
+          "dur": 5,
+          "kind": "queue"
+        },
+        {
+          "component": "Queue wait",
+          "op": "ワーカーが空くまでの待機",
+          "start": 75,
+          "dur": 180,
+          "kind": "queue",
+          "note": "ピーク時はここが全体の半分を占める"
+        },
+        {
+          "component": "Distributed Worker",
+          "op": "ジョブ実行とペイロード整形",
+          "start": 255,
+          "dur": 64,
+          "kind": "compute"
+        },
+        {
+          "component": "Third-Party APIs",
+          "op": "外部サービスへの送信",
+          "start": 319,
+          "dur": 290,
+          "kind": "external"
+        }
+      ]
+    },
+    {
+      "type": "event-catalog",
+      "title": "イベントカタログ (Event Bus)",
+      "desc": "1つのイベントに何がぶら下がっているかを明示する。購読者を増やす前後で結合度を確認するための一覧。",
+      "events": [
+        {
+          "name": "job.completed",
+          "desc": "ワーカーがジョブを正常終了させたときに発行される。",
+          "delivery": "at-least-once",
+          "transport": "Redis Streams",
+          "volume": "約 8k/分",
+          "producers": [
+            "Distributed Worker"
+          ],
+          "consumers": [
+            {
+              "name": "ClickHouse OLAP",
+              "action": "実行メトリクスを追記",
+              "async": true
+            },
+            {
+              "name": "Core API Service",
+              "action": "ジョブ状態を completed に更新"
+            },
+            {
+              "name": "Webhook Dispatcher",
+              "action": "テナントの Webhook を発火",
+              "async": true
+            }
+          ],
+          "payload": "{ jobId, tenantId, status, startedAt, durationMs, attempt }"
+        },
+        {
+          "name": "job.failed",
+          "desc": "リトライ上限に達したジョブが最終的に失敗したとき。",
+          "delivery": "at-least-once",
+          "transport": "Redis Streams",
+          "volume": "約 40/分",
+          "producers": [
+            "Distributed Worker"
+          ],
+          "consumers": [
+            {
+              "name": "Dead Letter Queue",
+              "action": "再投入用に退避"
+            },
+            {
+              "name": "Alerting",
+              "action": "失敗率がしきい値を超えたら通知",
+              "async": true
+            }
+          ],
+          "payload": "{ jobId, tenantId, error, attempts, lastAttemptAt }"
+        }
+      ]
+    },
+    {
+      "type": "deployment-topology",
+      "title": "デプロイ構成とフェイルオーバー",
+      "desc": "論理構成ではなく実際の配置。障害時にどこまで倒れるかはこの図で決まる。",
+      "global": [
+        {
+          "name": "CloudFront",
+          "kind": "cdn",
+          "tech": "静的配信 + WAF"
+        },
+        {
+          "name": "Route 53",
+          "kind": "gateway",
+          "tech": "ヘルスチェック付きフェイルオーバー"
+        }
+      ],
+      "regions": [
+        {
+          "name": "ap-northeast-1",
+          "sub": "東京 · 本番",
+          "role": "primary",
+          "zones": [
+            {
+              "name": "AZ-a",
+              "units": [
+                {
+                  "name": "API Gateway",
+                  "kind": "gateway",
+                  "replicas": 4,
+                  "tech": "Envoy / ECS"
+                },
+                {
+                  "name": "Core API Service",
+                  "kind": "service",
+                  "replicas": 6,
+                  "tech": "ECS Fargate"
+                },
+                {
+                  "name": "Distributed Worker",
+                  "kind": "worker",
+                  "replicas": 12,
+                  "tech": "ECS Fargate",
+                  "note": "キュー長でオートスケール"
+                }
+              ]
+            },
+            {
+              "name": "AZ-c",
+              "units": [
+                {
+                  "name": "Core API Service",
+                  "kind": "service",
+                  "replicas": 6,
+                  "tech": "ECS Fargate"
+                },
+                {
+                  "name": "PostgreSQL Primary",
+                  "kind": "database",
+                  "replicas": 1,
+                  "tech": "Aurora Writer"
+                },
+                {
+                  "name": "Redis Cluster",
+                  "kind": "cache",
+                  "replicas": 3,
+                  "tech": "ElastiCache"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "us-east-1",
+          "sub": "バージニア · 待機",
+          "role": "dr",
+          "zones": [
+            {
+              "name": "AZ-a",
+              "units": [
+                {
+                  "name": "Core API Service",
+                  "kind": "service",
+                  "replicas": 2,
+                  "tech": "ECS Fargate",
+                  "note": "ウォームスタンバイ"
+                },
+                {
+                  "name": "PostgreSQL Replica",
+                  "kind": "database",
+                  "replicas": 1,
+                  "tech": "クロスリージョン複製"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "failure-modes",
+      "title": "障害モードと影響範囲",
+      "desc": "各コンポーネントが落ちたとき、誰が何を失い、何分で戻るか。冗長化が実際に何を買っているかの確認。",
+      "rows": [
+        {
+          "component": "PostgreSQL Primary",
+          "severity": "critical",
+          "failure": "ライターインスタンスが応答しない",
+          "impact": "ジョブの受付と状態更新が全面停止",
+          "blast": "全テナントの書き込み経路",
+          "detect": "ライター接続失敗率のアラート (30秒)",
+          "mitigate": "Aurora 自動フェイルオーバー、API は 503 を返し再送を促す",
+          "rto": "約 60 秒"
+        },
+        {
+          "component": "Message Queue",
+          "severity": "high",
+          "failure": "Redis クラスタのプライマリ喪失",
+          "impact": "新規ジョブを積めない。実行中のジョブは完走する",
+          "blast": "非同期処理を使う全テナント",
+          "detect": "enqueue レイテンシ > 1s",
+          "mitigate": "レプリカ昇格。API 側は短時間バッファして再投入",
+          "rto": "約 90 秒"
+        },
+        {
+          "component": "Third-Party APIs",
+          "severity": "medium",
+          "failure": "外部連携先が 5xx を返し続ける",
+          "degraded": true,
+          "impact": "該当連携のみ遅延。他の処理は正常",
+          "blast": "その連携を使うテナントのみ",
+          "detect": "連携先別の成功率ダッシュボード",
+          "mitigate": "指数バックオフ後 DLQ へ退避し、復旧後に再処理",
+          "rto": "約 10 分"
+        },
+        {
+          "component": "ClickHouse OLAP",
+          "severity": "low",
+          "failure": "解析クラスタが利用不可",
+          "degraded": true,
+          "impact": "ダッシュボードの数値が古くなる。本処理には影響なし",
+          "blast": "管理画面の閲覧者",
+          "detect": "取り込み遅延の監視",
+          "mitigate": "イベントは Streams に保持され復旧後に追いつく",
+          "rto": "約 30 分"
+        }
+      ]
+    },
+    {
+      "type": "comparison",
+      "title": "アーキテクチャ設計選定: イベント駆動型 vs 同期モノリス",
+      "options": [
+        {
+          "name": "同期型モノリス (Monolithic)",
+          "pros": [
+            "初期実装が極めてシンプル",
+            "単一コードベースでデプロイが容易"
+          ],
+          "cons": [
+            "外部API遅延や障害がAPI全体を巻き込んでスレッド枯渇",
+            "個別スケーリングが不可能でインフラコスト高騰",
+            "大量トラフィックの急増時にリクエストがドロップ"
+          ],
+          "metrics": [
+            {
+              "k": "耐障害性",
+              "v": "低"
+            },
+            {
+              "k": "スケーラビリティ",
+              "v": "制限的"
+            },
+            {
+              "k": "開発コスト",
+              "v": "初期低 / 後期高"
+            }
+          ]
+        },
+        {
+          "name": "イベント駆動型分散アーキテクチャ",
+          "recommended": true,
+          "pros": [
+            "キューによる負荷平滑化で外部障害時もAPIは即座に200 OK応答",
+            "ワーカーやキューを個別リソースに合わせて独立自動スケーリング",
+            "DLQ (デッドレターキュー) によるメッセージ不達防止と自動リトライ",
+            "ClickHouse分離による本番OLTPへの影響ゼロのリアルタイム分析"
+          ],
+          "cons": [
+            "分散トレーシングや結果整合性(Eventual Consistency)の考慮が必要"
+          ],
+          "metrics": [
+            {
+              "k": "耐障害性",
+              "v": "極めて高い"
+            },
+            {
+              "k": "スケーラビリティ",
+              "v": "無制限"
+            },
+            {
+              "k": "開発コスト",
+              "v": "標準化により低廉化"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "system-architecture",
+    "name": "システムアーキテクチャ仕様書",
+    "genre": "技術ドキュメント",
+    "purpose": "分散システムの全体像を「構成・処理・性能・イベント・配置・障害」の6面から示し、読み手が図を見て流れを追え、変更や障害の影響範囲まで自力で判断できる状態にする。トポロジ図1枚では答えられない問いを、それぞれ専用のモジュールで受ける構成。",
+    "audience": "実装エンジニア / SRE / テックリード / アーキテクチャレビュー参加者",
+    "triggers": {
+      "ja": [
+        "システムアーキテクチャ仕様書",
+        "システム構成を解説して",
+        "分散システムの設計資料",
+        "アーキテクチャドキュメント",
+        "OSSの内部構造を解説",
+        "エンドツーエンドの処理フローを図解"
+      ],
+      "en": [
+        "system architecture document",
+        "distributed system design doc",
+        "explain this platform architecture",
+        "end to end architecture guide"
+      ],
+      "ko": [
+        "시스템 아키텍처 문서",
+        "분산 시스템 설계 자료",
+        "플랫폼 구조 설명 자료",
+        "엔드투엔드 아키텍처 가이드"
+      ]
+    },
+    "axes": {
+      "theme": "dark-focus",
+      "layout": "stack",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "図が主役の技術資料なのでdark-focusでSVGのコントラストを稼ぐ。Version/Status/Ownerを明示するsplitヘッダ。上から読み下す設計資料なのでstack。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "callout",
+        "role": "結論先出し（概要と設計原則）",
+        "required": true,
+        "guide": "このシステムが何を解いているかを3文以内。以降の図を読む前提となる原則を並べる。",
+        "volume": "3〜4文"
+      },
+      {
+        "n": 2,
+        "type": "kpi",
+        "role": "アーキテクチャ指標",
+        "required": false,
+        "guide": "スループット・遅延・可用性など、設計判断の根拠になる実測値。deltaに矢印は書かない（builderが付ける）。",
+        "volume": "3〜4枚"
+      },
+      {
+        "n": 3,
+        "type": "arch-explorer",
+        "role": "全体トポロジとシナリオ探索",
+        "required": true,
+        "guide": "この資料の中心。zones/nodes/edges/scenariosをデータで渡す。SVGは手書きしない。ビルド時のwarnはすべて解消すること。scenariosの各stepは必ずedgesに存在する辺を指すこと。",
+        "volume": "ノード8〜18 / シナリオ2〜4"
+      },
+      {
+        "n": 4,
+        "type": "pipeline-flow",
+        "role": "データ処理の段階",
+        "required": false,
+        "guide": "各段階が入力を何に変えるか。arch-explorerが「何と何が繋がるか」なら、ここは「各段で何が起きるか」。",
+        "volume": "4〜6段階"
+      },
+      {
+        "n": 5,
+        "type": "service-catalog",
+        "role": "コンポーネント仕様一覧",
+        "required": false,
+        "guide": "役割・リポジトリパス・技術・ポート・責務。読者がコードに降りるための索引。",
+        "volume": "5〜8件"
+      },
+      {
+        "n": 6,
+        "type": "request-trace",
+        "role": "1リクエストのレイテンシ内訳",
+        "required": false,
+        "guide": "「時間がどこに消えるか」。合計ではなく支配的な区間を見せる。startとdurは実測値で。",
+        "volume": "5〜8ホップ"
+      },
+      {
+        "n": 7,
+        "type": "event-catalog",
+        "role": "イベントカタログ",
+        "required": false,
+        "guide": "イベント駆動なら必須。1イベントに複数購読者がぶら下がる形を見せる。配送保証も明記。",
+        "volume": "2〜4イベント"
+      },
+      {
+        "n": 8,
+        "type": "deployment-topology",
+        "role": "デプロイ構成",
+        "required": false,
+        "guide": "論理構成ではなく実際の配置。冗長化とフェイルオーバーの根拠になる。",
+        "volume": "1〜3リージョン"
+      },
+      {
+        "n": 9,
+        "type": "failure-modes",
+        "role": "障害モードと影響範囲",
+        "required": false,
+        "guide": "各コンポーネントが落ちたとき誰が何を失うか。severityで自動整列される。",
+        "volume": "3〜6件"
+      },
+      {
+        "n": 10,
+        "type": "comparison",
+        "role": "設計選定の根拠",
+        "required": false,
+        "guide": "採用案と却下案を並べ、なぜこの構成になったかを残す。",
+        "volume": "2案"
+      }
+    ],
+    "swaps": [
+      {
+        "when": "小さなシステムで追うべき流れが無い",
+        "from": "arch-explorer",
+        "to": "arch-diagram"
+      },
+      {
+        "when": "性能が論点でない",
+        "drop": "request-trace"
+      },
+      {
+        "when": "同期RPC中心でイベント駆動でない",
+        "drop": "event-catalog"
+      },
+      {
+        "when": "単一リージョン・単一インスタンス",
+        "drop": "deployment-topology"
+      },
+      {
+        "when": "DB設計が主題",
+        "add": "erd"
+      },
+      {
+        "when": "サービス間の呼び出し順序が論点",
+        "add": "sequence-diagram"
+      }
+    ],
+    "modules": [
+      "callout-box",
+      "kpi-grid",
+      "arch-explorer",
+      "pipeline-flow",
+      "service-catalog",
+      "request-trace",
+      "event-catalog",
+      "deployment-topology",
+      "failure-modes",
+      "comparison-grid"
+    ]
+  }
+}

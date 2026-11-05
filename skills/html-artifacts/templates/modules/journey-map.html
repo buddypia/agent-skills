@@ -1,0 +1,95 @@
+<!-- ============================================================================
+MODULE: journey-map                                         lineage: unified-system original (diagram/report)
+PURPOSE: User journey map. A row of stage columns, an emotion curve (SVG polyline
+         with a dot per stage, y = sentiment score), then aligned touchpoint and
+         pain-point rows - so "what the user does" and "where it hurts" read against
+         the same stages. For onboarding, purchase, support, or service-blueprint flows.
+VARIABLES: {{TITLE}}; {{N}} (stage count, set --jm-cols); per stage {{STAGE}};
+           emotion {{POINTS}} (polyline "x,y …" in a 0-100 box) + per dot {{X_PCT}}
+           {{Y_PCT}} {{EMO_LABEL}} (tone jm-emo-pos | -neu | -neg);
+           per stage {{TOUCHPOINT}} and {{PAINPOINT}}.
+GEOMETRY:  emotion box is a 0-100 square stretched to the band (preserveAspectRatio
+           none; the stroke stays crisp via vector-effect). For stage i of N:
+           X_PCT = (i + 0.5) / N * 100.  Y_PCT = 85 − (score − 1)/(SCORE_MAX − 1) * 70
+           (higher sentiment sits higher / smaller y). Dots are CSS, positioned
+           left:X_PCT% top:Y_PCT%, so they land on the polyline vertices.
+REQUIRES:  core/tokens.css (--accent, --color-success, --color-danger, --bg-muted,
+           --bg-surface, --text-*, --border-subtle, --radius-*, --sp-*)
+MODULE CSS: inline the data-module="journey-map" style block once.
+INTERACTION: none (static). SVG has role="img" + <title>; row cells are real text.
+USAGE: 3-5 stages. Keep the stage header, the emotion band, and the touchpoint /
+       pain grids all at --jm-cols so their columns line up. Mark a stage with no
+       pain as .jm-pain.is-empty.
+============================================================================ -->
+<style data-module="journey-map">
+  .journey { width: 100%; }
+  .journey-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .journey .jm-band-title { font: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow);
+    color: var(--text-muted); margin: var(--sp-4) 0 var(--sp-2); }
+  .journey .jm-grid { display: grid; grid-template-columns: repeat(var(--jm-cols, 4), 1fr); gap: var(--sp-2); }
+  .journey .jm-stage { text-align: center; padding: var(--sp-2); border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-muted)); border: 1px solid var(--border-subtle); }
+  .journey .jm-stage-n { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .journey .jm-stage-name { font: var(--type-small); font-weight: 600; color: var(--text-primary); }
+  /* emotion band: a stretched 0-100 box holds the accent curve; dots are CSS overlays */
+  .journey .jm-emotion { position: relative; height: 120px; margin-top: var(--sp-1); background: var(--bg-muted); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+  .journey .jm-emotion svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .journey .jm-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .journey .jm-dot { position: absolute; transform: translate(-50%, -50%); }
+  .journey .jm-dot-face { display: block; width: 12px; height: 12px; border-radius: var(--radius-pill);
+    background: var(--accent); border: 2px solid var(--bg-surface); }
+  .journey .jm-dot-face.jm-emo-pos { background: var(--color-success); }
+  .journey .jm-dot-face.jm-emo-neu { background: var(--accent); }
+  .journey .jm-dot-face.jm-emo-neg { background: var(--color-danger); }
+  .journey .jm-cell { min-height: 54px; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm);
+    font: var(--type-caption); line-height: 1.45; }
+  .journey .jm-touch { background: var(--bg-muted); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+  /* pain chips read in the danger register; is-empty falls back to a quiet blank */
+  .journey .jm-pain { background: color-mix(in srgb, var(--color-danger) 8%, var(--bg-surface)); color: var(--text-secondary);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--border-subtle)); }
+  .journey .jm-pain.is-empty { background: var(--bg-surface); color: var(--text-muted);
+    border: 1px solid var(--border-subtle); }
+</style>
+
+<figure class="journey card-outlined" style="--jm-cols:{{N}}" aria-label="{{TITLE}}"> <!-- N = stage count, e.g. 4 -->
+  <figcaption class="journey-title">{{TITLE}}</figcaption>
+
+  <!-- ── STAGE HEADER (one .jm-stage per stage) ────────────────────────── -->
+  <div class="jm-grid jm-stages">
+    <div class="jm-stage"><span class="jm-stage-n">01</span><span class="jm-stage-name">{{STAGE_1}}</span></div>
+    <div class="jm-stage"><span class="jm-stage-n">02</span><span class="jm-stage-name">{{STAGE_2}}</span></div>
+    <div class="jm-stage"><span class="jm-stage-n">03</span><span class="jm-stage-name">{{STAGE_3}}</span></div>
+    <div class="jm-stage"><span class="jm-stage-n">04</span><span class="jm-stage-name">{{STAGE_4}}</span></div>
+  </div>
+
+  <!-- ── EMOTION CURVE (--accent line + one dot per stage) ─────────────── -->
+  <p class="jm-band-title">Emotion</p>
+  <div class="jm-emotion">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="{{TITLE}} - emotion curve">
+      <title>{{TITLE}} - emotion curve</title>
+      <polyline class="jm-line" points="{{POINTS}}" vector-effect="non-scaling-stroke"/> <!-- e.g. 12.5,65 37.5,32 62.5,58 87.5,18 -->
+    </svg>
+    <span class="jm-dot" style="left:12.5%; top:{{Y1_PCT}}%"><span class="jm-dot-face jm-emo-neu" title="{{EMO_1}}"></span></span>
+    <span class="jm-dot" style="left:37.5%; top:{{Y2_PCT}}%"><span class="jm-dot-face jm-emo-pos" title="{{EMO_2}}"></span></span>
+    <span class="jm-dot" style="left:62.5%; top:{{Y3_PCT}}%"><span class="jm-dot-face jm-emo-neg" title="{{EMO_3}}"></span></span>
+    <span class="jm-dot" style="left:87.5%; top:{{Y4_PCT}}%"><span class="jm-dot-face jm-emo-pos" title="{{EMO_4}}"></span></span>
+  </div>
+
+  <!-- ── TOUCHPOINTS (one cell per stage) ──────────────────────────────── -->
+  <p class="jm-band-title">Touchpoints</p>
+  <div class="jm-grid">
+    <div class="jm-cell jm-touch">{{TOUCHPOINT_1}}</div>
+    <div class="jm-cell jm-touch">{{TOUCHPOINT_2}}</div>
+    <div class="jm-cell jm-touch">{{TOUCHPOINT_3}}</div>
+    <div class="jm-cell jm-touch">{{TOUCHPOINT_4}}</div>
+  </div>
+
+  <!-- ── PAIN POINTS (one cell per stage; .is-empty when there is none) ── -->
+  <p class="jm-band-title">Pain points</p>
+  <div class="jm-grid">
+    <div class="jm-cell jm-pain">{{PAINPOINT_1}}</div>
+    <div class="jm-cell jm-pain is-empty">{{PAINPOINT_2}}</div>
+    <div class="jm-cell jm-pain">{{PAINPOINT_3}}</div>
+    <div class="jm-cell jm-pain is-empty">{{PAINPOINT_4}}</div>
+  </div>
+</figure>

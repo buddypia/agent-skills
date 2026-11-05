@@ -1,0 +1,85 @@
+<!-- ============================================================================
+MODULE: sparkline                                           lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A compact multi-metric scan table (NO external libs). Each row carries a
+         label, the current value, a tiny inline sparkline (per-row polyline SVG),
+         and a delta badge (▲/▼ toned success/danger). 3-5 rows let a dashboard show
+         many KPIs' "now + recent shape" in one dense block.
+         Distinction: stat-trend is a grid of full KPI cards (one big value + trend
+         each); chart-line is a single full-size chart; this is the tightest form -
+         one thin row per metric for at-a-glance scanning.
+VARIABLES: {{TITLE}}; per row {{LABEL}} {{VALUE}} {{DELTA}} (tone the row's sparkline
+           and badge with -up = success / -down = danger).
+GEOMETRY:  each sparkline SVG viewBox 0 0 120 32, pad 3. x = 3 + i/(n−1)×114;
+           y = (32−3) − (v−min)/(max−min)×(32−2·3) so higher values sit nearer the
+           top. The area path repeats the polyline then drops to y=29 and closes.
+REQUIRES:  core/tokens.css (--accent, --color-success, --color-danger, --text-*,
+           --border-subtle, --font-mono, --sp-*), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="sparkline" style block once.
+INTERACTION: none (static). Each row's SVG carries role="img" + <title>; the value
+             row is real text so the badge/spark are decorative.
+USAGE: duplicate one <div class="spk-row"> per metric; set the graph class -up/-down
+       and keep the area path, polyline, and end dot in sync.
+============================================================================ -->
+<style data-module="sparkline">
+  .spk { margin: 0; }
+  .spk-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .spk-rows { display: flex; flex-direction: column; }
+  .spk-row { display: grid; grid-template-columns: 1fr auto 120px auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) 0; border-top: 1px solid var(--border-subtle); }
+  .spk-row:first-child { border-top: 0; }
+  .spk-label { font: var(--type-small); color: var(--text-secondary); letter-spacing: var(--tracking-tight); }
+  .spk-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 600; color: var(--text-primary); text-align: right; }
+  .spk-graph { width: 120px; height: 32px; overflow: visible; }
+  .spk-graph .s-line { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+  .spk-graph .s-area { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
+  .spk-graph .s-dot { fill: var(--accent); }
+  .spk-graph.-up .s-line { stroke: var(--color-success); }
+  .spk-graph.-up .s-dot  { fill: var(--color-success); }
+  .spk-graph.-up .s-area { fill: color-mix(in srgb, var(--color-success) 14%, transparent); }
+  .spk-graph.-down .s-line { stroke: var(--color-danger); }
+  .spk-graph.-down .s-dot  { fill: var(--color-danger); }
+  .spk-graph.-down .s-area { fill: color-mix(in srgb, var(--color-danger) 14%, transparent); }
+  .spk-delta { font: var(--type-caption); font-family: var(--font-mono); font-weight: 600; white-space: nowrap; text-align: right; }
+  .spk-delta.-up { color: var(--color-success); }
+  .spk-delta.-down { color: var(--color-danger); }
+</style>
+
+<figure class="spk card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="spk-title">{{TITLE}}</figcaption>
+  <div class="spk-rows">
+    <!-- ↓ one row per metric (3-5); tone the graph + badge -up (success) / -down (danger) -->
+    <div class="spk-row">
+      <span class="spk-label">{{LABEL}}</span> <!-- e.g. 日次アクティブ -->
+      <span class="spk-value">{{VALUE}}</span> <!-- e.g. 12,480 -->
+      <svg class="spk-graph -up" viewBox="0 0 120 32" preserveAspectRatio="none" role="img" aria-label="{{LABEL}} 推移">
+        <title>{{LABEL}} 推移</title>
+        <path class="s-area" d="M3,24 L25.8,20 L48.6,22 L71.4,14 L94.2,12 L117,8 L117,29 L3,29 Z"/>
+        <polyline class="s-line" points="3,24 25.8,20 48.6,22 71.4,14 94.2,12 117,8"/>
+        <circle class="s-dot" cx="117" cy="8" r="2.4"/>
+      </svg>
+      <span class="spk-delta -up">▲ {{DELTA}}</span> <!-- e.g. 8.2% -->
+    </div>
+    <div class="spk-row">
+      <span class="spk-label">{{LABEL}}</span>
+      <span class="spk-value">{{VALUE}}</span>
+      <svg class="spk-graph -down" viewBox="0 0 120 32" preserveAspectRatio="none" role="img" aria-label="{{LABEL}} 推移">
+        <title>{{LABEL}} 推移</title>
+        <path class="s-area" d="M3,10 L25.8,14 L48.6,12 L71.4,18 L94.2,22 L117,26 L117,29 L3,29 Z"/>
+        <polyline class="s-line" points="3,10 25.8,14 48.6,12 71.4,18 94.2,22 117,26"/>
+        <circle class="s-dot" cx="117" cy="26" r="2.4"/>
+      </svg>
+      <span class="spk-delta -down">▼ {{DELTA}}</span>
+    </div>
+    <div class="spk-row">
+      <span class="spk-label">{{LABEL}}</span>
+      <span class="spk-value">{{VALUE}}</span>
+      <svg class="spk-graph -up" viewBox="0 0 120 32" preserveAspectRatio="none" role="img" aria-label="{{LABEL}} 推移">
+        <title>{{LABEL}} 推移</title>
+        <path class="s-area" d="M3,26 L25.8,22 L48.6,24 L71.4,18 L94.2,16 L117,10 L117,29 L3,29 Z"/>
+        <polyline class="s-line" points="3,26 25.8,22 48.6,24 71.4,18 94.2,16 117,10"/>
+        <circle class="s-dot" cx="117" cy="10" r="2.4"/>
+      </svg>
+      <span class="spk-delta -up">▲ {{DELTA}}</span>
+    </div>
+    <!-- ↑ repeat -->
+  </div>
+</figure>

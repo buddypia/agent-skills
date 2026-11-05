@@ -1,0 +1,272 @@
+{
+  "title": "かんばんフロー 導入ガイド",
+  "theme": "forest",
+  "layout": "stack",
+  "header": "standard",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "GETTING STARTED",
+  "subtitle": "チーム管理者のための初期セットアップ手順（約15分）",
+  "footer": "かんばんフロー ヘルプセンター / v4.2",
+  "meta": [
+    {
+      "k": "対象バージョン",
+      "v": "v4.2"
+    },
+    {
+      "k": "所要時間",
+      "v": "約15分"
+    },
+    {
+      "k": "対象",
+      "v": "チーム管理者"
+    }
+  ],
+  "sections": [
+    {
+      "type": "callout",
+      "variant": "tldr",
+      "title": "このガイドで達成できること",
+      "body": "本ガイドを終えると、かんばんフローに組織を作成し、メンバーを招待し、最初のボードとWIP制限、Slack通知までを設定できます。所要時間は約15分です。"
+    },
+    {
+      "type": "stepper",
+      "title": "セットアップ手順",
+      "steps": [
+        {
+          "n": 1,
+          "title": "組織を作成",
+          "desc": "管理者アカウントでサインインし、組織名とワークスペースURLを登録します。",
+          "level": "info"
+        },
+        {
+          "n": 2,
+          "title": "メンバーを招待",
+          "desc": "メールまたは招待リンクでメンバーを追加し、ロール（管理者/編集者/閲覧者）を割り当てます。",
+          "event": "最大50名",
+          "level": "info"
+        },
+        {
+          "n": 3,
+          "title": "最初のボードを作成",
+          "desc": "テンプレートから「開発フロー」を選ぶと、Backlog / Doing / Review / Done の列が自動生成されます。",
+          "level": "info"
+        },
+        {
+          "n": 4,
+          "title": "WIP制限を設定",
+          "desc": "Doing列に同時進行の上限を設定し、フロー効率を可視化します。",
+          "fn": "wip_limit",
+          "level": "soft"
+        },
+        {
+          "n": 5,
+          "title": "Slack通知を接続",
+          "desc": "連携設定からSlackワークスペースを認可し、通知チャンネルを選択します。",
+          "level": "info",
+          "branches": [
+            {
+              "label": "認可成功",
+              "desc": "：テスト通知が届きます",
+              "kind": "go"
+            },
+            {
+              "label": "権限不足",
+              "desc": "：組織管理者に承認を依頼",
+              "kind": "warn"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"cs\" aria-label=\"kanbanflow.yml\"><figcaption class=\"cs-head\"><span class=\"cs-file\">kanbanflow.yml</span><span class=\"cs-lang\">YAML</span></figcaption><pre class=\"cs-body\"><code><span class=\"cs-row\"><span class=\"cs-ln\">1</span><span class=\"cs-code\"><span class=\"cs-com\"># チーム共通のボード設定</span></span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">2</span><span class=\"cs-code\"><span class=\"cs-kw\">board</span>:</span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">3</span><span class=\"cs-code\">  <span class=\"cs-kw\">name</span>: <span class=\"cs-str\">\"開発フロー\"</span></span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">4</span><span class=\"cs-code\">  <span class=\"cs-kw\">columns</span>: [Backlog, Doing, Review, Done]</span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">5</span><span class=\"cs-code\">  <span class=\"cs-kw\">wip_limit</span>:</span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">6</span><span class=\"cs-code\">    <span class=\"cs-kw\">Doing</span>: 3          <span class=\"cs-com\"># 同時進行の上限</span></span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">7</span><span class=\"cs-code\">  <span class=\"cs-kw\">notifications</span>:</span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">8</span><span class=\"cs-code\">    <span class=\"cs-kw\">slack</span>:</span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">9</span><span class=\"cs-code\">      <span class=\"cs-kw\">channel</span>: <span class=\"cs-str\">\"#dev-flow\"</span></span></span>\n<span class=\"cs-row\"><span class=\"cs-ln\">10</span><span class=\"cs-code\">      <span class=\"cs-kw\">events</span>: [card_moved, card_blocked]</span></span></code></pre></figure>",
+      "cssModules": [
+        "code-snippet"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"ftr card-outlined\" aria-label=\"設定ファイルの構成\"><figcaption class=\"ftr-title\">設定ファイルの構成</figcaption><div class=\"ftr-tree\" role=\"group\" aria-label=\"設定ファイルの構成\"><div class=\"ftr-row\"><span class=\"ftr-guide\"></span><span class=\"ftr-name -dir\">.kanbanflow/</span><span class=\"ftr-note\"># プロジェクト設定</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name\">kanbanflow.yml</span><span class=\"ftr-note\"># ボード定義（上記）</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">automations/</span><span class=\"ftr-note\"># 自動化ルール</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  ├─ </span><span class=\"ftr-name\">move-on-pr.yml</span><span class=\"ftr-note\"># PR作成でReviewへ</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  └─ </span><span class=\"ftr-name\">notify-blocked.yml</span><span class=\"ftr-note\"># ブロック時に通知</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">templates/</span><span class=\"ftr-note\"># カードテンプレート</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  └─ </span><span class=\"ftr-name\">bug-report.md</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">└─ </span><span class=\"ftr-name\">members.csv</span><span class=\"ftr-note\"># 一括招待リスト</span></div></div></figure>",
+      "cssModules": [
+        "file-tree"
+      ]
+    },
+    {
+      "type": "collapsible",
+      "title": "トラブルシューティング",
+      "items": [
+        {
+          "summary": "招待メールが届かない",
+          "body": "<p>迷惑メールフォルダをご確認ください。10分以上届かない場合は、メンバー管理画面から招待リンクを再発行できます。</p>"
+        },
+        {
+          "summary": "Slack通知が届かない",
+          "body": "<p>連携の認可が管理者権限で行われているか、選択した通知チャンネルがアーカイブされていないかをご確認ください。</p>"
+        },
+        {
+          "summary": "WIP制限が反映されない",
+          "body": "<p>ブラウザのキャッシュをクリアして再読み込みしてください。設定は保存後30秒以内に反映されます。</p>"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"faq card-outlined\" aria-label=\"よくあるご質問\"><figcaption class=\"faq-title\">よくあるご質問</figcaption><dl class=\"faq-list\"><div class=\"faq-item\"><dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">無料プランでも使えますか？</span></dt><dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">はい。5名まで無料で全機能をお試しいただけます。人数を増やす場合のみ有料プランへの切り替えが必要です。</span></dd></div><div class=\"faq-item\"><dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">既存のTrelloからインポートできますか？</span></dt><dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">CSVまたはTrello連携でボードを移行できます。設定 &gt; インポートから実行してください。</span></dd></div><div class=\"faq-item\"><dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">データのバックアップはありますか？</span></dt><dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">毎日自動でバックアップを取得し30日間保持します。手動エクスポート（JSON/CSV）も可能です。</span></dd></div><div class=\"faq-item\"><dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">モバイルアプリはありますか？</span></dt><dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">iOS / Android版を提供しています。カードの移動やブロック通知をプッシュで受け取れます。</span></dd></div></dl></figure>",
+      "cssModules": [
+        "faq"
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "セットアップ完了チェック",
+      "control": "checkbox",
+      "items": [
+        {
+          "label": "組織とワークスペースを作成",
+          "state": "done"
+        },
+        {
+          "label": "メンバーを招待しロールを割り当て",
+          "state": "done"
+        },
+        {
+          "label": "最初のボードを作成",
+          "state": "pending"
+        },
+        {
+          "label": "WIP制限を設定",
+          "state": "todo"
+        },
+        {
+          "label": "Slack通知を接続",
+          "state": "todo"
+        }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "onboarding-guide",
+    "name": "導入・利用ガイド",
+    "genre": "導入ガイド",
+    "purpose": "新規ユーザー（特に管理者）が製品を最短でセットアップし、最初の成功体験に到達できるよう、手順・設定例・つまずきどころ・完了チェックを一直線に提示する。",
+    "audience": "新規導入するチーム管理者 / 初回セットアップ担当者",
+    "triggers": {
+      "ja": [
+        "導入ガイドを作って",
+        "オンボーディング資料",
+        "セットアップ手順をまとめて",
+        "利用ガイドをHTMLで",
+        "クイックスタートを作成",
+        "使い方の手引き"
+      ],
+      "en": [
+        "onboarding guide",
+        "getting started",
+        "setup guide",
+        "quickstart"
+      ],
+      "ko": [
+        "온보딩 가이드",
+        "설정 가이드",
+        "시작하기 문서"
+      ]
+    },
+    "axes": {
+      "theme": "forest",
+      "layout": "stack",
+      "header": "standard",
+      "density": "comfortable",
+      "rationale": "forestは手順書に馴染む穏やかな緑基調で読み進めやすい（birchlineだとstack+standardでdefault-sandwich警告になるため回避）。standardヘッダで対象バージョン・所要時間を素直に提示。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "callout",
+        "role": "結論先出し（達成できること）",
+        "required": true,
+        "guide": "tldrで「このガイドを終えると何ができるか」と所要時間を1段落で示し、読む動機を作る。",
+        "volume": "2〜3文"
+      },
+      {
+        "n": 2,
+        "type": "stepper",
+        "role": "セットアップ手順",
+        "required": true,
+        "guide": "番号付きで実際の操作を順に。分岐が要る手順はbranchesでgo/warnを提示。fnで設定キー名をコード表示。",
+        "volume": "4〜6ステップ"
+      },
+      {
+        "n": 3,
+        "type": "html:code-snippet",
+        "role": "設定例",
+        "required": false,
+        "guide": "実際の設定ファイルをトークン強調付きで提示。cs-kw/cs-str/cs-comで役割を色分け。",
+        "volume": "8〜12行"
+      },
+      {
+        "n": 4,
+        "type": "html:file-tree",
+        "role": "設定ファイル構成",
+        "required": false,
+        "guide": "設定ファイルがどこに置かれるかをbox-drawingで図示。右側に各ファイルの用途。",
+        "volume": "6〜10行"
+      },
+      {
+        "n": 5,
+        "type": "collapsible",
+        "role": "トラブルシューティング",
+        "required": false,
+        "guide": "よくあるつまずきを症状ベースの折りたたみに。原因と対処を各1段落。",
+        "volume": "3件"
+      },
+      {
+        "n": 6,
+        "type": "html:faq",
+        "role": "よくある質問",
+        "required": false,
+        "guide": "料金・移行・バックアップ・アプリなど購入前後の定番疑問をQ&Aで。4〜5件が読みやすい。",
+        "volume": "4〜5件"
+      },
+      {
+        "n": 7,
+        "type": "checklist",
+        "role": "セットアップ完了チェック",
+        "required": true,
+        "guide": "手順に対応した完了チェック。stateで進捗を可視化し、達成感を与える。",
+        "volume": "5項目"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 4,
+        "default": "html:file-tree",
+        "alternative": "table（設定項目一覧）",
+        "when": "ファイル構成より各設定キーの意味を一覧したいとき"
+      },
+      {
+        "slot": 2,
+        "default": "stepper",
+        "alternative": "screenflow",
+        "when": "手順を画面遷移として見せたいアプリ系オンボーディングのとき（target: mobile-app/web-app）"
+      },
+      {
+        "slot": 3,
+        "default": "html:code-snippet",
+        "alternative": "tabs（OS別コマンド）",
+        "when": "設定例をmacOS/Windows/Linuxなど環境別に切り替えたいとき"
+      }
+    ],
+    "modules": [
+      "callout",
+      "stepper",
+      "code-snippet",
+      "file-tree",
+      "collapsible",
+      "faq",
+      "checklist"
+    ]
+  }
+}

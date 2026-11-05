@@ -1,0 +1,67 @@
+{
+  "lang": "ko",
+  "target": "document",
+  "theme": "birchline",
+  "layout": "stack",
+  "header": "split",
+  "meta": [
+    { "k": "문서 번호", "v": "TDR-007" },
+    { "k": "결정일", "v": "2026-06-07" },
+    { "k": "상태", "v": "승인 대기" }
+  ],
+  "eyebrow": "기술 의사결정",
+  "title": "모바일 앱 상태 관리 라이브러리 선택",
+  "subtitle": "Riverpod / Bloc / GetX 3개 후보를 5개 기준(가중치 포함)으로 평가한 결과와 추천 근거",
+  "footer": "html-artifacts · decision 섹션 예시 (node tools/build.mjs examples/specs/example-decision.spec.json)",
+  "sections": [
+    {
+      "type": "decision",
+      "title": "평가 매트릭스",
+      "desc": "점수는 1–5점, 가중치(×N)는 프로젝트 우선순위를 반영합니다. 합계는 가중 합산 점수입니다.",
+      "options": ["Riverpod", "Bloc", "GetX"],
+      "scale": 5,
+      "criteria": [
+        {
+          "name": "학습 곡선",
+          "weight": 2,
+          "scores": [3, 2, 5],
+          "notes": ["개념은 많지만 문서가 좋음", "보일러플레이트가 많아 진입 장벽 높음", "API가 단순해 바로 시작 가능"]
+        },
+        {
+          "name": "타입 안전성",
+          "weight": 3,
+          "scores": [5, 4, 2],
+          "notes": ["컴파일 타임 검증, lint 패키지 제공", "이벤트/상태 클래스로 안전", "런타임 의존이 많아 약함"]
+        },
+        {
+          "name": "테스트 용이성",
+          "weight": 3,
+          "scores": [5, 5, 3],
+          "notes": ["Provider 오버라이드로 모킹 쉬움", "bloc_test로 패턴 확립", "전역 상태라 격리 어려움"]
+        },
+        {
+          "name": "커뮤니티·유지보수",
+          "weight": 2,
+          "scores": [5, 4, 3],
+          "notes": ["활발한 릴리스, Flutter 팀 인접", "성숙하지만 성장 둔화", "단일 메인테이너 리스크"]
+        },
+        {
+          "name": "대규모 앱 적합성",
+          "weight": 3,
+          "scores": [4, 5, 2],
+          "notes": ["모듈화 쉬움", "엄격한 패턴이 대규모에 유리", "암묵적 의존으로 추적 어려움"]
+        }
+      ],
+      "verdict": {
+        "pick": "Riverpod",
+        "rationale": "가중 합계 1위(58/65). 특히 가중치가 높은 타입 안전성·테스트 용이성에서 만점에 가까운 평가를 받았습니다. Bloc은 대규모 적합성에서 앞서지만 학습 곡선 부담이 크고, GetX는 시작은 빠르나 장기 유지보수 리스크가 커서 제외했습니다."
+      }
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "전제 조건",
+      "body": "이 평가는 팀에 Flutter 경험자가 2명 이상이고 앱이 화면 30개 이상으로 성장한다는 가정 기준입니다. 프로토타입 단계의 1인 개발이라면 학습 곡선 가중치를 ×3으로 올려 재평가하세요."
+    }
+  ]
+}

@@ -21,6 +21,7 @@
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | 指令被放在错误的机制中，导致 CLAUDE.md 臃肿、规则被忽略 |
 | [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | 没有把关（gate）就把重复性的智能体工作循环化，导致漂移、烧 token 并合入未经审查的代码 |
 | [`spec-preview`](./skills/spec-preview) | 模式 + target →（缓存的）UI 扫描 → 自包含 HTML → 打开并即时决策 | 规格与 UI 想法被当作文字草草略过，导致评审停滞、决策拖延 |
+| [`html-artifacts`](./skills/html-artifacts) | 需求 + target → 模板组合 → 确定性离线 HTML | 用可复用结构和验证生成报告、仪表盘、图示与 UI 原型 |
 
 > `multi-llm-*` 技能负责编排你自行安装的厂商 CLI（`agy` / Antigravity、`claude` / Claude Code、`codex` / Codex）；像 `reflect` 这样的单智能体技能则无需任何外部 CLI。有关安装设置、模型覆盖以及离线 `mock` 模式，请参阅各技能各自的 README。
 
@@ -33,6 +34,7 @@
 - **claude-code-steering** —— 决定 Claude Code 指令该放在哪里（CLAUDE.md / 规则 / 技能 / 子智能体 / hook / 输出样式），以及审查已经漂移或臃肿的现有 .claude 配置。
 - **loop-engineering** —— 判断某个反复出现的智能体任务是否应当变成自我提示（self-prompting）的循环——并在不该如此时给出证明——然后构建最小可行循环（automation + skill + state file + gate 各一个），并针对目标漂移、token 失控以及未经审查的合入加以加固。
 - **spec-preview** —— 把规格、需求或 UI 提案做成可在浏览器中打开的自包含 HTML（多方案对比 / 需求看板 / before-after 差异），让人一眼就能看清并即时决策，而不是草草略读文字。它能识别 target surface（移动应用 / Web / 文档 / 图示），并通过跨框架的 UI 扫描（复用缓存以节省成本）还原目标产品的外观。
+- **html-artifacts** — 使用可复用模块生成单个离线 HTML 报告、仪表盘、图示或 UI 原型，支持目标界面适配、确定性构建和验证。
 
 ## When to use it (and when not)
 

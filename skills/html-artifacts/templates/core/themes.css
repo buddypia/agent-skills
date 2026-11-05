@@ -1,0 +1,203 @@
+/* ============================================================================
+   themes.css - Layer 0 / Foundation (palettes)
+   10 selectable themes, each scoped to [data-theme="..."] so a single inlined
+   stylesheet can switch live by changing the attribute on <html>.
+
+   SELECT A THEME:   <html data-theme="birchline">          (default)
+                     <html data-theme="dark-focus">
+                     <html data-theme="interactive-warm">
+                     <html data-theme="minimal">
+                     <html data-theme="midnight">
+                     <html data-theme="slate">
+                     <html data-theme="forest">
+                     <html data-theme="rose">
+                     <html data-theme="nord">
+                     <html data-theme="sunset">
+   DARK TOGGLE:      interactions.js [data-theme-toggle] swaps the active
+                     theme to/from "dark-focus" and restores on click.
+   CUSTOM PALETTE:   override the accent (and optionally raws) inline, e.g.
+                     <html data-theme="birchline" style="--accent:#2563EB;--on-accent:#fff">
+                     or generate an 11-step scale with the color-palette skill
+                     and remap --color-primary / --accent / --cat-* here.
+
+   Each theme provides: raw colors -> semantic aliases (--bg-*, --text-*,
+   --border-*, --accent, --on-accent) + shadow set, PLUS structural personality
+   overrides of radius tokens (--radius-*, letter-spacing) while keeping clean
+   fluid sans-first typography (--font-sans) across all themes:
+     warm-editorial     birchline / rose / forest / minimal
+     bold-sans          sunset / nord / interactive-warm
+     technical-compact  slate / midnight / dark-focus
+   Themes must NEVER override --sp-* / --sp-unit or --container-max - spacing
+   is owned by the density axis and page width is owned by the layout/artifact.
+   ============================================================================ */
+
+/* color-scheme - native form controls, scrollbars, and caret match the theme's
+   lightness (Web Interface Guidelines: dark themes must declare color-scheme:dark
+   or native UI renders light over a dark page). One declarative rule, no per-block edits. */
+[data-theme="birchline"], [data-theme="interactive-warm"], [data-theme="minimal"],
+[data-theme="slate"], [data-theme="forest"], [data-theme="rose"], :root { color-scheme: light; }
+[data-theme="dark-focus"], [data-theme="midnight"], [data-theme="nord"], [data-theme="sunset"] { color-scheme: dark; }
+
+/* ============================ BIRCHLINE (default) ==========================
+   Crisp architectural stone & cool paper. Deep terracotta accent without warm-cream slop.
+   Best for: report, spec, long-form. */
+:root,
+[data-theme="birchline"] {
+  --color-primary:#B91C1C; --color-slate:#0F172A; --color-ivory:#F8FAFC;
+  --color-oat:#F1F5F9; --color-white:#FFFFFF;
+  --color-gray-100:#F1F5F9; --color-gray-150:#E2E8F0; --color-gray-300:#CBD5E1;
+  --color-gray-500:#64748B; --color-gray-700:#334155;
+  --color-success:#15803D; --color-warning:#B45309; --color-danger:#B91C1C; --color-info:#2563EB;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04); --shadow-md:0 4px 12px -2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04); --shadow-lg:0 12px 24px -4px rgba(15,23,42,.08), 0 4px 8px -2px rgba(15,23,42,.04);
+  --bg-page:var(--color-ivory); --bg-surface:var(--color-white); --bg-muted:var(--color-gray-100); --bg-card:var(--color-white);
+  --text-primary:var(--color-slate); --text-secondary:var(--color-gray-700); --text-muted:var(--color-gray-500);
+  --border-default:var(--color-gray-300); --border-subtle:var(--color-gray-150);
+  --accent:var(--color-primary); --on-accent:#FFFFFF;
+  --code-bg:#F1F5F9; --atmosphere:0;
+}
+
+/* ============================== DARK FOCUS ================================
+   Obsidian technical dark, crisp slate hairlines, sky-blue accent. Best for: data-viz, diagram, code. */
+[data-theme="dark-focus"] {
+  --color-primary:#58A6FF; --color-bg:#0D1117; --color-surface:#151B23;
+  --color-surface-raised:#1C232E; --color-text:#ECF0F6;
+  --color-text-secondary:#9BA4B5; --color-text-muted:#8290A5;
+  --color-border:#2A3241; --color-border-subtle:#202734;
+  --color-success:#3FB950; --color-warning:#D29922; --color-danger:#F85149; --color-info:#58A6FF;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.28); --shadow-md:0 4px 12px -2px rgba(0,0,0,.38), 0 1px 3px rgba(0,0,0,.24);
+  --shadow-lg:0 12px 28px -4px rgba(0,0,0,.5); --shadow-glow:none;
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#091326;
+  --code-bg:#0A0D12; --atmosphere:0;
+  /* structural personality: technical-compact */
+  --radius-md:8px; --radius-lg:12px; --type-caption:500 0.75rem/1.4 var(--font-mono);
+}
+
+/* =========================== INTERACTIVE WARM ============================
+   Clean studio white, cobalt accent, crisp elevation. Best for: prototype, editor. */
+[data-theme="interactive-warm"] {
+  --color-primary:#2563EB; --color-primary-hover:#1D4ED8;
+  --color-bg:#F9FAFB; --color-surface:#FFFFFF; --color-surface-raised:#F3F4F6;
+  --color-text:#111827; --color-text-secondary:#4B5563; --color-text-muted:#6B7280;
+  --color-border:#D1D5DB; --color-border-subtle:#E5E7EB;
+  --color-success:#16A34A; --color-warning:#D97706; --color-danger:#DC2626; --color-info:#2563EB;
+  --shadow-sm:0 1px 2px rgba(17,24,39,.04); --shadow-md:0 4px 12px -2px rgba(17,24,39,.07), 0 1px 3px rgba(17,24,39,.04); --shadow-lg:0 12px 24px -4px rgba(17,24,39,.1);
+  --shadow-interactive:0 1px 3px rgba(37,99,235,.16); --shadow-interactive-hover:0 4px 12px rgba(37,99,235,.22);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#FFFFFF;
+  --code-bg:#F3F4F6; --atmosphere:0;
+  /* structural personality: bold-sans */
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px;
+}
+
+/* ============================ MINIMAL DOCUMENT ===========================
+   Serif headings, quiet document tone, generous whitespace. Best for: essays. */
+[data-theme="minimal"] {
+  --color-primary:#374151; --color-bg:#FDFDFC; --color-surface:#FFFFFF;
+  --color-surface-raised:#F4F4F5; --color-text:#18181B;
+  --color-text-secondary:#52525B; --color-text-muted:#71717A;
+  --color-border:#D4D4D8; --color-border-subtle:#E4E4E7;
+  --color-success:#15803D; --color-warning:#B45309; --color-danger:#B91C1C; --color-info:#1D4ED8;
+  --shadow-sm:0 1px 1px rgba(0,0,0,.03); --shadow-md:0 2px 6px rgba(0,0,0,.05); --shadow-lg:0 6px 16px rgba(0,0,0,.07);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#FFFFFF; --code-bg:#F4F4F5;
+  --atmosphere:0; --grain-img:none;
+  /* structural overrides: genuine editorial serif */
+  --radius-xs:2px; --radius-sm:4px; --radius-md:6px; --radius-lg:10px;
+  --font-display:var(--font-serif);
+  --type-display:500 clamp(2rem, 3.2vw, 2.75rem)/1.14 var(--font-serif);
+  --type-h1:500 clamp(1.5rem, 2.3vw, 2.05rem)/1.24 var(--font-serif);
+  --type-h2:500 clamp(1.1875rem, 1.5vw, 1.375rem)/1.34 var(--font-serif);
+}
+
+/* ============================ MIDNIGHT (dark / cobalt indigo) ============= */
+[data-theme="midnight"] {
+  --color-primary:#4F83FF; --color-bg:#0B0E17; --color-surface:#131826; --color-surface-raised:#1A2133;
+  --color-text:#F1F5F9; --color-text-secondary:#94A3B8; --color-text-muted:#8290A5;
+  --color-border:#253046; --color-border-subtle:#1A2436;
+  --color-success:#22C55E; --color-warning:#F59E0B; --color-danger:#EF4444; --color-info:#3B82F6;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.32); --shadow-md:0 4px 14px -2px rgba(0,0,0,.42); --shadow-lg:0 12px 28px -4px rgba(0,0,0,.55);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#0A1020; --code-bg:#090C14; --atmosphere:0;
+  /* structural personality: technical-compact */
+  --radius-md:8px; --type-caption:500 0.75rem/1.4 var(--font-mono);
+}
+
+/* ============================ SLATE (light / pro blue-gray) =============== */
+[data-theme="slate"] {
+  --color-primary:#1D4ED8; --color-bg:#F8FAFC; --color-surface:#FFFFFF; --color-surface-raised:#F1F5F9;
+  --color-text:#0F172A; --color-text-secondary:#334155; --color-text-muted:#64748B;
+  --color-border:#CBD5E1; --color-border-subtle:#E2E8F0;
+  --color-success:#15803D; --color-warning:#B45309; --color-danger:#B91C1C; --color-info:#1D4ED8;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04); --shadow-md:0 4px 12px -2px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.04); --shadow-lg:0 12px 24px -4px rgba(15,23,42,.1);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#FFFFFF; --code-bg:#F1F5F9; --atmosphere:0;
+  /* structural personality: technical-compact */
+  --radius-sm:6px; --radius-md:8px; --radius-lg:12px;
+}
+
+/* ============================ FOREST (light / botanical) ================== */
+[data-theme="forest"] {
+  --color-primary:#15803D; --color-bg:#F6F8F5; --color-surface:#FFFFFF; --color-surface-raised:#EDF2EB;
+  --color-text:#14231A; --color-text-secondary:#354B3E; --color-text-muted:#62796B;
+  --color-border:#CBD7CC; --color-border-subtle:#E0E9E1;
+  --color-success:#15803D; --color-warning:#B45309; --color-danger:#B91C1C; --color-info:#1D4ED8;
+  --shadow-sm:0 1px 2px rgba(20,35,26,.04); --shadow-md:0 4px 12px -2px rgba(20,35,26,.07), 0 1px 3px rgba(20,35,26,.04); --shadow-lg:0 12px 24px -4px rgba(20,35,26,.1);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#FFFFFF; --code-bg:#EDF2EB; --atmosphere:0;
+  --cat-2:#2563EB;
+}
+
+/* ============================ ROSE (light / editorial berry) ============== */
+[data-theme="rose"] {
+  --color-primary:#BE185D; --color-bg:#FDF8F9; --color-surface:#FFFFFF; --color-surface-raised:#F8EDF1;
+  --color-text:#23151B; --color-text-secondary:#4F3842; --color-text-muted:#7C626E;
+  --color-border:#DFCAD3; --color-border-subtle:#EEDDE4;
+  --color-success:#15803D; --color-warning:#B45309; --color-danger:#B91C1C; --color-info:#2563EB;
+  --shadow-sm:0 1px 2px rgba(35,21,27,.04); --shadow-md:0 4px 12px -2px rgba(35,21,27,.07), 0 1px 3px rgba(35,21,27,.04); --shadow-lg:0 12px 24px -4px rgba(35,21,27,.1);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#FFFFFF; --code-bg:#F8EDF1; --atmosphere:0;
+}
+
+/* ============================ NORD (dark / arctic slate) ================== */
+[data-theme="nord"] {
+  --color-primary:#88C0D0; --color-bg:#1E222A; --color-surface:#272C36; --color-surface-raised:#303744;
+  --color-text:#ECEFF4; --color-text-secondary:#C8D0E0; --color-text-muted:#8A94A6;
+  --color-border:#3B4354; --color-border-subtle:#313846;
+  --color-success:#A3BE8C; --color-warning:#EBCB8B; --color-danger:#E06C75; --color-info:#81A1C1;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.28); --shadow-md:0 4px 12px -2px rgba(0,0,0,.36); --shadow-lg:0 12px 24px -4px rgba(0,0,0,.46);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#181C24; --code-bg:#181B22; --atmosphere:0;
+  --cat-2:#B48EAD;
+  /* structural personality: bold-sans */
+  --radius-xs:3px; --radius-sm:5px; --radius-md:8px; --radius-lg:12px; --type-caption:500 0.75rem/1.4 var(--font-mono);
+}
+
+/* ============================ SUNSET (dark / warm espresso amber) ========= */
+[data-theme="sunset"] {
+  --color-primary:#F59E0B; --color-bg:#12100E; --color-surface:#1C1916; --color-surface-raised:#27221E;
+  --color-text:#F4ECE6; --color-text-secondary:#C8B7AB; --color-text-muted:#948275;
+  --color-border:#3A312B; --color-border-subtle:#2C2520;
+  --color-success:#22C55E; --color-warning:#F59E0B; --color-danger:#EF4444; --color-info:#F59E0B;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.32); --shadow-md:0 4px 14px -2px rgba(0,0,0,.42); --shadow-lg:0 12px 26px -4px rgba(0,0,0,.52);
+  --bg-page:var(--color-bg); --bg-surface:var(--color-surface); --bg-muted:var(--color-surface-raised); --bg-card:var(--color-surface);
+  --text-primary:var(--color-text); --text-secondary:var(--color-text-secondary); --text-muted:var(--color-text-muted);
+  --border-default:var(--color-border); --border-subtle:var(--color-border-subtle);
+  --accent:var(--color-primary); --on-accent:#1C1307; --code-bg:#0E0C0A; --atmosphere:0;
+}

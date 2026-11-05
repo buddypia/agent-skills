@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: event-catalog                                    lineage: unified-system v7 architecture
+PURPOSE: Producer → event → consumers fan-out, one card per event. The catalog gap in
+         an event-driven system is never "what services exist" - it is "who emits this,
+         who reacts to it, and what does each reaction do". A linear pipeline diagram
+         cannot show one event with six independent subscribers; this can.
+VARIABLES: {{TITLE}} {{DESC}} + one card per event
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="event-catalog" style block once.
+BUILDER: section.type "event-catalog" -
+  { title, desc, events: [{ name, desc, payload, transport, volume, delivery,
+                            producers: [string], consumers: [{ name, action, async }] }] }
+  delivery: at-least-once | at-most-once | exactly-once  (rendered as a chip)
+INTERACTION: none (static), so it prints and reads aloud intact.
+============================================================================ -->
+<style data-module="event-catalog">
+  .evcat { width: 100%; display: grid; gap: var(--sp-4); }
+  .evcat-head h2 { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .evcat-desc { font: var(--type-small); color: var(--text-secondary); margin-top: var(--sp-1); max-width: 75ch; }
+  .evcat-list { display: grid; gap: var(--sp-4); }
+
+  .evcat-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-surface); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .evcat-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); padding: var(--sp-3) var(--sp-4); background: var(--bg-muted); border-bottom: 1px solid var(--border-subtle); }
+  .evcat-name { font-family: var(--font-mono); font-size: 13.5px; font-weight: 700; color: var(--accent); }
+  .evcat-chip { font: var(--type-caption); font-family: var(--font-mono); padding: 2px 8px; border-radius: var(--radius-pill); background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+  .evcat-chip-strong { background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); border-color: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--accent); font-weight: 600; }
+  .evcat-card-desc { padding: var(--sp-3) var(--sp-4) 0; font: var(--type-small); color: var(--text-secondary); max-width: 80ch; }
+
+  /* the fan-out: producers | event spine | consumers */
+  .evcat-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr); gap: var(--sp-3); align-items: stretch; padding: var(--sp-4); }
+  .evcat-col { display: grid; gap: var(--sp-2); align-content: start; }
+  .evcat-col-key { font: var(--type-caption); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+
+  .evcat-party { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-3); background: var(--bg-muted); }
+  .evcat-party-name { font-size: 12.5px; font-weight: 700; color: var(--text-primary); }
+  .evcat-party-act { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .evcat-consumer { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle)); }
+  .evcat-producer { border-color: color-mix(in srgb, var(--cat-2) 42%, var(--border-subtle)); }
+  .evcat-async { font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* spine: a single vertical rail with an arrowhead, so the 1→N shape is visible */
+  .evcat-spine { position: relative; width: 34px; display: grid; place-items: center; }
+  .evcat-spine::before { content: ''; position: absolute; top: 18px; bottom: 18px; left: 50%; width: 2px; background: linear-gradient(var(--cat-2), var(--accent)); transform: translateX(-50%); border-radius: 1px; }
+  .evcat-spine-dot { position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-size: 13px; font-weight: 800; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+
+  .evcat-payload { margin: 0 var(--sp-4) var(--sp-4); padding: var(--sp-2) var(--sp-3); background: var(--bg-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); overflow-x: auto; white-space: pre; }
+
+  @media (max-width: 760px) {
+    .evcat-flow { grid-template-columns: 1fr; }
+    .evcat-spine { width: auto; height: 30px; }
+    .evcat-spine::before { top: 50%; bottom: auto; left: 18px; right: 18px; width: auto; height: 2px; transform: translateY(-50%); background: linear-gradient(90deg, var(--cat-2), var(--accent)); }
+  }
+</style>
+
+<section class="evcat card-outlined" aria-label="{{TITLE}}">
+  <header class="evcat-head">
+    <h2>{{TITLE}}</h2>
+    <p class="evcat-desc">{{DESC}}</p>
+  </header>
+
+  <div class="evcat-list">
+    <!-- one .evcat-card per event -->
+    <article class="evcat-card">
+      <header class="evcat-card-head">
+        <span class="evcat-name">{{EVENT_NAME}}</span>
+        <span class="evcat-chip evcat-chip-strong">{{DELIVERY}}</span>
+        <span class="evcat-chip">{{TRANSPORT}}</span>
+        <span class="evcat-chip">{{VOLUME}}</span>
+      </header>
+      <p class="evcat-card-desc">{{EVENT_DESC}}</p>
+
+      <div class="evcat-flow">
+        <div class="evcat-col">
+          <span class="evcat-col-key">{{PRODUCERS_LABEL}}</span>
+          <div class="evcat-party evcat-producer"><div class="evcat-party-name">{{PRODUCER}}</div></div>
+        </div>
+        <div class="evcat-spine" aria-hidden="true"><span class="evcat-spine-dot">↯</span></div>
+        <div class="evcat-col">
+          <span class="evcat-col-key">{{CONSUMERS_LABEL}}</span>
+          <div class="evcat-party evcat-consumer">
+            <div class="evcat-party-name">{{CONSUMER}} <span class="evcat-async">async</span></div>
+            <div class="evcat-party-act">{{CONSUMER_ACTION}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="evcat-payload">{{PAYLOAD}}</div>
+    </article>
+  </div>
+</section>

@@ -1,0 +1,62 @@
+<!-- ============================================================================
+MODULE: spectrum                                            lineage: unified-system original (report/decision)
+PURPOSE: One-dimensional spectrum / scale (pure CSS - NO SVG). A horizontal
+         diverging track labelled at each end (e.g. Conservative ↔ Aggressive),
+         with one or more position markers (▼ caret + name) placed at left:PCT%.
+         For putting several things on ONE axis: maturity, risk tolerance, temperature,
+         build-vs-buy stance, sentiment.
+VARIABLES: {{TITLE}}; end captions {{LEFT_LABEL}} {{RIGHT_LABEL}};
+           per marker {{PCT}} (0 = left end … 100 = right end), {{NAME}}.
+SCALING:   PCT = round((position − MIN) / (MAX − MIN) * 100). left:PCT% is the
+           caret's center (translateX(−50%)). Add .is-lifted to a marker whose
+           label would collide with a neighbour to raise it a row.
+REQUIRES:  core/tokens.css (--accent, --cat-5, --bg-muted, --bg-surface, --text-*,
+           --border-subtle, --radius-pill, --sp-*)
+MODULE CSS: inline the data-module="spectrum" style block once.
+INTERACTION: none (static). Section carries aria-label; end labels + names are real text.
+USAGE: one .sp-scale holding the markers, the .sp-track, and the .sp-ends captions.
+       Duplicate .sp-marker per item; markers near each other take .is-lifted to stagger.
+============================================================================ -->
+<style data-module="spectrum">
+  .spectrum { width: 100%; }
+  .spectrum-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-5); }
+  .spectrum .sp-scale { position: relative; height: 92px; }
+  /* diverging track: cat-5 pole → neutral → accent pole, following the theme */
+  .spectrum .sp-track { position: absolute; inset-inline: 0; bottom: 22px; height: 12px; border-radius: var(--radius-pill);
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--cat-5) 55%, var(--bg-muted)),
+      var(--bg-muted) 50%,
+      color-mix(in srgb, var(--accent) 70%, var(--bg-muted)));
+    box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .spectrum .sp-ends { position: absolute; inset-inline: 0; bottom: 0; display: flex; justify-content: space-between;
+    font: var(--type-caption); color: var(--text-muted); }
+  /* marker: name chip + ▼ caret, centered on left:PCT%; the caret drops onto the track */
+  .spectrum .sp-marker { position: absolute; bottom: 30px; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; --sp-drop: 4px; transition: filter var(--dur-fast) var(--ease); }
+  .spectrum .sp-marker.is-lifted { bottom: 54px; --sp-drop: 28px; }
+  .spectrum .sp-name { font: var(--type-caption); color: var(--text-primary); white-space: nowrap;
+    padding: 2px var(--sp-2); border-radius: var(--radius-pill);
+    background: var(--bg-surface); box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .spectrum .sp-caret { color: var(--accent); font-size: 11px; line-height: 1; margin-top: 2px; }
+  .spectrum .sp-caret::after { content: ""; display: block; width: 2px; height: var(--sp-drop); margin: 1px auto 0;
+    border-radius: 1px; background: color-mix(in srgb, var(--accent) 60%, transparent); }
+  @media (hover: hover) { .spectrum .sp-marker:hover { filter: brightness(1.06); } }
+  @media (prefers-reduced-motion: reduce) { .spectrum .sp-marker { transition: none; } }
+</style>
+
+<figure class="spectrum card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="spectrum-title">{{TITLE}}</figcaption>
+  <div class="sp-scale">
+    <!-- ↓ repeat one .sp-marker per item (add .is-lifted to stagger crowded ones) -->
+    <div class="sp-marker" style="left:{{PCT}}%">   <!-- e.g. 30 -->
+      <span class="sp-name">{{NAME}}</span>          <!-- e.g. Team A -->
+      <span class="sp-caret" aria-hidden="true">▼</span>
+    </div>
+    <!-- ↑ repeat -->
+    <div class="sp-track"></div>
+    <div class="sp-ends">
+      <span>{{LEFT_LABEL}}</span>   <!-- e.g. Conservative -->
+      <span>{{RIGHT_LABEL}}</span>  <!-- e.g. Aggressive -->
+    </div>
+  </div>
+</figure>

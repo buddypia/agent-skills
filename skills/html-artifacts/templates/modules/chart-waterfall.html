@@ -1,0 +1,87 @@
+<!-- ============================================================================
+MODULE: chart-waterfall                                     lineage: html-visual(chart/dashboard)
+PURPOSE: Self-contained SVG waterfall chart (NO external libs). A start bar, a run
+         of floating increment (+, --color-success) / decrement (−, --color-danger)
+         bars each rising from the running total, a final total bar (--accent), thin
+         dashed connectors bridging the bars, and a value label per bar. For P&L
+         bridges, budget variance, headcount deltas, cohort build-ups.
+VARIABLES: {{TITLE}}; start bar {{X0}} {{Y0}} {{H0}} {{START_LABEL}} {{START_VALUE}};
+           per delta bar {{X}} {{Y}} {{H}} {{VALUE}} {{LABEL}} + connector
+           {{X_END}} {{Y_CONN}} {{NEXT_X}} (tone class is-up | is-down);
+           total bar {{XN}} {{YN}} {{HN}} {{TOTAL_LABEL}} {{TOTAL_VALUE}}.
+GEOMETRY:  baseline y=280, plot top y=40 (240px range). MAX = peak running total.
+           yOf(v) = 280 − v/MAX*240.
+           start/total bar (absolute v): Y = yOf(v), H = v/MAX*240.
+           delta bar over running total Cprev→Cnew: top = max(Cprev,Cnew),
+           Y = yOf(top), H = |Cnew − Cprev|/MAX*240.
+           connector: dashed line at Y_CONN = yOf(Cnew), from this bar's right edge
+           X_END to the next bar's left edge NEXT_X (bars are 64 wide).
+REQUIRES:  core/tokens.css (--accent, --color-success, --color-danger, --text-*,
+           --border-subtle, --border-default)
+MODULE CSS: inline the data-module="chart-waterfall" style block once.
+INTERACTION: CSS-only hover + [data-chart-tip] floating tooltip ([data-tip] per bar,
+             behavior from interactions.js). role="img" + <title> for a11y.
+============================================================================ -->
+<style data-module="chart-waterfall">
+  .waterfall { width: 100%; }
+  .waterfall svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  .waterfall-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .waterfall .grid-line { stroke: var(--border-subtle); stroke-width: 1; }
+  .waterfall .axis { stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; }
+  /* bars: tone by role; transition paint only so the static render is safe */
+  .waterfall .bar { fill: var(--accent); stroke: color-mix(in srgb, var(--accent) 22%, transparent); stroke-width: 1;
+    transition: fill var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .waterfall .bar.is-start { fill: color-mix(in srgb, var(--accent) 52%, var(--bg-muted)); }
+  .waterfall .bar.is-up    { fill: var(--color-success); stroke: color-mix(in srgb, var(--color-success) 30%, transparent); }
+  .waterfall .bar.is-down  { fill: var(--color-danger);  stroke: color-mix(in srgb, var(--color-danger) 30%, transparent); }
+  .waterfall .bar.is-total { fill: var(--accent); }
+  .waterfall .bar:hover { filter: brightness(1.08) drop-shadow(0 3px 8px color-mix(in srgb, var(--accent) 28%, transparent)); }
+  /* dashed step connectors thread the running total across the gaps */
+  .waterfall .connector { stroke: color-mix(in srgb, var(--text-muted) 60%, transparent); stroke-width: 1; stroke-dasharray: 4 3; }
+  .waterfall .val { fill: var(--text-secondary); font-size: 11px; text-anchor: middle; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .waterfall .cat { fill: var(--text-muted); font-size: 12px; text-anchor: middle; letter-spacing: var(--tracking-tight); }
+  @media (prefers-reduced-motion: reduce) { .waterfall .bar { transition: none; } }
+</style>
+
+<figure class="waterfall card-outlined" data-chart-tip>
+  <figcaption class="waterfall-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 720 320" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- gridlines (quartiles of the 240px plot area, baseline 280) -->
+    <line class="grid-line" x1="40" y1="40"  x2="700" y2="40"/>
+    <line class="grid-line" x1="40" y1="100" x2="700" y2="100"/>
+    <line class="grid-line" x1="40" y1="160" x2="700" y2="160"/>
+    <line class="grid-line" x1="40" y1="220" x2="700" y2="220"/>
+    <line class="axis"      x1="40" y1="280" x2="700" y2="280"/>
+
+    <!-- ── START bar (absolute, one) ─────────────────────────────────────── -->
+    <g>
+      <rect class="bar is-start" x="{{X0}}" y="{{Y0}}" width="64" height="{{H0}}" rx="4" data-tip="{{START_LABEL}}: {{START_VALUE}}">
+        <title>{{START_LABEL}}: {{START_VALUE}}</title>
+      </rect>
+      <text class="val" x="{{X0+32}}" y="{{Y0-8}}">{{START_VALUE}}</text>
+      <text class="cat" x="{{X0+32}}" y="300">{{START_LABEL}}</text>
+      <line class="connector" x1="{{X0+64}}" y1="{{Y_CONN}}" x2="{{NEXT_X}}" y2="{{Y_CONN}}"/>
+    </g>
+
+    <!-- ↓ repeat one delta bar per step (tone is-up for +, is-down for −) -->
+    <g>
+      <rect class="bar is-up" x="{{X}}" y="{{Y}}" width="64" height="{{H}}" rx="4" data-tip="{{LABEL}}: {{VALUE}}">
+        <title>{{LABEL}}: {{VALUE}}</title>
+      </rect>
+      <text class="val" x="{{X+32}}" y="{{Y-8}}">{{VALUE}}</text>
+      <text class="cat" x="{{X+32}}" y="300">{{LABEL}}</text>
+      <line class="connector" x1="{{X_END}}" y1="{{Y_CONN}}" x2="{{NEXT_X}}" y2="{{Y_CONN}}"/>
+    </g>
+    <!-- ↑ repeat -->
+
+    <!-- ── TOTAL bar (absolute, one - no trailing connector) ─────────────── -->
+    <g>
+      <rect class="bar is-total" x="{{XN}}" y="{{YN}}" width="64" height="{{HN}}" rx="4" data-tip="{{TOTAL_LABEL}}: {{TOTAL_VALUE}}">
+        <title>{{TOTAL_LABEL}}: {{TOTAL_VALUE}}</title>
+      </rect>
+      <text class="val" x="{{XN+32}}" y="{{YN-8}}">{{TOTAL_VALUE}}</text>
+      <text class="cat" x="{{XN+32}}" y="300">{{TOTAL_LABEL}}</text>
+    </g>
+  </svg>
+</figure>

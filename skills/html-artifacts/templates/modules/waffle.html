@@ -1,0 +1,71 @@
+<!-- ============================================================================
+MODULE: waffle                                     lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A waffle / square-pie chart (pure CSS - no SVG). A 10×10 grid of 100
+         cells where each category fills a run of CONSECUTIVE cells (one cell = 1%),
+         tinted --cat-1..5; a legend maps color → label + percent. Makes a
+         part-of-100 breakdown countable at a glance. Distinction: chart-donut
+         encodes share as arc angle (small slices get hard to read); progress is
+         one value against a goal; waffle makes each percent a TANGIBLE, countable
+         square so "37%" is literally 37 cells.
+VARIABLES: {{TITLE}}; per legend entry {{CAT_LABEL}} {{CAT_PCT}} (+ .cat-N swatch).
+           Cells carry no text - the category boundaries live in the fill order.
+SCALING:   fill cells row-major (left→right, top→bottom). Give the first {p1} cells
+           .cat-1, the next {p2} cells .cat-2, and so on; the counts are the percents
+           and must sum to 100. A category of p% = p cells.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --bg-surface, --border-subtle,
+           --text-*, --radius-xs, --sp-*, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="waffle" style block once.
+INTERACTION: none (static). aria-label on the figure; the grid is aria-hidden (decorative)
+           and the legend carries the real labels + percents. Cells lift on hover
+           (paint only, reduced-motion guarded).
+USAGE: emit 100 <i class="wf-cell cat-N"> total; change the cat-N class at each
+       category boundary by counting cells. Add one legend .wf-key per category.
+============================================================================ -->
+<style data-module="waffle">
+  .wf { margin: 0; }
+  .wf-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .wf-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; max-width: 320px; }
+  .wf-cell { aspect-ratio: 1 / 1; border-radius: var(--radius-xs); background: var(--bg-surface); transition: filter var(--dur-fast) var(--ease); }
+  .wf-cell:hover { filter: brightness(1.12); }
+  .wf-cell.cat-1 { background: color-mix(in srgb, var(--cat-1) 82%, var(--bg-surface)); }
+  .wf-cell.cat-2 { background: color-mix(in srgb, var(--cat-2) 82%, var(--bg-surface)); }
+  .wf-cell.cat-3 { background: color-mix(in srgb, var(--cat-3) 82%, var(--bg-surface)); }
+  .wf-cell.cat-4 { background: color-mix(in srgb, var(--cat-4) 82%, var(--bg-surface)); }
+  .wf-cell.cat-5 { background: color-mix(in srgb, var(--cat-5) 82%, var(--bg-surface)); }
+  .wf-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin-top: var(--sp-4); }
+  .wf-key { display: inline-flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); color: var(--text-secondary); }
+  .wf-key i { width: 11px; height: 11px; border-radius: var(--radius-xs); }
+  .wf-key .wf-pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .wf-key .cat-1 { background: color-mix(in srgb, var(--cat-1) 82%, var(--bg-surface)); }
+  .wf-key .cat-2 { background: color-mix(in srgb, var(--cat-2) 82%, var(--bg-surface)); }
+  .wf-key .cat-3 { background: color-mix(in srgb, var(--cat-3) 82%, var(--bg-surface)); }
+  .wf-key .cat-4 { background: color-mix(in srgb, var(--cat-4) 82%, var(--bg-surface)); }
+  @media (prefers-reduced-motion: reduce) { .wf-cell { transition: none; } }
+</style>
+
+<figure class="wf card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="wf-title">{{TITLE}}</figcaption>
+
+  <!-- 100 cells, row-major; change .cat-N at each boundary (example: 42 / 28 / 18 / 12) -->
+  <div class="wf-grid" aria-hidden="true">
+    <i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i>
+    <i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i>
+    <i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i>
+    <i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i>
+    <i class="wf-cell cat-1"></i><i class="wf-cell cat-1"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i>
+    <i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i>
+    <i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i><i class="wf-cell cat-2"></i>
+    <i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i>
+    <i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-3"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i>
+    <i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i><i class="wf-cell cat-4"></i>
+  </div>
+
+  <div class="wf-legend">
+    <!-- ↓ repeat one .wf-key per category (swatch + label + percent) -->
+    <span class="wf-key"><i class="cat-1"></i>{{CAT_LABEL}} <span class="wf-pct">{{CAT_PCT}}</span></span> <!-- e.g. 継続 42% -->
+    <span class="wf-key"><i class="cat-2"></i>{{CAT_LABEL}} <span class="wf-pct">{{CAT_PCT}}</span></span> <!-- e.g. 休眠 28% -->
+    <span class="wf-key"><i class="cat-3"></i>{{CAT_LABEL}} <span class="wf-pct">{{CAT_PCT}}</span></span> <!-- e.g. 解約 18% -->
+    <span class="wf-key"><i class="cat-4"></i>{{CAT_LABEL}} <span class="wf-pct">{{CAT_PCT}}</span></span> <!-- e.g. 新規 12% -->
+    <!-- ↑ repeat -->
+  </div>
+</figure>

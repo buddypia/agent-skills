@@ -1,0 +1,88 @@
+<!-- ============================================================================
+MODULE: composition-bar                                    lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A single horizontal 100% composition bar (pure CSS - no SVG). One
+         full-width strip split into cat-tinted segments (each width set inline as a
+         percent), each carrying an in-bar label, with a legend row below mapping
+         color → label + value. Optionally stack a SECOND bar to compare two periods
+         (今年 vs 昨年) sharing the same legend. For an inline part-of-whole readout.
+         Distinction: chart-stacked is a multi-bar time series across categories;
+         waffle spells the same share as a 100-cell countable grid; chart-donut is
+         radial; this is the compact one-strip composition bar for a text flow.
+VARIABLES: {{TITLE}}; optional per-bar {{ROW_LABEL}} (今年/昨年); per segment
+           {{SEG_LABEL}} with inline width:NN% and a .cat-N tint; per legend entry
+           {{LEG_LABEL}} {{LEG_VALUE}}.
+SCALING:   each .cmb-bar is a flex row of .cmb-seg segments; segment widths are set
+           inline (width:NN%) and MUST sum to 100 within a bar. In-bar labels hide via
+           overflow when a segment is too narrow; the legend always carries the values.
+REQUIRES:  core/tokens.css (--cat-1..5, --accent, --bg-surface, --bg-muted,
+           --border-*, --text-*, --font-mono, --radius-*, --sp-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="composition-bar" style block once.
+INTERACTION: hover brightens a segment (paint only, reduced-motion guarded).
+             aria-label on the figure; segment + legend labels are real text.
+USAGE: one .cmb-seg per part (inline width:NN%, .cat-N); for a comparison add a second
+       .cmb-row with its own {{ROW_LABEL}}. One .cmb-key per part in the legend.
+============================================================================ -->
+<style data-module="composition-bar">
+  .cmb { margin: 0; }
+  .cmb-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cmb-rows { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .cmb-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: var(--sp-3); }
+  .cmb-row-label { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); text-align: right; min-width: 3em; }
+  /* the strip: a flex track of segments, rounded ends via overflow clip. Segments are block boxes
+     (not flex) so a label too long for a thin segment ends in "…" instead of being cut on both sides */
+  .cmb-bar { display: flex; height: 30px; border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .cmb-seg { --sc: var(--accent); display: block; text-align: center; min-width: 0; padding-inline: var(--sp-1); font: var(--type-caption); font-weight: 600; line-height: 28px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--sc) 60%, var(--bg-surface)); box-shadow: inset -1px 0 0 color-mix(in srgb, var(--bg-surface) 55%, transparent); transition: filter var(--dur-fast) var(--ease); }
+  .cmb-seg:last-child { box-shadow: none; }
+  .cmb-seg:hover { filter: brightness(1.06); }
+  .cmb-seg.cat-1 { --sc: var(--cat-1); } .cmb-seg.cat-2 { --sc: var(--cat-2); }
+  .cmb-seg.cat-3 { --sc: var(--cat-3); } .cmb-seg.cat-4 { --sc: var(--cat-4); }
+  .cmb-seg.cat-5 { --sc: var(--cat-5); }
+  /* legend: swatch + label + value, wraps */
+  .cmb-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin-top: var(--sp-4); padding-top: var(--sp-3); border-top: 1px solid var(--border-subtle); }
+  .cmb-key { display: inline-flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); color: var(--text-secondary); }
+  .cmb-key i { width: 11px; height: 11px; border-radius: var(--radius-xs); }
+  .cmb-key .cmb-v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .cmb-key .cat-1 { background: color-mix(in srgb, var(--cat-1) 60%, var(--bg-surface)); }
+  .cmb-key .cat-2 { background: color-mix(in srgb, var(--cat-2) 60%, var(--bg-surface)); }
+  .cmb-key .cat-3 { background: color-mix(in srgb, var(--cat-3) 60%, var(--bg-surface)); }
+  .cmb-key .cat-4 { background: color-mix(in srgb, var(--cat-4) 60%, var(--bg-surface)); }
+  .cmb-key .cat-5 { background: color-mix(in srgb, var(--cat-5) 60%, var(--bg-surface)); }
+  @media (prefers-reduced-motion: reduce) { .cmb-seg { transition: none; } }
+</style>
+
+<figure class="cmb card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="cmb-title">{{TITLE}}</figcaption>
+  <div class="cmb-rows">
+    <!-- ── PRIMARY bar (row label optional; drop the .cmb-row-label for a single bar) ── -->
+    <div class="cmb-row">
+      <span class="cmb-row-label">{{ROW_LABEL}}</span>              <!-- e.g. 今年 -->
+      <div class="cmb-bar">
+        <!-- ↓ one .cmb-seg per part; inline width:NN% must sum to 100 -->
+        <span class="cmb-seg cat-1" style="width:46%">{{SEG_LABEL}}</span> <!-- e.g. モバイル 46% -->
+        <span class="cmb-seg cat-2" style="width:30%">{{SEG_LABEL}}</span> <!-- e.g. デスクトップ 30% -->
+        <span class="cmb-seg cat-3" style="width:16%">{{SEG_LABEL}}</span> <!-- e.g. タブレット 16% -->
+        <span class="cmb-seg cat-4" style="width:8%">{{SEG_LABEL}}</span>  <!-- e.g. その他 8% -->
+      </div>
+    </div>
+    <!-- ── COMPARISON bar (optional; delete this .cmb-row for a single-bar readout) ── -->
+    <div class="cmb-row">
+      <span class="cmb-row-label">{{ROW_LABEL}}</span>              <!-- e.g. 昨年 -->
+      <div class="cmb-bar">
+        <span class="cmb-seg cat-1" style="width:38%">{{SEG_LABEL}}</span> <!-- e.g. モバイル 38% -->
+        <span class="cmb-seg cat-2" style="width:36%">{{SEG_LABEL}}</span> <!-- e.g. デスクトップ 36% -->
+        <span class="cmb-seg cat-3" style="width:18%">{{SEG_LABEL}}</span> <!-- e.g. タブレット 18% -->
+        <span class="cmb-seg cat-4" style="width:8%">{{SEG_LABEL}}</span>  <!-- e.g. その他 8% -->
+      </div>
+    </div>
+  </div>
+
+  <div class="cmb-legend">
+    <!-- ↓ one .cmb-key per part (swatch + label + value) -->
+    <span class="cmb-key"><i class="cat-1"></i>{{LEG_LABEL}} <span class="cmb-v">{{LEG_VALUE}}</span></span> <!-- e.g. モバイル 46% -->
+    <span class="cmb-key"><i class="cat-2"></i>{{LEG_LABEL}} <span class="cmb-v">{{LEG_VALUE}}</span></span> <!-- e.g. デスクトップ 30% -->
+    <span class="cmb-key"><i class="cat-3"></i>{{LEG_LABEL}} <span class="cmb-v">{{LEG_VALUE}}</span></span> <!-- e.g. タブレット 16% -->
+    <span class="cmb-key"><i class="cat-4"></i>{{LEG_LABEL}} <span class="cmb-v">{{LEG_VALUE}}</span></span> <!-- e.g. その他 8% -->
+    <!-- ↑ repeat -->
+  </div>
+</figure>

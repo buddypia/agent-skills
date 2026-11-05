@@ -1,0 +1,351 @@
+{
+  "title": "次期ECプラットフォーム選定会議 - 事前配布資料",
+  "theme": "birchline",
+  "layout": "stack",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "意思決定会議 事前資料",
+  "subtitle": "次期ECプラットフォームの方式選定に関する意思決定会議",
+  "meta": [
+    {
+      "k": "日時",
+      "v": "2026-07-15（火）14:00-15:30"
+    },
+    {
+      "k": "場所",
+      "v": "本社4F 大会議室 / オンライン併用"
+    },
+    {
+      "k": "出席者",
+      "v": "経営企画・情報システム・EC事業・財務（計8名）"
+    }
+  ],
+  "footer": "配布: 情報システム部 / 2026-07-08 作成 - ハルカゼ商事株式会社（社外秘）",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<!-- module: agenda (hand-pasted, filled) -->\n<figure class=\"agd card-outlined\" aria-label=\"会議次第（90分）\">\n  <figcaption class=\"agd-title\">会議次第（90分）</figcaption> <!-- e.g. カンファレンス Day 1 -->\n  <div class=\"agd-list\">\n\n    <!-- ── one .agd-block per part of the day (morning / afternoon / …) ────── -->\n    <section class=\"agd-block\">\n      <p class=\"agd-block-label\">前半（説明・共有）</p> <!-- e.g. 午前 -->\n\n      <!-- ── one .agd-slot per session ─────────────────────────────────────── -->\n      <div class=\"agd-slot\">\n        <span class=\"agd-time\">14:00-14:10</span> <!-- e.g. 09:00-09:30 -->\n        <div class=\"agd-body\">\n          <p class=\"agd-session\">開会・本日のゴール確認</p>        <!-- e.g. 開会あいさつと全体像 -->\n          <div class=\"agd-meta\">\n            <span class=\"chip\">議長: 高橋</span>          <!-- e.g. 田中 実行委員長 -->\n            <span class=\"agd-track\">全体</span>     <!-- e.g. メインホール（省略可） -->\n          </div>\n        </div>\n      </div>\n\n      <div class=\"agd-slot\">\n        <span class=\"agd-time\">14:10-14:40</span> <!-- e.g. 09:30-10:20 -->\n        <div class=\"agd-body\">\n          <p class=\"agd-session\">各選択肢の評価結果 説明</p>        <!-- e.g. 基調講演：これからのプロダクト開発 -->\n          <div class=\"agd-meta\">\n            <span class=\"chip\">情シス: 中村</span>          <!-- e.g. 佐藤 花子 -->\n            <span class=\"agd-track\">説明40分</span>     <!-- e.g. Track A -->\n          </div>\n        </div>\n      </div>\n      <!-- ↑ repeat: one .agd-slot per session -->\n    </section>\n\n    <section class=\"agd-block\">\n      <p class=\"agd-block-label\">後半（討議・意思決定）</p> <!-- e.g. 午後 -->\n      <div class=\"agd-slot\">\n        <span class=\"agd-time\">14:40-15:30</span> <!-- e.g. 13:00-13:45 -->\n        <div class=\"agd-body\">\n          <p class=\"agd-session\">論点討議と意思決定</p>        <!-- e.g. 分科会：導入事例に学ぶ -->\n          <div class=\"agd-meta\">\n            <span class=\"chip\">進行: 高橋</span>          <!-- e.g. 鈴木 太郎 -->\n            <span class=\"agd-track\">討議・決定50分</span>     <!-- e.g. Track B / 302 -->\n          </div>\n        </div>\n      </div>\n    </section>\n    <!-- ↑ repeat: one .agd-block per part of the day -->\n\n  </div>\n</figure>",
+      "cssModules": [
+        "agenda"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<!-- module: key-takeaways (hand-pasted, filled) -->\n<figure class=\"ktw card-outlined\" aria-label=\"本日の論点（決めたいこと）\">\n  <figcaption class=\"ktw-title\">本日の論点（決めたいこと）</figcaption> <!-- e.g. 要点 -->\n  <ol class=\"ktw-list\">\n\n    <!-- ── one .ktw-row per takeaway (3-5 total; badge numbers auto) ───────── -->\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">① 次期ECプラットフォームの方式を3案から1つ選定する</span>          <!-- e.g. 導入により問い合わせ対応時間が42%短縮 -->\n        <span class=\"ktw-elab\">内製刷新 / SaaS-A / SaaS-B（ヘッドレス）の3案を比較。</span>          <!-- e.g. 主因はテンプレート返信の自動提案。3か月の実測値。 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">② 初期投資と回収計画の承認</span>          <!-- e.g. 初期費用ゼロで既存フローに追加可能 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">③ 移行開始時期とピーク商戦(11月)回避の可否</span>          <!-- e.g. 次の意思決定はPoC対象部署の選定 -->\n        <span class=\"ktw-elab\">本日決定できれば9月着手・翌2月本番が射程。</span>          <!-- e.g. 候補はサポート部とCS部。7月中に決定。 -->\n      </div>\n    </li>\n    <!-- ↑ repeat: one .ktw-row per takeaway -->\n  </ol>\n</figure>",
+      "cssModules": [
+        "key-takeaways"
+      ]
+    },
+    {
+      "type": "decision",
+      "title": "評価マトリクス（選択肢 × 評価軸）",
+      "desc": "重み付き合計は各評価軸の重み×スコアで自動算出。最高点を推奨案とする。",
+      "options": [
+        "内製刷新",
+        "SaaS-A",
+        "SaaS-B（ヘッドレス）"
+      ],
+      "scale": 5,
+      "criteria": [
+        {
+          "name": "初期コスト",
+          "weight": 2,
+          "scores": [
+            2,
+            4,
+            3
+          ],
+          "notes": [
+            "大規模開発で高コスト",
+            "定額・低初期費用",
+            "中程度・構築費あり"
+          ]
+        },
+        {
+          "name": "拡張性・カスタマイズ",
+          "weight": 3,
+          "scores": [
+            5,
+            2,
+            4
+          ],
+          "notes": [
+            "自由度が最大",
+            "制約が多い",
+            "API中心で柔軟"
+          ]
+        },
+        {
+          "name": "運用負荷",
+          "weight": 2,
+          "scores": [
+            2,
+            5,
+            3
+          ],
+          "notes": [
+            "内製保守が必要",
+            "フルマネージド",
+            "一部運用が残る"
+          ]
+        },
+        {
+          "name": "移行スピード",
+          "weight": 3,
+          "scores": [
+            2,
+            5,
+            4
+          ],
+          "notes": [
+            "構築に9か月以上",
+            "最短3か月",
+            "4〜5か月"
+          ]
+        },
+        {
+          "name": "ピーク耐性",
+          "weight": 2,
+          "scores": [
+            3,
+            5,
+            4
+          ],
+          "notes": [
+            "自前増強が必要",
+            "自動スケール",
+            "自動スケール"
+          ]
+        }
+      ],
+      "verdict": {
+        "pick": "SaaS-A",
+        "rationale": "加重合計49で最高。移行スピードと運用負荷で突出し、11月商戦前の本番化に最も現実的。拡張性の弱みはAPI連携で補完する前提。"
+      }
+    },
+    {
+      "type": "comparison",
+      "label": "選択肢の定性比較",
+      "options": [
+        {
+          "name": "内製刷新",
+          "pros": [
+            "自社要件に完全適合",
+            "知見が社内に蓄積"
+          ],
+          "cons": [
+            "初期9か月・高コスト",
+            "保守要員の恒常確保が必要"
+          ],
+          "metrics": [
+            {
+              "k": "初期費用",
+              "v": "約1.8億円"
+            },
+            {
+              "k": "本番目安",
+              "v": "2027/03"
+            }
+          ]
+        },
+        {
+          "name": "SaaS-A",
+          "recommended": true,
+          "pros": [
+            "最短3か月で本番",
+            "フルマネージドで運用軽",
+            "商戦期の自動スケール"
+          ],
+          "cons": [
+            "カスタマイズに制約",
+            "月額が売上連動で逓増"
+          ],
+          "metrics": [
+            {
+              "k": "初期費用",
+              "v": "約4,500万円"
+            },
+            {
+              "k": "本番目安",
+              "v": "2026/11"
+            }
+          ]
+        },
+        {
+          "name": "SaaS-B（ヘッドレス）",
+          "pros": [
+            "APIで高い柔軟性",
+            "フロントを自由設計"
+          ],
+          "cons": [
+            "フロント内製が必要",
+            "構築費が中程度"
+          ],
+          "metrics": [
+            {
+              "k": "初期費用",
+              "v": "約9,000万円"
+            },
+            {
+              "k": "本番目安",
+              "v": "2027/01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "note",
+      "title": "前提と制約",
+      "body": "本選定は2026年11月の大型セール前の本番稼働を最優先制約とする。年間EC流通額は約120億円、想定ピークは平常時の6.5倍。個人情報を扱うためISMS準拠が必須で、いずれの案もPCI DSS対応済みを前提とする。"
+    },
+    {
+      "type": "checklist",
+      "title": "決定後アクションと担当（本会議で確定）",
+      "control": "checkbox",
+      "items": [
+        {
+          "label": "選定結果の社内周知と契約手続き開始",
+          "desc": "担当: 情シス 中村 / 期限 7/22",
+          "state": "todo"
+        },
+        {
+          "label": "移行計画・体制のドラフト作成",
+          "desc": "担当: PMO 相川 / 期限 7/31",
+          "state": "todo"
+        },
+        {
+          "label": "初期投資の稟議起票",
+          "desc": "担当: 財務 岡田 / 期限 7/25",
+          "state": "todo"
+        },
+        {
+          "label": "現行データ棚卸しの開始",
+          "desc": "担当: EC事業 林 / 期限 7/18",
+          "state": "todo"
+        }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "meeting-pack",
+    "name": "会議資料（意思決定会議の事前配布資料）",
+    "genre": "会議資料",
+    "purpose": "意思決定会議の前に配布し、次第・論点・評価・比較・制約・決定後アクションを共有して、会議当日に結論（どの案を選ぶか）まで到達させる。",
+    "audience": "意思決定会議の出席者（経営・関連部門の意思決定者）",
+    "triggers": {
+      "ja": [
+        "会議資料を作りたい",
+        "意思決定会議の事前資料",
+        "選定会議のアジェンダと論点",
+        "決裁のための比較資料",
+        "会議のたたき台を用意",
+        "討議用の意思決定マトリクス"
+      ],
+      "en": [
+        "decision meeting pre-read",
+        "meeting agenda and options",
+        "selection decision pack"
+      ],
+      "ko": [
+        "의사결정 회의 자료",
+        "회의 어젠다와 논점",
+        "선정 비교 자료"
+      ]
+    },
+    "axes": {
+      "theme": "birchline",
+      "layout": "stack",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "birchline の紙的な明るいトーンは配布資料として読みやすい。stack で次第→論点→評価→比較→制約→アクションを順に。split ヘッダに日時/場所/出席者を常設し会議の provenance を明示。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:agenda",
+        "role": "タイムテーブル",
+        "required": true,
+        "guide": "前半（説明）/後半（討議・決定）のブロックで時間配分。各スロットに時刻・議題・進行担当。",
+        "volume": "2ブロック・3〜5スロット"
+      },
+      {
+        "n": 2,
+        "type": "html:key-takeaways",
+        "role": "論点サマリー（決めたいこと＝結論先出し）",
+        "required": true,
+        "guide": "本日決めたい論点を①②③で。各行に選択肢や判断の期限を添える。",
+        "volume": "3項目"
+      },
+      {
+        "n": 3,
+        "type": "decision",
+        "role": "意思決定マトリクス",
+        "required": true,
+        "guide": "選択肢×評価軸に重みとスコア、各セルに一言根拠。加重合計と推奨は自動算出、verdictで理由を明記。",
+        "volume": "3選択肢×5軸"
+      },
+      {
+        "n": 4,
+        "type": "comparison",
+        "role": "選択肢の定性比較",
+        "required": true,
+        "guide": "各案のpros/cons/主要metrics（初期費用・本番時期）。推奨案にrecommended:true。",
+        "volume": "3案"
+      },
+      {
+        "n": 5,
+        "type": "callout",
+        "role": "前提と制約",
+        "required": true,
+        "guide": "note で全案共通の前提（期限・規模・コンプライアンス）を1段落に。",
+        "volume": "1段落"
+      },
+      {
+        "n": 6,
+        "type": "checklist",
+        "role": "決定後のアクションと担当",
+        "required": true,
+        "guide": "checkbox で決定を受けたToDoを担当・期限つきで。会議で確定する前提。",
+        "volume": "4〜6件"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 3,
+        "default": "decision（重み付き評価）",
+        "alternative": "quadrant / risk-matrix",
+        "when": "重み付けよりポジショニングやリスク評価で見せたいとき"
+      },
+      {
+        "slot": 4,
+        "default": "comparison",
+        "alternative": "table（案×評価軸のクロス表）",
+        "when": "定性pros/consより一覧の比較表が適するとき"
+      },
+      {
+        "slot": 5,
+        "default": "callout(note)",
+        "alternative": "html:swot / statlist",
+        "when": "前提を強み弱みや数値ファクトで整理したいとき"
+      },
+      {
+        "slot": 6,
+        "default": "checklist",
+        "alternative": "stepper（決定後の承認フロー）",
+        "when": "ToDoではなく段階的な手続きを示したいとき"
+      }
+    ],
+    "modules": [
+      "agenda",
+      "key-takeaways",
+      "decision",
+      "comparison",
+      "callout",
+      "checklist"
+    ]
+  }
+}

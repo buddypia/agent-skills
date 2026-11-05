@@ -1,0 +1,72 @@
+<!-- ============================================================================
+MODULE: team-grid                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Pure-CSS team roster (NO SVG). A 3-4 column grid of member cards; each card
+         leads with an initials avatar (accent / cat-tinted disc), then name, role,
+         a one-line bio, and contact/skill chips. For the "who we are" introduction
+         on about pages, proposals, and org decks.
+         Distinction: persona-card is a deep UX archetype profile (goals / pains /
+         scenario); org-chart shows the reporting hierarchy between people; team-grid
+         is the flat, equal-weight introduction gallery of the actual people.
+VARIABLES: {{TITLE}}; per card {{INITIALS}} (avatar, tint via .cat-N) {{NAME}}
+           {{ROLE}} {{BIO}} (one line) + per chip {{TAG}} (contact / skill).
+REQUIRES: core/tokens.css (--accent, --cat-1..5, --bg-surface, --bg-muted, --border-*,
+          --text-*, --radius-*, --sp-*, --shadow-sm), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="team-grid" style block once. Set style="--tmg-cols:N"
+            (3 or 4) on the figure to pick column count.
+INTERACTION: hover lifts a card (paint-only shadow/border, reduced-motion guarded).
+USAGE: one .tmg-card per member inside .tmg-grid; tint each avatar with .cat-1..5.
+============================================================================ -->
+<style data-module="team-grid">
+  .tmg { margin: 0; --tmg-cols: 3; }
+  .tmg-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .tmg-grid { display: grid; grid-template-columns: repeat(var(--tmg-cols), 1fr); gap: var(--sp-4); }
+  .tmg-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-1); padding: var(--sp-4); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  /* initials avatar: cat-tinted disc, name+role beneath */
+  .tmg-avatar { --ac: var(--accent); width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin-bottom: var(--sp-2); font: var(--type-h3); font-weight: 700; color: var(--ac); background: color-mix(in srgb, var(--ac) 16%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--ac) 46%, var(--border-default)); }
+  .tmg-avatar.cat-1 { --ac: var(--cat-1); } .tmg-avatar.cat-2 { --ac: var(--cat-2); } .tmg-avatar.cat-3 { --ac: var(--cat-3); } .tmg-avatar.cat-4 { --ac: var(--cat-4); } .tmg-avatar.cat-5 { --ac: var(--cat-5); }
+  .tmg-name { font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .tmg-role { font: var(--type-caption); font-weight: 600; letter-spacing: var(--tracking-tight); color: var(--accent); }
+  .tmg-bio { font: var(--type-small); color: var(--text-secondary); margin-top: var(--sp-1); }
+  .tmg-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-1); margin-top: var(--sp-2); }
+  .tmg-tag { font: var(--type-caption); color: var(--text-muted); padding: 2px var(--sp-2); border-radius: var(--radius-pill); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  @media (hover: hover) { .tmg-card:hover { border-color: color-mix(in srgb, var(--accent) 44%, var(--border-default)); box-shadow: var(--shadow-md); } }
+  @media (hover: hover) { .tmg-card:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-default)); } }
+  @media (max-width: 720px) { .tmg-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<figure class="tmg card-outlined" style="--tmg-cols:3" aria-label="{{TITLE}}">
+  <figcaption class="tmg-title">{{TITLE}}</figcaption> <!-- e.g. チーム紹介 -->
+  <div class="tmg-grid">
+
+    <!-- ── one .tmg-card per member (tint avatar .cat-1..5) ────────────────── -->
+    <div class="tmg-card">
+      <span class="tmg-avatar cat-1" aria-hidden="true">{{INITIALS}}</span> <!-- e.g. ST -->
+      <span class="tmg-name">{{NAME}}</span>        <!-- e.g. 佐藤 智子 -->
+      <span class="tmg-role">{{ROLE}}</span>        <!-- e.g. プロダクトリード -->
+      <span class="tmg-bio">{{BIO}}</span>          <!-- e.g. 検索体験の設計を8年担当。 -->
+      <div class="tmg-tags">
+        <span class="tmg-tag">{{TAG}}</span>        <!-- e.g. Figma -->
+        <span class="tmg-tag">{{TAG}}</span>        <!-- e.g. @sato -->
+      </div>
+    </div>
+    <div class="tmg-card">
+      <span class="tmg-avatar cat-2" aria-hidden="true">{{INITIALS}}</span> <!-- e.g. YT -->
+      <span class="tmg-name">{{NAME}}</span>        <!-- e.g. 山田 太郎 -->
+      <span class="tmg-role">{{ROLE}}</span>        <!-- e.g. エンジニアリングマネージャ -->
+      <span class="tmg-bio">{{BIO}}</span>          <!-- e.g. 決済基盤の刷新をリード。 -->
+      <div class="tmg-tags">
+        <span class="tmg-tag">{{TAG}}</span>        <!-- e.g. Go -->
+      </div>
+    </div>
+    <div class="tmg-card">
+      <span class="tmg-avatar cat-4" aria-hidden="true">{{INITIALS}}</span> <!-- e.g. RK -->
+      <span class="tmg-name">{{NAME}}</span>        <!-- e.g. 鈴木 玲奈 -->
+      <span class="tmg-role">{{ROLE}}</span>        <!-- e.g. デザイナー -->
+      <span class="tmg-bio">{{BIO}}</span>          <!-- e.g. ブランドとUIを横断して担当。 -->
+      <div class="tmg-tags">
+        <span class="tmg-tag">{{TAG}}</span>        <!-- e.g. @rina -->
+      </div>
+    </div>
+    <!-- ↑ repeat: one .tmg-card per member -->
+  </div>
+</figure>

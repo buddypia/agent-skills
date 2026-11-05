@@ -1,0 +1,139 @@
+<!-- ============================================================================
+MODULE: decision-matrix                          lineage: comparison-grid (options) + html-over-markdown (comparison)
+PURPOSE: Weighted decision matrix for "help me decide" content. Criteria rows
+         (each with an explicit ×weight) score every option with a VISUAL bar +
+         number AND a one-line human-readable rationale per cell; a weighted-total
+         footer shows each option's score against the maximum possible; the
+         recommended option's column is tinted and badged; a closing verdict
+         callout states the recommendation and WHY in plain language. The reader
+         can audit the decision (weights, scores, notes) instead of trusting a
+         bare conclusion. The deterministic builder renders this module from data
+         via the `decision` section type, computing weighted totals and the
+         winner automatically (reference/07-build-spec.md).
+VARIABLES: {{MATRIX_TITLE}} {{MATRIX_DESC}}
+           per option (column): {{OPTION}} (+ .-winner & badge on the recommended one)
+           per criterion (row): {{CRITERION}} {{WEIGHT}}
+           per cell: {{SCORE}} {{SCORE_PCT}} (= score/scale·100) {{CELL_NOTE}}
+           footer: {{TOTAL}} {{TOTAL_MAX}} {{TOTAL_PCT}}
+           verdict: {{PICK}} {{RATIONALE}}
+REQUIRES:  core/elements.css (.badge .badge-accent .callout .callout-title .lede h2)
+           + callout-box module CSS (for the .callout-success verdict box)
+MODULE CSS: inline the data-module="decision-matrix" style block once.
+INTERACTION: none (fully static).
+USAGE: one column per option (2-5; tint via .dm-c1..dm-c5), one row per
+       criterion. Winner column cells carry .-winner. Score bars: width =
+       score/scale·100% (scale defaults to 5). Footer bar: total/maxTotal·100%.
+       Always close with the verdict callout - a recommendation without a stated
+       reason is not a decision aid.
+============================================================================ -->
+<style data-module="decision-matrix">
+  .dm-scroll { overflow-x: auto; border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+  .dm-table { width: 100%; border-collapse: collapse; font: var(--type-small); }
+  .dm-table th, .dm-table td { padding: var(--sp-3); text-align: left; vertical-align: top;
+    border-bottom: 1px solid var(--border-subtle); transition: background var(--dur-fast) var(--ease); }
+  .dm-table thead th { font: var(--type-caption); text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text-muted); border-bottom: 2px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-muted) 50%, transparent); }
+  .dm-table thead th.dm-opt { font: var(--type-small); font-weight: 700; color: var(--text-primary);
+    text-transform: none; letter-spacing: 0; }
+  /* hairline column separators between option columns keep dense scores legible */
+  .dm-table th + th, .dm-table td + td { border-left: 1px solid var(--border-subtle); }
+  /* calm accent-tinted row hover - reads across the whole criterion row */
+  .dm-table tbody tr:hover td, .dm-table tbody tr:hover th {
+    background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .dm-crit { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .dm-weight { display: inline-block; margin-left: var(--sp-2); padding: 0 var(--sp-1);
+    font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary);
+    background: color-mix(in srgb, var(--accent) 9%, transparent); border-radius: var(--radius-xs); }
+  /* Bar color follows the VERDICT, not the column position: every non-winning
+     option column uses one neutral accent/blue tone, and the recommended
+     (-winner) column's bars use the positive accent (green). Green therefore
+     marks the best option only - color and recommendation agree. */
+  .dm-c1, .dm-c2, .dm-c3, .dm-c4, .dm-c5 { --dm-c: var(--accent); }
+  .dm-table .-winner { --dm-c: var(--color-success);
+    /* recommended column: faint accent wash on every cell + badge in the header */
+    background: color-mix(in srgb, var(--color-success) 8%, transparent); }
+  /* winner column header gets a confident success rail so the pick reads at a glance */
+  .dm-table thead th.-winner { background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--color-success) 60%, transparent); }
+  /* winner-row hover stays in the success key rather than the neutral accent */
+  .dm-table tbody tr:hover td.-winner, .dm-table tbody tr:hover th.-winner {
+    background: color-mix(in srgb, var(--color-success) 13%, transparent); }
+  /* score cell: bar + number, then a one-line rationale */
+  .dm-score { display: flex; align-items: center; gap: var(--sp-2); }
+  .dm-bar { position: relative; display: inline-block; width: 96px; height: 8px; flex: 0 0 auto;
+    border-radius: var(--radius-pill); background: var(--bg-muted); overflow: hidden;
+    box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .dm-bar.-total { height: 10px; }
+  .dm-fill { display: block; height: 100%; border-radius: inherit;
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--dm-c, var(--accent)) 88%, transparent),
+      var(--dm-c, var(--accent)));
+    transition: filter var(--dur-fast) var(--ease); }
+  /* on row hover the bar fill firms up - accent-tied feedback, no layout shift */
+  .dm-table tbody tr:hover .dm-fill { filter: brightness(1.06) saturate(1.05); }
+  .dm-num { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
+  .dm-max { color: var(--text-muted); font-weight: 400; }
+  .dm-note { margin: var(--sp-1) 0 0; font: var(--type-caption); color: var(--text-secondary); max-width: 30ch; }
+  /* weighted-total footer */
+  .dm-table tfoot th, .dm-table tfoot td { border-top: 2px solid var(--border-default); border-bottom: none;
+    background: color-mix(in srgb, var(--bg-muted) 40%, transparent); }
+  .dm-table tfoot .dm-num { font-weight: 700; }
+  .dm-table tfoot td.-winner { background: color-mix(in srgb, var(--color-success) 10%, transparent); }
+  .dm-verdict { margin-top: var(--sp-4); }
+</style>
+
+<section class="decision-matrix" aria-label="{{MATRIX_TITLE}}">
+  <h2>{{MATRIX_TITLE}}</h2>
+  <p class="lede">{{MATRIX_DESC}}</p>
+
+  <div class="dm-scroll">
+    <table class="dm-table">
+      <thead>
+        <tr>
+          <th class="dm-crit">Criteria</th>
+          <!-- ↓ repeat one th per option; recommended one gets .-winner + badge -->
+          <th class="dm-opt dm-c1 -winner" scope="col">{{OPTION}} <span class="badge badge-accent">Recommended</span></th>
+          <th class="dm-opt dm-c2" scope="col">{{OPTION_2}}</th>
+          <!-- ↑ repeat -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ↓ repeat one tr per criterion; one td per option (column order fixed) -->
+        <tr>
+          <th scope="row" class="dm-crit">{{CRITERION}}<span class="dm-weight">×{{WEIGHT}}</span></th>
+          <td class="dm-cell dm-c1 -winner">
+            <div class="dm-score"><span class="dm-bar"><span class="dm-fill" style="width:{{SCORE_PCT}}%"></span></span><span class="dm-num">{{SCORE}}</span></div>
+            <p class="dm-note">{{CELL_NOTE}}</p>
+          </td>
+          <td class="dm-cell dm-c2">
+            <div class="dm-score"><span class="dm-bar"><span class="dm-fill" style="width:{{SCORE_PCT}}%"></span></span><span class="dm-num">{{SCORE}}</span></div>
+            <p class="dm-note">{{CELL_NOTE}}</p>
+          </td>
+        </tr>
+        <!-- ↑ repeat -->
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" class="dm-crit">Weighted total</th>
+          <td class="dm-cell dm-total dm-c1 -winner">
+            <div class="dm-score"><span class="dm-bar -total"><span class="dm-fill" style="width:{{TOTAL_PCT}}%"></span></span><span class="dm-num">{{TOTAL}}<span class="dm-max">/{{TOTAL_MAX}}</span></span></div>
+          </td>
+          <td class="dm-cell dm-total dm-c2">
+            <div class="dm-score"><span class="dm-bar -total"><span class="dm-fill" style="width:{{TOTAL_PCT}}%"></span></span><span class="dm-num">{{TOTAL}}<span class="dm-max">/{{TOTAL_MAX}}</span></span></div>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- verdict: recommendation + WHY, in plain language (callout-box module CSS) -->
+  <div class="callout callout-box callout-success dm-verdict">
+    <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="success"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+    <div>
+      <p class="callout-title">Recommended: {{PICK}}</p>
+      <div class="callout-body"><p>{{RATIONALE}}</p></div>
+    </div>
+  </div>
+</section>

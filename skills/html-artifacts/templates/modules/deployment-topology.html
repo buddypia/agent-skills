@@ -1,0 +1,108 @@
+<!-- ============================================================================
+MODULE: deployment-topology                              lineage: unified-system v7 architecture
+PURPOSE: Where the software actually RUNS - region → zone → deployed unit, with replica
+         counts, instance classes and the shared/edge services that sit outside a region.
+         A logical architecture diagram deliberately hides this; when the question is
+         failover, latency or cost, the physical view is the answer and nothing else in
+         the catalog carries it.
+VARIABLES: {{TITLE}} {{DESC}} + nested region/zone/unit blocks
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="deployment-topology" style block once.
+BUILDER: section.type "deployment-topology" -
+  { title, desc,
+    global: [{ name, kind, tech, note }],                     // edge/shared, region-less
+    regions: [{ name, sub, role, zones: [{ name,
+                units: [{ name, kind, replicas, tech, note }] }] }] }
+  role: primary | secondary | dr   (drives the region header accent)
+  kind: service | worker | database | cache | queue | gateway | storage | cdn
+INTERACTION: none (static).
+============================================================================ -->
+<style data-module="deployment-topology">
+  .dtopo { width: 100%; display: grid; gap: var(--sp-4); }
+  .dtopo-head h2 { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .dtopo-desc { font: var(--type-small); color: var(--text-secondary); margin-top: var(--sp-1); max-width: 75ch; }
+
+  .dtopo-regions { display: grid; gap: var(--sp-4); }
+  @media (min-width: 900px) { .dtopo-regions.is-multi { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); } }
+
+  .dtopo-region { border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; }
+  .dtopo-region-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--bg-muted); border-bottom: 1px solid var(--border-subtle); }
+  .dtopo-region-name { font-size: 14px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); }
+  .dtopo-region-sub { font: var(--type-caption); color: var(--text-secondary); }
+  .dtopo-role { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--dt-c, var(--accent)) 14%, var(--bg-surface)); color: var(--dt-c, var(--accent)); }
+  .dtopo-r-primary { --dt-c: var(--accent); }
+  .dtopo-r-secondary { --dt-c: var(--cat-2); }
+  .dtopo-r-dr { --dt-c: var(--color-warning); }
+
+  .dtopo-zones { display: grid; gap: var(--sp-3); padding: var(--sp-4); }
+  .dtopo-zone { border: 1px dashed var(--border-default); border-radius: var(--radius-md); padding: var(--sp-3); background: color-mix(in srgb, var(--bg-muted) 55%, transparent); }
+  .dtopo-zone-name { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--sp-2); }
+  .dtopo-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: var(--sp-2); }
+
+  .dtopo-unit { border: 1px solid color-mix(in srgb, var(--du-c, var(--border-subtle)) 32%, var(--border-subtle)); border-radius: var(--radius-sm); background: var(--bg-surface); padding: var(--sp-2) var(--sp-3); display: grid; gap: 2px; }
+  .dtopo-unit-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+  .dtopo-unit-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+  .dtopo-replicas { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: var(--du-c, var(--text-secondary)); background: color-mix(in srgb, var(--du-c, var(--text-muted)) 12%, transparent); border-radius: var(--radius-pill); padding: 1px 6px; flex: none; }
+  .dtopo-unit-tech { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-secondary); }
+  .dtopo-unit-note { font-size: 10.5px; color: var(--text-muted); }
+
+  /* unit kinds share the arch-explorer palette so both views read as one system */
+  .dtopo-k-gateway { --du-c: var(--cat-1); }
+  .dtopo-k-service { --du-c: var(--accent); }
+  .dtopo-k-worker { --du-c: var(--cat-4); }
+  .dtopo-k-queue { --du-c: var(--color-warning); }
+  .dtopo-k-database { --du-c: var(--cat-5); }
+  .dtopo-k-cache { --du-c: var(--cat-2); }
+  .dtopo-k-storage { --du-c: var(--cat-4); }
+  .dtopo-k-cdn { --du-c: var(--cat-3); }
+
+  .dtopo-global { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-muted); padding: var(--sp-3) var(--sp-4); display: grid; gap: var(--sp-2); }
+  .dtopo-global-key { font: var(--type-caption); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .dtopo-global-list { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+</style>
+
+<section class="dtopo card-outlined" aria-label="{{TITLE}}">
+  <header class="dtopo-head">
+    <h2>{{TITLE}}</h2>
+    <p class="dtopo-desc">{{DESC}}</p>
+  </header>
+
+  <!-- region-less edge / shared services first: they front everything below -->
+  <div class="dtopo-global">
+    <span class="dtopo-global-key">{{GLOBAL_LABEL}}</span>
+    <div class="dtopo-global-list">
+      <div class="dtopo-unit dtopo-k-cdn">
+        <div class="dtopo-unit-top"><span class="dtopo-unit-name">{{GLOBAL_NAME}}</span></div>
+        <span class="dtopo-unit-tech">{{GLOBAL_TECH}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dtopo-regions is-multi">
+    <!-- one .dtopo-region per region -->
+    <article class="dtopo-region dtopo-r-primary">
+      <header class="dtopo-region-head">
+        <div>
+          <div class="dtopo-region-name">{{REGION_NAME}}</div>
+          <div class="dtopo-region-sub">{{REGION_SUB}}</div>
+        </div>
+        <span class="dtopo-role">{{REGION_ROLE}}</span>
+      </header>
+      <div class="dtopo-zones">
+        <div class="dtopo-zone">
+          <div class="dtopo-zone-name">{{ZONE_NAME}}</div>
+          <div class="dtopo-units">
+            <div class="dtopo-unit dtopo-k-service">
+              <div class="dtopo-unit-top">
+                <span class="dtopo-unit-name">{{UNIT_NAME}}</span>
+                <span class="dtopo-replicas">×{{REPLICAS}}</span>
+              </div>
+              <span class="dtopo-unit-tech">{{UNIT_TECH}}</span>
+              <span class="dtopo-unit-note">{{UNIT_NOTE}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

@@ -1,0 +1,179 @@
+{
+  "title": "Architecture Decision: Selecting an Event Delivery Platform",
+  "theme": "slate",
+  "layout": "sidebar",
+  "header": "split",
+  "meta": [
+    { "k": "Version", "v": "v1.0" },
+    { "k": "Owner", "v": "Platform Architecture Guild" },
+    { "k": "Status", "v": "Pending approval" }
+  ],
+  "lang": "en",
+  "target": "document",
+  "viewport": "desktop",
+  "eyebrow": "ADR-014 · PLATFORM",
+  "subtitle": "As we split the order domain into microservices, we compare three options for an asynchronous event delivery platform between services. We evaluate them on throughput, operational burden, and cost, then present our recommendation and the rationale behind it.",
+  "footer": "Source: Platform Architecture Guild · Decision date 2026-06-07 · Proposed by shoridevel@gmail.com · Status: Pending approval",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<section aria-label=\"Decision background\"><div class=\"callout\"><div class=\"stack\"><p class=\"callout-title\">Background and Constraints</p><p class=\"small\">The current monolith integrates services through synchronous REST calls, and cascading failures occur at peak load (8,000 orders per second). The new platform must meet three requirements: process a peak of 12,000 msg/s at p99 &lt; 200ms, guarantee at-least-once delivery, and be operable by a team of 2 SREs. The three options under evaluation are <code>Apache Kafka</code> (self-hosted), <code>Amazon SQS + SNS</code> (managed), and <code>NATS JetStream</code> (lightweight).</p></div></div></section>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>Comparison of Options</h2>"
+    },
+    {
+      "type": "comparison",
+      "label": "Comparison of options",
+      "options": [
+        {
+          "name": "A. Apache Kafka (Self-hosted)",
+          "pros": [
+            "Handles 12,000 msg/s comfortably, with linear horizontal scaling",
+            "Log retention and replay make failure recovery and reprocessing easy",
+            "Rich ecosystem (Connect / Streams / Schema Registry)"
+          ],
+          "cons": [
+            "High learning curve for ZooKeeper / KRaft and broker operations",
+            "Significant always-on cost even with a minimal 3-node setup",
+            "Risk of overloading operations with only 2 SREs"
+          ],
+          "metrics": [
+            { "k": "Max throughput", "v": "~1.2M msg/s" },
+            { "k": "p99 latency", "v": "9 ms" },
+            { "k": "Est. monthly cost", "v": "$2,400" },
+            { "k": "Operational burden", "v": "High" }
+          ],
+          "cta": "View deep dive"
+        },
+        {
+          "name": "B. SQS + SNS",
+          "recommended": true,
+          "pros": [
+            "Fully managed, with zero broker operations",
+            "SNS fan-out makes topic subscriptions easy",
+            "Pay-as-you-go keeps costs low during light traffic"
+          ],
+          "cons": [
+            "Standard queues offer no ordering guarantee (FIFO caps at 3,000 msg/s)",
+            "Message retention is limited to a maximum of 14 days",
+            "Vendor lock-in and limited low-level control"
+          ],
+          "metrics": [
+            { "k": "Max throughput", "v": "Virtually unlimited" },
+            { "k": "p99 latency", "v": "35 ms" },
+            { "k": "Est. monthly cost", "v": "$680" },
+            { "k": "Operational burden", "v": "Low" }
+          ],
+          "cta": "View deep dive"
+        },
+        {
+          "name": "C. NATS JetStream (Lightweight)",
+          "pros": [
+            "Single binary with fast startup and lightweight operations",
+            "Sub-millisecond latency and high throughput",
+            "Built-in stream retention and redelivery"
+          ],
+          "cons": [
+            "No in-house operational expertise and limited track record",
+            "Limited managed-service options",
+            "Cluster operations and backups must be built in-house"
+          ],
+          "metrics": [
+            { "k": "Max throughput", "v": "~800K msg/s" },
+            { "k": "p99 latency", "v": "4 ms" },
+            { "k": "Est. monthly cost", "v": "$1,100" },
+            { "k": "Operational burden", "v": "Medium" }
+          ],
+          "cta": "View deep dive"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "area": "side",
+      "variant": "tldr",
+      "title": "Recommendation: Option B (SQS + SNS)",
+      "body": "The requirement ceiling (12,000 msg/s) is comfortably met by standard queues, and this option best satisfies the zero-operational-burden constraint. Only payment events that require ordering guarantees are isolated to a FIFO queue (within 3,000 msg/s). Kafka's high throughput is overkill, while NATS carries the risk of insufficient operational expertise. Considering cost, operations, and requirement fit overall, we adopt Option B."
+    },
+    {
+      "type": "kpi",
+      "area": "side",
+      "label": "Requirement snapshot",
+      "items": [
+        { "label": "Peak Throughput", "value": "12,000 msg/s" },
+        { "label": "Latency Target", "value": "p99 < 200 ms" },
+        { "label": "SRE Headcount", "value": "2" }
+      ]
+    },
+    {
+      "type": "table",
+      "density": "compact",
+      "label": "Requirements coverage by the recommended option",
+      "columns": ["Requirement", "Target", "Option B (SQS + SNS)", "Status"],
+      "rows": [
+        ["Peak throughput", "12,000 msg/s", "Standard queues: virtually unlimited", { "badge": "success", "text": "Met" }],
+        ["Delivery latency", "p99 < 200 ms", "p99 35 ms measured", { "badge": "success", "text": "Met" }],
+        ["Delivery guarantee", "At-least-once", "Visibility timeout + redrive policy", { "badge": "success", "text": "Met" }],
+        ["Ordering", "Payment events only", "FIFO queue (within 3,000 msg/s)", { "badge": "warning", "text": "Scoped" }],
+        ["Operability", "Run by 2 SREs", "Fully managed, zero broker operations", { "badge": "success", "text": "Met" }]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<h2>Data Flow (Recommended Architecture)</h2>"
+    },
+    {
+      "type": "diagram",
+      "title": "Order event delivery path: Producer → SNS fan-out → SQS → Consumer / DLQ",
+      "layout": "layered",
+      "zones": ["Producer", "Topic", "Decision", "Queue", "Consumer"],
+      "groupLabels": { "1": "Service", "2": "Messaging", "4": "Decision / Failure path" },
+      "nodes": [
+        { "id": "order", "label": "Order Service", "sub": "Producer", "zone": "Producer", "group": 1 },
+        { "id": "sns", "label": "SNS Topic", "sub": "Fan-out", "zone": "Topic", "group": 2 },
+        { "id": "dec", "label": "Delivery successful?", "sub": "Decision", "zone": "Decision", "group": 4 },
+        { "id": "sqs", "label": "SQS Queue", "sub": "Subscription", "zone": "Queue", "group": 2 },
+        { "id": "dlq", "label": "DLQ + Alert", "sub": "Max retries exceeded", "zone": "Queue", "group": 4 },
+        { "id": "inv", "label": "Inventory Service", "sub": "Consumer", "zone": "Consumer", "group": 1 }
+      ],
+      "edges": [
+        { "from": "order", "to": "sns" },
+        { "from": "sns", "to": "dec" },
+        { "from": "dec", "to": "sqs", "label": "Success" },
+        { "from": "dec", "to": "dlq", "label": "Failure" },
+        { "from": "sqs", "to": "inv" }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<p class=\"small muted\">Figure: Messages that fail delivery are parked in the dead-letter queue (DLQ) after the maximum retries and monitored separately via alerts. The success path completes with the consumer's ACK.</p>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>Deep Dive: Details of Each Option</h2>"
+    },
+    {
+      "type": "tabs",
+      "label": "Deep dive on each option",
+      "tabs": [
+        {
+          "id": "sqs",
+          "label": "B. SQS + SNS (Recommended)",
+          "body": "<h3 id=\"tab-sqs\">B. Amazon SQS + SNS — Managed Architecture</h3><p>Events published to an SNS topic are fanned out to multiple SQS queues. Each consumer group subscribes to a dedicated queue and achieves at-least-once delivery via visibility timeouts and a retry policy. FIFO queues are used only for the payment domain, where ordering is mandatory.</p><div class=\"grid grid-2\"><div class=\"card-flat\"><p class=\"callout-title small\">When to Use</p><ul class=\"stack\" style=\"margin-top:var(--sp-2)\"><li class=\"small sev-low\">Ideal for organizations that cannot dedicate an SRE to operations</li><li class=\"small sev-med\">Not suited to cases requiring broad global ordering guarantees</li><li class=\"small sev-low\">Lets AWS automatically absorb traffic spikes</li></ul></div><div class=\"card-flat\"><p class=\"callout-title small\">Key Metrics</p><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Standard queue limit</td><td>Unlimited</td></tr><tr><td>FIFO queue limit</td><td>3,000 msg/s</td></tr><tr><td>Max retention period</td><td>14 days</td></tr><tr><td>p99 latency</td><td>35 ms</td></tr></tbody></table></div></div><p class=\"callout-title small\">Terraform Excerpt</p><pre><code>resource \"aws_sns_topic\" \"order_events\" {\n  name = \"order-events\"\n}\n\nresource \"aws_sqs_queue\" \"inventory\" {\n  name                       = \"inventory-consumer\"\n  visibility_timeout_seconds = 30\n  redrive_policy = jsonencode({\n    deadLetterTargetArn = aws_sqs_queue.inventory_dlq.arn\n    maxReceiveCount     = 5\n  })\n}</code></pre>"
+        },
+        {
+          "id": "kafka",
+          "label": "A. Apache Kafka",
+          "body": "<h3 id=\"tab-kafka\">A. Apache Kafka — Self-hosted Architecture</h3><p>Build a cluster of 3 brokers (KRaft mode) with a replication factor of 3. Consumer parallelism is controlled by the number of partitions, and reprocessing is possible thanks to log retention. Schema Registry ensures schema compatibility. Throughput far exceeds the requirements, but operational cost is the central concern.</p><div class=\"grid grid-2\"><div class=\"card-flat\"><p class=\"callout-title small\">When to Use</p><ul class=\"stack\" style=\"margin-top:var(--sp-2)\"><li class=\"small sev-high\">Recommended only when a dedicated operations team can be secured</li><li class=\"small sev-low\">Powerful if event sourcing / reprocessing is a core requirement</li><li class=\"small sev-med\">Well suited to sharing streams across multiple teams</li></ul></div><div class=\"card-flat\"><p class=\"callout-title small\">Key Metrics</p><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Max throughput</td><td>~1.2M msg/s</td></tr><tr><td>p99 latency</td><td>9 ms</td></tr><tr><td>Minimum node count</td><td>3</td></tr><tr><td>Operational burden</td><td>High</td></tr></tbody></table></div></div><p class=\"small muted\">Note: KRaft has eliminated the ZooKeeper dependency, but the operational burden of rebalancing, disk management, and monitoring remains substantial.</p>"
+        },
+        {
+          "id": "nats",
+          "label": "C. NATS JetStream",
+          "body": "<h3 id=\"tab-nats\">C. NATS JetStream — Lightweight Architecture</h3><p>It starts from a single binary, and JetStream provides stream persistence and redelivery. A 3-node cluster ensures high availability, and sub-millisecond latency is a strength. Operations are lightweight, but there is no in-house track record, so onboarding and building out monitoring infrastructure incur an initial cost.</p><div class=\"grid grid-2\"><div class=\"card-flat\"><p class=\"callout-title small\">When to Use</p><ul class=\"stack\" style=\"margin-top:var(--sp-2)\"><li class=\"small sev-med\">Strong choice when low latency is the top priority and you want lightweight operations</li><li class=\"small sev-high\">Adopting it with zero in-house expertise is high risk</li><li class=\"small sev-low\">A good fit for edge / IoT messaging</li></ul></div><div class=\"card-flat\"><p class=\"callout-title small\">Key Metrics</p><table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>Max throughput</td><td>~800K msg/s</td></tr><tr><td>p99 latency</td><td>4 ms</td></tr><tr><td>Minimum node count</td><td>3</td></tr><tr><td>Operational burden</td><td>Medium</td></tr></tbody></table></div></div><p class=\"small muted\">Note: A managed offering (Synadia Cloud) also exists, but compliance for this requirement mandates operation within our own VPC, so it was evaluated on the assumption of a self-managed cluster.</p>"
+        }
+      ]
+    }
+  ]
+}

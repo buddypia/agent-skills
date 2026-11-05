@@ -1,0 +1,76 @@
+<!-- ============================================================================
+MODULE: rating-scale                                        lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A Likert / rating-scale board (pure CSS - no SVG). One row per criterion:
+         a label, a discrete 5-step dot scale where the filled dots (accent) show
+         the score, and an optional trailing numeric / verdict text. A header row
+         names the two scale ends (e.g. 弱い ↔ 強い); an optional averaged summary
+         row closes it. For survey results, self-assessments,評価スコア at a glance,
+         maturity ratings. Distinction: progress shows % toward one goal; spectrum
+         places items on a CONTINUOUS axis; data-table is raw numbers; rating-scale
+         shows DISCRETE ordinal scores across several criteria side by side.
+VARIABLES: {{TITLE}}; header {{SCALE_LABEL}} {{VAL_HEAD}}; scale ends {{LOW_END}}
+           {{HIGH_END}}; per row {{LABEL}} + filled-dot count (.rs-on) + optional
+           {{VAL}}; summary {{AVG_LABEL}} + {{VAL}}.
+SCALING:  every row shares one 3-track grid - label (1fr), a fixed 108px dot rail
+          (5 dots, space-between), value (auto). The end labels sit in the same
+          108px rail so they align to the first / last dot. Score = number of
+          .rs-on dots (0-5), filled left-to-right.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --bg-surface, --text-*, --border-*, --font-mono, --radius-pill, --sp-*,
+          --type-*, --dur-fast, --ease)
+MODULE CSS: inline the data-module="rating-scale" style block once.
+INTERACTION: paint-only row hover tint (reduced-motion guarded). aria-label on the
+             figure; the dot rail is decorative, the {{VAL}} text carries the score.
+USAGE: one .rs-row per criterion; give the leading N dots class .rs-on for a score
+       of N. Add a final .rs-row.rs-avg for the group average; omit if not needed.
+============================================================================ -->
+<style data-module="rating-scale">
+  .rs { margin: 0; }
+  .rs-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  /* one shared 3-track grid keeps every dot rail vertically aligned */
+  .rs-row, .rs-head { display: grid; grid-template-columns: minmax(90px, 1fr) 108px minmax(48px, auto); gap: var(--sp-3); align-items: center; }
+  .rs-head { margin-bottom: var(--sp-1); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--border-subtle); }
+  .rs-ends { grid-column: 2; display: flex; justify-content: space-between; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  .rs-row { padding: var(--sp-2) 0; border-bottom: 1px solid var(--border-subtle); transition: background var(--dur-fast) var(--ease); }
+  @media (hover: hover) { .rs-row:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); } }
+  .rs-label { font: var(--type-small); color: var(--text-primary); }
+  .rs-dots { grid-column: 2; display: flex; justify-content: space-between; }
+  .rs-dot { width: 14px; height: 14px; border-radius: var(--radius-pill); background: var(--bg-surface); border: 1.5px solid color-mix(in srgb, var(--accent) 30%, var(--border-default)); }
+  .rs-dot.rs-on { background: var(--accent); border-color: var(--accent); }
+  .rs-val { grid-column: 3; text-align: right; font: var(--type-small); font-family: var(--font-mono); color: var(--text-secondary); }
+  /* averaged summary row: an accent top rule + bolder label */
+  .rs-row.rs-avg { border-bottom: none; border-top: 2px solid color-mix(in srgb, var(--accent) 40%, var(--border-default)); margin-top: var(--sp-1); }
+  .rs-avg .rs-label { font-weight: 700; color: var(--text-primary); }
+  .rs-avg .rs-val { color: var(--accent); font-weight: 700; }
+  @media (prefers-reduced-motion: reduce) { .rs-row { transition: none; } }
+</style>
+
+<figure class="rs card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="rs-title">{{TITLE}}</figcaption> <!-- e.g. チーム能力の自己評価 -->
+
+  <!-- ── header: name the two ends of the scale ────────────────────────────── -->
+  <div class="rs-head">
+    <span class="rs-label">{{SCALE_LABEL}}</span> <!-- e.g. 評価軸 -->
+    <span class="rs-ends"><span>{{LOW_END}}</span><span>{{HIGH_END}}</span></span> <!-- e.g. 弱い / 強い -->
+    <span class="rs-val">{{VAL_HEAD}}</span> <!-- e.g. スコア -->
+  </div>
+
+  <!-- ── one .rs-row per criterion (leading N dots get .rs-on for a score of N) -->
+  <div class="rs-row">
+    <span class="rs-label">{{LABEL}}</span> <!-- e.g. 技術力 -->
+    <span class="rs-dots" role="img" aria-label="{{VAL}}">
+      <span class="rs-dot rs-on"></span><span class="rs-dot rs-on"></span><span class="rs-dot rs-on"></span><span class="rs-dot rs-on"></span><span class="rs-dot"></span>
+    </span>
+    <span class="rs-val">{{VAL}}</span> <!-- e.g. 4 / 5 -->
+  </div>
+  <!-- ↑ repeat: one .rs-row per criterion; add / remove .rs-on to set the score -->
+
+  <!-- ── optional group-average summary row ─────────────────────────────────── -->
+  <div class="rs-row rs-avg">
+    <span class="rs-label">{{AVG_LABEL}}</span> <!-- e.g. 平均 -->
+    <span class="rs-dots" role="img" aria-label="{{VAL}}">
+      <span class="rs-dot rs-on"></span><span class="rs-dot rs-on"></span><span class="rs-dot rs-on"></span><span class="rs-dot"></span><span class="rs-dot"></span>
+    </span>
+    <span class="rs-val">{{VAL}}</span> <!-- e.g. 3.4 -->
+  </div>
+</figure>

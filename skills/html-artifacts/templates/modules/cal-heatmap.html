@@ -1,0 +1,60 @@
+<!-- ============================================================================
+MODULE: cal-heatmap                                         lineage: unified-system original (dashboard/report)
+PURPOSE: A GitHub-style contribution calendar - week columns × 7 weekday rows, each
+         day cell tinted by an intensity bucket (0-4) via a token color-mix of
+         --accent, with a Less→More legend. For activity/streak/cadence over time.
+         (Distinct from `heatmap`, which is an arbitrary labeled value matrix.)
+VARIABLES (per cell): {{CELL_STYLE}} (bucket background)  {{CELL_TITLE}} (date: value)
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --bg-muted,
+          --text-muted, --radius-sm, --sp-*)
+MODULE CSS: inline the data-module="cal-heatmap" style block once.
+INTERACTION: none (static). The <figure> is role="img" + aria-label; cells carry a
+             title="date: value" tooltip. Empty padding cells are aria-hidden.
+USAGE: BUCKET → intensity: bucket 0 = --bg-muted; 1-4 =
+       color-mix(in srgb, var(--accent) {22,40,58,78}%, var(--bg-muted)).
+============================================================================ -->
+<style data-module="cal-heatmap">
+  .cal-heatmap { margin: 0; }
+  .cal-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); position: relative; padding-left: var(--sp-3); }
+  /* editorial accent tick anchoring the caption */
+  .cal-title::before { content: ""; position: absolute; left: 0; top: 0.18em; bottom: 0.18em; width: 3px; border-radius: var(--radius-pill); background: linear-gradient(var(--accent), color-mix(in srgb, var(--accent) 40%, transparent)); }
+  .cal-scroll { overflow-x: auto; padding-bottom: var(--sp-1); }
+  .cal-grid { display: flex; gap: 3px; }
+  .cal-week { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; }
+  /* hairline inset keeps low-intensity cells legible on the surface; a soft accent
+     halo on hover lets a reader trace a single day without disturbing the dense field */
+  .cal-cell { width: 13px; height: 13px; border-radius: var(--radius-xs); background: var(--bg-muted); display: block; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-subtle) 60%, transparent); transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  @media (hover: hover) {
+    .cal-cell[title]:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent); }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .cal-cell[title]:hover { transform: scale(1.18); }
+  }
+  .cal-empty { background: transparent; box-shadow: none; }
+  .cal-legend { display: flex; align-items: center; gap: 3px; margin-top: var(--sp-4); justify-content: flex-end; }
+  .cal-legend-label { font: var(--type-caption); color: var(--text-muted); margin-inline: var(--sp-1); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; }
+  /* legend swatches: a static intensity ramp so Less→More reads without data */
+  .cal-legend .cal-cell { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-subtle) 60%, transparent); }
+  .cal-legend .cal-cell:nth-of-type(1) { background: var(--bg-muted); }
+  .cal-legend .cal-cell:nth-of-type(2) { background: color-mix(in srgb, var(--accent) 22%, var(--bg-muted)); }
+  .cal-legend .cal-cell:nth-of-type(3) { background: color-mix(in srgb, var(--accent) 40%, var(--bg-muted)); }
+  .cal-legend .cal-cell:nth-of-type(4) { background: color-mix(in srgb, var(--accent) 58%, var(--bg-muted)); }
+  .cal-legend .cal-cell:nth-of-type(5) { background: color-mix(in srgb, var(--accent) 78%, var(--bg-muted)); }
+</style>
+
+<figure class="cal-heatmap card-outlined" role="img" aria-label="{{TITLE}}">
+  <figcaption class="cal-title">{{TITLE}}</figcaption>
+  <div class="cal-scroll">
+    <div class="cal-grid">
+      <!-- one .cal-week per week; 7 .cal-cell per week (top=Sun … bottom=Sat) -->
+      <div class="cal-week">
+        <span class="cal-cell" style="{{CELL_STYLE}}" title="{{CELL_TITLE}}"></span>
+      </div>
+    </div>
+  </div>
+  <div class="cal-legend">
+    <span class="cal-legend-label">Less</span>
+    <span class="cal-cell"></span>
+    <span class="cal-legend-label">More</span>
+  </div>
+</figure>

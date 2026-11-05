@@ -1,0 +1,339 @@
+{
+  "title": "配車最適化システム(TMS)刷新プロジェクト - 月次進捗報告",
+  "theme": "slate",
+  "layout": "stack",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "プロジェクト月次報告",
+  "subtitle": "TMS刷新プロジェクト 2026年6月度 進捗サマリー",
+  "meta": [
+    {
+      "k": "報告期間",
+      "v": "2026-06-01 〜 06-30（月次）"
+    },
+    {
+      "k": "PM",
+      "v": "井上 拓海（PMO）"
+    },
+    {
+      "k": "全体RAG",
+      "v": "Amber - 一部遅延"
+    }
+  ],
+  "footer": "出典: プロジェクト管理台帳 / 2026-07-02 作成 - コスモロジ株式会社",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<!-- module: project-status (hand-pasted, filled) -->\n<figure class=\"pst card-outlined\" aria-label=\"ワークストリーム別ステータス\">\n  <figcaption class=\"pst-title\">ワークストリーム別ステータス</figcaption> <!-- e.g. 決済リプレース 週次ステータス -->\n\n  <!-- ── HEADER: overall RAG chip + reporting period ─────────────────────── -->\n  <div class=\"pst-head\">\n    <span class=\"pst-head-label\">Overall</span>\n    <span class=\"pst-rag pst-overall is-amber\">Amber - 一部遅延</span> <!-- e.g. Amber - 一部遅延 -->\n    <span class=\"pst-period\">2026年6月度（第4週時点）</span>                    <!-- e.g. 2026-07-06 〜 07-10 (W28) -->\n  </div>\n\n  <!-- ── WORKSTREAM ROWS ─────────────────────────────────────────────────── -->\n  <div class=\"pst-list\">\n    <!-- one .pst-row per workstream; .is-green/-amber/-red sets RAG colour -->\n    <div class=\"pst-row is-green\">\n      <span class=\"pst-stream\">要件定義・基本設計</span>            <!-- e.g. API連携 -->\n      <span class=\"pst-rag\">Green</span>                  <!-- e.g. Green -->\n      <span class=\"pst-bar\" style=\"--pst-v:100%\"></span>\n      <span class=\"pst-pct\">100%</span>                 <!-- e.g. 78% -->\n      <span class=\"chip\">設計: 田村</span>                  <!-- e.g. 田中 -->\n      <span class=\"pst-note\">6/12 設計承認 完了</span>          <!-- e.g. 7/12 結合テスト完了 -->\n    </div>\n\n    <div class=\"pst-row is-amber\">\n      <span class=\"pst-stream\">コア機能開発（配車エンジン）</span>            <!-- e.g. 移行データ整備 -->\n      <span class=\"pst-rag\">Amber</span>                  <!-- e.g. Amber -->\n      <span class=\"pst-bar\" style=\"--pst-v:62%\"></span>\n      <span class=\"pst-pct\">62%</span>                 <!-- e.g. 52% -->\n      <span class=\"chip\">開発: 大西</span>                  <!-- e.g. 佐藤 -->\n      <span class=\"pst-note\">7/10 結合テスト開始（3日遅延）</span>          <!-- e.g. 7/15 データ検証レビュー -->\n    </div>\n\n    <div class=\"pst-row is-red\">\n      <span class=\"pst-stream\">既存データ移行</span>            <!-- e.g. 外部審査対応 -->\n      <span class=\"pst-rag\">Red</span>                  <!-- e.g. Red -->\n      <span class=\"pst-bar\" style=\"--pst-v:28%\"></span>\n      <span class=\"pst-pct\">28%</span>                 <!-- e.g. 23% -->\n      <span class=\"chip\">データ: 森</span>                  <!-- e.g. 鈴木 -->\n      <span class=\"pst-note\">移行スクリプト再設計中（要エスカレ）</span>          <!-- e.g. 7/18 審査結果待ち（要エスカレ） -->\n    </div>\n    <!-- ↑ repeat: one .pst-row per workstream -->\n  </div>\n</figure>",
+      "cssModules": [
+        "project-status"
+      ]
+    },
+    {
+      "type": "kpi",
+      "label": "進捗ハイライト",
+      "items": [
+        {
+          "label": "全体進捗率",
+          "value": "63%",
+          "delta": "計画比 ▲5pt",
+          "dir": "down"
+        },
+        {
+          "label": "予算消化率",
+          "value": "58%"
+        },
+        {
+          "label": "未解決課題",
+          "value": "14件",
+          "delta": "+3件",
+          "dir": "down"
+        },
+        {
+          "label": "高優先度リスク",
+          "value": "2件"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "line",
+      "size": "md",
+      "title": "残タスク数の推移（バーンダウン）",
+      "points": [
+        {
+          "label": "W1",
+          "value": 210
+        },
+        {
+          "label": "W2",
+          "value": 190
+        },
+        {
+          "label": "W3",
+          "value": 176
+        },
+        {
+          "label": "W4",
+          "value": 158
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "label": "課題一覧",
+      "columns": [
+        "課題",
+        "影響",
+        "対応方針",
+        "期限"
+      ],
+      "rows": [
+        [
+          "移行データの欠損レコード",
+          {
+            "badge": "danger",
+            "text": "高"
+          },
+          "旧DBの補完ルール再定義のうえ再抽出",
+          "7/12"
+        ],
+        [
+          "配車エンジンのAPI応答遅延",
+          {
+            "badge": "warning",
+            "text": "中"
+          },
+          "クエリ最適化とキャッシュ層の追加",
+          "7/18"
+        ],
+        [
+          "結合テスト環境の不足",
+          {
+            "badge": "warning",
+            "text": "中"
+          },
+          "検証環境をもう1面増設",
+          "7/09"
+        ],
+        [
+          "ドライバー向けUI改善要望",
+          {
+            "badge": "info",
+            "text": "低"
+          },
+          "次リリースへバックログ化",
+          "8/01"
+        ]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<!-- module: raci-matrix (hand-pasted, filled) -->\n<figure class=\"rci card-outlined\" aria-label=\"主要タスクの責任分担（RACI）\">\n  <figcaption class=\"rci-title\">主要タスクの責任分担（RACI）</figcaption>\n  <div class=\"rci-scroll\">\n    <table class=\"rci-table\">\n      <thead>\n        <tr>\n          <th class=\"rci-corner\" scope=\"col\">タスク ＼ 役割</th> <!-- e.g. タスク \\ 役割 -->\n          <!-- ↓ one th per role -->\n          <th scope=\"col\">PMO</th> <!-- e.g. PM -->\n          <th scope=\"col\">業務部門</th> <!-- e.g. デザイナー -->\n          <th scope=\"col\">開発リード</th> <!-- e.g. エンジニア -->\n          <th scope=\"col\">QA</th> <!-- e.g. QA -->\n        </tr>\n      </thead>\n      <tbody>\n        <!-- ↓ one tr per task; exactly one .rci-a per row, blank cells allowed -->\n        <tr>\n          <th class=\"rci-task\" scope=\"row\">要件・スコープ確定</th> <!-- e.g. 要件定義 -->\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-a\">A</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-c\">C</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-r\">R</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-i\">I</span></td>\n        </tr>\n        <tr>\n          <th class=\"rci-task\" scope=\"row\">データ移行 設計・実行</th> <!-- e.g. UI設計 -->\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-c\">C</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-a\">A</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-r\">R</span></td>\n          <td class=\"rci-cell\"></td>\n        </tr>\n        <tr>\n          <th class=\"rci-task\" scope=\"row\">本番リリース判定</th> <!-- e.g. 実装 -->\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-i\">I</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-c\">C</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-a\">A</span></td>\n          <td class=\"rci-cell\"><span class=\"rci-badge rci-r\">R</span></td>\n        </tr>\n        <!-- ↑ repeat: one tr per task -->\n      </tbody>\n    </table>\n  </div>\n  <!-- ── LEGEND (R / A / C / I meanings) ─────────────────────────────────────── -->\n  <div class=\"rci-legend\">\n    <span class=\"rci-key\"><span class=\"rci-badge rci-r\">R</span>実行責任</span> <!-- e.g. 実行担当 -->\n    <span class=\"rci-key\"><span class=\"rci-badge rci-a\">A</span>説明責任（承認者）</span> <!-- e.g. 説明責任 -->\n    <span class=\"rci-key\"><span class=\"rci-badge rci-c\">C</span>相談先</span> <!-- e.g. 相談先 -->\n    <span class=\"rci-key\"><span class=\"rci-badge rci-i\">I</span>情報共有</span> <!-- e.g. 情報共有 -->\n  </div>\n</figure>",
+      "cssModules": [
+        "raci-matrix"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "エスカレーション事項",
+      "body": "既存データ移行(Red)が移行スクリプトの再設計により約2週間遅延の見込み。本番リリース目標(8/31)への影響を回避するため、追加要員1名の割当と、業務部門によるデータ補完作業の前倒しを、7/10の運営会議で決定いただきたい。"
+    },
+    {
+      "type": "timeline",
+      "label": "直近マイルストーン",
+      "events": [
+        {
+          "date": "6/12",
+          "title": "基本設計 承認",
+          "body": "全ワークストリームの設計レビュー完了",
+          "status": "done"
+        },
+        {
+          "date": "7/10",
+          "title": "結合テスト開始",
+          "body": "配車エンジンの結合テストに着手（3日遅延）",
+          "status": "active"
+        },
+        {
+          "date": "7/25",
+          "title": "データ移行リハーサル",
+          "body": "本番相当データでの移行検証",
+          "status": "todo"
+        },
+        {
+          "date": "8/31",
+          "title": "本番リリース",
+          "body": "並行稼働を経て順次切替",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "来月（7月）の重点アクション",
+      "control": "checkbox",
+      "items": [
+        {
+          "label": "移行スクリプト再設計のレビュー完了",
+          "state": "pending"
+        },
+        {
+          "label": "追加要員のアサイン確定",
+          "state": "todo"
+        },
+        {
+          "label": "結合テスト計画の再ベースライン",
+          "state": "pending"
+        },
+        {
+          "label": "業務部門とのデータ補完段取り確定",
+          "state": "todo"
+        },
+        {
+          "label": "リリース判定基準の合意",
+          "state": "todo"
+        }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "project-report",
+    "name": "プロジェクト進捗報告（週次／月次）",
+    "genre": "プロジェクト報告",
+    "purpose": "PMがプロジェクトの健康状態（全体RAG・ワークストリーム別）と進捗・課題・エスカレーション・次アクションを定例で共有し、遅延に対する意思決定を引き出す。",
+    "audience": "ステアリングコミッティ／プロジェクトスポンサー・関係部門リード",
+    "triggers": {
+      "ja": [
+        "プロジェクトの進捗報告",
+        "週次ステータスレポート",
+        "月次のPJ報告資料",
+        "RAGステータスをまとめたい",
+        "ステコミ資料を作りたい",
+        "エスカレーション事項を整理"
+      ],
+      "en": [
+        "project status report",
+        "weekly PM update",
+        "steering committee deck"
+      ],
+      "ko": [
+        "프로젝트 진행 보고",
+        "주간 상태 보고서",
+        "스티어링 위원회 자료"
+      ]
+    },
+    "axes": {
+      "theme": "slate",
+      "layout": "stack",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "stack は状況→数字→課題→次アクションの一本道の読み順に最適。slate は定例報告の落ち着いたトーン。split ヘッダに報告期間/PM/全体RAGを常設し provenance を明確化。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:project-status",
+        "role": "状況スナップショット（結論先出し）",
+        "required": true,
+        "guide": "全体RAGと期間をヘッダに、ワークストリームごとにRAG・進捗%・オーナー・次マイルストーン。バー幅(--pst-v)と%を一致させ、色は is-green/-amber/-red。",
+        "volume": "3〜5ワークストリーム"
+      },
+      {
+        "n": 2,
+        "type": "kpi",
+        "role": "進捗ハイライト",
+        "required": true,
+        "guide": "進捗率・予算消化・未解決課題・高リスク件数など4枚。悪化はdir:downで赤▼。",
+        "volume": "4カード"
+      },
+      {
+        "n": 3,
+        "type": "chart",
+        "role": "バーンダウン推移",
+        "required": true,
+        "guide": "残タスク数（または残工数）の週次推移を line で。理想線が要るなら2系列に。",
+        "volume": "4〜6データ点"
+      },
+      {
+        "n": 4,
+        "type": "table",
+        "role": "課題一覧",
+        "required": true,
+        "guide": "課題／影響／対応方針／期限。影響度はbadge(danger/warning/info)。行数が多ければpaginate。",
+        "volume": "4〜8行"
+      },
+      {
+        "n": 5,
+        "type": "html:raci-matrix",
+        "role": "体制・責任分担",
+        "required": false,
+        "guide": "タスク×役割でR/A/C/I。各行のAは1つだけ。凡例を必ず添える。",
+        "volume": "3〜5タスク×3〜4役割"
+      },
+      {
+        "n": 6,
+        "type": "callout",
+        "role": "エスカレーション事項",
+        "required": true,
+        "guide": "warning で意思決定を要する1件を、依頼内容・期限・決定の場まで明記。",
+        "volume": "1段落"
+      },
+      {
+        "n": 7,
+        "type": "timeline",
+        "role": "直近マイルストーン",
+        "required": true,
+        "guide": "完了/進行中/予定を status(done/active/todo)で。日付は昇順。",
+        "volume": "4〜6件"
+      },
+      {
+        "n": 8,
+        "type": "checklist",
+        "role": "来週／来月のアクション",
+        "required": true,
+        "guide": "checkbox で次期間のToDo。state(done/pending/blocked/todo)で状態を色分け。",
+        "volume": "4〜6件"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 5,
+        "default": "html:raci-matrix",
+        "alternative": "table（課題の追加詳細一覧）",
+        "when": "責任分担が固定で、課題の粒度を上げたいとき"
+      },
+      {
+        "slot": 3,
+        "default": "chart(line バーンダウン)",
+        "alternative": "chart(barstacked ワークストリーム別工数)",
+        "when": "残量推移よりストリーム別の工数配分を見せたいとき"
+      },
+      {
+        "slot": 8,
+        "default": "checklist",
+        "alternative": "stepper（承認フローの次ステップ）",
+        "when": "ToDoではなく手続きの次工程を示したいとき"
+      },
+      {
+        "slot": 7,
+        "default": "timeline",
+        "alternative": "html:roadmap",
+        "when": "週次の細かい節目より四半期粒度の計画を示したいとき"
+      }
+    ],
+    "modules": [
+      "project-status",
+      "kpi",
+      "chart",
+      "table",
+      "raci-matrix",
+      "callout",
+      "timeline",
+      "checklist"
+    ]
+  }
+}

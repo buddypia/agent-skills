@@ -1,0 +1,118 @@
+{
+  "title": "Atlas Analytics — Q2 Product Status Report",
+  "theme": "minimal",
+  "layout": "stack",
+  "header": "standard",
+  "lang": "en",
+  "target": "document",
+  "viewport": "desktop",
+  "eyebrow": "Q2 FY2025 · Product Status Report",
+  "subtitle": "A quarterly summary for leadership and stakeholders covering the key metrics, trends, and milestone progress from April to June 2025.",
+  "footer": "Source: Atlas Analytics Product Analytics Team · Published 2026-06-07 · Confidential — Internal stakeholders only",
+  "sections": [
+    {
+      "type": "callout",
+      "variant": "tldr",
+      "title": "Summary (TL;DR)",
+      "body": "Q2 grew at a pace exceeding plan. MAU reached 204K, up 10.3% quarter-over-quarter, and net revenue retention (NRR) improved to 118%, putting us on track to hit our annual targets. The GA release of the new dashboard feature drove up adoption, while the delay in enterprise SSO support is the key priority for next quarter."
+    },
+    {
+      "type": "html",
+      "html": "<h2>Key Metrics (KPIs)</h2>"
+    },
+    {
+      "type": "kpi",
+      "label": "Key metrics",
+      "items": [
+        { "label": "Monthly Active Users", "value": "204K", "delta": "10.3% QoQ" },
+        { "label": "Net Revenue Retention (NRR)", "value": "118%", "delta": "4pt QoQ" },
+        { "label": "Annual Recurring Revenue (ARR)", "value": "¥1.42B", "delta": "12.7% QoQ" },
+        { "label": "Monthly Churn Rate", "value": "1.8%", "delta": "0.5pt QoQ", "dir": "down", "tone": "good" }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<h2>Growth Trend</h2>"
+    },
+    {
+      "type": "chart",
+      "variant": "line",
+      "title": "Monthly Active Users Over Time (thousands of users / quarter)",
+      "points": [
+        { "label": "Q1 '24", "value": 128 },
+        { "label": "Q2 '24", "value": 142 },
+        { "label": "Q3 '24", "value": 151 },
+        { "label": "Q4 '24", "value": 168 },
+        { "label": "Q1 '25", "value": 185 },
+        { "label": "Q2 '25", "value": 204 }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<h2>Detail Sections</h2>"
+    },
+    {
+      "type": "collapsible",
+      "label": "Quarterly details",
+      "items": [
+        {
+          "summary": "Product — Key Features Shipped",
+          "open": true,
+          "body": "<p>We made the customizable new dashboard generally available (GA), and 62% of all workspaces adopted it within 30 days of release. Alongside it, we shipped real-time cohort analysis, CSV and Webhook exports, and sharing of saved segments.</p><p>We released API v3 in beta, and 8 early partners completed their migration. Response latency (p95) was halved from 420ms last quarter to 210ms.</p>"
+        },
+        {
+          "summary": "Engineering — Reliability and Performance",
+          "body": "<p>Uptime reached 99.95% across the quarter, exceeding the 99.9% SLA. There were 2 incidents (both Sev-2), with a mean time to recovery (MTTR) of 38 minutes. Revamping the query engine's cache layer made the dashboard's initial render 1.8x faster.</p><p>To pay down technical debt, we migrated the legacy ingestion pipeline to an event-driven architecture. Median data ingestion latency was reduced from 90 seconds to 12 seconds.</p>"
+        },
+        {
+          "summary": "Business — Revenue and Pipeline",
+          "body": "<p>We won 14 new enterprise contracts, bringing new ARR for the quarter to ¥162M. Upsells accounted for 41% of net new growth, demonstrating that product-led growth (PLG) is working. The sales pipeline carried over into next quarter, up 28% QoQ.</p><p>By region, APAC grew the fastest (+34% QoQ). Meanwhile, 3 financial-sector deals are on hold due to the lack of SSO support, so completing that support is the key to closing them.</p>"
+        },
+        {
+          "summary": "Risks and Next-Quarter Priorities",
+          "body": "<p><strong>Top priority:</strong> The delayed shipment of enterprise SSO (SAML / SCIM). The design is complete, and we have re-planned for a GA target in early Q3. This is expected to unblock the 3 pending financial deals (¥48M total).</p><p><strong>Monitoring:</strong> Rising query costs for large tenants. We have added cost governance features (usage caps and alerts) to the Q3 backlog.</p>"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<h2>Milestone Progress</h2>"
+    },
+    {
+      "type": "timeline",
+      "label": "Quarterly milestones",
+      "events": [
+        {
+          "date": "2025-04-15",
+          "status": "done",
+          "title": "New Dashboard GA Release",
+          "body": "Made the customizable dashboard generally available across all plans. 62% of workspaces adopted it within 30 days of release."
+        },
+        {
+          "date": "2025-05-20",
+          "status": "done",
+          "title": "API v3 Beta Release",
+          "body": "8 early partners completed their migration. Cut p95 latency in half, from 420ms to 210ms."
+        },
+        {
+          "date": "2025-06-30 (In Progress)",
+          "status": "active",
+          "title": "Event-Driven Migration of the Ingestion Pipeline",
+          "body": "Phased migration of the legacy pipeline is underway. Median ingestion latency has been reduced from 90 seconds to 12 seconds. Removal of the remaining legacy path is scheduled to complete in early Q3."
+        },
+        {
+          "date": "2025-08-15 (Planned)",
+          "status": "todo",
+          "title": "Enterprise SSO (SAML / SCIM) GA",
+          "body": "Top priority. Shipping it is expected to unblock 3 pending financial-sector deals (¥48M total)."
+        },
+        {
+          "date": "2025-09-30 (Planned)",
+          "status": "todo",
+          "title": "Release of Cost Governance Features",
+          "body": "Provides usage caps, alerts, and per-tenant cost visibility to reduce the risk of rising query costs for large tenants."
+        }
+      ]
+    }
+  ]
+}

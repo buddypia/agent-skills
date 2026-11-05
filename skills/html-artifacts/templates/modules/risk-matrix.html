@@ -1,0 +1,89 @@
+<!-- ============================================================================
+MODULE: risk-matrix                                         lineage: unified-system original (risk/assessment)
+PURPOSE: A probability × impact risk matrix (pure CSS grid - no SVG). A 5×5 (or
+         3×3) heat grid whose cell tint steps from --color-success → warning →
+         danger by severity, with risk-item chips dropped into their cells and a
+         dimension label on each axis. For risk registers, threat assessment,
+         issue triage. (Distinct from `heatmap`, whose cells encode one numeric
+         magnitude; here the tint is a qualitative severity band.)
+VARIABLES: {{TITLE}}; {{X_AXIS}} (impact) + per column {{IMPACT_LABEL}};
+           {{Y_AXIS}} (probability) + per row {{PROB_LABEL}}; per cell a
+           severity class .rm-s1..s5 and 0+ {{RISK}} chips.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--color-success,
+          --color-warning, --color-danger, --bg-surface, --border-*, --text-*,
+          --radius-*, --sp-*, --font-mono)
+MODULE CSS: inline the data-module="risk-matrix" style block once.
+INTERACTION: none (static). aria-label on the figure; headers/chips are real text.
+USAGE: severity band = the cell's .rm-s1..s5 (s1 lowest = success … s5 highest =
+       danger; the intermediates blend the adjacent colors). A common map is
+       band = clamp(round((prob×impact)/5), 1, 5). Order rows high→low probability
+       (top row = highest). Drop one <span class="rm-chip"> per risk into its cell;
+       empty cells stay a bare tint.
+============================================================================ -->
+<style data-module="risk-matrix">
+  .rm { margin: 0; }
+  .rm-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .rm-frame { display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr auto; gap: var(--sp-2); }
+  .rm-axis-y { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: center; }
+  .rm-axis-y span { writing-mode: vertical-rl; transform: rotate(180deg); font: var(--type-caption); font-weight: 600; color: var(--text-secondary); letter-spacing: var(--tracking-tight); }
+  .rm-axis-x { grid-column: 2; grid-row: 2; text-align: center; font: var(--type-caption); font-weight: 600; color: var(--text-secondary); letter-spacing: var(--tracking-tight); }
+  .rm-grid { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: auto repeat(5, 1fr); gap: 4px; }
+  .rm-corner { background: transparent; }
+  .rm-colhead { text-align: center; align-self: end; }
+  .rm-rowhead { display: flex; align-items: center; justify-content: flex-end; padding-inline-end: var(--sp-2); white-space: nowrap; }
+  .rm-colhead, .rm-rowhead { font: var(--type-caption); color: var(--text-muted); font-weight: 600; }
+  /* severity band: 5 steps success → (blend) → warning → (blend) → danger */
+  .rm-s1 { --sev: var(--color-success); }
+  .rm-s2 { --sev: color-mix(in srgb, var(--color-warning) 55%, var(--color-success)); }
+  .rm-s3 { --sev: var(--color-warning); }
+  .rm-s4 { --sev: color-mix(in srgb, var(--color-danger) 55%, var(--color-warning)); }
+  .rm-s5 { --sev: var(--color-danger); }
+  .rm-cell { --sev: var(--color-warning); min-height: 58px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 3px; padding: var(--sp-1); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--sev) 20%, var(--bg-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sev) 40%, transparent); transition: box-shadow var(--dur-fast) var(--ease); }
+  .rm-cell:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sev) 70%, transparent), var(--shadow-sm); }
+  /* risk chip: surface pill so it reads on any severity tint */
+  .rm-chip { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-primary); background: var(--bg-surface); border: 1px solid color-mix(in srgb, var(--sev) 50%, var(--border-default)); border-radius: var(--radius-pill); padding: 1px var(--sp-2); }
+  @media (prefers-reduced-motion: reduce) { .rm-cell { transition: none; } }
+</style>
+
+<figure class="rm card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="rm-title">{{TITLE}}</figcaption>
+  <div class="rm-frame">
+    <div class="rm-axis-y"><span>{{Y_AXIS}}</span></div> <!-- e.g. 発生確率 -->
+
+    <div class="rm-grid">
+      <!-- ── header row: corner + impact (X) column labels ─────────────────── -->
+      <span class="rm-corner"></span>
+      <span class="rm-colhead">{{IMPACT_LABEL}}</span> <!-- e.g. 軽微 -->
+      <span class="rm-colhead">{{IMPACT_LABEL}}</span> <!-- e.g. 小 -->
+      <span class="rm-colhead">{{IMPACT_LABEL}}</span> <!-- e.g. 中 -->
+      <span class="rm-colhead">{{IMPACT_LABEL}}</span> <!-- e.g. 大 -->
+      <span class="rm-colhead">{{IMPACT_LABEL}}</span> <!-- e.g. 致命的 -->
+
+      <!-- ── data rows, highest probability first ──────────────────────────── -->
+      <!-- one row = a .rm-rowhead + 5 .rm-cell (set each cell's .rm-s1..s5) -->
+      <span class="rm-rowhead">{{PROB_LABEL}}</span>   <!-- e.g. ほぼ確実 -->
+      <div class="rm-cell rm-s3"></div>
+      <div class="rm-cell rm-s4"></div>
+      <div class="rm-cell rm-s5"><span class="rm-chip">{{RISK}}</span></div> <!-- e.g. 主要ベンダー障害 -->
+      <div class="rm-cell rm-s5"></div>
+      <div class="rm-cell rm-s5"></div>
+
+      <span class="rm-rowhead">{{PROB_LABEL}}</span>   <!-- e.g. 可能性あり -->
+      <div class="rm-cell rm-s2"></div>
+      <div class="rm-cell rm-s3"><span class="rm-chip">{{RISK}}</span></div> <!-- e.g. 仕様変更 -->
+      <div class="rm-cell rm-s3"></div>
+      <div class="rm-cell rm-s4"></div>
+      <div class="rm-cell rm-s5"></div>
+
+      <span class="rm-rowhead">{{PROB_LABEL}}</span>   <!-- e.g. まれ -->
+      <div class="rm-cell rm-s1"></div>
+      <div class="rm-cell rm-s1"></div>
+      <div class="rm-cell rm-s2"></div>
+      <div class="rm-cell rm-s3"></div>
+      <div class="rm-cell rm-s4"><span class="rm-chip">{{RISK}}</span></div> <!-- e.g. 天災 -->
+      <!-- ↑ repeat rows to fill a 5×5 (or trim to 3×3) -->
+    </div>
+
+    <div class="rm-axis-x">{{X_AXIS}}</div> <!-- e.g. 影響度 -->
+  </div>
+</figure>

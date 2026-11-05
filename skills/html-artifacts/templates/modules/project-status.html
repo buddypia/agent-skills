@@ -1,0 +1,93 @@
+<!-- ============================================================================
+MODULE: project-status                                     lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A weekly project status report board (pure CSS, NO SVG, no JS). A header
+         row carries the overall RAG chip + reporting period; then one row per
+         workstream with its name, a RAG chip (green / amber / red), a thin
+         progress bar + %, an owner chip, and a "next milestone" note. For the
+         point-in-time health snapshot a PM circulates each week.
+         Distinction: kanban-board is interactive card triage across To do/Doing/
+         Done; gantt plans task bars on dates; raci-matrix assigns roles per task;
+         project-status is the read-only health snapshot at one moment.
+VARIABLES: {{TITLE}}; {{PERIOD}}; overall {{OVERALL}} chip (put .is-green/-amber/
+           -red on .pst-overall); per workstream {{STREAM}}, its RAG chip
+           {{RAG}} (.is-green/-amber/-red on the row), {{PCT}} (0-100 → inline
+           --pst-v), {{OWNER}} chip, {{MILESTONE}} note.
+SCALING:  each row is a grid: [name 1.4fr | rag auto | bar 1fr | % auto | owner auto]
+          with the milestone note on a second line spanning the row. The bar fill
+          width = the inline --pst-v percent. RAG colour flows from one modifier
+          class per row into --pst-c (chip + bar tint).
+REQUIRES: core/elements.css (.card-outlined, .chip), core/tokens.css (--accent,
+          --color-success/-warning/-danger, --bg-card, --bg-surface, --bg-muted,
+          --border-*, --text-*, --font-mono, --radius-*, --sp-*, --type-*,
+          --shadow-sm, --dur-mid, --ease, --tracking-eyebrow)
+MODULE CSS: inline the data-module="project-status" style block once.
+INTERACTION: none required; the bar fill has a width transition (reduced-motion guarded).
+USAGE: set .pst-overall's colour with .is-green/-amber/-red; one .pst-row per
+       workstream with the same modifier, style="--pst-v:64%" on its .pst-bar.
+============================================================================ -->
+<style data-module="project-status">
+  .pst { margin: 0; --pst-c: var(--color-success); }
+  .pst-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-3); }
+  /* header: overall RAG + reporting period */
+  .pst-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); background: var(--bg-surface); border: 1px solid var(--border-default); }
+  .pst-head-label { font: var(--type-caption); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); }
+  .pst-period { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .pst-list { border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+  /* workstream row: name | rag | bar | % | owner, plus a milestone note line */
+  .pst-row { --pst-c: var(--color-success); display: grid; grid-template-columns: 1.4fr auto 1fr auto auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  .pst-row:last-child { border-bottom: none; }
+  .pst-stream { font: var(--type-small); font-weight: 650; color: var(--text-primary); }
+  .pst-rag { padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; white-space: nowrap; color: var(--pst-c); background: color-mix(in srgb, var(--pst-c) 15%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--pst-c) 42%, var(--border-subtle)); }
+  .pst-bar { height: 6px; border-radius: var(--radius-pill); background: var(--bg-muted); overflow: hidden; }
+  .pst-bar::before { content: ""; display: block; height: 100%; width: var(--pst-v, 0%); border-radius: inherit; background: var(--pst-c); transition: width var(--dur-mid) var(--ease); }
+  .pst-pct { font-family: var(--font-mono); font-size: 12px; font-weight: 650; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .pst-note { grid-column: 1 / -1; font: var(--type-caption); font-weight: 400; color: var(--text-secondary); }
+  .pst-note::before { content: "▸ 次: "; font-family: var(--font-mono); color: var(--text-muted); }
+  .is-green { --pst-c: var(--color-success); }
+  .is-amber { --pst-c: var(--color-warning); }
+  .is-red   { --pst-c: var(--color-danger); }
+  @media (prefers-reduced-motion: reduce) { .pst-bar::before { transition: none; } }
+</style>
+
+<figure class="pst card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="pst-title">{{TITLE}}</figcaption> <!-- e.g. 決済リプレース 週次ステータス -->
+
+  <!-- ── HEADER: overall RAG chip + reporting period ─────────────────────── -->
+  <div class="pst-head">
+    <span class="pst-head-label">Overall</span>
+    <span class="pst-rag pst-overall is-amber">{{OVERALL}}</span> <!-- e.g. Amber - 一部遅延 -->
+    <span class="pst-period">{{PERIOD}}</span>                    <!-- e.g. 2026-07-06 〜 07-10 (W28) -->
+  </div>
+
+  <!-- ── WORKSTREAM ROWS ─────────────────────────────────────────────────── -->
+  <div class="pst-list">
+    <!-- one .pst-row per workstream; .is-green/-amber/-red sets RAG colour -->
+    <div class="pst-row is-green">
+      <span class="pst-stream">{{STREAM}}</span>            <!-- e.g. API連携 -->
+      <span class="pst-rag">{{RAG}}</span>                  <!-- e.g. Green -->
+      <span class="pst-bar" style="--pst-v:78%"></span>
+      <span class="pst-pct">{{PCT}}</span>                 <!-- e.g. 78% -->
+      <span class="chip">{{OWNER}}</span>                  <!-- e.g. 田中 -->
+      <span class="pst-note">{{MILESTONE}}</span>          <!-- e.g. 7/12 結合テスト完了 -->
+    </div>
+
+    <div class="pst-row is-amber">
+      <span class="pst-stream">{{STREAM}}</span>            <!-- e.g. 移行データ整備 -->
+      <span class="pst-rag">{{RAG}}</span>                  <!-- e.g. Amber -->
+      <span class="pst-bar" style="--pst-v:52%"></span>
+      <span class="pst-pct">{{PCT}}</span>                 <!-- e.g. 52% -->
+      <span class="chip">{{OWNER}}</span>                  <!-- e.g. 佐藤 -->
+      <span class="pst-note">{{MILESTONE}}</span>          <!-- e.g. 7/15 データ検証レビュー -->
+    </div>
+
+    <div class="pst-row is-red">
+      <span class="pst-stream">{{STREAM}}</span>            <!-- e.g. 外部審査対応 -->
+      <span class="pst-rag">{{RAG}}</span>                  <!-- e.g. Red -->
+      <span class="pst-bar" style="--pst-v:23%"></span>
+      <span class="pst-pct">{{PCT}}</span>                 <!-- e.g. 23% -->
+      <span class="chip">{{OWNER}}</span>                  <!-- e.g. 鈴木 -->
+      <span class="pst-note">{{MILESTONE}}</span>          <!-- e.g. 7/18 審査結果待ち（要エスカレ） -->
+    </div>
+    <!-- ↑ repeat: one .pst-row per workstream -->
+  </div>
+</figure>

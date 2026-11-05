@@ -1,0 +1,76 @@
+{
+  "title": "Product Analytics Dashboard — May 2026",
+  "theme": "midnight",
+  "layout": "bento",
+  "header": "compact",
+  "lang": "en",
+  "target": "web-app",
+  "viewport": "desktop",
+  "eyebrow": "PRODUCT ANALYTICS / 2026 Q2",
+  "subtitle": "An operational dashboard that gives a single-screen view of monthly active users, acquisition channels, and the activity of key workspaces. Figures are finalized values for May 1–31, 2026.",
+  "footer": "Source: Internal Product Analytics Platform (Metrics Pipeline v4) / Reporting period: 2026-05-01 – 2026-05-31 / Generated: 2026-06-07",
+  "sections": [
+    {
+      "type": "kpi",
+      "variant": "hero",
+      "label": "Key metrics",
+      "items": [
+        { "label": "Monthly Active Users", "value": "48,210", "delta": "+12.4% MoM", "dir": "up" },
+        { "label": "Monthly Recurring Revenue (MRR)", "value": "¥18.6M", "delta": "+6.8% MoM", "dir": "up" },
+        { "label": "Trial Conversion Rate", "value": "23.7%", "delta": "+2.1pt MoM", "dir": "up" },
+        { "label": "Monthly Churn Rate", "value": "2.9%", "delta": "−0.4pt MoM", "dir": "down", "tone": "good" }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "span": 6,
+      "size": "sm",
+      "title": "Weekly Active Users (May 2026)",
+      "series": [
+        { "label": "Week 1", "value": 31200, "display": "31.2K" },
+        { "label": "Week 2", "value": 35800, "display": "35.8K" },
+        { "label": "Week 3", "value": 33400, "display": "33.4K" },
+        { "label": "Week 4", "value": 41600, "display": "41.6K" },
+        { "label": "Week 5", "value": 38900, "display": "38.9K" },
+        { "label": "Week 6", "value": 48200, "display": "48.2K" }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "donut",
+      "span": 6,
+      "size": "sm",
+      "title": "Acquisition Channel Breakdown (Share of Sessions)",
+      "total": "1.24M",
+      "totalLabel": "Total Sessions",
+      "segments": [
+        { "label": "Organic Search", "value": 42, "cat": 1 },
+        { "label": "Direct", "value": 27, "cat": 2 },
+        { "label": "Referral", "value": 18, "cat": 3 },
+        { "label": "Social", "value": 13, "cat": 4 }
+      ]
+    },
+    {
+      "type": "table",
+      "span": 12,
+      "label": "Workspace list",
+      "columns": ["Workspace", "Plan", "MAU", "Status"],
+      "placeholder": "Search workspaces and plans…",
+      "rows": [
+        ["Northern Works Inc.", "Enterprise", "8,420", { "badge": "success", "text": "Active" }],
+        ["Minato Design LLC", "Business", "3,180", { "badge": "success", "text": "Active" }],
+        ["Aurora Labs Inc.", "Business", "2,940", { "badge": "warning", "text": "Payment Pending" }],
+        ["Sakura Retail Co., Ltd.", "Pro", "1,260", { "badge": "success", "text": "Active" }],
+        ["Helios Media GmbH", "Pro", "980", { "badge": "info", "text": "In Trial" }],
+        ["Ozora Fintech Co., Ltd.", "Enterprise", "6,710", { "badge": "success", "text": "Active" }],
+        ["Riverstone Consulting", "Business", "1,540", { "badge": "danger", "text": "Cancellation Scheduled" }],
+        ["Komorebi Education Institute", "Pro", "620", { "badge": "info", "text": "In Trial" }]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<p class=\"small muted\">Click a column header to sort, and use the search box to filter.</p>"
+    }
+  ]
+}

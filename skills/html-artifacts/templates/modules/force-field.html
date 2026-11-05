@@ -1,0 +1,103 @@
+<!-- ============================================================================
+MODULE: force-field                             lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A Lewin force-field analysis (pure CSS - no SVG). A central vertical bar
+         names the change/goal; a left column of DRIVING forces are arrow bars
+         pointing right (toward the change) and a right column of RESTRAINING forces
+         are arrow bars pointing left. Each force carries a label and a strength 1-5
+         set via an inline --s custom property that scales the bar's length. Driving
+         = success tint, restraining = danger tint. For change-readiness, go/no-go
+         tension, adoption barriers vs pulls.
+         Distinction: before-after contrasts two states and pros-cons (peer module)
+         lists arguments as text - force-field visualizes OPPOSING forces with
+         MAGNITUDE pushing on a single change.
+VARIABLES: {{TITLE}}; {{CHANGE}}; column heads {{DRIVE_HEAD}} {{RESTRAIN_HEAD}};
+           per force {{FORCE}} + {{STRENGTH}} with inline --s (1-5).
+SCALING:   3-column grid [driving | change bar | restraining]. A bar's width =
+           calc(24px + var(--s) · 30px), so strength 1→54px … 5→174px. Driving bars
+           right-align so their arrow tips meet the center bar; restraining bars
+           left-align so theirs do too. Arrowheads are clip-path polygons (right- or
+           left-pointing). Set the shown {{STRENGTH}} number to match --s.
+REQUIRES:  core/tokens.css (--color-success, --color-danger, --accent, --bg-surface,
+           --border-default, --text-*, --radius-*, --sp-*, --shadow-*, --font-mono),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="force-field" style block once.
+INTERACTION: none (static). Hover brightens a force bar (paint only, reduced-motion
+             guarded). aria-label on the figure; labels + strengths are real text.
+USAGE: repeat one .ff-force (style="--s:N") in .ff-drive / .ff-restrain per force.
+============================================================================ -->
+<style data-module="force-field">
+  .ff { margin: 0; }
+  .ff-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .ff-grid { display: grid; grid-template-columns: 1fr auto 1fr; grid-template-rows: auto 1fr; gap: var(--sp-2) var(--sp-4); align-items: center; }
+  .ff-head { font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .ff-head-drive { grid-column: 1; grid-row: 1; text-align: right; color: var(--color-success); }
+  .ff-head-restrain { grid-column: 3; grid-row: 1; color: var(--color-danger); }
+  /* the change under pressure: an accent slab with vertical (CJK-friendly) text */
+  .ff-center { grid-column: 2; grid-row: 1 / span 2; display: flex; align-items: center; justify-content: center; min-width: 60px; padding: var(--sp-4) var(--sp-2); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border-inline: 2px solid color-mix(in srgb, var(--accent) 46%, var(--border-default)); border-radius: var(--radius-sm); }
+  .ff-center span { writing-mode: vertical-rl; font: var(--type-h3); font-weight: 700; color: var(--accent); letter-spacing: var(--tracking-tight); }
+  .ff-side { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .ff-drive { grid-column: 1; grid-row: 2; align-items: flex-end; }
+  .ff-restrain { grid-column: 3; grid-row: 2; align-items: flex-start; }
+  .ff-force { display: flex; align-items: center; gap: var(--sp-2); }
+  .ff-label { font: var(--type-small); font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  /* arrow bars: length = strength; clip-path forms the directional head */
+  .ff-bar { height: 28px; width: calc(24px + var(--s, 3) * 30px); display: flex; align-items: center; padding: 0 var(--sp-3); font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 6%, transparent); transition: filter var(--dur-fast) var(--ease); }
+  .ff-drive .ff-bar { justify-content: flex-start; background: color-mix(in srgb, var(--color-success) 30%, var(--bg-surface)); clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); }
+  .ff-restrain .ff-bar { justify-content: flex-end; background: color-mix(in srgb, var(--color-danger) 30%, var(--bg-surface)); clip-path: polygon(12px 0, 100% 0, 100% 100%, 12px 100%, 0 50%); }
+  .ff-force:hover .ff-bar { filter: brightness(1.06) saturate(1.1); }
+  /* phone: stack drive / change / restrain instead of three columns */
+  @media (max-width: 640px) {
+    .ff-grid { grid-template-columns: 1fr; grid-template-rows: none; }
+    .ff-head-drive, .ff-head-restrain { text-align: left; grid-column: 1; }
+    .ff-head-drive { grid-row: 1; }
+    .ff-drive { grid-column: 1; grid-row: 2; align-items: flex-start; }
+    .ff-center { grid-column: 1; grid-row: 3; }
+    .ff-center span { writing-mode: horizontal-tb; }
+    .ff-head-restrain { grid-row: 4; }
+    .ff-restrain { grid-column: 1; grid-row: 5; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ff-bar { transition: none; } }
+</style>
+
+<figure class="ff card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="ff-title">{{TITLE}}</figcaption>
+  <div class="ff-grid">
+    <span class="ff-head ff-head-drive">{{DRIVE_HEAD}} &rarr;</span>       <!-- e.g. 推進力 -->
+    <div class="ff-center"><span>{{CHANGE}}</span></div>                    <!-- e.g. 全社リモート化 -->
+    <span class="ff-head ff-head-restrain">&larr; {{RESTRAIN_HEAD}}</span> <!-- e.g. 抑止力 -->
+
+    <!-- ── driving forces (push right into the change) ─────────────────────── -->
+    <div class="ff-side ff-drive">
+      <div class="ff-force" style="--s:5">
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. 通勤削減の要望 -->
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 5 -->
+      </div>
+      <div class="ff-force" style="--s:3">
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. 採用競争力 -->
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 3 -->
+      </div>
+      <div class="ff-force" style="--s:2">
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. オフィス費削減 -->
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 2 -->
+      </div>
+      <!-- ↑ repeat: one .ff-force per driving force -->
+    </div>
+
+    <!-- ── restraining forces (push left against the change) ──────────────── -->
+    <div class="ff-side ff-restrain">
+      <div class="ff-force" style="--s:4">
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 4 -->
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. 対面文化の重視 -->
+      </div>
+      <div class="ff-force" style="--s:3">
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 3 -->
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. 情報漏えい懸念 -->
+      </div>
+      <div class="ff-force" style="--s:2">
+        <span class="ff-bar">{{STRENGTH}}</span>         <!-- e.g. 2 -->
+        <span class="ff-label">{{FORCE}}</span>          <!-- e.g. 設備投資 -->
+      </div>
+      <!-- ↑ repeat: one .ff-force per restraining force -->
+    </div>
+  </div>
+</figure>

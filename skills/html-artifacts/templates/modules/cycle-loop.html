@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: cycle-loop                                          lineage: unified-system original (process/loop)
+PURPOSE: Self-contained SVG cycle diagram (NO external libs). N steps (3-6) placed
+         around a ring, joined by curved arc arrows into a closed loop; each node is
+         a circle + label, and the cycle's name sits in a hub at the center. For
+         PDCA, build-measure-learn, dev/release cycles, feedback loops.
+VARIABLES: {{TITLE}} + {{CYCLE_NAME}} (center hub) + per step {{STEP_LABEL}}
+           (and optional {{STEP_N}} order index).
+GEOMETRY:  cx=200, cy=200, R=130 (node-center ring), node radius nr=44.
+           Step i angle θ_i = −90 + i·360/N (degrees, i=0 at top, clockwise).
+           node center = (cx + R·cos θ_i, cy + R·sin θ_i).
+           Connector i→i+1 is an arc on radius R from A=(cx+R·cos(θ_i+g),
+           cy+R·sin(θ_i+g)) to B=(cx+R·cos(θ_{i+1}−g), cy+R·sin(θ_{i+1}−g)) with
+           gap g≈32° (clears the node discs): path "M Ax,Ay A R,R 0 0 1 Bx,By"
+           (sweep=1 clockwise) + marker-end. The example below is N=4.
+REQUIRES: core/tokens.css (--cat-1..5, --accent, --bg-surface, --bg-muted,
+          --border-*, --text-*, --font-mono, --sp-*)
+MODULE CSS: inline the data-module="cycle-loop" style block once.
+INTERACTION: none (static). role="img" + <title> a11y; marker id is "cyc-"-prefixed.
+USAGE: one <path class="cyc-arc"> per step transition (drawn first), then one
+       <g class="cyc-node cat-N"> (circle + label + optional number) per step.
+       Recompute node centers + arc endpoints from GEOMETRY when N changes.
+============================================================================ -->
+<style data-module="cycle-loop">
+  .cyc { margin: 0; }
+  .cyc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cyc svg { width: 100%; height: auto; max-width: 420px; margin-inline: auto; display: block; overflow: visible; font-family: var(--font-sans); }
+  @media (max-width: 640px) { .cyc { overflow-x: auto; } .cyc svg { min-width: 400px; } }
+  .cyc-arc { fill: none; stroke: color-mix(in srgb, var(--accent) 55%, var(--text-secondary)); stroke-width: 2; stroke-linecap: round; }
+  .cyc-arrow { fill: color-mix(in srgb, var(--accent) 55%, var(--text-secondary)); }
+  .cyc-hub { fill: color-mix(in srgb, var(--bg-muted) 70%, var(--bg-surface)); stroke: var(--border-subtle); stroke-width: 1; }
+  .cyc-hub-label { fill: var(--text-secondary); font: var(--type-caption); font-weight: 700; text-anchor: middle; dominant-baseline: middle; letter-spacing: var(--tracking-tight); }
+  /* nodes: cat-tinted discs whose ring firms on hover (paint only) */
+  .cyc-disc { --nc: var(--accent); fill: color-mix(in srgb, var(--nc) 14%, var(--bg-surface)); stroke: color-mix(in srgb, var(--nc) 55%, var(--border-default)); stroke-width: 1.5; transition: fill var(--dur-fast) var(--ease), stroke var(--dur-fast) var(--ease); }
+  .cyc-node:hover .cyc-disc { fill: color-mix(in srgb, var(--nc) 24%, var(--bg-surface)); stroke: color-mix(in srgb, var(--nc) 80%, var(--border-default)); }
+  .cyc-node.cat-1 .cyc-disc { --nc: var(--cat-1); }
+  .cyc-node.cat-2 .cyc-disc { --nc: var(--cat-2); }
+  .cyc-node.cat-3 .cyc-disc { --nc: var(--cat-3); }
+  .cyc-node.cat-4 .cyc-disc { --nc: var(--cat-4); }
+  .cyc-node.cat-5 .cyc-disc { --nc: var(--cat-5); }
+  .cyc-num { fill: var(--text-muted); font: var(--type-caption); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: middle; }
+  .cyc-label { fill: var(--text-primary); font-size: 14px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+  @media (prefers-reduced-motion: reduce) { .cyc-disc { transition: none; } }
+</style>
+
+<figure class="cyc card-outlined">
+  <figcaption class="cyc-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 400 400" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <defs>
+      <marker id="cyc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="cyc-arrow" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+    </defs>
+
+    <!-- ── connector arcs (drawn first, one per step transition, clockwise) ─── -->
+    <path class="cyc-arc" d="M268.9,89.8 A130,130 0 0 1 310.2,131.1" marker-end="url(#cyc-arrow)"/>
+    <path class="cyc-arc" d="M310.2,268.9 A130,130 0 0 1 268.9,310.2" marker-end="url(#cyc-arrow)"/>
+    <path class="cyc-arc" d="M131.1,310.2 A130,130 0 0 1 89.8,268.9" marker-end="url(#cyc-arrow)"/>
+    <path class="cyc-arc" d="M89.8,131.1 A130,130 0 0 1 131.1,89.8" marker-end="url(#cyc-arrow)"/>
+    <!-- ↑ repeat: one arc per transition; last one closes the loop -->
+
+    <!-- ── center hub (cycle name) ─────────────────────────────────────────── -->
+    <circle class="cyc-hub" cx="200" cy="200" r="42"/>
+    <text class="cyc-hub-label" x="200" y="200">{{CYCLE_NAME}}</text> <!-- e.g. PDCA -->
+
+    <!-- ── nodes (circle + optional number + label), one per step ──────────── -->
+    <g class="cyc-node cat-1">
+      <circle class="cyc-disc" cx="200" cy="70" r="44"/>
+      <text class="cyc-num" x="200" y="56">{{STEP_N}}</text>       <!-- e.g. 1 -->
+      <text class="cyc-label" x="200" y="76">{{STEP_LABEL}}</text> <!-- e.g. Plan -->
+    </g>
+    <g class="cyc-node cat-2">
+      <circle class="cyc-disc" cx="330" cy="200" r="44"/>
+      <text class="cyc-num" x="330" y="186">{{STEP_N}}</text>
+      <text class="cyc-label" x="330" y="206">{{STEP_LABEL}}</text> <!-- e.g. Do -->
+    </g>
+    <g class="cyc-node cat-3">
+      <circle class="cyc-disc" cx="200" cy="330" r="44"/>
+      <text class="cyc-num" x="200" y="316">{{STEP_N}}</text>
+      <text class="cyc-label" x="200" y="336">{{STEP_LABEL}}</text> <!-- e.g. Check -->
+    </g>
+    <g class="cyc-node cat-4">
+      <circle class="cyc-disc" cx="70" cy="200" r="44"/>
+      <text class="cyc-num" x="70" y="186">{{STEP_N}}</text>
+      <text class="cyc-label" x="70" y="206">{{STEP_LABEL}}</text> <!-- e.g. Act -->
+    </g>
+    <!-- ↑ repeat: one node <g> per step (recompute cx,cy from GEOMETRY) -->
+  </svg>
+</figure>

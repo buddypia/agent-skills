@@ -1,0 +1,353 @@
+{
+  "title": "そらAIサポート導入のご提案",
+  "theme": "rose",
+  "layout": "stack",
+  "header": "banner",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "ご提案",
+  "subtitle": "問い合わせ対応の自動化による顧客満足と生産性の両立",
+  "footer": "あおぞらデジタル株式会社 / 2026-07-08",
+  "meta": [
+    {
+      "k": "提案先",
+      "v": "北央鉄道株式会社 御中"
+    },
+    {
+      "k": "提案日",
+      "v": "2026-07-08"
+    },
+    {
+      "k": "有効期限",
+      "v": "2026-08-31"
+    },
+    {
+      "k": "提案元",
+      "v": "あおぞらデジタル株式会社"
+    }
+  ],
+  "sections": [
+    {
+      "type": "html",
+      "html": "<figure class=\"ktw card-outlined\" aria-label=\"提案サマリー\"><figcaption class=\"ktw-title\">提案サマリー</figcaption><ol class=\"ktw-list\"><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">そらAIサポート導入で、問い合わせの一次対応を最大62%自動化し、応答待ち時間を平均11分から90秒へ短縮します。</span><span class=\"ktw-elab\">運行情報・遅延・払い戻しなどの定型問い合わせが対象。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">初期費用¥0で開始でき、約3か月で投資回収の見込みです。</span><span class=\"ktw-elab\">既存のFAQと予約システムに追加するだけで導入できます。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">有人対応はクレーム・特殊対応に集中でき、応対品質のばらつきも解消します。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">次のステップは2週間の無償PoC。対象路線とチャネルを決定します。</span><span class=\"ktw-elab\">詳細は本書末尾「次のステップ」をご覧ください。</span></div></li></ol></figure>",
+      "cssModules": [
+        "key-takeaways"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "課題認識",
+      "body": "北央鉄道様のコールセンターは、悪天候・遅延時に問い合わせが平常時の3.4倍へ急増し、応答率が58%まで低下しています。定型的な運行・払い戻し問い合わせが全体の64%を占め、有人リソースを圧迫しています。"
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"gap card-outlined\" aria-label=\"現状とあるべき姿\"><figcaption class=\"gap-title\">現状とあるべき姿</figcaption><div class=\"gap-cols\"><div class=\"gap-col gap-as-is\"><span class=\"gap-head\">現状</span><div class=\"gap-list\"><div class=\"gap-item\">ピーク時の応答率58%</div><div class=\"gap-item\">一次回答まで平均11分</div><div class=\"gap-item\">定型問い合わせが全体の64%</div></div></div><div class=\"gap-arrow\" aria-hidden=\"true\">→</div><div class=\"gap-col gap-mid\"><span class=\"gap-head\">ギャップ・施策</span><div class=\"gap-list\"><div class=\"gap-row\"><span class=\"gap-name\">繁忙時に人手が不足し放棄呼が増加</span><span class=\"gap-action\">AIによる24時間の一次対応</span></div><div class=\"gap-row\"><span class=\"gap-name\">回答品質が担当者に依存</span><span class=\"gap-action\">運行データ連携の自動回答</span></div></div></div><div class=\"gap-arrow\" aria-hidden=\"true\">→</div><div class=\"gap-col gap-to-be\"><span class=\"gap-head\">あるべき姿</span><div class=\"gap-list\"><div class=\"gap-item\">応答率95%以上を常時維持</div><div class=\"gap-item\">一次回答まで90秒以内</div><div class=\"gap-item\">有人は特殊対応へ集中</div></div></div></div></figure>",
+      "cssModules": [
+        "gap-analysis"
+      ]
+    },
+    {
+      "type": "features",
+      "title": "提案ソリューション「そらAIサポート」",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "bolt",
+          "title": "リアルタイム運行連携",
+          "body": "運行管理システムと連携し、遅延・運休を自動で回答します。"
+        },
+        {
+          "icon": "globe",
+          "title": "マルチチャネル対応",
+          "body": "LINE・Web・電話（音声）を単一のAIで一元対応します。"
+        },
+        {
+          "icon": "shield",
+          "title": "安全なエスカレーション",
+          "body": "AIが判断に迷う問い合わせは、文脈ごと有人へ引き継ぎます。"
+        },
+        {
+          "icon": "chart",
+          "title": "対応分析ダッシュボード",
+          "body": "問い合わせ傾向と自動化率を可視化し、継続的な改善を支援します。"
+        },
+        {
+          "icon": "clock",
+          "title": "24時間365日対応",
+          "body": "深夜・早朝の問い合わせも待たせず即応します。"
+        },
+        {
+          "icon": "lock",
+          "title": "国内データセンター",
+          "body": "個人情報は国内DCで暗号化保管し、ISMS準拠で運用します。"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"prc\" aria-label=\"プランと価格\"><figcaption class=\"prc-title\">プランと価格</figcaption><div class=\"prc-grid\"><article class=\"prc-plan card-outlined\"><h3 class=\"prc-name\">Starter</h3><p class=\"prc-price\"><span class=\"prc-amount\">¥98,000</span><span class=\"prc-period\">/ 月</span></p><ul class=\"prc-feats\"><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>月5,000対応まで</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>Web + LINE チャネル</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>標準FAQ連携</li><li class=\"prc-feat prc-no\"><span class=\"prc-mark\">-</span>音声チャネル</li><li class=\"prc-feat prc-no\"><span class=\"prc-mark\">-</span>専任担当</li></ul><a class=\"btn btn-ghost prc-cta\" href=\"#next-steps\">PoCで試す</a></article><article class=\"prc-plan card-outlined prc-featured\"><span class=\"prc-popular\">人気</span><h3 class=\"prc-name\">Standard</h3><p class=\"prc-price\"><span class=\"prc-amount\">¥248,000</span><span class=\"prc-period\">/ 月</span></p><ul class=\"prc-feats\"><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>月20,000対応まで</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>全チャネル対応（音声含む）</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>運行データ連携</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>対応分析ダッシュボード</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>メール・チャットサポート</li></ul><a class=\"btn prc-cta\" href=\"#next-steps\">Standardで相談する</a></article><article class=\"prc-plan card-outlined\"><h3 class=\"prc-name\">Enterprise</h3><p class=\"prc-price\"><span class=\"prc-amount\">個別見積</span><span class=\"prc-period\"></span></p><ul class=\"prc-feats\"><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>無制限対応</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>SLA 99.9%保証</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>専任カスタマーサクセス</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>専用DC / オンプレ選択可</li><li class=\"prc-feat\"><span class=\"prc-mark\">✓</span>監査ログ・SSO</li></ul><a class=\"btn btn-ghost prc-cta\" href=\"#next-steps\">問い合わせる</a></article></div></figure>",
+      "cssModules": [
+        "pricing-table"
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "導入スケジュール",
+      "events": [
+        {
+          "date": "7月下旬",
+          "title": "キックオフ・要件確認",
+          "body": "対象チャネルと運行データ連携範囲を確定します。",
+          "status": "active"
+        },
+        {
+          "date": "8月",
+          "title": "無償PoC（2週間）",
+          "body": "主要路線でAI一次対応を試験導入し、効果を測定します。",
+          "status": "todo"
+        },
+        {
+          "date": "9月",
+          "title": "本番構築・チャネル接続",
+          "body": "LINE・Web・音声を接続し、FAQと運行APIを統合します。",
+          "status": "todo"
+        },
+        {
+          "date": "10月",
+          "title": "段階リリース",
+          "body": "平日日中から全時間帯へ段階的に拡大します。",
+          "status": "todo"
+        },
+        {
+          "date": "11月",
+          "title": "全面稼働・効果レビュー",
+          "body": "KPIレビューと改善サイクルを開始します。",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "type": "comparison",
+      "title": "他社比較",
+      "options": [
+        {
+          "name": "そらAIサポート",
+          "recommended": true,
+          "pros": [
+            "運行データとネイティブ連携",
+            "音声チャネルを標準対応",
+            "初期費用¥0で開始"
+          ],
+          "cons": [
+            "鉄道特化のため汎用FAQは要設定"
+          ],
+          "metrics": [
+            {
+              "k": "自動化率",
+              "v": "最大62%"
+            },
+            {
+              "k": "導入期間",
+              "v": "約6週間"
+            }
+          ]
+        },
+        {
+          "name": "汎用チャットボット A社",
+          "pros": [
+            "多言語に強い",
+            "低価格"
+          ],
+          "cons": [
+            "運行データ連携は別途開発",
+            "音声チャネル非対応"
+          ],
+          "metrics": [
+            {
+              "k": "自動化率",
+              "v": "〜35%"
+            },
+            {
+              "k": "導入期間",
+              "v": "約10週間"
+            }
+          ]
+        },
+        {
+          "name": "有人BPO増員",
+          "pros": [
+            "特殊対応に柔軟"
+          ],
+          "cons": [
+            "繁忙期のコストが増大",
+            "品質にばらつき",
+            "24時間化が高コスト"
+          ],
+          "metrics": [
+            {
+              "k": "自動化率",
+              "v": "0%"
+            },
+            {
+              "k": "導入期間",
+              "v": "約4週間"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"lgw card-outlined\" aria-label=\"導入実績\"><figcaption class=\"lgw-kicker\">導入実績</figcaption><div class=\"lgw-row\"><div class=\"lgw-tile\"><span class=\"lgw-name\">東西エクスプレス</span></div><div class=\"lgw-tile\"><span class=\"lgw-name\">みなと交通</span></div><div class=\"lgw-tile\"><span class=\"lgw-name\">さくら観光バス</span></div><div class=\"lgw-tile\"><span class=\"lgw-name\">北都フェリー</span></div><div class=\"lgw-tile\"><span class=\"lgw-name\">山手モビリティ</span></div><div class=\"lgw-tile\"><span class=\"lgw-name\">KAEDE空港</span></div></div><p class=\"lgw-stat\"><b>全国80社以上の交通・インフラ事業者が導入</b></p></figure>",
+      "cssModules": [
+        "logo-wall"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<section id=\"next-steps\" class=\"card-outlined\" aria-label=\"次のステップ\"><h2>次のステップ</h2><ol><li>本提案書のご確認（〜7/18）</li><li>2週間の無償PoC対象路線・チャネルの決定（7月下旬）</li><li>PoC効果測定レビューと本契約のご判断（8月末）</li></ol><p>ご不明点は担当の<strong>あおぞらデジタル 営業部 山田</strong>（sora-support&#64;example.co.jp）までお気軽にお問い合わせください。上記プランの「PoCで試す」からも本セクションにお戻りいただけます。</p></section>"
+    }
+  ],
+  "_recipe": {
+    "id": "proposal",
+    "name": "提案書（企画 / 営業提案）",
+    "genre": "提案書",
+    "purpose": "相手の課題認識から入り、解決策・価格・導入スケジュール・実績で意思決定を後押しし、明確な次アクション（PoC等）まで導く営業/企画提案書。",
+    "audience": "提案先の意思決定者 / 検討担当者",
+    "triggers": {
+      "ja": [
+        "提案書を作って",
+        "営業提案の資料",
+        "企画書をHTMLで",
+        "ソリューション提案",
+        "導入提案をまとめて",
+        "お客様向け提案資料"
+      ],
+      "en": [
+        "proposal",
+        "sales proposal",
+        "pitch document",
+        "solution proposal"
+      ],
+      "ko": [
+        "제안서",
+        "영업 제안 자료",
+        "솔루션 제안"
+      ]
+    },
+    "axes": {
+      "theme": "rose",
+      "layout": "stack",
+      "header": "banner",
+      "density": "comfortable",
+      "rationale": "roseは提案書に映える暖色で表紙感を出せる。bannerヘッダで提案先・提案日・有効期限を大きく提示し表紙代わりに。stackでストーリーとして読み下す。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:key-takeaways",
+        "role": "提案サマリー（結論先出し）",
+        "required": true,
+        "guide": "効果・費用・次アクションをleadで断定。冒頭で「なぜ検討する価値があるか」を伝える。",
+        "volume": "3〜4項目"
+      },
+      {
+        "n": 2,
+        "type": "callout",
+        "role": "課題認識",
+        "required": true,
+        "guide": "warningバリアントで相手の現状課題を数値付きで代弁し「分かっている」ことを示す。",
+        "volume": "2〜3文"
+      },
+      {
+        "n": 3,
+        "type": "html:gap-analysis",
+        "role": "現状とあるべき姿",
+        "required": true,
+        "guide": "現状→施策→あるべき姿の3列で、提案が埋めるギャップを明示。数値の対比を入れる。",
+        "volume": "現状3 / 施策2 / 目標3"
+      },
+      {
+        "n": 4,
+        "type": "features",
+        "role": "提案ソリューション",
+        "required": true,
+        "guide": "アイコン付きカードで機能価値を3列に。機能名は具体、bodyは1文の便益で。",
+        "volume": "6カード"
+      },
+      {
+        "n": 5,
+        "type": "html:pricing-table",
+        "role": "プランと価格",
+        "required": true,
+        "guide": "3プランで中央を推奨(featured)。CTAはhref=\"#\"禁止のため、末尾のid=\"next-steps\"へ実アンカーで接続。",
+        "volume": "3プラン"
+      },
+      {
+        "n": 6,
+        "type": "timeline",
+        "role": "導入スケジュール",
+        "required": true,
+        "guide": "月次で導入の道筋を提示。直近をstatus:active、以降をtodoに。",
+        "volume": "5フェーズ"
+      },
+      {
+        "n": 7,
+        "type": "comparison",
+        "role": "他社比較",
+        "required": false,
+        "guide": "自社をrecommendedに。pros/consとmetricsで公平に見せつつ優位を伝える。ctaは付けない（href=\"#\"回避）。",
+        "volume": "3案"
+      },
+      {
+        "n": 8,
+        "type": "html:logo-wall",
+        "role": "導入実績",
+        "required": false,
+        "guide": "オフライン成立のためロゴはテキストタイルで。statに社数の裏付け。",
+        "volume": "6社 + 統計"
+      },
+      {
+        "n": 9,
+        "type": "html:next-steps",
+        "role": "次のステップ（アンカー先）",
+        "required": true,
+        "guide": "id=\"next-steps\"を持つcard-outlinedセクション。pricingのCTAの着地点。次アクションと連絡先を明記。",
+        "volume": "3ステップ + 連絡先"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 6,
+        "default": "timeline",
+        "alternative": "html:roadmap",
+        "when": "導入を四半期×テーマの粗い計画グリッドで見せたいとき（モジュール数が4→上限に達する点に注意）"
+      },
+      {
+        "slot": 7,
+        "default": "comparison",
+        "alternative": "省略",
+        "when": "競合比較が不要、または相見積り前提でない一社指名の提案のとき"
+      },
+      {
+        "slot": 3,
+        "default": "html:gap-analysis",
+        "alternative": "html:before-after",
+        "when": "施策の橋渡しより導入前後のBefore/After対比を強調したいとき"
+      }
+    ],
+    "modules": [
+      "key-takeaways",
+      "callout",
+      "gap-analysis",
+      "features",
+      "pricing-table",
+      "timeline",
+      "comparison",
+      "logo-wall",
+      "html"
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+<!-- ============================================================================
+MODULE: kpi-grid                                              lineage: html-visual(dashboard) + html-artifacts(report)
+PURPOSE: Row of headline metrics (KPI cards) with value, label, and delta.
+VARIABLES (per card): {{VALUE}} {{VALUE_NUMBER}} {{LABEL}} {{DELTA}}  +  delta direction class
+   {{VALUE_NUMBER}} = the bare number to count up to (no $/%/commas), e.g. 48210 or 23.7
+   {{VALUE}}        = the fully-formatted display string, e.g. "$48,210" or "23.7%" (fallback text)
+REQUIRES: core/elements.css (.grid .grid-auto .card-outlined .metric*)
+MODULE CSS: inline the data-module="kpi-grid" style block once. It only refines
+   the shared .metric / .card-outlined primitives for this grid (accent rail + hover,
+   editorial value type, delta chip) - no new markup, no on-load animation.
+INTERACTION: count-up via [data-counter][data-to] (interactions.js animates on reveal;
+   add data-suffix when the value carries a unit like % or pt). Wrap in [data-filter-in
+   target] if you want it filterable.
+USAGE: repeat the .card-outlined block once per metric inside .grid-auto.
+============================================================================ -->
+<style data-module="kpi-grid">
+  /* Editorial Atmosphere refinement for the headline-metric grid. The base
+     .card-outlined / .metric primitives already carry layout + the shared
+     border-firm hover; here we add this grid's own bespoke detail: a quiet
+     accent rail down the lead edge, an editorial value face, and a tinted
+     delta chip. Colors come only from semantic tokens via color-mix; the
+     section already fades in at page level, so NO on-load animation here. */
+  .grid-auto > .metric.card-outlined {
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--dur-mid) var(--ease), box-shadow var(--dur-mid) var(--ease), transform var(--dur-mid) var(--ease-out);
+  }
+  /* lead-edge accent rail - dormant hairline that warms to full accent on hover.
+     A pseudo-element (not a border) so the card's own border stays unbroken. */
+  .grid-auto > .metric.card-outlined::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 25%, transparent));
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+  /* faint top sheen for subtle atmospheric depth (drops to nothing at atmosphere 0) */
+  .grid-auto > .metric.card-outlined::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 0;
+    height: 1px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent), transparent 65%);
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  .grid-auto > .metric.card-outlined .metric-value {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-display);
+  }
+  .grid-auto > .metric.card-outlined .metric-label {
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  /* delta → a calm tinted chip with a rounded cap (not neon, just legible state) */
+  .grid-auto > .metric.card-outlined .metric-delta-up,
+  .grid-auto > .metric.card-outlined .metric-delta-down {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: 1px var(--sp-2);
+    border-radius: var(--radius-pill);
+    font-variant-numeric: tabular-nums;
+  }
+  .grid-auto > .metric.card-outlined .metric-delta-up {
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  }
+  .grid-auto > .metric.card-outlined .metric-delta-down {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  }
+
+  /* hover - accent-tied: rail lights, edge firms toward accent, depth deepens,
+     label warms. Pointer-only so dense dashboards stay calm; color/shadow shifts
+     are reduced-motion safe on their own (the lift lives in the motion guard). */
+  @media (hover: hover) {
+    .grid-auto > .metric.card-outlined:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default));
+      box-shadow: var(--shadow-md);
+    }
+    .grid-auto > .metric.card-outlined:hover::before { opacity: 1; }
+    .grid-auto > .metric.card-outlined:hover .metric-label { color: var(--text-secondary); }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .grid-auto > .metric.card-outlined:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-default)); }
+  }
+</style>
+
+<section aria-label="Key metrics">
+  <div class="grid grid-auto">
+
+    <!-- ↓ repeat one card per metric -->
+    <article class="card-outlined metric">
+      <span class="metric-label">{{LABEL}}</span>
+      <span class="metric-value" data-counter data-to="{{VALUE_NUMBER}}" data-suffix="{{VALUE_SUFFIX}}">{{VALUE}}</span>   <!-- data-suffix optional: set "%"/"pt" when the value has a unit, else drop the attr -->
+      <span class="metric-delta-up">▲ {{DELTA}}</span>   <!-- or .metric-delta-down ▼ -->
+    </article>
+    <!-- ↑ repeat -->
+
+  </div>
+</section>

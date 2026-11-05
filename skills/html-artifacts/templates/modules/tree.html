@@ -1,0 +1,67 @@
+<!-- ============================================================================
+MODULE: tree                                                lineage: unified-system original (spec/report/diagram)
+PURPOSE: A collapsible hierarchy / outline - file tree, sitemap, org chart, taxonomy,
+         nested requirements. Indented rows with a rotating caret on branches and a
+         dot on leaves; an optional mono meta value on the trailing edge. Reuses the
+         existing HA.tree behavior (no per-module JS) and the elements.css tree atoms.
+VARIABLES (per node): {{LABEL}}  {{META}} (optional trailing value)
+REQUIRES: core/tokens.css (--border-*, --bg-muted, --text-*, --radius-sm, --sp-*),
+          core/elements.css ([data-children].collapsed, [data-tree-toggle], .tw-caret),
+          core/interactions.js (HA.tree - auto-wired)
+MODULE CSS: inline the data-module="tree" style block once.
+INTERACTION: HA.tree - a [data-tree] root, [data-tree-node] per node, a
+             [data-tree-toggle] row on branches, and a [data-children] child <ul>.
+             Click / Enter / Space on a branch collapses its subtree (aria-expanded).
+USAGE: nest <ul class="tw-children" data-children> inside each branch <li>. Use the
+       down-caret glyph "▾" - HA.tree rotates it −90° when collapsed.
+============================================================================ -->
+<style data-module="tree">
+  .tw-title { margin-bottom: var(--sp-4); }
+  .tree, .tw-children { list-style: none; margin: 0; padding: 0; }
+  /* nesting rail - a hairline guide that warms toward the accent on hover so the
+     active branch reads as a connected lineage rather than a flat indent. */
+  .tw-children { margin-inline-start: var(--sp-4); border-inline-start: 1px solid var(--border-subtle); padding-inline-start: var(--sp-3); transition: border-color var(--dur-fast) var(--ease); }
+  .tw-node:hover > .tw-children { border-inline-start-color: color-mix(in srgb, var(--accent) 30%, var(--border-subtle)); }
+  .tw-row { position: relative; display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-sm); font: var(--type-small); color: var(--text-primary); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  /* accent-tinted hover on togglable branch rows, with a short inset accent rail */
+  .tw-row[data-tree-toggle]:hover { background: color-mix(in srgb, var(--accent) 8%, var(--bg-muted)); box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 60%, transparent); }
+  .tw-row[data-tree-toggle]:active { background: color-mix(in srgb, var(--accent) 13%, var(--bg-muted)); }
+  .tw-row[data-tree-toggle]:focus-visible { outline: none; box-shadow: inset 2px 0 0 var(--accent), 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent); }
+  /* caret picks up the accent the moment its row is engaged */
+  .tw-caret { color: var(--text-muted); font-size: 10px; width: 1em; text-align: center; flex: 0 0 auto; transition: color var(--dur-fast) var(--ease); }
+  .tw-row[data-tree-toggle]:hover .tw-caret { color: var(--accent); }
+  /* leaf bullet - a subtle accent-ringed dot that fills on row hover */
+  .tw-bullet { width: 5px; height: 5px; border-radius: 50%; background: var(--border-default); margin-inline: 3px; flex: 0 0 auto; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 10%, transparent); transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .tw-leaf:hover .tw-bullet { background: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .tw-label { color: var(--text-primary); transition: color var(--dur-fast) var(--ease); }
+  .tw-leaf .tw-label { color: var(--text-secondary); }
+  .tw-leaf:hover .tw-label { color: var(--text-primary); }
+  .tw-meta { margin-inline-start: auto; padding-inline-start: var(--sp-3); font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); transition: color var(--dur-fast) var(--ease); }
+  .tw-row:hover .tw-meta { color: var(--text-secondary); }
+</style>
+
+<section aria-label="{{TITLE}}">
+  <h2 class="tw-title">{{TITLE}}</h2>
+  <ul class="tree" data-tree>
+
+    <!-- ── branch node (has children) ─────────────────────────────────────── -->
+    <li class="tw-node" data-tree-node>
+      <div class="tw-row" data-tree-toggle>
+        <span class="tw-caret" aria-hidden="true">▾</span>
+        <span class="tw-label">{{LABEL}}</span>
+        <span class="tw-meta">{{META}}</span>
+      </div>
+      <ul class="tw-children" data-children>
+
+        <!-- ── leaf node (no children) ────────────────────────────────────── -->
+        <li class="tw-node tw-leaf" data-tree-node>
+          <div class="tw-row">
+            <span class="tw-bullet" aria-hidden="true"></span>
+            <span class="tw-label">{{LABEL}}</span>
+            <span class="tw-meta">{{META}}</span>
+          </div>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>

@@ -1,0 +1,87 @@
+<!-- ============================================================================
+MODULE: pricing-table                                       lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pricing and plan-selection comparison block.
+         ANTI-SLOP (design-taste-frontend):
+         - Replaces gimmicky floating cards and oversized badges with crisp,
+           architectural hierarchy (contrast, border weights, clear typography).
+         - Eliminates banned en-dash (-) glyphs in favor of clean semantic styling.
+VARIABLES: per plan {{PLAN}} name, {{PRICE}} + {{PERIOD}}, {{FEATURE}} rows (mark
+            .prc-no for excluded), {{CTA}} button label; {{TITLE}} for a11y.
+            {{..._HREF}} = where the CTA goes ("#pricing", "https://..."). No destination? Replace the
+            <a> with <span class="btn ...">label</span> - an illustrative CTA must not be a dead link.
+SCALING:  flexible responsive grid collapsing cleanly on small screens.
+REQUIRES: core/elements.css (.card-outlined, .btn, .btn-ghost), core/tokens.css
+          (--accent, --bg-surface, --text-*, --border-*, --color-success,
+          --radius-*, --sp-*, --type-*, --shadow-*, --dur-*, --ease-out)
+MODULE CSS: inline the data-module="pricing-table" style block once.
+USAGE: one <article class="prc-plan"> per plan inside .prc-grid; add
+       .prc-featured to highlight the recommended option.
+============================================================================ -->
+<style data-module="pricing-table">
+  .prc { margin: 0; }
+  .prc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-5); letter-spacing: var(--tracking-tight); }
+  .prc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-5); align-items: stretch; }
+  .prc-plan { position: relative; display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-6); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); }
+  /* Featured plan: architectural accent border and soft elevation without cartoonish bounce */
+  .prc-featured { border-color: var(--accent); border-width: 2px; box-shadow: var(--shadow-md); background: color-mix(in srgb, var(--accent) 2%, var(--bg-surface)); }
+  .prc-popular { position: absolute; top: var(--sp-3); right: var(--sp-4); padding: 2px var(--sp-3); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; color: var(--on-accent); background: var(--accent); }
+  .prc-name { font: var(--type-h3); color: var(--text-primary); }
+  .prc-price { display: flex; align-items: baseline; gap: var(--sp-2); margin-top: var(--sp-1); }
+  .prc-amount { font: var(--type-display); font-size: clamp(2rem, 3vw, 2.5rem); color: var(--text-primary); letter-spacing: var(--tracking-tight); line-height: 1; }
+  .prc-period { font: var(--type-small); color: var(--text-muted); }
+  .prc-feats { list-style: none; margin: 0; padding: var(--sp-4) 0 0; display: grid; gap: var(--sp-3); border-top: 1px solid var(--border-subtle); }
+  .prc-feat { display: flex; align-items: flex-start; gap: var(--sp-2); font: var(--type-small); color: var(--text-secondary); line-height: 1.5; }
+  .prc-mark { flex: none; font-weight: 700; color: var(--color-success); }
+  .prc-no { color: var(--text-muted); opacity: 0.7; }
+  .prc-no .prc-mark { color: var(--text-muted); }
+  .prc-cta { margin-top: auto; width: 100%; }
+</style>
+
+<figure class="prc" aria-label="{{TITLE}}">
+  <figcaption class="prc-title">{{TITLE}}</figcaption> <!-- e.g. 料金プラン -->
+  <div class="prc-grid">
+
+    <!-- Standard plan -->
+    <article class="prc-plan">
+      <div>
+        <h3 class="prc-name">{{PLAN}}</h3>                     <!-- e.g. Free -->
+        <p class="prc-price"><span class="prc-amount">{{PRICE}}</span><span class="prc-period">{{PERIOD}}</span></p>
+      </div>
+      <ul class="prc-feats">
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. 3 プロジェクトまで -->
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. コミュニティサポート -->
+        <li class="prc-feat prc-no"><span class="prc-mark">-</span>{{FEATURE}}</li> <!-- e.g. 優先サポート -->
+      </ul>
+      <a class="btn btn-ghost prc-cta" href="{{CTA_HREF}}">{{CTA}}</a>  <!-- e.g. 無料で始める -->
+    </article>
+
+    <!-- Featured plan -->
+    <article class="prc-plan prc-featured">
+      <span class="prc-popular">推奨</span>
+      <div>
+        <h3 class="prc-name">{{PLAN}}</h3>                     <!-- e.g. Pro -->
+        <p class="prc-price"><span class="prc-amount">{{PRICE}}</span><span class="prc-period">{{PERIOD}}</span></p>
+      </div>
+      <ul class="prc-feats">
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. 無制限プロジェクト -->
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. 優先サポート -->
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. 高度な分析 -->
+      </ul>
+      <a class="btn prc-cta" href="{{CTA_HREF}}">{{CTA}}</a>            <!-- e.g. Pro を選ぶ -->
+    </article>
+
+    <!-- Enterprise plan -->
+    <article class="prc-plan">
+      <div>
+        <h3 class="prc-name">{{PLAN}}</h3>                     <!-- e.g. Enterprise -->
+        <p class="prc-price"><span class="prc-amount">{{PRICE}}</span><span class="prc-period">{{PERIOD}}</span></p>
+      </div>
+      <ul class="prc-feats">
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. SSO / 監査ログ -->
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. 専任担当者 -->
+        <li class="prc-feat"><span class="prc-mark">✓</span>{{FEATURE}}</li>       <!-- e.g. SLA 保証 -->
+      </ul>
+      <a class="btn btn-ghost prc-cta" href="{{CTA_HREF}}">{{CTA}}</a>  <!-- e.g. 問い合わせる -->
+    </article>
+  </div>
+</figure>

@@ -1,0 +1,76 @@
+<!-- ============================================================================
+MODULE: failure-modes                                    lineage: unified-system v7 architecture
+PURPOSE: Per component: what breaks, who feels it, how you find out, what absorbs it.
+         The question an architecture review always reaches and a topology diagram never
+         answers. risk-matrix scores generic project risks by likelihood/impact; this is
+         component-anchored operational reality (blast radius, detection, mitigation, RTO).
+VARIABLES: {{TITLE}} {{DESC}} + one card per failure mode
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="failure-modes" style block once.
+BUILDER: section.type "failure-modes" -
+  { title, desc, rows: [{ component, failure, severity, impact, blast,
+                          detect, mitigate, rto, degraded }] }
+  severity: critical | high | medium | low
+  degraded: true  → the system keeps serving in a reduced mode (renders a chip)
+INTERACTION: none (static), so it survives print and export intact.
+============================================================================ -->
+<style data-module="failure-modes">
+  .fmodes { width: 100%; display: grid; gap: var(--sp-4); }
+  .fmodes-head h2 { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .fmodes-desc { font: var(--type-small); color: var(--text-secondary); margin-top: var(--sp-1); max-width: 75ch; }
+
+  .fmodes-list { display: grid; gap: var(--sp-3); }
+  @media (min-width: 1000px) { .fmodes-list { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); } }
+
+  .fmode { border: 1px solid color-mix(in srgb, var(--fm-c, var(--border-subtle)) 32%, var(--border-subtle)); border-radius: var(--radius-md); background: var(--bg-surface); overflow: hidden; }
+  .fmode-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: color-mix(in srgb, var(--fm-c, var(--text-muted)) 6%, var(--bg-surface)); border-bottom: 1px solid var(--border-subtle); }
+  .fmode-comp { font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); }
+  .fmode-sev { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--fm-c, var(--text-muted)); color: var(--on-accent); }
+  .fmode-degraded { font: var(--type-caption); padding: 2px 8px; border-radius: var(--radius-pill); background: var(--bg-muted); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+
+  .fmode-what { padding: var(--sp-3) var(--sp-4); font-size: 13px; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); }
+
+  .fmode-grid { display: grid; gap: 0; }
+  .fmode-row { display: grid; grid-template-columns: 96px 1fr; gap: var(--sp-3); padding: var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  .fmode-row:last-child { border-bottom: none; }
+  .fmode-key { font: var(--type-caption); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .fmode-val { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+  .fmode-val code { font-family: var(--font-mono); font-size: 11.5px; background: var(--bg-muted); padding: 1px 5px; border-radius: var(--radius-xs); }
+  .fmode-rto { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); }
+
+  /* Severity drives the whole card's accent - the eye should sort by blast radius. */
+  .fmode-s-critical { --fm-c: var(--color-danger); }
+  .fmode-s-high     { --fm-c: var(--cat-3); }
+  .fmode-s-medium   { --fm-c: var(--color-warning); }
+  .fmode-s-low      { --fm-c: var(--cat-2); }
+
+  @media (max-width: 560px) {
+    .fmode-row { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>
+
+<section class="fmodes card-outlined" aria-label="{{TITLE}}">
+  <header class="fmodes-head">
+    <h2>{{TITLE}}</h2>
+    <p class="fmodes-desc">{{DESC}}</p>
+  </header>
+
+  <div class="fmodes-list">
+    <!-- one .fmode per failure mode; order them severity-first -->
+    <article class="fmode fmode-s-critical">
+      <header class="fmode-head">
+        <span class="fmode-comp">{{COMPONENT}}</span>
+        <span class="fmode-sev">{{SEVERITY}}</span>
+        <span class="fmode-degraded">{{DEGRADED_LABEL}}</span>
+      </header>
+      <div class="fmode-what">{{FAILURE}}</div>
+      <div class="fmode-grid">
+        <div class="fmode-row"><span class="fmode-key">{{IMPACT_LABEL}}</span><span class="fmode-val">{{IMPACT}}</span></div>
+        <div class="fmode-row"><span class="fmode-key">{{BLAST_LABEL}}</span><span class="fmode-val">{{BLAST}}</span></div>
+        <div class="fmode-row"><span class="fmode-key">{{DETECT_LABEL}}</span><span class="fmode-val">{{DETECT}}</span></div>
+        <div class="fmode-row"><span class="fmode-key">{{MITIGATE_LABEL}}</span><span class="fmode-val">{{MITIGATE}}</span></div>
+        <div class="fmode-row"><span class="fmode-key">{{RTO_LABEL}}</span><span class="fmode-val fmode-rto">{{RTO}}</span></div>
+      </div>
+    </article>
+  </div>
+</section>

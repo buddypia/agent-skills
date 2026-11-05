@@ -1,0 +1,78 @@
+<!-- ============================================================================
+MODULE: timeline                                             lineage: html-visual(diagram) + html-artifacts(report)
+PURPOSE: Vertical timeline - pure CSS (NO SVG). A left rail (::before line) with
+         status dots; each event is a .card-outlined with date, title, and body.
+VARIABLES (per event): {{DATE}} {{TITLE}} {{BODY}}  +  {{STATUS}} dot class
+           STATUS = .is-done (--color-success) / .is-active (--accent) /
+                    .is-todo (--text-muted). Default (no class) = todo.
+REQUIRES: core/elements.css (.stack .card-outlined .eyebrow)
+          core/tokens.css   (--color-success, --accent, --text-muted, --sp-*, --border-*)
+MODULE CSS: inline the data-module="timeline" style block once.
+INTERACTION: none (pure CSS).
+USAGE: repeat the <li class="tl-event"> block once per event inside <ol class="timeline">.
+============================================================================ -->
+<style data-module="timeline">
+  .timeline { position: relative; list-style: none; margin: 0; padding: 0 0 0 var(--sp-6); }
+  /* left rail - hairline with a soft accent-tinted gradient that fades the run
+     to a quiet tail, reading as a lit spine rather than a flat divider */
+  .timeline::before { content: ""; position: absolute; left: 7px; top: var(--sp-2); bottom: var(--sp-2); width: 2px; border-radius: var(--radius-pill); background: linear-gradient(to bottom, color-mix(in srgb, var(--accent) 40%, var(--border-default)) 0%, var(--border-default) 32%, var(--border-subtle) 100%); }
+  .tl-event { position: relative; }
+  .tl-event + .tl-event { margin-top: var(--sp-5); }
+  /* status dot sits on the rail */
+  .tl-event::before { content: ""; position: absolute; left: calc(var(--sp-6) * -1); top: var(--sp-1); width: 16px; height: 16px; border-radius: var(--radius-pill); background: var(--bg-surface); border: 3px solid var(--text-muted); box-sizing: border-box; box-shadow: 0 0 0 3px var(--bg-page); transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  .tl-event.is-done::before   { border-color: var(--color-success); background: var(--color-success); }
+  .tl-event.is-active::before { border-color: var(--accent); box-shadow: 0 0 0 3px var(--bg-page), 0 0 0 7px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .tl-event.is-todo::before   { border-color: var(--text-muted); }
+  /* accent connector tick - a hairline bridge from rail to card, lit on hover */
+  .tl-event::after { content: ""; position: absolute; left: calc(var(--sp-6) * -1 + 16px); top: calc(var(--sp-1) + 7px); width: calc(var(--sp-4) - 4px); height: 1px; background: var(--border-subtle); transition: background var(--dur-fast) var(--ease), width var(--dur-fast) var(--ease-out); }
+  .tl-date { display: block; margin-bottom: var(--sp-1); }   /* .eyebrow = mono uppercase accent */
+  .tl-title { font: var(--type-h3); color: var(--text-primary); margin: 0 0 var(--sp-2); transition: color var(--dur-fast) var(--ease); }
+  .tl-body { color: var(--text-secondary); font: var(--type-small); margin: 0; }
+  /* hover - accent-tied micro-state: the card edge firms up (inherited from
+     .card-outlined), the dot lifts toward the rail, the connector lights up */
+  @media (hover: hover) {
+    .tl-event:hover::after { background: color-mix(in srgb, var(--accent) 60%, var(--border-default)); width: var(--sp-4); }
+    .tl-event:hover::before { box-shadow: 0 0 0 3px var(--bg-page), 0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent); }
+    .tl-event.is-active:hover::before { box-shadow: 0 0 0 3px var(--bg-page), 0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent); }
+    .tl-event:hover .tl-title { color: color-mix(in srgb, var(--text-primary) 86%, var(--accent)); }
+    .tl-event:hover .card-outlined { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default)); box-shadow: var(--shadow-sm); }
+  }
+</style>
+
+<ol class="timeline" aria-label="Timeline">
+
+  <!-- ↓ repeat one <li> per event - set STATUS class: is-done / is-active / is-todo -->
+  <li class="tl-event is-done">
+    <span class="tl-date eyebrow">{{DATE}}</span>
+    <article class="card-outlined">
+      <h3 class="tl-title">{{TITLE}}</h3>
+      <p class="tl-body">{{BODY}}</p>
+    </article>
+  </li>
+  <!-- ↑ repeat -->
+
+  <li class="tl-event is-done">
+    <span class="tl-date eyebrow">{{DATE}}</span>
+    <article class="card-outlined">
+      <h3 class="tl-title">{{TITLE}}</h3>
+      <p class="tl-body">{{BODY}}</p>
+    </article>
+  </li>
+
+  <li class="tl-event is-active">
+    <span class="tl-date eyebrow">{{DATE}}</span>
+    <article class="card-outlined">
+      <h3 class="tl-title">{{TITLE}}</h3>
+      <p class="tl-body">{{BODY}}</p>
+    </article>
+  </li>
+
+  <li class="tl-event is-todo">
+    <span class="tl-date eyebrow">{{DATE}}</span>
+    <article class="card-outlined">
+      <h3 class="tl-title">{{TITLE}}</h3>
+      <p class="tl-body">{{BODY}}</p>
+    </article>
+  </li>
+
+</ol>

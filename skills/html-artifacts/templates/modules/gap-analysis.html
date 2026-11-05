@@ -1,0 +1,95 @@
+<!-- ============================================================================
+MODULE: gap-analysis                                       lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A three-column As-Is → Gap → To-Be layout (pure CSS, NO SVG). Left
+         column 現状 lists the current state; the middle column ギャップ names each
+         gap and pins a bridging-action chip to it; the right column あるべき姿
+         lists the target state. Arrow gutters flow left → right so the eye reads
+         current → gap+action → target.
+         Distinction: before-after shows two states side-by-side with delta chips
+         only (no bridge); force-field weighs driving vs restraining forces around
+         a change; gap-analysis makes the GAP itself and its closing ACTIONS
+         explicit as the middle term.
+VARIABLES: {{TITLE}}; column heads {{ASIS_HEAD}} {{GAP_HEAD}} {{TOBE_HEAD}};
+           per current item {{ASIS_ITEM}}; per gap {{GAP}} + its {{ACTION}} chip;
+           per target item {{TOBE_ITEM}}.
+SCALING:  a 5-track grid: [as-is 1fr][arrow auto][gap 1.2fr][arrow auto][to-be 1fr].
+          The two arrow gutters hold a single "→" glyph each, vertically centred.
+          The middle column is widened because each gap row also carries an action
+          chip. On narrow screens the grid collapses to one column and the arrow
+          gutters rotate to point downward.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --color-success,
+          --color-warning, --bg-surface, --bg-muted, --border-*, --text-*, --font-mono,
+          --radius-*, --sp-*, --type-*, --shadow-sm, --tracking-eyebrow)
+MODULE CSS: inline the data-module="gap-analysis" style block once.
+INTERACTION: none (static). Columns and arrows are real text/glyphs.
+USAGE: one .gap-item per bullet in the As-Is and To-Be columns; one .gap-row per
+       gap in the middle column, each holding a .gap-name and a .gap-action chip.
+============================================================================ -->
+<style data-module="gap-analysis">
+  .gap { margin: 0; }
+  .gap-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .gap-cols { display: grid; grid-template-columns: 1fr auto 1.2fr auto 1fr; align-items: stretch; gap: var(--sp-2); }
+  /* arrow gutter: a single flow glyph pointing to the next column */
+  .gap-arrow { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 20px; color: color-mix(in srgb, var(--accent) 60%, var(--text-muted)); }
+  /* column: an eyebrow head over a stack of items */
+  .gap-col { display: grid; grid-template-rows: auto 1fr; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--radius-md); border: 1px solid var(--border-default); background: var(--bg-surface); }
+  .gap-as-is { background: var(--bg-muted); }
+  .gap-to-be { background: color-mix(in srgb, var(--color-success) 8%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-success) 30%, var(--border-default)); }
+  .gap-mid   { background: color-mix(in srgb, var(--color-warning) 8%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-warning) 32%, var(--border-default)); }
+  .gap-head { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-secondary); }
+  .gap-list { display: grid; gap: var(--sp-2); align-content: start; }
+  .gap-item { padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); font: var(--type-small); color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); }
+  /* gap row: the gap statement + a bridging-action chip */
+  .gap-row { display: grid; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); background: var(--bg-surface); border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--border-subtle)); box-shadow: var(--shadow-sm); }
+  .gap-name { font: var(--type-small); font-weight: 600; color: var(--text-primary); }
+  .gap-action { justify-self: start; padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border-subtle)); }
+  .gap-action::before { content: "→ "; }
+  @media (max-width: 720px) { .gap-cols { grid-template-columns: 1fr; } .gap-arrow { transform: rotate(90deg); } }
+</style>
+
+<figure class="gap card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="gap-title">{{TITLE}}</figcaption> <!-- e.g. 問い合わせ対応のギャップ分析 -->
+  <div class="gap-cols">
+
+    <!-- ── AS-IS (現状) ─────────────────────────────────────────────────────── -->
+    <div class="gap-col gap-as-is">
+      <span class="gap-head">{{ASIS_HEAD}}</span> <!-- e.g. 現状 -->
+      <div class="gap-list">
+        <div class="gap-item">{{ASIS_ITEM}}</div> <!-- e.g. 一次回答まで平均8時間 -->
+        <div class="gap-item">{{ASIS_ITEM}}</div> <!-- e.g. FAQが未整備で属人化 -->
+        <!-- ↑ repeat: one .gap-item per current-state fact -->
+      </div>
+    </div>
+
+    <div class="gap-arrow" aria-hidden="true">→</div>
+
+    <!-- ── GAP + 施策 (ギャップと橋渡し) ───────────────────────────────────── -->
+    <div class="gap-col gap-mid">
+      <span class="gap-head">{{GAP_HEAD}}</span> <!-- e.g. ギャップ・施策 -->
+      <div class="gap-list">
+        <div class="gap-row">
+          <span class="gap-name">{{GAP}}</span>       <!-- e.g. 初動が遅く一次回答が滞留 -->
+          <span class="gap-action">{{ACTION}}</span>  <!-- e.g. FAQ整備とテンプレ自動提案 -->
+        </div>
+        <div class="gap-row">
+          <span class="gap-name">{{GAP}}</span>       <!-- e.g. 対応品質が担当者依存 -->
+          <span class="gap-action">{{ACTION}}</span>  <!-- e.g. 応対ガイドラインの標準化 -->
+        </div>
+        <!-- ↑ repeat: one .gap-row per gap (each with a bridging action chip) -->
+      </div>
+    </div>
+
+    <div class="gap-arrow" aria-hidden="true">→</div>
+
+    <!-- ── TO-BE (あるべき姿) ──────────────────────────────────────────────── -->
+    <div class="gap-col gap-to-be">
+      <span class="gap-head">{{TOBE_HEAD}}</span> <!-- e.g. あるべき姿 -->
+      <div class="gap-list">
+        <div class="gap-item">{{TOBE_ITEM}}</div> <!-- e.g. 一次回答まで1時間以内 -->
+        <div class="gap-item">{{TOBE_ITEM}}</div> <!-- e.g. 誰でも一定品質で対応 -->
+        <!-- ↑ repeat: one .gap-item per target-state fact -->
+      </div>
+    </div>
+
+  </div>
+</figure>

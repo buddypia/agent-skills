@@ -1,0 +1,89 @@
+<!-- ============================================================================
+MODULE: changelog                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Pure-CSS release notes (NO SVG). A stack of version blocks: each carries a
+         mono version number, a release date, and an optional "latest" badge, then
+         groups its entries under Added / Changed / Fixed chips (success / accent /
+         warning tints), with one short description line per entry. For the versioned
+         product-change record kept in READMEs / release pages.
+         Distinction: activity-feed is a chronological event stream (actor+action);
+         diff-block shows code +/- lines; timeline narrates milestones; changelog is
+         the version-keyed record of what shipped in each release.
+VARIABLES: {{TITLE}}; per version {{VERSION}} (mono) {{DATE}} + optional "latest"
+           badge; per group {{TAG}} (chip label, tone via .-added/-changed/-fixed);
+           per entry {{ENTRY}} (one-line description).
+REQUIRES: core/tokens.css (--accent, --color-success, --color-warning, --bg-surface,
+          --bg-muted, --border-*, --text-*, --font-mono, --radius-*, --sp-*, --shadow-sm),
+          core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="changelog" style block once.
+INTERACTION: hover lifts an entry line's tint (paint-only, reduced-motion guarded).
+USAGE: one .clg-ver per release (newest first); inside it one .clg-group per change
+       kind, its .clg-tag toned .-added/-changed/-fixed, then one .clg-entry per line.
+============================================================================ -->
+<style data-module="changelog">
+  .clg { margin: 0; }
+  .clg-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .clg-ver { padding-bottom: var(--sp-5); margin-bottom: var(--sp-5); border-bottom: 1px solid var(--border-subtle); }
+  .clg-ver:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+  /* version header: mono number + date + optional latest badge */
+  .clg-head { display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+  .clg-num { font: var(--type-h3); font-family: var(--font-mono); color: var(--text-primary); }
+  .clg-date { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .clg-latest { font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); padding: 2px var(--sp-2); border-radius: var(--radius-pill); color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border-default)); }
+  /* change group: a toned chip labels the kind, entries listed beneath */
+  .clg-group { display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-2) var(--sp-3); align-items: start; margin-top: var(--sp-3); }
+  .clg-tag { --tc: var(--accent); justify-self: start; font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px var(--sp-2); border-radius: var(--radius-xs); color: var(--tc); background: color-mix(in srgb, var(--tc) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--tc) 40%, var(--border-default)); }
+  .clg-tag.-added   { --tc: var(--color-success); }
+  .clg-tag.-changed { --tc: var(--accent); }
+  .clg-tag.-fixed   { --tc: var(--color-warning); }
+  .clg-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .clg-entry { font: var(--type-small); color: var(--text-secondary); padding: 2px var(--sp-2); border-radius: var(--radius-xs); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  @media (hover: hover) { .clg-entry:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); color: var(--text-primary); } }
+  @media (prefers-reduced-motion: reduce) { .clg-entry { transition: none; } }
+</style>
+
+<figure class="clg card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="clg-title">{{TITLE}}</figcaption> <!-- e.g. 変更履歴 -->
+
+  <!-- ── one .clg-ver per release (newest first) ─────────────────────────── -->
+  <section class="clg-ver">
+    <div class="clg-head">
+      <span class="clg-num">{{VERSION}}</span>          <!-- e.g. v2.4.0 -->
+      <span class="clg-date">{{DATE}}</span>            <!-- e.g. 2026-06-30 -->
+      <span class="clg-latest">latest</span>            <!-- 最新版のみ付与。旧版では削除 -->
+    </div>
+    <div class="clg-group">
+      <span class="clg-tag -added">{{TAG}}</span>       <!-- e.g. 追加 -->
+      <ul class="clg-list">
+        <li class="clg-entry">{{ENTRY}}</li>            <!-- e.g. CSVエクスポート機能を追加 -->
+        <li class="clg-entry">{{ENTRY}}</li>            <!-- e.g. ダークモードに対応 -->
+      </ul>
+    </div>
+    <div class="clg-group">
+      <span class="clg-tag -changed">{{TAG}}</span>     <!-- e.g. 変更 -->
+      <ul class="clg-list">
+        <li class="clg-entry">{{ENTRY}}</li>            <!-- e.g. 検索APIのレスポンス形式を刷新 -->
+      </ul>
+    </div>
+    <div class="clg-group">
+      <span class="clg-tag -fixed">{{TAG}}</span>       <!-- e.g. 修正 -->
+      <ul class="clg-list">
+        <li class="clg-entry">{{ENTRY}}</li>            <!-- e.g. ログイン時のタイムアウトを修正 -->
+      </ul>
+    </div>
+    <!-- ↑ repeat: one .clg-group per change kind (Added/Changed/Fixed) -->
+  </section>
+
+  <section class="clg-ver">
+    <div class="clg-head">
+      <span class="clg-num">{{VERSION}}</span>          <!-- e.g. v2.3.1 -->
+      <span class="clg-date">{{DATE}}</span>            <!-- e.g. 2026-05-12 -->
+    </div>
+    <div class="clg-group">
+      <span class="clg-tag -fixed">{{TAG}}</span>       <!-- e.g. 修正 -->
+      <ul class="clg-list">
+        <li class="clg-entry">{{ENTRY}}</li>            <!-- e.g. 通知の重複送信を修正 -->
+      </ul>
+    </div>
+  </section>
+  <!-- ↑ repeat: one .clg-ver per release -->
+</figure>

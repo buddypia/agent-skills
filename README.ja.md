@@ -21,6 +21,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 | [`claude-code-steering`](./skills/claude-code-steering) | Route / Audit → 4 axes → right mechanism | 指示が誤ったメカニズムに置かれ、CLAUDE.md が肥大化しルールが無視される |
 | [`loop-engineering`](./skills/loop-engineering) | Scan → Analyze → Build → Harden → Measure | ゲートなしでループ化されたエージェントの反復作業が、ドリフトしトークンを浪費し未レビューのコードを出してしまう |
 | [`spec-preview`](./skills/spec-preview) | モード + target → （キャッシュ済み）UI スキャン → 自己完結HTML → 開いて即決 | 仕様や UI 案が文章として読み飛ばされ、レビューが滞り意思決定が遅れる |
+| [`html-artifacts`](./skills/html-artifacts) | 要求 + target → テンプレート組成 → 決定論的なオフラインHTML | レポート・ダッシュボード・図解・UI案を、再利用できる構成と検証付きで出力する |
 
 > `multi-llm-*` スキルは、ユーザー自身がインストールするベンダー CLI（`agy` / Antigravity、`claude` / Claude Code、`codex` / Codex）をオーケストレーションします。`reflect` のような単一エージェントスキルは外部 CLI を必要としません。セットアップ、モデルの上書き設定、オフラインの `mock` モードについては、各スキルの README を参照してください。
 
@@ -33,6 +34,7 @@ buddypia による、MIT ライセンスのクロスエージェント **[Agent 
 - **claude-code-steering** — Claude Code の指示をどこに置くべきか（CLAUDE.md / ルール / スキル / サブエージェント / hook / アウトプットスタイル）の判断、そしてドリフトや肥大化した既存の .claude 設定の監査。
 - **loop-engineering** — 反復的なエージェントタスクを自己プロンプト型ループにすべきか — そしてすべきでない場合はそれを示す — を判断し、最小構成のループ（automation + skill + state file + gate を 1 つずつ）を構築して、ゴールのドリフト・トークンの暴走・未レビューのマージに対して堅牢化する。
 - **spec-preview** — 仕様・要件・UI 案を、ブラウザで開く自己完結HTML（複数案の比較 / 要件ダッシュボード / before-after 差分）に起こし、文章を読み飛ばす代わりに人間が目視で確認して即決できるようにする。target surface を判定し（モバイルアプリ / Web / ドキュメント / 図）、フレームワーク横断の UI スキャン（キャッシュ再利用でコストカット）で対象プロダクトの見た目を再現する。
+- **html-artifacts** — 再利用できる部品から単一のオフラインHTMLを作る。レポート・ダッシュボード・図解・UI案を対象画面に合わせて組み立て、決定論的なビルドと検証を行う。
 
 ## When to use it (and when not)
 

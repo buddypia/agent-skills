@@ -1,0 +1,91 @@
+<!-- ============================================================================
+MODULE: dot-plot                                   lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A dot / range plot (pure CSS - no SVG). One row per category: a label, a
+         horizontal track carrying a min-max range bar, and 1-2 value dots placed
+         by left% (inline). A legend maps each dot series (e.g. 現状 vs 目標). For
+         gap analysis, current-vs-target, before/after per category on a shared
+         scale. Distinction: chart-bar encodes value as a length FROM ZERO;
+         chart-bullet is one measure against qualitative bands; dot-plot foregrounds
+         POSITION and the RANGE/gap per category (dumbbell-style comparisons).
+VARIABLES: {{TITLE}}; scale ends {{SCALE_MIN}} {{SCALE_MID}} {{SCALE_MAX}};
+           per row {{CATEGORY}} + range bar inline left%/right% + per dot inline
+           left% (.dp-dot-a / .dp-dot-b); legend {{SERIES_A}} {{SERIES_B}}.
+SCALING:   map a value to a track position with pct = (v − MIN)/(MAX − MIN) * 100.
+           Range bar: style="left:{minPct}%;right:{100−maxPct}%". Dot: style="left:{pct}%"
+           (translate(-50%,-50%) centers it on the point). Reuse MIN/MAX for every row.
+REQUIRES:  core/tokens.css (--accent, --cat-1, --cat-4, --bg-surface, --border-*,
+           --text-*, --radius-*, --sp-*, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="dot-plot" style block once.
+INTERACTION: none (static). aria-label on the figure; dots grow on hover (paint/scale,
+           reduced-motion guarded). Labels are real text.
+USAGE: duplicate one <div class="dp-row"> per category; give the range bar left%+right%,
+       and one .dp-dot-a (+ optional .dp-dot-b) with left%. Keep the scale row last.
+============================================================================ -->
+<style data-module="dot-plot">
+  .dp { margin: 0; }
+  .dp-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .dp-row { display: grid; grid-template-columns: 8.5rem 1fr; align-items: center; gap: var(--sp-3); padding-block: var(--sp-2); }
+  .dp-label { font: var(--type-small); color: var(--text-secondary); font-weight: 600; letter-spacing: var(--tracking-tight); }
+  /* track: a hairline rail; the range bar is a tinted span between min and max */
+  .dp-track { position: relative; height: 20px; }
+  .dp-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%); background: var(--border-subtle); border-radius: var(--radius-pill); }
+  .dp-range { position: absolute; top: 50%; height: 6px; transform: translateY(-50%); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent) 22%, var(--bg-surface)); }
+  /* value dots: series A (現状) accent-tinted, series B (目標) warning-tinted */
+  .dp-dot { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: var(--radius-pill); transform: translate(-50%, -50%); border: 2px solid var(--bg-surface); box-shadow: var(--shadow-sm); transition: transform var(--dur-fast) var(--ease); }
+  .dp-dot-a { background: var(--cat-1); }
+  .dp-dot-b { background: var(--cat-4); }
+  .dp-dot:hover { transform: translate(-50%, -50%) scale(1.25); z-index: 2; }
+  /* scale row: mono end labels aligned to the track column */
+  .dp-scale { display: flex; justify-content: space-between; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); margin-top: var(--sp-1); }
+  .dp-legend { display: flex; gap: var(--sp-4); margin-top: var(--sp-3); }
+  .dp-legend span { display: inline-flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); color: var(--text-secondary); }
+  .dp-legend i { width: 11px; height: 11px; border-radius: var(--radius-pill); }
+  .dp-legend .dp-dot-a { position: static; transform: none; border: 0; box-shadow: none; }
+  .dp-legend .dp-dot-b { position: static; transform: none; border: 0; box-shadow: none; }
+  @media (prefers-reduced-motion: reduce) { .dp-dot { transition: none; } }
+</style>
+
+<figure class="dp card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="dp-title">{{TITLE}}</figcaption>
+
+  <!-- ↓ repeat one .dp-row per category (range bar + 1-2 dots) -->
+  <div class="dp-row">
+    <span class="dp-label">{{CATEGORY}}</span> <!-- e.g. 応答速度 -->
+    <div class="dp-track">
+      <span class="dp-range" style="left:24%;right:22%"></span> <!-- min→max range -->
+      <span class="dp-dot dp-dot-a" style="left:30%"></span>    <!-- 現状 -->
+      <span class="dp-dot dp-dot-b" style="left:72%"></span>    <!-- 目標 -->
+    </div>
+  </div>
+  <div class="dp-row">
+    <span class="dp-label">{{CATEGORY}}</span> <!-- e.g. 定着率 -->
+    <div class="dp-track">
+      <span class="dp-range" style="left:40%;right:12%"></span>
+      <span class="dp-dot dp-dot-a" style="left:46%"></span>
+      <span class="dp-dot dp-dot-b" style="left:84%"></span>
+    </div>
+  </div>
+  <div class="dp-row">
+    <span class="dp-label">{{CATEGORY}}</span> <!-- e.g. 稼働率 -->
+    <div class="dp-track">
+      <span class="dp-range" style="left:12%;right:38%"></span>
+      <span class="dp-dot dp-dot-a" style="left:20%"></span>
+      <span class="dp-dot dp-dot-b" style="left:60%"></span>
+    </div>
+  </div>
+  <!-- ↑ repeat -->
+
+  <div class="dp-row">
+    <span></span>
+    <span class="dp-scale">
+      <span>{{SCALE_MIN}}</span> <!-- e.g. 0 -->
+      <span>{{SCALE_MID}}</span> <!-- e.g. 50 -->
+      <span>{{SCALE_MAX}}</span> <!-- e.g. 100 -->
+    </span>
+  </div>
+
+  <div class="dp-legend">
+    <span><i class="dp-dot-a"></i>{{SERIES_A}}</span> <!-- e.g. 現状 -->
+    <span><i class="dp-dot-b"></i>{{SERIES_B}}</span> <!-- e.g. 目標 -->
+  </div>
+</figure>

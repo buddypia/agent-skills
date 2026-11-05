@@ -1,0 +1,47 @@
+<!-- ============================================================================
+MODULE: chart-line                                           lineage: html-visual(chart/dashboard)
+PURPOSE: Line / area chart on the HTML-hybrid plot frame (NO external libs). The line
+         and area are a preserveAspectRatio="none" SVG in 0-100 coordinates with a
+         non-scaling stroke; dots, value labels, ticks and x labels are HTML, so the text
+         never shrinks with the card. One series (area under the line) or several
+         series (lines + legend, end-of-line value labels).
+VARIABLES: {{TITLE}} · ticks as in chart-bar · {{POINTS}} = "x,y x,y …" in 0-100 space
+           (x = (i + 0.5) / N × 100 - points sit at slot centres so they align with the
+           x labels; y = 100 − pct) · {{AREA}} = "M x0,100 L …points… L xn,100 Z" ·
+           per point {{X_PCT}} {{Y_PCT}} (Y_PCT = bottom %, i.e. 100 − y) {{VALUE}} {{LABEL}}
+SCALING:   the y domain need NOT start at 0 for a line (168→182 reads best on 165-185);
+           label the ticks so the baseline is explicit - and then draw NO area: a fill
+           measures from zero, so over a truncated axis it exaggerates the change. The builder (`chart` variant line)
+           picks the domain, thins labels on long series and supports multi-series + target.
+REQUIRES:  core/elements.css (.hc frame + .hc-line/.hc-area/.hc-dot/.hc-pt)
+MODULE CSS: inline the data-module="chart-line" style block once.
+INTERACTION: [data-chart-tip] on figure + data-tip per .hc-dot → floating tooltip; dots grow on hover.
+============================================================================ -->
+<style data-module="chart-line">
+  .chart { width: 100%; }
+  .chart-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-2); letter-spacing: var(--tracking-tight); }
+  .chart.card-outlined:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border-default)); box-shadow: var(--shadow-sm); }
+  /* a faint same-hue lift so the line sits above its own area fill */
+  .hc-linechart .hc-line { filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--c, var(--accent)) 30%, transparent)); }
+</style>
+
+<figure class="chart hc hc-linechart card-outlined" data-chart-tip>
+  <figcaption class="chart-title">{{TITLE}}</figcaption>
+  <div class="hc-body" role="img" aria-label="{{TITLE}}: {{LABEL}} {{VALUE}}, …" style="--hc-h:240px;--hc-yw:{{YW}}px">
+    <div class="hc-y" aria-hidden="true"><span style="bottom:{{TICK_PCT}}%">{{TICK_LABEL}}</span></div>
+    <div class="hc-plot">
+      <div class="hc-grid" aria-hidden="true"><i class="hc-base" style="bottom:0%"></i><i style="bottom:{{TICK_PCT}}%"></i></div>
+      <div class="hc-lines">
+        <svg class="hc-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="hc-area cat-1" d="{{AREA}}"/>
+          <polyline class="hc-line cat-1" points="{{POINTS}}" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <!-- ↓ repeat per point -->
+        <span class="hc-dot cat-1" style="left:{{X_PCT}}%;bottom:{{Y_PCT}}%" data-tip="{{LABEL}}: {{VALUE}}"></span>
+        <span class="hc-val hc-pt" style="left:{{X_PCT}}%;bottom:{{Y_PCT}}%">{{VALUE}}</span>
+        <!-- ↑ repeat -->
+      </div>
+    </div>
+    <div class="hc-x" aria-hidden="true"><span>{{LABEL}}</span></div>
+  </div>
+</figure>

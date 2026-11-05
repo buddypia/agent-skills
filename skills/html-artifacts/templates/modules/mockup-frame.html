@@ -1,0 +1,225 @@
+<!-- ============================================================================
+MODULE: mockup-frame                                         lineage: html-visual(mockup) + demo2 mockup-mobile-app
+PURPOSE: Hi-fi mobile device mockup. Pure-CSS phone frame (~320px, rounded 40px,
+         thick bezel via border + box-shadow) with notch, status bar, an app
+         header, a scrollable list of .card rows, and a bottom tab bar. LIVE
+         screen switcher: tap a tab to swap the phone's screen.
+         Multi-screen, theme-aware, dependency-free (no images, no libs).
+VARIABLES: per screen: {{SCREEN_ID}} {{SCREEN_LABEL}} {{APP_TITLE}}
+           per row: {{ROW_INITIAL}} {{ROW_TITLE}} {{ROW_META}} {{ROW_TAG}}
+           bottom tab bar: {{TAB_LABEL}} (repeat 4×, first is .active)
+           (SCREEN_ID is the shared key: .tab[data-tab=ID] ↔ [data-panel=ID].)
+           CONTENT SLOT: replace the .mock-list block with any primitive markup.
+REQUIRES:  core/reset.css (.hidden) + core/tokens.css + core/elements.css
+           (.stack .card .badge* .small .muted) + core/interactions.js
+MODULE CSS: inline the data-module="mockup-frame" style block once.
+INTERACTION: [data-tabs] wraps the device; .tab(.active)[data-tab=x][role=tab] in
+             the .mock-switcher swaps [data-panel=x] screens inside the phone.
+             interactions.js → HA.tabs toggles .active / .hidden + aria-selected.
+USAGE: keep exactly one .tab.active + one visible [data-panel] screen; .hidden
+       every other screen. Repeat the .tab button + the [data-panel] screen block
+       once per screen (2 shown). Repeat .card rows in each .mock-list; repeat the
+       4 .mock-tab items in .mock-tabbar (spans - the app's own tab bar is illustration).
+============================================================================ -->
+<style data-module="mockup-frame">
+  /* Device + screen switcher wrapper */
+  .mock-device { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); }
+  /* Screen switcher - small tab bar above the phone (control, so .no-print) */
+  .mock-switcher { display: inline-flex; gap: var(--sp-1); padding: 4px; border-radius: var(--radius-pill); background: var(--bg-muted); }
+  .mock-switcher .tab {
+    background: none; border: none; cursor: pointer; min-height: 36px;
+    padding: var(--sp-1) var(--sp-4); border-radius: var(--radius-pill);
+    font: var(--type-caption); font-weight: 600; color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  }
+  .mock-switcher .tab:hover { color: var(--text-secondary); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .mock-switcher .tab.active { color: var(--on-accent); background: var(--accent); box-shadow: var(--shadow-sm); }
+  /* Device shell - bezel from border + layered shadow, no images */
+  .mock-phone {
+    width: 320px; max-width: 100%; margin-inline: auto;
+    background: var(--bg-surface);
+    border: 10px solid var(--text-primary);
+    border-radius: 40px;
+    box-shadow: var(--shadow-lg), inset 0 0 0 2px var(--border-default), inset 0 0 0 3px color-mix(in srgb, var(--accent) 8%, transparent);
+    overflow: hidden; position: relative;
+    font: var(--type-small);
+  }
+  /* Notch - small rounded bar centred over the status bar */
+  .mock-notch {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 22px;
+    background: var(--text-primary); border-radius: 0 0 var(--radius-md) var(--radius-md);
+    z-index: 3;
+  }
+  /* Status bar - time + faux signal/battery icons */
+  .mock-status {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-3) var(--sp-5) var(--sp-2);
+    font: var(--type-caption); font-weight: 600; color: var(--text-primary);
+  }
+  .mock-status .mock-icons { display: inline-flex; gap: 5px; align-items: center; }
+  .mock-icons svg { display: block; }
+  .mock-icons svg [data-fill] { fill: var(--text-primary); }
+  /* App header inside the screen */
+  .mock-appbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-3) var(--sp-5);
+    background: var(--accent); color: var(--on-accent);
+  }
+  .mock-appbar .mock-app-title { font: var(--type-h3); color: var(--on-accent); }
+  .mock-appbar .mock-app-btn {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--on-accent) 22%, transparent);
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .mock-appbar .mock-app-btn:hover { background: color-mix(in srgb, var(--on-accent) 34%, transparent); }
+  .mock-appbar .mock-app-btn svg [data-fill] { fill: var(--on-accent); }
+  /* Scroll area + list of rows */
+  .mock-screen { background: var(--bg-page); }
+  .mock-list { padding: var(--sp-4); max-height: 360px; overflow-y: auto; }
+  .mock-list > * + * { margin-top: var(--sp-3); }
+  .mock-row {
+    display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-3) var(--sp-4);
+    position: relative;
+    transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+  /* accent rail slides in on hover; row tint keeps the dense list calm (no lift) */
+  .mock-row::before {
+    content: ""; position: absolute; left: 0; top: 14%; bottom: 14%; width: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--accent); opacity: 0; transform: scaleY(.5);
+    transform-origin: center;
+    transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out);
+  }
+  .mock-row.card:hover { background: color-mix(in srgb, var(--accent) 6%, var(--bg-card)); transform: none; box-shadow: var(--shadow-sm); }
+  .mock-row:hover::before { opacity: 1; transform: scaleY(1); }
+  .mock-row .mock-avatar {
+    flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--accent) 16%, var(--bg-muted));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+    color: var(--accent); display: grid; place-items: center; font-weight: 700;
+  }
+  .mock-row .mock-row-body { flex: 1 1 auto; min-width: 0; }
+  .mock-row .mock-row-title { font-weight: 600; color: var(--text-primary); }
+  .mock-row .mock-row-meta { color: var(--text-muted); font: var(--type-caption); }
+  /* Bottom tab bar */
+  .mock-tabbar {
+    display: flex; border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+  .mock-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: var(--sp-2) 0 var(--sp-4); min-height: 44px;
+    color: var(--text-muted); font: var(--type-caption);
+    position: relative; /* illustrative app chrome: a <span>, not a dead button */
+  }
+  .mock-tab svg [data-fill] { fill: currentColor; }
+  .mock-tab.active { color: var(--accent); }
+  .mock-tab.active svg [data-fill] { fill: var(--accent); }
+  /* active tab indicator - short rounded accent tick above the icon */
+  .mock-tab.active::before {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 22px; height: 2px; border-radius: var(--radius-pill);
+    background: var(--accent);
+  }
+</style>
+
+<!-- [data-tabs] wraps switcher + phone so HA.tabs can swap screens -->
+<div class="mock-device" data-tabs>
+
+  <!-- Screen switcher (control → .no-print). One .tab per screen; first .active. -->
+  <div class="mock-switcher no-print" role="tablist" aria-label="{{APP_TITLE}} screens">
+    <!-- ↓ repeat one button per screen; first is .active + aria-selected="true" -->
+    <button class="tab active" type="button" data-tab="{{SCREEN_ID}}"   role="tab" aria-selected="true"  aria-controls="screen-{{SCREEN_ID}}">{{SCREEN_LABEL}}</button>
+    <button class="tab"        type="button" data-tab="{{SCREEN_ID_2}}" role="tab" aria-selected="false" aria-controls="screen-{{SCREEN_ID_2}}">{{SCREEN_LABEL_2}}</button>
+    <!-- ↑ repeat -->
+  </div>
+
+  <figure class="mock-phone" aria-label="{{APP_TITLE}} - mobile app mockup">
+  <span class="mock-notch" aria-hidden="true"></span>
+
+  <!-- Status bar: time + signal / wifi / battery -->
+  <div class="mock-status">
+    <span>9:41</span>
+    <span class="mock-icons" aria-hidden="true">
+      <svg width="17" height="11" viewBox="0 0 17 11"><rect data-fill x="0"  y="7" width="3" height="4" rx="1"/><rect data-fill x="4"  y="5" width="3" height="6" rx="1"/><rect data-fill x="8"  y="3" width="3" height="8" rx="1"/><rect data-fill x="12" y="1" width="3" height="10" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11"><path data-fill d="M7.5 2C4.4 2 1.7 3.2 0 5l1.6 1.6C2.9 5.2 5.1 4.3 7.5 4.3s4.6.9 5.9 2.3L15 5c-1.7-1.8-4.4-3-7.5-3Zm0 4.6c-1.6 0-3 .6-4 1.6L7.5 11l4-2.8c-1-1-2.4-1.6-4-1.6Z"/></svg>
+      <svg width="25" height="11" viewBox="0 0 25 11"><rect x="0.5" y="0.5" width="21" height="10" rx="2.5" fill="none" stroke="currentColor" opacity=".4"/><rect data-fill x="2" y="2" width="16" height="7" rx="1"/><rect data-fill x="23" y="3.5" width="2" height="4" rx="1"/></svg>
+    </span>
+  </div>
+
+  <!-- ↓ repeat one [data-panel] per screen; all but the first carry .hidden -->
+  <div class="mock-screen" data-panel="{{SCREEN_ID}}" id="screen-{{SCREEN_ID}}" role="tabpanel" aria-label="{{SCREEN_LABEL}}">
+    <!-- App header -->
+    <header class="mock-appbar">
+      <h3 class="mock-app-title">{{APP_TITLE}}</h3>
+      <span class="mock-app-btn" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle data-fill cx="3"  cy="8" r="1.6"/><circle data-fill cx="8"  cy="8" r="1.6"/><circle data-fill cx="13" cy="8" r="1.6"/></svg>
+      </span>
+    </header>
+
+    <!-- CONTENT SLOT: list of card rows (replace with any primitive markup) -->
+    <div class="mock-list stack">
+
+      <!-- ↓ repeat one .card per list row -->
+      <article class="card mock-row">
+        <span class="mock-avatar" aria-hidden="true">{{ROW_INITIAL}}</span>
+        <div class="mock-row-body">
+          <div class="mock-row-title">{{ROW_TITLE}}</div>
+          <div class="mock-row-meta">{{ROW_META}}</div>
+        </div>
+        <span class="badge badge-accent">{{ROW_TAG}}</span>
+      </article>
+      <!-- ↑ repeat -->
+
+    </div>
+  </div>
+
+  <!-- Second screen (inactive → .hidden). Swap content as needed. -->
+  <div class="mock-screen hidden" data-panel="{{SCREEN_ID_2}}" id="screen-{{SCREEN_ID_2}}" role="tabpanel" aria-label="{{SCREEN_LABEL_2}}">
+    <!-- App header -->
+    <header class="mock-appbar">
+      <h3 class="mock-app-title">{{APP_TITLE_2}}</h3>
+      <span class="mock-app-btn" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle data-fill cx="3"  cy="8" r="1.6"/><circle data-fill cx="8"  cy="8" r="1.6"/><circle data-fill cx="13" cy="8" r="1.6"/></svg>
+      </span>
+    </header>
+
+    <!-- CONTENT SLOT: detail / secondary screen markup -->
+    <div class="mock-list stack">
+      <article class="card mock-row">
+        <span class="mock-avatar" aria-hidden="true">{{ROW_INITIAL_2}}</span>
+        <div class="mock-row-body">
+          <div class="mock-row-title">{{ROW_TITLE_2}}</div>
+          <div class="mock-row-meta">{{ROW_META_2}}</div>
+        </div>
+        <span class="badge badge-accent">{{ROW_TAG_2}}</span>
+      </article>
+    </div>
+  </div>
+  <!-- ↑ repeat screen -->
+
+  <!-- Bottom tab bar (4 tabs; first .active) -->
+  <div class="mock-tabbar">
+    <!-- ↓ repeat one .mock-tab per tab; mark the current one .active -->
+    <span class="mock-tab active">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path data-fill d="M10 2 2 8.5V18h5v-5h6v5h5V8.5L10 2Z"/></svg>
+      {{TAB_LABEL}}
+    </span>
+    <!-- ↑ repeat (3 more, e.g. Search / Activity / Profile) -->
+    <span class="mock-tab">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12.5" y1="12.5" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      {{TAB_LABEL}}
+    </span>
+    <span class="mock-tab">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path data-fill d="M10 17.5 8.7 16.3C4.1 12.1 1 9.3 1 5.9 1 3.4 3 1.5 5.5 1.5c1.4 0 2.8.7 3.5 1.7.7-1 2.1-1.7 3.5-1.7C15 1.5 17 3.4 17 5.9c0 3.4-3.1 6.2-7.7 10.4L10 17.5Z"/></svg>
+      {{TAB_LABEL}}
+    </span>
+    <span class="mock-tab">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle data-fill cx="10" cy="6" r="3.4"/><path data-fill d="M3.5 17c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5H3.5Z"/></svg>
+      {{TAB_LABEL}}
+    </span>
+  </div>
+  </figure>
+</div>

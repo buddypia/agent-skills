@@ -1,0 +1,385 @@
+{
+  "title": "Souko Cloud 在庫同期API v2 - 技術仕様書",
+  "theme": "dark-focus",
+  "layout": "stack",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "TECHNICAL SPEC",
+  "subtitle": "全国12拠点の在庫をリアルタイム同期する在庫同期APIの設計仕様",
+  "footer": "Souko Cloud プラットフォームチーム / 2026-07-08",
+  "meta": [
+    {
+      "k": "Version",
+      "v": "2.3.0"
+    },
+    {
+      "k": "Owner",
+      "v": "プラットフォームチーム"
+    },
+    {
+      "k": "Status",
+      "v": "レビュー中"
+    },
+    {
+      "k": "Reviewers",
+      "v": "田中 / 佐藤 / 鈴木"
+    }
+  ],
+  "sections": [
+    {
+      "type": "callout",
+      "variant": "tldr",
+      "title": "目的とスコープ",
+      "body": "在庫同期API v2は、全国12拠点の倉庫在庫を平均800msでリアルタイム同期し、二重販売を防止するための基盤である。本仕様の対象は同期API・イベント配信・整合性保証まで。決済処理と配送手配は対象外とする。"
+    },
+    {
+      "type": "html",
+      "html": "<nav class=\"toc card-outlined\" aria-label=\"目次\"><p class=\"toc-title\">目次</p><ol class=\"toc-list\"><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">01</span><span class=\"toc-label\">目的とスコープ</span><span class=\"toc-dots\"></span><span class=\"toc-page\">1</span></div></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">02</span><span class=\"toc-label\">システムアーキテクチャ</span><span class=\"toc-dots\"></span><span class=\"toc-page\">2</span></div><ol class=\"toc-subs\"><li><div class=\"toc-row toc-sub\"><span class=\"toc-num\">2.1</span><span class=\"toc-label\">コンポーネント構成</span><span class=\"toc-dots\"></span><span class=\"toc-page\">2</span></div></li><li><div class=\"toc-row toc-sub\"><span class=\"toc-num\">2.2</span><span class=\"toc-label\">データフローと整合性</span><span class=\"toc-dots\"></span><span class=\"toc-page\">3</span></div></li></ol></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">03</span><span class=\"toc-label\">API仕様</span><span class=\"toc-dots\"></span><span class=\"toc-page\">4</span></div></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">04</span><span class=\"toc-label\">リポジトリ構成</span><span class=\"toc-dots\"></span><span class=\"toc-page\">6</span></div></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">05</span><span class=\"toc-label\">非機能要件</span><span class=\"toc-dots\"></span><span class=\"toc-page\">7</span></div></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">06</span><span class=\"toc-label\">詳細設計</span><span class=\"toc-dots\"></span><span class=\"toc-page\">8</span></div></li><li class=\"toc-chapter\"><div class=\"toc-row\"><span class=\"toc-num\">07</span><span class=\"toc-label\">レビュー観点</span><span class=\"toc-dots\"></span><span class=\"toc-page\">10</span></div></li></ol></nav>",
+      "cssModules": [
+        "toc"
+      ]
+    },
+    {
+      "type": "diagram",
+      "title": "システムアーキテクチャ",
+      "layout": "layered",
+      "zones": [
+        "Edge",
+        "Services",
+        "Data"
+      ],
+      "groupLabels": {
+        "1": "ステートレス",
+        "2": "ステートフル"
+      },
+      "nodes": [
+        {
+          "id": "gw",
+          "label": "API Gateway",
+          "sub": "認証 / レート制限",
+          "zone": "Edge",
+          "group": 1
+        },
+        {
+          "id": "sync",
+          "label": "sync-service",
+          "sub": "同期オーケストレーション",
+          "zone": "Services",
+          "group": 1
+        },
+        {
+          "id": "stock",
+          "label": "stock-service",
+          "sub": "在庫台帳ドメイン",
+          "zone": "Services",
+          "group": 1
+        },
+        {
+          "id": "pg",
+          "label": "PostgreSQL",
+          "sub": "在庫マスタ",
+          "zone": "Data",
+          "group": 2
+        },
+        {
+          "id": "redis",
+          "label": "Redis",
+          "sub": "在庫キャッシュ",
+          "zone": "Data",
+          "group": 2
+        },
+        {
+          "id": "bus",
+          "label": "Kafka",
+          "sub": "イベントバス",
+          "zone": "Data",
+          "group": 2
+        }
+      ],
+      "edges": [
+        {
+          "from": "gw",
+          "to": "sync",
+          "label": "HTTP"
+        },
+        {
+          "from": "sync",
+          "to": "stock",
+          "label": "gRPC"
+        },
+        {
+          "from": "stock",
+          "to": "pg"
+        },
+        {
+          "from": "stock",
+          "to": "redis",
+          "label": "cache"
+        },
+        {
+          "from": "sync",
+          "to": "bus",
+          "proto": "pub-sub",
+          "label": "events"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"api card-outlined\" aria-label=\"主要エンドポイント\"><figcaption class=\"api-title\">主要エンドポイント</figcaption><section class=\"api-ep\"><div class=\"api-head\"><span class=\"api-method -get\">GET</span><span class=\"api-path\">/v2/inventory/<span class=\"api-param\">:sku</span></span></div><p class=\"api-desc\">指定SKUの現在庫を全倉庫横断で集計して取得する。</p><table class=\"api-params\"><caption>Parameters</caption><thead><tr><th>name</th><th>type</th><th>required</th><th>description</th></tr></thead><tbody><tr class=\"api-prow\"><td class=\"api-pn\">sku</td><td class=\"api-pt\">string</td><td><span class=\"api-req\">必須</span></td><td>対象の商品SKU（13桁JANコード）</td></tr><tr class=\"api-prow\"><td class=\"api-pn\">warehouse</td><td class=\"api-pt\">string</td><td><span class=\"api-opt\">任意</span></td><td>倉庫IDで絞り込む（省略時は全拠点合算）</td></tr></tbody></table><div class=\"api-res\"><span class=\"api-status -ok\">200</span><span class=\"api-rdesc\">倉庫別在庫と合計を含む在庫サマリJSONを返す。</span></div></section><section class=\"api-ep\"><div class=\"api-head\"><span class=\"api-method -post\">POST</span><span class=\"api-path\">/v2/inventory/sync</span></div><p class=\"api-desc\">在庫差分を登録し、全拠点へ同期イベントを発行する。</p><table class=\"api-params\"><caption>Parameters</caption><thead><tr><th>name</th><th>type</th><th>required</th><th>description</th></tr></thead><tbody><tr class=\"api-prow\"><td class=\"api-pn\">sku</td><td class=\"api-pt\">string</td><td><span class=\"api-req\">必須</span></td><td>対象の商品SKU</td></tr><tr class=\"api-prow\"><td class=\"api-pn\">delta</td><td class=\"api-pt\">number</td><td><span class=\"api-req\">必須</span></td><td>在庫の増減数（マイナスで引当）</td></tr><tr class=\"api-prow\"><td class=\"api-pn\">reason</td><td class=\"api-pt\">string</td><td><span class=\"api-opt\">任意</span></td><td>在庫変動の理由コード（入荷/出荷/棚卸）</td></tr></tbody></table><div class=\"api-res\"><span class=\"api-status -warn\">400</span><span class=\"api-rdesc\">在庫が負になる場合はバリデーションエラーを返す。</span></div></section></figure>",
+      "cssModules": [
+        "api-endpoint"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"ftr card-outlined\" aria-label=\"リポジトリ構成\"><figcaption class=\"ftr-title\">リポジトリ構成</figcaption><div class=\"ftr-tree\" role=\"group\" aria-label=\"リポジトリ構成\"><div class=\"ftr-row\"><span class=\"ftr-guide\"></span><span class=\"ftr-name -dir\">inventory-sync/</span><span class=\"ftr-note\"># サービスルート</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">cmd/</span><span class=\"ftr-note\"># エントリポイント</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  └─ </span><span class=\"ftr-name\">server.go</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">internal/</span><span class=\"ftr-note\"># 非公開パッケージ</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  ├─ </span><span class=\"ftr-name -dir\">sync/</span><span class=\"ftr-note\"># 同期オーケストレーション</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  │  ├─ </span><span class=\"ftr-name\">orchestrator.go</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  │  └─ </span><span class=\"ftr-name\">reconciler.go</span><span class=\"ftr-note\"># 整合性照合</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  ├─ </span><span class=\"ftr-name -dir\">stock/</span><span class=\"ftr-note\"># 在庫台帳ドメイン</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  │  └─ </span><span class=\"ftr-name\">ledger.go</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  └─ </span><span class=\"ftr-name -dir\">event/</span><span class=\"ftr-note\"># Kafkaイベント発行</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│     └─ </span><span class=\"ftr-name\">publisher.go</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">api/</span><span class=\"ftr-note\"># OpenAPI定義</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">│  └─ </span><span class=\"ftr-name\">openapi.yaml</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">├─ </span><span class=\"ftr-name -dir\">deploy/</span><span class=\"ftr-note\"># k8sマニフェスト</span></div><div class=\"ftr-row\"><span class=\"ftr-guide\">└─ </span><span class=\"ftr-name\">README.md</span><span class=\"ftr-note\"># セットアップ手順</span></div></div></figure>",
+      "cssModules": [
+        "file-tree"
+      ]
+    },
+    {
+      "type": "table",
+      "title": "非機能要件",
+      "columns": [
+        "項目",
+        "目標値",
+        "測定方法",
+        "状態"
+      ],
+      "rows": [
+        [
+          "可用性",
+          "99.95% / 月",
+          "月次SLOレポート",
+          {
+            "badge": "success",
+            "text": "達成"
+          }
+        ],
+        [
+          "同期レイテンシ p95",
+          "800ms 以下",
+          "分散トレーシング",
+          {
+            "badge": "success",
+            "text": "達成"
+          }
+        ],
+        [
+          "スループット",
+          "5,000 req/s",
+          "負荷試験（k6）",
+          {
+            "badge": "warning",
+            "text": "要改善"
+          }
+        ],
+        [
+          "整合性",
+          "結果整合（最大3秒）",
+          "照合ジョブの差分件数",
+          {
+            "badge": "success",
+            "text": "達成"
+          }
+        ],
+        [
+          "監査ログ保持",
+          "400日",
+          "オブジェクトストレージ監査",
+          {
+            "badge": "info",
+            "text": "監視中"
+          }
+        ]
+      ]
+    },
+    {
+      "type": "collapsible",
+      "title": "詳細設計",
+      "items": [
+        {
+          "summary": "同期アルゴリズム（差分マージ）",
+          "open": true,
+          "body": "<p>各拠点の在庫更新はイベントソーシングで記録し、SKU単位のバージョンベクタで順序を保証する。到着順が前後しても、より新しいバージョンのみを適用する冪等マージを行う。</p>"
+        },
+        {
+          "summary": "競合解決ポリシー",
+          "body": "<p>同一SKUへの同時更新は「引当（減算）を優先」する。加算はいつでも安全に再適用できるため後続に回し、負在庫を防ぐ。競合発生時は照合ジョブが検知しアラートを発報する。</p>"
+        },
+        {
+          "summary": "障害時のフォールバック",
+          "body": "<p>Kafka配信が停止した場合、sync-serviceはローカルのアウトボックステーブルに退避し、復旧後に順序を保って再送する。読み取りはRedisキャッシュが劣化モードで応答する。</p>"
+        }
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "レビュー観点",
+      "control": "checkbox",
+      "items": [
+        {
+          "label": "API後方互換性（v1クライアント）を確認",
+          "state": "done"
+        },
+        {
+          "label": "エラーレスポンスがRFC 7807に準拠",
+          "state": "done"
+        },
+        {
+          "label": "負荷試験を2倍ピークで実施",
+          "state": "pending",
+          "desc": "担当: QAチーム / 期限 7/22"
+        },
+        {
+          "label": "監視ダッシュボードとアラートを整備",
+          "state": "pending",
+          "desc": "担当: SRE / 期限 7/25"
+        },
+        {
+          "label": "セキュリティレビュー完了",
+          "state": "blocked",
+          "desc": "認証まわりの指摘対応待ち"
+        },
+        {
+          "label": "運用Runbookとドキュメントを更新",
+          "state": "todo"
+        }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "tech-spec",
+    "name": "技術仕様書 / 設計書",
+    "genre": "技術ドキュメント",
+    "purpose": "サービスやAPIの設計意図・アーキテクチャ・API契約・非機能要件・レビュー観点を1枚に集約し、実装者とレビュアーが同じ前提で設計判断を下せるようにする。",
+    "audience": "実装エンジニア / テックリード / レビュアー",
+    "triggers": {
+      "ja": [
+        "技術仕様書を作って",
+        "設計書をHTMLで",
+        "API仕様をまとめて",
+        "アーキテクチャドキュメント",
+        "design doc を作成",
+        "システム設計の資料"
+      ],
+      "en": [
+        "tech spec",
+        "design doc",
+        "architecture document",
+        "API specification"
+      ],
+      "ko": [
+        "기술 명세서",
+        "설계 문서",
+        "API 스펙 문서"
+      ]
+    },
+    "axes": {
+      "theme": "dark-focus",
+      "layout": "stack",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "diagram中心の技術資料はdark-focusが既定相性。左タイトル/右メタのsplitヘッダでVersion・Owner・Statusの出自を明示。stackで上から読み下す設計書向き。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "callout",
+        "role": "結論先出し（目的とスコープ）",
+        "required": true,
+        "guide": "tldrバリアントで「何を・誰のために・どこまで」を3文以内。スコープ外も1文で明記する。",
+        "volume": "3〜4文"
+      },
+      {
+        "n": 2,
+        "type": "html:toc",
+        "role": "目次（2階層ナビ）",
+        "required": false,
+        "guide": "章番号+章名+ページの索引。builderセクションにidが付かないため非リンクのリーダー行で構成（in-pageアンカーは非対応）。章数は本文の節数に合わせる。",
+        "volume": "5〜8章"
+      },
+      {
+        "n": 3,
+        "type": "diagram",
+        "role": "アーキテクチャ図",
+        "required": true,
+        "guide": "layoutはlayeredでEdge/Services/Dataのゾーンに分ける。group色でステートレス/ステートフルを区別。edgeにHTTP/gRPC/pub-subのプロトコルを付す。",
+        "volume": "ノード5〜8"
+      },
+      {
+        "n": 4,
+        "type": "html:api-endpoint",
+        "role": "主要API契約",
+        "required": true,
+        "guide": "メソッドバッジ+パス（:paramをapi-paramで強調）+パラメータ表+レスポンス。代表2本に絞る。",
+        "volume": "エンドポイント2本"
+      },
+      {
+        "n": 5,
+        "type": "html:file-tree",
+        "role": "リポジトリ構成",
+        "required": false,
+        "guide": "box-drawingガイドで実際のディレクトリ構成を提示。フォルダは-dir、右側に用途コメント。",
+        "volume": "12〜16行"
+      },
+      {
+        "n": 6,
+        "type": "table",
+        "role": "非機能要件",
+        "required": true,
+        "guide": "項目/目標値/測定方法/状態の4列。状態はbadge（success/warning/info）で達成度を色分け。",
+        "volume": "5〜7行"
+      },
+      {
+        "n": 7,
+        "type": "collapsible",
+        "role": "詳細設計（折りたたみ）",
+        "required": false,
+        "guide": "アルゴリズム・競合解決・障害時など踏み込んだ設計を折りたたみに退避。1件目のみopen。",
+        "volume": "3件"
+      },
+      {
+        "n": 8,
+        "type": "checklist",
+        "role": "レビュー観点",
+        "required": true,
+        "guide": "マージ前チェック。stateでdone/pending/blocked/todoを表現し、descに担当と期限。",
+        "volume": "5〜7項目"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 3,
+        "default": "diagram（layered アーキテクチャ）",
+        "alternative": "html:sequence-diagram または diagram(vertical)",
+        "when": "構造よりリクエストの時系列フローを見せたいとき"
+      },
+      {
+        "slot": 5,
+        "default": "html:file-tree",
+        "alternative": "table（設定ファイル一覧）",
+        "when": "ディレクトリより設定項目の一覧が重要なとき"
+      },
+      {
+        "slot": 7,
+        "default": "collapsible",
+        "alternative": "tabs",
+        "when": "詳細設計を並列カテゴリ（設計/運用/移行）で切り替えたいとき"
+      }
+    ],
+    "modules": [
+      "callout",
+      "toc",
+      "diagram",
+      "api-endpoint",
+      "file-tree",
+      "table",
+      "collapsible",
+      "checklist"
+    ]
+  }
+}

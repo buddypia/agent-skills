@@ -1,0 +1,269 @@
+{
+  "title": "Knowledge Graph Platform — Diagram Figure Sheet",
+  "theme": "sunset",
+  "layout": "stack",
+  "header": "compact",
+  "lang": "en",
+  "target": "diagram",
+  "viewport": "desktop",
+  "eyebrow": "DIAGRAM FIGURE-SHEET · DARK-FOCUS",
+  "subtitle": "The design of our internal knowledge graph platform is shown in three types of figures: the data model (ERD), the layered architecture, and a mind map of design considerations. All are single-file, work offline, and have no external dependencies.",
+  "footer": "Source: Platform Design Review · 2026-06-07 · UNIFIED HTML SYSTEM demo (shape: diagram / theme: dark-focus)",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<section class=\"erd stack\" aria-label=\"Entity Relationship Diagram (ERD)\">\n  <h2>Figure 1 — Data Model ERD</h2>\n  <p class=\"muted small\">The core schema of the knowledge graph. Documents are created by users, extracted as entities, and connected many-to-many between nodes via relations.</p>\n  <div class=\"erd-stage\" data-zoompan data-zoom-min=\"0.5\" data-zoom-max=\"2.4\" tabindex=\"0\">\n    <div class=\"zoom-controls no-print\">\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-in aria-label=\"Zoom in\">+</button>\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-out aria-label=\"Zoom out\">&minus;</button>\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-reset aria-label=\"Reset zoom\">&#x2922;</button>\n      <span class=\"zoom-readout\" data-zoom-readout>100%</span>\n    </div>\n    <svg viewBox=\"0 0 800 680\" data-draggable role=\"img\" aria-label=\"Entity relationship diagram of the knowledge graph schema (drag entities to rearrange)\">\n      <defs>\n        <marker id=\"erd-arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\">\n          <path d=\"M0,0 L10,5 L0,10 z\" fill=\"var(--text-muted)\"/>\n        </marker>\n      </defs>\n      <g data-viewport>\n        <line class=\"erd-link\" data-edge data-from=\"users\" data-to=\"documents\" marker-end=\"url(#erd-arrow)\"/>\n        <text class=\"erd-link-label\" data-edge-label=\"users-documents\">1:N</text>\n        <line class=\"erd-link\" data-edge data-from=\"documents\" data-to=\"entities\" marker-end=\"url(#erd-arrow)\"/>\n        <text class=\"erd-link-label\" data-edge-label=\"documents-entities\">1:N</text>\n        <line class=\"erd-link nm\" data-edge data-from=\"entities\" data-to=\"relations\" marker-end=\"url(#erd-arrow)\" marker-start=\"url(#erd-arrow)\"/>\n        <text class=\"erd-link-label\" data-edge-label=\"entities-relations\">N:M</text>\n      <g class=\"erd-node\" data-node=\"users\" transform=\"translate(40,50)\" role=\"group\" aria-label=\"users entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"236\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"236\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">users</header>\n            <ul class=\"erd-rows\">\n        <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">email</span><span class=\"erd-type\">varchar(255)</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">display_name</span><span class=\"erd-type\">varchar(120)</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">role</span><span class=\"erd-type\">enum</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">created_at</span><span class=\"erd-type\">timestamptz</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      <g class=\"erd-node\" data-node=\"documents\" transform=\"translate(520,50)\" role=\"group\" aria-label=\"documents entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"274\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"274\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">documents</header>\n            <ul class=\"erd-rows\">\n        <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">author_id</span><span class=\"chip fk\">FK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">title</span><span class=\"erd-type\">varchar(300)</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">body</span><span class=\"erd-type\">text</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">status</span><span class=\"erd-type\">enum</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">indexed_at</span><span class=\"erd-type\">timestamptz</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      <g class=\"erd-node\" data-node=\"entities\" transform=\"translate(520,390)\" role=\"group\" aria-label=\"entities entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"236\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"236\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">entities</header>\n            <ul class=\"erd-rows\">\n        <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">document_id</span><span class=\"chip fk\">FK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">label</span><span class=\"erd-type\">varchar(200)</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">kind</span><span class=\"erd-type\">enum</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">embedding</span><span class=\"erd-type\">vector(768)</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      <g class=\"erd-node\" data-node=\"relations\" transform=\"translate(40,390)\" role=\"group\" aria-label=\"relations entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"236\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"236\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">relations</header>\n            <ul class=\"erd-rows\">\n        <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">source_id</span><span class=\"chip fk\">FK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">target_id</span><span class=\"chip fk\">FK</span><span class=\"erd-type\">uuid</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">predicate</span><span class=\"erd-type\">varchar(120)</span></li>\n        <li class=\"erd-row\"><span class=\"erd-col\">weight</span><span class=\"erd-type\">numeric(4,3)</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      </g>\n    </svg>\n  </div>\n  <div class=\"cluster no-print\">\n    <button class=\"btn btn-ghost btn-sm\" data-drag-reset>Reset layout</button>\n  </div>\n  <div class=\"cluster erd-legend\" aria-label=\"Cardinality legend\">\n    <span><span class=\"chip\">1:1</span> One-to-one</span>\n    <span><span class=\"chip\">1:N</span> One-to-many</span>\n    <span><span class=\"chip\">N:M</span> Many-to-many (dashed)</span>\n  </div>\n</section>",
+      "cssModules": [
+        "erd"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"divider-label\">Layered Architecture</div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"stack\">\n  <h2>Figure 2 — System Architecture</h2>\n  <p class=\"muted small\">A four-layer architecture from ingestion to the search API. Synchronous calls use HTTP / gRPC, while the extraction pipeline is loosely coupled through an event-driven (pub-sub) approach.</p>\n</div>"
+    },
+    {
+      "type": "diagram",
+      "title": "Knowledge Graph Platform — Layered Architecture",
+      "layout": "layered",
+      "zones": [
+        "Client Layer",
+        "Application Layer",
+        "Data Layer",
+        "External Services"
+      ],
+      "legend": false,
+      "nodes": [
+        {
+          "id": "web-console",
+          "label": "Web Console",
+          "zone": "Client Layer",
+          "group": 1
+        },
+        {
+          "id": "cli-sdk",
+          "label": "CLI / SDK",
+          "zone": "Client Layer",
+          "group": 1
+        },
+        {
+          "id": "api-gateway",
+          "label": "API Gateway",
+          "zone": "Application Layer",
+          "group": 2
+        },
+        {
+          "id": "query-service",
+          "label": "Query Service",
+          "zone": "Application Layer",
+          "group": 2
+        },
+        {
+          "id": "ingest-worker",
+          "label": "Ingest Worker",
+          "zone": "Application Layer",
+          "group": 2
+        },
+        {
+          "id": "graph-store",
+          "label": "Graph Store",
+          "zone": "Data Layer",
+          "group": 3
+        },
+        {
+          "id": "vector-index",
+          "label": "Vector Index",
+          "zone": "Data Layer",
+          "group": 3
+        },
+        {
+          "id": "extraction-api",
+          "label": "Extraction API",
+          "sub": "LLM",
+          "zone": "External Services",
+          "group": 4
+        }
+      ],
+      "edges": [
+        {
+          "from": "web-console",
+          "to": "api-gateway",
+          "label": "HTTP"
+        },
+        {
+          "from": "api-gateway",
+          "to": "query-service",
+          "label": "gRPC"
+        },
+        {
+          "from": "query-service",
+          "to": "graph-store",
+          "label": "gRPC"
+        },
+        {
+          "from": "query-service",
+          "to": "vector-index",
+          "label": "gRPC"
+        },
+        {
+          "from": "ingest-worker",
+          "to": "extraction-api",
+          "label": "pub-sub",
+          "proto": "pub-sub"
+        },
+        {
+          "from": "ingest-worker",
+          "to": "graph-store",
+          "label": "pub-sub",
+          "proto": "pub-sub"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"cluster\" aria-label=\"Protocol legend\">\n  <span class=\"badge badge-accent\">HTTP — Synchronous REST</span>\n  <span class=\"badge badge-success\">gRPC — Internal RPC</span>\n  <span class=\"badge badge-warning\">pub-sub — Asynchronous events (dashed)</span>\n</div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"divider-label\">Design Mind Map</div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"stack\">\n  <h2>Figure 3 — Design Considerations Mind Map</h2>\n  <p class=\"muted small\">A radial layout organizing the four design axes that make up the knowledge graph platform, along with the key topics under each.</p>\n</div>"
+    },
+    {
+      "type": "diagram",
+      "title": "Mind map: Knowledge Graph Platform",
+      "layout": "radial",
+      "groupLabels": {
+        "1": "Ingestion",
+        "2": "Extraction",
+        "3": "Search",
+        "4": "Operations"
+      },
+      "nodes": [
+        {
+          "id": "kgp",
+          "label": "Knowledge Graph",
+          "sub": "Platform",
+          "root": true
+        },
+        {
+          "id": "ingestion",
+          "label": "Ingestion",
+          "group": 1
+        },
+        {
+          "id": "connectors",
+          "label": "Connectors",
+          "group": 1
+        },
+        {
+          "id": "incremental-sync",
+          "label": "Incremental Sync",
+          "group": 1
+        },
+        {
+          "id": "extraction",
+          "label": "Extraction",
+          "group": 2
+        },
+        {
+          "id": "ner",
+          "label": "NER",
+          "sub": "Relation Extraction",
+          "group": 2
+        },
+        {
+          "id": "embedding-generation",
+          "label": "Embedding",
+          "sub": "Generation",
+          "group": 2
+        },
+        {
+          "id": "search",
+          "label": "Search",
+          "group": 3
+        },
+        {
+          "id": "hybrid-search",
+          "label": "Hybrid Search",
+          "group": 3
+        },
+        {
+          "id": "graph-traversal",
+          "label": "Graph Traversal",
+          "group": 3
+        },
+        {
+          "id": "operations",
+          "label": "Operations",
+          "group": 4
+        },
+        {
+          "id": "access-control",
+          "label": "Access Control",
+          "group": 4
+        },
+        {
+          "id": "observability",
+          "label": "Observability",
+          "group": 4
+        }
+      ],
+      "edges": [
+        {
+          "from": "kgp",
+          "to": "ingestion"
+        },
+        {
+          "from": "ingestion",
+          "to": "connectors"
+        },
+        {
+          "from": "ingestion",
+          "to": "incremental-sync"
+        },
+        {
+          "from": "kgp",
+          "to": "extraction"
+        },
+        {
+          "from": "extraction",
+          "to": "ner"
+        },
+        {
+          "from": "extraction",
+          "to": "embedding-generation"
+        },
+        {
+          "from": "kgp",
+          "to": "search"
+        },
+        {
+          "from": "search",
+          "to": "hybrid-search"
+        },
+        {
+          "from": "search",
+          "to": "graph-traversal"
+        },
+        {
+          "from": "kgp",
+          "to": "operations"
+        },
+        {
+          "from": "operations",
+          "to": "access-control"
+        },
+        {
+          "from": "operations",
+          "to": "observability"
+        }
+      ]
+    }
+  ]
+}

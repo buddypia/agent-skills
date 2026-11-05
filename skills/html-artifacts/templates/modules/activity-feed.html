@@ -1,0 +1,72 @@
+<!-- ============================================================================
+MODULE: activity-feed                                       lineage: unified-system original (report/code-review/dashboard)
+PURPOSE: A vertical chronological feed of events - commits, comments, deploys,
+         status changes, audit log. A connector line threads icon markers; each row
+         has an actor, an action sentence, and a timestamp. Denser and less
+         ceremonial than `timeline`; for activity streams rather than milestones.
+VARIABLES (per item): {{ICON_PATH}} {{ACTOR}} {{TEXT}} {{TIME}}
+REQUIRES: core/tokens.css (--border-subtle, --bg-muted, --color-*, --text-*, --sp-*)
+MODULE CSS: inline the data-module="activity-feed" style block once. Tone an item
+            with .-success / -warning / -danger / -info to color its marker.
+INTERACTION: none by default. Optional: add [data-reveal] per .af-item to stagger in.
+USAGE: one <ul class="activity-feed"> with one .af-item per event (newest first).
+============================================================================ -->
+<style data-module="activity-feed">
+  .af-title { margin-bottom: var(--sp-4); }
+  .activity-feed { list-style: none; margin: 0; padding: 0; }
+  .af-item { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); position: relative; padding-bottom: var(--sp-4); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  /* connector rail: a hairline thread that warms toward the accent on hover */
+  .af-item::before { content: ""; position: absolute; inset-inline-start: 14px; top: 28px; bottom: 0; width: 1px; background: var(--border-subtle); transition: background var(--dur-fast) var(--ease); }
+  .af-item:last-child { padding-bottom: 0; }
+  .af-item:last-child::before { display: none; }
+  .af-mark { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-muted); color: var(--text-secondary); border: 1px solid var(--border-subtle); position: relative; z-index: 1; box-shadow: 0 0 0 3px var(--bg-page); transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  .af-ic { width: 15px; height: 15px; transition: transform var(--dur-fast) var(--ease-out); }
+  .af-item.-success .af-mark { color: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 40%, var(--border-subtle)); }
+  .af-item.-warning .af-mark { color: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 40%, var(--border-subtle)); }
+  .af-item.-danger  .af-mark { color: var(--color-danger);  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--border-subtle)); }
+  .af-item.-info    .af-mark { color: var(--color-info);    border-color: color-mix(in srgb, var(--color-info) 40%, var(--border-subtle)); }
+  .af-body { padding-top: 3px; min-width: 0; }
+  .af-text { margin: 0; font: var(--type-small); color: var(--text-secondary); }
+  .af-actor { font-weight: 600; color: var(--text-primary); }
+  .af-time { font: var(--type-caption); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+  /* ----- Hover: accent-tinted row wash + a firmer marker, calm and confident.
+     Pointer-only so dense feeds stay still on touch; transform under reduced-
+     motion is harmless (transition simply collapses to instant). ----- */
+  @media (hover: hover) {
+    .af-item:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+    .af-item:hover::before { background: color-mix(in srgb, var(--accent) 32%, var(--border-subtle)); }
+    .af-item:hover .af-mark { border-color: color-mix(in srgb, var(--accent) 50%, var(--border-default)); box-shadow: 0 0 0 3px var(--bg-page), var(--shadow-sm); }
+    .af-item:hover .af-time { color: var(--text-secondary); }
+    /* toned items keep their own semantic hue on the rail/marker */
+    .af-item.-success:hover::before { background: color-mix(in srgb, var(--color-success) 32%, var(--border-subtle)); }
+    .af-item.-warning:hover::before { background: color-mix(in srgb, var(--color-warning) 32%, var(--border-subtle)); }
+    .af-item.-danger:hover::before  { background: color-mix(in srgb, var(--color-danger) 32%, var(--border-subtle)); }
+    .af-item.-info:hover::before    { background: color-mix(in srgb, var(--color-info) 32%, var(--border-subtle)); }
+    .af-item.-success:hover .af-mark { border-color: color-mix(in srgb, var(--color-success) 60%, var(--border-default)); }
+    .af-item.-warning:hover .af-mark { border-color: color-mix(in srgb, var(--color-warning) 60%, var(--border-default)); }
+    .af-item.-danger:hover .af-mark  { border-color: color-mix(in srgb, var(--color-danger) 60%, var(--border-default)); }
+    .af-item.-info:hover .af-mark    { border-color: color-mix(in srgb, var(--color-info) 60%, var(--border-default)); }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .af-item:hover .af-mark { transform: translateY(-1px); }
+    .af-item:hover .af-ic { transform: scale(1.06); }
+  }
+</style>
+
+<section aria-label="{{TITLE}}">
+  <h2 class="af-title">{{TITLE}}</h2>
+  <ul class="activity-feed">
+
+    <!-- ── one .af-item per event ─────────────────────────────────────────── -->
+    <li class="af-item -success">
+      <span class="af-mark" aria-hidden="true">
+        <svg class="af-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ICON_PATH}}</svg>
+      </span>
+      <div class="af-body">
+        <p class="af-text"><span class="af-actor">{{ACTOR}}</span> {{TEXT}}</p>
+        <span class="af-time">{{TIME}}</span>
+      </div>
+    </li>
+  </ul>
+</section>

@@ -1,0 +1,69 @@
+<!-- ============================================================================
+MODULE: pros-cons                                           lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A pros / cons argument board for ONE option (pure CSS - no SVG). Under a
+         single topic, two columns: pros on the left (success tint, ＋ markers),
+         cons on the right (danger tint, − markers); each item may carry a mono
+         weight note; a footer verdict strip closes the call. For go/no-go writeups,
+         option debriefs, "should we do X" memos. Distinction: comparison-grid
+         compares SEVERAL options across attribute rows; before-after contrasts two
+         states in time; decision-matrix scores options numerically; pros-cons
+         argues a SINGLE option's for-vs-against.
+VARIABLES: {{TITLE}} (the option); per column {{HEAD}}; per item {{POINT}} +
+           optional {{WEIGHT}}; footer {{VERDICT_LABEL}} + {{VERDICT}}.
+SCALING:  two equal columns (1fr 1fr); stack to one column below 620px. Each
+          column drives its own --pc-tint hue and --pc-mark glyph (＋ / −).
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --color-success/-danger, --bg-card, --bg-surface, --text-*, --border-*,
+          --font-mono, --radius-*, --sp-*)
+MODULE CSS: inline the data-module="pros-cons" style block once.
+INTERACTION: none (static). aria-label on the figure; sign chips are aria-hidden.
+USAGE: one .pc-col.pc-pros + one .pc-col.pc-cons; one <li class="pc-item"> per
+       argument (drop the .pc-weight span when there is no note). Omit .pc-verdict
+       if no conclusion is drawn yet.
+============================================================================ -->
+<style data-module="pros-cons">
+  .pc { margin: 0; }
+  .pc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .pc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+  @media (max-width: 620px) { .pc-cols { grid-template-columns: 1fr; } }
+  /* each column owns its hue + marker glyph so the shared rules stay side-agnostic */
+  .pc-col { --pc-tint: var(--color-success); --pc-mark: "＋"; border: 1px solid color-mix(in srgb, var(--pc-tint) 28%, var(--border-default)); border-radius: var(--radius-md); background: color-mix(in srgb, var(--pc-tint) 5%, var(--bg-card)); overflow: hidden; }
+  .pc-col.pc-cons { --pc-tint: var(--color-danger); --pc-mark: "−"; }
+  .pc-head { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font: var(--type-small); font-weight: 650; color: var(--text-primary); background: color-mix(in srgb, var(--pc-tint) 13%, var(--bg-card)); border-bottom: 1px solid color-mix(in srgb, var(--pc-tint) 28%, var(--border-subtle)); }
+  .pc-sign { flex: 0 0 auto; width: 20px; height: 20px; display: grid; place-items: center; border-radius: var(--radius-pill); font-weight: 700; color: var(--bg-card); background: color-mix(in srgb, var(--pc-tint) 78%, var(--text-primary)); }
+  .pc-list { margin: 0; padding: var(--sp-3); display: grid; gap: var(--sp-3); list-style: none; }
+  .pc-item { display: grid; grid-template-columns: 1.1em 1fr; gap: var(--sp-2); font: var(--type-small); color: var(--text-secondary); }
+  .pc-item::before { content: var(--pc-mark); color: color-mix(in srgb, var(--pc-tint) 85%, var(--text-primary)); font-weight: 700; line-height: 1.5; text-align: center; }
+  .pc-weight { display: block; margin-top: 2px; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  .pc-verdict { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-3) 0 0; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border-default)); font: var(--type-small); color: var(--text-primary); }
+  .pc-verdict b { flex: 0 0 auto; font-weight: 700; color: var(--accent); }
+</style>
+
+<figure class="pc card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="pc-title">{{TITLE}}</figcaption> <!-- e.g. リモートワークの全面導入 -->
+  <div class="pc-cols">
+
+    <!-- ── PROS (success tint, ＋ markers) ──────────────────────────────────── -->
+    <section class="pc-col pc-pros">
+      <header class="pc-head"><span class="pc-sign" aria-hidden="true">＋</span>{{HEAD}}</header> <!-- e.g. メリット -->
+      <ul class="pc-list">
+        <li class="pc-item"><span>{{POINT}}<span class="pc-weight">{{WEIGHT}}</span></span></li>
+        <!-- e.g. POINT=通勤時間の削減で可処分時間が増える / WEIGHT=影響: 大 -->
+        <!-- ↑ repeat: one .pc-item per pro (drop .pc-weight if no note) -->
+      </ul>
+    </section>
+
+    <!-- ── CONS (danger tint, − markers) ───────────────────────────────────── -->
+    <section class="pc-col pc-cons">
+      <header class="pc-head"><span class="pc-sign" aria-hidden="true">−</span>{{HEAD}}</header> <!-- e.g. デメリット -->
+      <ul class="pc-list">
+        <li class="pc-item"><span>{{POINT}}<span class="pc-weight">{{WEIGHT}}</span></span></li>
+        <!-- e.g. POINT=偶発的な雑談が減り連携が弱まる / WEIGHT=影響: 中 -->
+      </ul>
+    </section>
+  </div>
+
+  <!-- ── verdict strip (optional) ──────────────────────────────────────────── -->
+  <p class="pc-verdict"><b>{{VERDICT_LABEL}}</b>{{VERDICT}}</p>
+  <!-- e.g. VERDICT_LABEL=結論 / VERDICT=週2出社のハイブリッドで段階導入し四半期ごとに再評価 -->
+</figure>

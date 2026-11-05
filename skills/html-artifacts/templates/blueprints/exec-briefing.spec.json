@@ -1,0 +1,274 @@
+{
+  "title": "セイワ精機 経営ブリーフィング - FY2026 Q1 DX推進レビュー",
+  "theme": "slate",
+  "layout": "bento",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "役員会 ブリーフィング",
+  "subtitle": "全社DX推進の四半期進捗と重点施策 - FY2026 第1四半期",
+  "meta": [
+    {
+      "k": "対象期間",
+      "v": "FY2026 Q1（4-6月）"
+    },
+    {
+      "k": "報告者",
+      "v": "経営企画室 DX推進課"
+    },
+    {
+      "k": "機密区分",
+      "v": "社外秘 / 役員限"
+    }
+  ],
+  "footer": "出典: 社内KPI集計 / 2026-07-06 作成 - セイワ精機株式会社",
+  "sections": [
+    {
+      "type": "html",
+      "span": 12,
+      "html": "<!-- module: key-takeaways (hand-pasted, filled) -->\n<figure class=\"ktw card-outlined\" aria-label=\"経営サマリー\">\n  <figcaption class=\"ktw-title\">経営サマリー</figcaption> <!-- e.g. 要点 -->\n  <ol class=\"ktw-list\">\n\n    <!-- ── one .ktw-row per takeaway (3-5 total; badge numbers auto) ───────── -->\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">DX投資回収は計画を上回り、Q1で年間目標の34%を達成</span>          <!-- e.g. 導入により問い合わせ対応時間が42%短縮 -->\n        <span class=\"ktw-elab\">自動化ラインの本格稼働で年換算1.2億円のコスト削減効果。</span>          <!-- e.g. 主因はテンプレート返信の自動提案。3か月の実測値。 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">受注リードタイムを前年同期比▲22%短縮し上期目標を前倒し</span>          <!-- e.g. 初期費用ゼロで既存フローに追加可能 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">次の意思決定は第2工場へのMES横展開の可否</span>          <!-- e.g. 次の意思決定はPoC対象部署の選定 -->\n        <span class=\"ktw-elab\">投資額2.4億円、8月の役員会で最終判断。</span>          <!-- e.g. 候補はサポート部とCS部。7月中に決定。 -->\n      </div>\n    </li>\n    <!-- ↑ repeat: one .ktw-row per takeaway -->\n  </ol>\n</figure>",
+      "cssModules": [
+        "key-takeaways"
+      ]
+    },
+    {
+      "type": "kpi",
+      "span": 12,
+      "label": "業績ハイライト",
+      "items": [
+        {
+          "label": "売上高",
+          "value": "¥182億",
+          "delta": "+6.4%",
+          "dir": "up"
+        },
+        {
+          "label": "営業利益率",
+          "value": "9.8%",
+          "delta": "+1.2pt",
+          "dir": "up"
+        },
+        {
+          "label": "DX投資回収率（年計画比）",
+          "value": "34%",
+          "delta": "+7pt",
+          "dir": "up"
+        },
+        {
+          "label": "主要ライン稼働率",
+          "value": "88.5%",
+          "delta": "+3.4pt",
+          "dir": "up"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "line",
+      "size": "md",
+      "span": 6,
+      "title": "業績トレンド（四半期売上高・億円）",
+      "points": [
+        {
+          "label": "25/Q2",
+          "value": 168,
+          "display": "¥168億"
+        },
+        {
+          "label": "25/Q3",
+          "value": 172,
+          "display": "¥172億"
+        },
+        {
+          "label": "25/Q4",
+          "value": 176,
+          "display": "¥176億"
+        },
+        {
+          "label": "26/Q1",
+          "value": 182,
+          "display": "¥182億"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "size": "md",
+      "span": 6,
+      "title": "事業セグメント別 売上高（当四半期・億円）",
+      "series": [
+        {
+          "label": "精密加工",
+          "value": 92,
+          "display": "¥92億"
+        },
+        {
+          "label": "産業機械",
+          "value": 54,
+          "display": "¥54億"
+        },
+        {
+          "label": "保守サービス",
+          "value": 24,
+          "display": "¥24億"
+        },
+        {
+          "label": "DXソリューション",
+          "value": 12,
+          "display": "¥12億"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "span": 12,
+      "html": "<!-- module: okr-board (hand-pasted, filled) -->\n<figure class=\"okr card-outlined\" aria-label=\"FY2026 全社OKR進捗（Q1時点）\">\n  <figcaption class=\"okr-title\">FY2026 全社OKR進捗（Q1時点）</figcaption> <!-- e.g. 2026 Q3 OKR -->\n  <div class=\"okr-grid\">\n\n    <!-- ── one .okr-obj per Objective ─────────────────────────────────────── -->\n    <section class=\"okr-obj\">\n      <span class=\"okr-kicker\">O1</span>   <!-- e.g. O1 -->\n      <h3 class=\"okr-obj-name\">製造DXで生産性を全社最適化する</h3>       <!-- e.g. 定着率No.1のプロダクト体験をつくる -->\n      <div class=\"okr-krs\">\n        <!-- ── one .okr-kr per Key Result; .is-ontrack | .is-atrisk sets colour ─ -->\n        <div class=\"okr-kr is-ontrack\">\n          <span class=\"okr-kr-name\">主要3ラインのMES導入率 40%→75%</span>       <!-- e.g. 継続率を35%→48%に -->\n          <div class=\"okr-meta\">\n            <span class=\"okr-bar\" style=\"--okr-v:72%\"></span>\n            <span class=\"okr-pct\">68%</span>        <!-- e.g. 72% -->\n            <span class=\"okr-chip\">順調</span>    <!-- e.g. 順調 -->\n          </div>\n        </div>\n        <div class=\"okr-kr is-atrisk\">\n          <span class=\"okr-kr-name\">設備総合効率(OEE) 78%→85%</span>       <!-- e.g. NPSを+12→+30に -->\n          <div class=\"okr-meta\">\n            <span class=\"okr-bar\" style=\"--okr-v:44%\"></span>\n            <span class=\"okr-pct\">44%</span>        <!-- e.g. 41% -->\n            <span class=\"okr-chip\">要注意</span>    <!-- e.g. 要注意 -->\n          </div>\n        </div>\n        <!-- ↑ repeat: one .okr-kr per Key Result -->\n      </div>\n    </section>\n\n    <section class=\"okr-obj\">\n      <span class=\"okr-kicker\">O2</span>   <!-- e.g. O2 -->\n      <h3 class=\"okr-obj-name\">高付加価値サービスへ収益構造を転換する</h3>       <!-- e.g. 収益基盤を健全化する -->\n      <div class=\"okr-krs\">\n        <div class=\"okr-kr is-ontrack\">\n          <span class=\"okr-kr-name\">保守サービス売上比率 12%→18%</span>       <!-- e.g. 粗利率を58%→65%に -->\n          <div class=\"okr-meta\">\n            <span class=\"okr-bar\" style=\"--okr-v:82%\"></span>\n            <span class=\"okr-pct\">82%</span>        <!-- e.g. 88% -->\n            <span class=\"okr-chip\">順調</span>    <!-- e.g. 順調 -->\n          </div>\n        </div>\n      </div>\n    </section>\n    <!-- ↑ repeat: one .okr-obj per Objective (2-3 recommended) -->\n\n  </div>\n</figure>",
+      "cssModules": [
+        "okr-board"
+      ]
+    },
+    {
+      "type": "callout",
+      "span": 12,
+      "variant": "warning",
+      "title": "主要リスクと対応方針",
+      "body": "半導体部材の調達リードタイム長期化により、産業機械セグメントで最大3億円の受注後ろ倒しリスク。代替サプライヤ2社の認定を7月中に前倒しし、影響を1億円以内に抑制する。担当: 購買本部。次回役員会で認定進捗を報告。"
+    },
+    {
+      "type": "html",
+      "span": 12,
+      "html": "<!-- module: roadmap (hand-pasted, filled) -->\n<figure class=\"rdm card-outlined\" style=\"--rdm-cols:4\" aria-label=\"H2 DX重点ロードマップ\"> <!-- N = period count, e.g. 4 -->\n  <figcaption class=\"rdm-title\">H2 DX重点ロードマップ</figcaption>\n\n  <!-- ── PERIOD HEADER (corner gutter + one .rdm-period per period) ──────────── -->\n  <div class=\"rdm-head\">\n    <div class=\"rdm-corner\"></div>\n    <div class=\"rdm-period\">26/Q2</div> <!-- e.g. Q1 -->\n    <div class=\"rdm-period\">26/Q3</div> <!-- e.g. Q2 -->\n    <div class=\"rdm-period\">26/Q4</div> <!-- e.g. Q3 -->\n    <div class=\"rdm-period\">27/Q1</div> <!-- e.g. Q4 -->\n    <!-- ↑ repeat: one .rdm-period per period; keep --rdm-cols in sync -->\n  </div>\n\n  <!-- ── THEME LANES (name in gutter + initiative bars in period columns) ────── -->\n  <div class=\"rdm-lane\">\n    <div class=\"rdm-lane-name\">生産・MES</div> <!-- e.g. 検索体験 -->\n    <span class=\"rdm-bar cat-1\" style=\"grid-column:2 / 4\">第1工場 MES本番稼働</span> <!-- e.g. 新検索UI (Q1-Q2) -->\n    <span class=\"rdm-bar cat-3\" style=\"grid-column:4 / 6\">第2工場 MES横展開</span> <!-- e.g. パーソナライズ (Q3-Q4) -->\n  </div>\n  <div class=\"rdm-lane\">\n    <div class=\"rdm-lane-name\">品質・トレーサビリティ</div> <!-- e.g. 決済基盤 -->\n    <span class=\"rdm-bar cat-2\" style=\"grid-column:2 / 5\">検査自動化・トレーサビリティ統合</span> <!-- e.g. 決済リプレース (Q1-Q3) -->\n    <span class=\"rdm-bar cat-4\" style=\"grid-column:5 / 6\">品質ダッシュボード全社展開</span> <!-- e.g. 分割払い (Q4) -->\n  </div>\n  <div class=\"rdm-lane\">\n    <div class=\"rdm-lane-name\">データ基盤・分析</div> <!-- e.g. 運用・信頼性 -->\n    <span class=\"rdm-bar cat-5\" style=\"grid-column:3 / 5\">需要予測AIの試験導入</span> <!-- e.g. 監視刷新 (Q2-Q3) -->\n  </div>\n  <!-- ↑ repeat: one .rdm-lane per theme; place bars with grid-column:(a+1)/(b+2) -->\n</figure>",
+      "cssModules": [
+        "roadmap"
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "exec-briefing",
+    "name": "経営ブリーフィング（役員会資料）",
+    "genre": "経営資料",
+    "purpose": "四半期の業績と全社戦略テーマ（ここではDX推進）の進捗を、役員が5分で把握し次の意思決定に進めるよう、結論・数字・リスク・今後施策の順で1枚に凝縮する。",
+    "audience": "取締役・執行役員（経営会議／役員会の出席者）",
+    "triggers": {
+      "ja": [
+        "経営資料を作りたい",
+        "役員会のブリーフィング資料",
+        "四半期の経営サマリー",
+        "取締役会向けの業績報告",
+        "DX推進の進捗を経営層に",
+        "経営レビュー資料"
+      ],
+      "en": [
+        "exec briefing deck",
+        "board quarterly review",
+        "leadership business summary"
+      ],
+      "ko": [
+        "경영 브리핑 자료",
+        "이사회 분기 리뷰",
+        "경영진 요약 보고"
+      ]
+    },
+    "axes": {
+      "theme": "slate",
+      "layout": "bento",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "落ち着いた slate は経営文書の信頼感に合致。bento で業績トレンドとセグメントを2枚並置しダッシュボード感を出しつつ、要点・OKR・ロードマップは全幅。split ヘッダで対象期間/報告者/機密区分の provenance を明示。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:key-takeaways",
+        "role": "経営サマリー（結論先出し）",
+        "required": true,
+        "guide": "「これだけ読めば足りる」3点。達成した成果・改善したKPI・次に判断すべき論点を各1行。数字を必ず入れる。",
+        "volume": "3項目（各1〜2文）"
+      },
+      {
+        "n": 2,
+        "type": "kpi",
+        "role": "業績ハイライト",
+        "required": true,
+        "guide": "売上・利益率・戦略テーマKPI・稼働率など4枚。deltaとdirは good-news=up(緑▲)/bad-news=down(赤▼)で意味づけを揃える。",
+        "volume": "4カード"
+      },
+      {
+        "n": 3,
+        "type": "chart",
+        "role": "業績トレンド",
+        "required": true,
+        "guide": "直近4四半期の売上等を line で。displayに¥表記。右のセグメント図と横並び。",
+        "volume": "4データ点"
+      },
+      {
+        "n": 4,
+        "type": "chart",
+        "role": "事業セグメント別内訳",
+        "required": false,
+        "guide": "bar で当四半期の売上を事業別に。合計を上のKPI売上高と一致させる。",
+        "volume": "3〜5系列"
+      },
+      {
+        "n": 5,
+        "type": "html:okr-board",
+        "role": "全社OKR進捗",
+        "required": true,
+        "guide": "2目標×各1〜2 KR。進捗%とバー幅(--okr-v)を一致させ、順調=is-ontrack/要注意=is-atrisk。",
+        "volume": "2目標・3KR"
+      },
+      {
+        "n": 6,
+        "type": "callout",
+        "role": "主要リスクと対応",
+        "required": true,
+        "guide": "warning で最大リスク1件を、影響額・対応・担当・期限まで具体化。",
+        "volume": "1段落"
+      },
+      {
+        "n": 7,
+        "type": "html:roadmap",
+        "role": "今後の重点施策",
+        "required": true,
+        "guide": "4期間×3レーンの粗いロードマップ。施策バーは grid-column でQをまたぐようにcatN色分け。",
+        "volume": "3レーン・5施策"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 4,
+        "default": "chart（セグメント別 bar）",
+        "alternative": "table（セグメント/売上/前年比/営業利益/状況）",
+        "when": "定量内訳より前年比や状況コメントまで見せたいとき"
+      },
+      {
+        "slot": 7,
+        "default": "html:roadmap",
+        "alternative": "timeline（主要マイルストーンの時系列）",
+        "when": "施策の期間帯より完了時点の並びを見せたいとき"
+      },
+      {
+        "slot": 1,
+        "default": "html:key-takeaways",
+        "alternative": "callout(variant:tldr)",
+        "when": "結論が1メッセージに集約でき箇条書きが不要なとき"
+      },
+      {
+        "slot": 5,
+        "default": "html:okr-board",
+        "alternative": "html:kpi-tree",
+        "when": "目標整合より単一指標の要因分解を示したいとき"
+      }
+    ],
+    "modules": [
+      "key-takeaways",
+      "kpi",
+      "chart",
+      "okr-board",
+      "callout",
+      "roadmap"
+    ]
+  }
+}

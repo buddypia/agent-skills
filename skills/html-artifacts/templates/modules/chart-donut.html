@@ -1,0 +1,98 @@
+<!-- ============================================================================
+MODULE: chart-donut                                          lineage: html-visual(chart/dashboard)
+PURPOSE: Self-contained SVG donut chart (NO external libs). Stacked <circle>
+         rings drawn with stroke-dasharray; theme-tinted segments, center total,
+         color-dot legend with labels + percentages.
+VARIABLES: {{TOTAL}}  +  per segment: {{DASH}} {{OFFSET}} {{CAT}} {{LABEL}} {{PCT}}
+           ({{CAT}} = cat-1..cat-5, {{PCT}} = "37%", legend dot reuses --cat-n.)
+DASHARRAY MATH: r=80 → circumference C = 2·π·80 = 502.65.
+           Per segment: seg = pct/100 · 502.65  and  gap = 502.65 − seg,
+           so {{DASH}} = "seg gap".  Stacking is done with stroke-dashoffset:
+           offset[0] = 0; offset[i] = offset[i-1] − seg[i-1] (negative walks the
+           ring forward).  The <g> is rotated −90° so segment 1 starts at 12 o'clock.
+           Example (37/28/20/15): segs 185.98/140.74/100.53/75.40;
+           offsets 0 / −185.98 / −326.72 / −427.25.
+REQUIRES:  core/tokens.css (--cat-*, --accent, --text-*, --border-subtle, --bg-surface)
+MODULE CSS: inline the data-module="chart-donut" style block once.
+INTERACTION: [data-chart-tip] on <figure> + data-tip="{{LABEL}}: {{PCT}}" on each
+           <circle class="seg"> → hover a slice for a floating tooltip (behavior in
+           interactions.js; no per-module script). role="img" + <title> stay for a11y.
+USAGE: one <circle class="seg"> per slice (repeat); one .legend-row per slice.
+============================================================================ -->
+<style data-module="chart-donut">
+  .donut { width: 100%; }
+  /* ring + legend side by side when there is room, stacked when the card is narrow */
+  .donut-body { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr); gap: var(--sp-5); align-items: center; }
+  .donut { container-type: inline-size; }
+  @container (max-width: 420px) { .donut-body { grid-template-columns: 1fr; justify-items: center; } .donut-body .donut-legend { width: 100%; } }
+  /* SVG text scales with the ring (viewBox 320): at 280px wide, 16 user units ≈ 14px */
+  .donut svg { width: 100%; max-width: 280px; height: auto; font-family: var(--font-sans); }
+  /* hairline track with a faint accent wash so the ring reads as a seated well */
+  .donut .track { fill: none; stroke: color-mix(in srgb, var(--accent) 8%, var(--border-subtle)); stroke-width: 40; }
+  /* rounded caps + accent-tied hover: the slice firms up (wider, faint lift) while
+     siblings recede, focusing the read. transitions on paintable props only -
+     stroke geometry (dasharray/offset) is left untouched for the static render. */
+  .donut .seg { fill: none; stroke-width: 40; stroke-linecap: round; transition: stroke-width var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .donut svg:hover .seg { opacity: .55; }
+  .donut .seg:hover { stroke-width: 46; opacity: 1; filter: drop-shadow(0 1px 4px color-mix(in srgb, var(--accent) 30%, transparent)); }
+  .donut .seg:focus-visible { outline: none; stroke-width: 46; opacity: 1; }
+  .donut .seg.cat-1 { stroke: var(--cat-1); }
+  .donut .seg.cat-2 { stroke: var(--cat-2); }
+  .donut .seg.cat-3 { stroke: var(--cat-3); }
+  .donut .seg.cat-4 { stroke: var(--cat-4); }
+  .donut .seg.cat-5 { stroke: var(--cat-5); }
+  .donut .total { fill: var(--text-primary); font: var(--type-display); font-size: 40px; font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight); text-anchor: middle; }
+  .donut .total-label { fill: var(--text-muted); font: var(--type-caption); font-size: 16px; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); text-anchor: middle; }
+  .donut-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+
+  .donut-legend { list-style: none; margin: 0; padding: 0; }
+  /* legend rows: hairline separators + accent-tinted hover so the list feels
+     keyed to the chart without shouting. rounded inset keeps the wash contained. */
+  .donut-legend .legend-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-2); border-radius: var(--radius-sm); border-bottom: 1px solid var(--border-subtle); font: var(--type-small); color: var(--text-secondary); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .donut-legend .legend-row:last-child { border-bottom: none; }
+  .donut-legend .legend-row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); color: var(--text-primary); }
+  .donut-legend .dot { width: 12px; height: 12px; border-radius: var(--radius-xs); flex: 0 0 auto; box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-primary) 8%, transparent) inset; transition: transform var(--dur-fast) var(--ease-out); }
+  .donut-legend .legend-row:hover .dot { transform: scale(1.18); }
+  .donut-legend .dot.cat-1 { background: var(--cat-1); }
+  .donut-legend .dot.cat-2 { background: var(--cat-2); }
+  .donut-legend .dot.cat-3 { background: var(--cat-3); }
+  .donut-legend .dot.cat-4 { background: var(--cat-4); }
+  .donut-legend .dot.cat-5 { background: var(--cat-5); }
+  .donut-legend .legend-val { margin-left: auto; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .donut-legend .legend-val + .legend-pct { margin-left: var(--sp-2); }
+  .donut-legend .legend-pct { margin-left: auto; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+</style>
+
+<figure class="donut card-outlined" data-chart-tip>
+  <figcaption class="donut-title">{{TITLE}}</figcaption>
+  <div class="donut-body">
+    <svg viewBox="0 0 320 320" role="img" aria-label="{{TITLE}}">
+      <!-- background ring -->
+      <circle class="track" cx="160" cy="160" r="80"/>
+      <!-- rotate −90° so the first segment starts at 12 o'clock -->
+      <g transform="rotate(-90 160 160)">
+        <!-- ↓ repeat one <circle> per segment; DASH="seg gap", OFFSET stacks -->
+        <circle class="seg {{CAT}}" cx="160" cy="160" r="80"
+                stroke-dasharray="{{DASH}}" stroke-dashoffset="{{OFFSET}}"
+                data-tip="{{LABEL}}: {{PCT}}">
+          <title>{{LABEL}}: {{PCT}}</title>
+        </circle>
+        <!-- ↑ repeat (up to 5 segments: cat-1 … cat-5) -->
+      </g>
+      <!-- center readout -->
+      <!-- keep TOTAL short (≤ 5 glyphs at 40px) or lower its font-size inline: it must fit the 120-unit hole -->
+      <text class="total" x="160" y="165">{{TOTAL}}</text>
+      <text class="total-label" x="160" y="189">Total</text>
+    </svg>
+
+    <ul class="donut-legend stack" aria-hidden="true">
+      <!-- ↓ repeat one row per segment -->
+      <li class="legend-row">
+        <span class="dot {{CAT}}"></span>
+        <span class="legend-label">{{LABEL}}</span>
+        <span class="legend-pct">{{PCT}}</span>
+      </li>
+      <!-- ↑ repeat -->
+    </ul>
+  </div>
+</figure>

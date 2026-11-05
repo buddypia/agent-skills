@@ -1,0 +1,369 @@
+{
+  "title": "CloudKarte Executive Dashboard — Interactive Analytics",
+  "theme": "dark-focus",
+  "layout": "bento",
+  "header": "compact",
+  "density": "compact",
+  "lang": "en",
+  "target": "web-app",
+  "viewport": "desktop",
+  "eyebrow": "SaaS Analytics · May 2026",
+  "subtitle": "Real-time metrics for CloudKarte, a Japanese SaaS product. Click a plan in the legend to filter the series, and search, sort, and paginate the table.",
+  "footer": "Source: CloudKarte internal BI (dummy data) · Generated 2026-06-07 · Single HTML · Works offline · No external dependencies",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<h2>Key Metrics (vs. previous month)</h2>",
+      "span": 12
+    },
+    {
+      "type": "kpi",
+      "label": "Key metrics",
+      "items": [
+        {
+          "label": "Monthly Recurring Revenue (MRR)",
+          "value": "0",
+          "valueNum": 48720000,
+          "suffix": " yen",
+          "delta": "6.8% MoM"
+        },
+        {
+          "label": "Monthly Active Accounts (MAA)",
+          "value": "0",
+          "valueNum": 3284,
+          "delta": "4.1% MoM"
+        },
+        {
+          "label": "Net Revenue Retention (NRR)",
+          "value": "0",
+          "valueNum": 118.4,
+          "suffix": "%",
+          "delta": "2.3pt MoM"
+        },
+        {
+          "label": "Monthly Churn Rate",
+          "value": "0",
+          "valueNum": 1.7,
+          "suffix": "%",
+          "delta": "0.4pt MoM",
+          "dir": "down", "tone": "good"
+        },
+        {
+          "label": "Average Revenue Per Account (ARPA)",
+          "value": "0",
+          "valueNum": 14830,
+          "suffix": " yen",
+          "delta": "2.6% MoM"
+        },
+        {
+          "label": "Trial-to-Paid Conversion Rate",
+          "value": "0",
+          "valueNum": 27.9,
+          "suffix": "%",
+          "delta": "1.9pt MoM"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "span": 6,
+      "title": "MRR by plan (¥M) — click a plan to highlight it",
+      "filter": true,
+      "yPrefix": "¥",
+      "ySuffix": "M",
+      "series": [
+        {
+          "label": "Pro",
+          "key": "pro",
+          "value": 12.1,
+          "cat": 1,
+          "display": "¥12.1M"
+        },
+        {
+          "label": "Team",
+          "key": "team",
+          "value": 14.6,
+          "cat": 2,
+          "display": "¥14.6M"
+        },
+        {
+          "label": "Business",
+          "key": "business",
+          "value": 18.6,
+          "cat": 3,
+          "display": "¥18.6M"
+        },
+        {
+          "label": "Enterprise",
+          "key": "enterprise",
+          "value": 10.6,
+          "cat": 4,
+          "display": "¥10.6M"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "donut",
+      "span": 6,
+      "title": "Customer share by plan — click a legend row to highlight it",
+      "filter": true,
+      "total": "3,284",
+      "totalLabel": "Customers",
+      "segments": [
+        {
+          "label": "Pro",
+          "key": "pro",
+          "value": 38,
+          "cat": 1
+        },
+        {
+          "label": "Team",
+          "key": "team",
+          "value": 31,
+          "cat": 2
+        },
+        {
+          "label": "Business",
+          "key": "business",
+          "value": 19,
+          "cat": 3
+        },
+        {
+          "label": "Enterprise",
+          "key": "enterprise",
+          "value": 12,
+          "cat": 4
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<h2>Customer Account List</h2>",
+      "span": 12
+    },
+    {
+      "type": "table",
+      "label": "Customer account list",
+      "placeholder": "Search by company, CSM, or plan…",
+      "paginate": 8,
+      "select": true,
+      "columns": [
+        "Company",
+        "Plan",
+        "CSM",
+        "MRR (yen)",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Mirai Trading Co., Ltd.",
+          "Business",
+          "Aoi Tanaka",
+          "248,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Aozora Logistics",
+          "Team",
+          "Emi Sato",
+          "96,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Sakura Design LLC",
+          "Pro",
+          "Takuya Suzuki",
+          "29,800",
+          {
+            "badge": "warning",
+            "text": "Renewal Pending"
+          }
+        ],
+        [
+          "Tokyo Medical Care",
+          "Enterprise",
+          "Misaki Takahashi",
+          "520,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Kansai Food Service",
+          "Business",
+          "Aoi Tanaka",
+          "186,000",
+          {
+            "badge": "info",
+            "text": "Onboarding"
+          }
+        ],
+        [
+          "Hokkaido Travel Planning",
+          "Team",
+          "Ken Watanabe",
+          "78,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Hinode Manufacturing Co., Ltd.",
+          "Pro",
+          "Takuya Suzuki",
+          "14,800",
+          {
+            "badge": "danger",
+            "text": "Cancellation Notice"
+          }
+        ],
+        [
+          "Kyushu Energy Solutions",
+          "Enterprise",
+          "Misaki Takahashi",
+          "640,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Nagoya Creative",
+          "Team",
+          "Ken Watanabe",
+          "84,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Shonan Health Lab",
+          "Business",
+          "Emi Sato",
+          "212,000",
+          {
+            "badge": "info",
+            "text": "Onboarding"
+          }
+        ],
+        [
+          "Komorebi Books LLC",
+          "Pro",
+          "Takuya Suzuki",
+          "14,800",
+          {
+            "badge": "warning",
+            "text": "Renewal Pending"
+          }
+        ],
+        [
+          "Sendai Smart Factory",
+          "Enterprise",
+          "Misaki Takahashi",
+          "480,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Kanade Acoustics Co., Ltd.",
+          "Team",
+          "Ken Watanabe",
+          "72,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Shikoku AgriTech",
+          "Business",
+          "Aoi Tanaka",
+          "168,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Yokohama Education",
+          "Pro",
+          "Emi Sato",
+          "29,800",
+          {
+            "badge": "danger",
+            "text": "Cancellation Notice"
+          }
+        ],
+        [
+          "Fukuoka Retail Partners",
+          "Team",
+          "Ken Watanabe",
+          "90,000",
+          {
+            "badge": "info",
+            "text": "Onboarding"
+          }
+        ],
+        [
+          "Akebono Construction Co., Ltd.",
+          "Business",
+          "Aoi Tanaka",
+          "198,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Kyoto Traditional Crafts Net",
+          "Pro",
+          "Takuya Suzuki",
+          "14,800",
+          {
+            "badge": "warning",
+            "text": "Renewal Pending"
+          }
+        ],
+        [
+          "Osaka Fintech Institute",
+          "Enterprise",
+          "Misaki Takahashi",
+          "560,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ],
+        [
+          "Shinshu Outdoor Gear",
+          "Team",
+          "Ken Watanabe",
+          "66,000",
+          {
+            "badge": "success",
+            "text": "Active"
+          }
+        ]
+      ],
+      "span": 12
+    },
+    {
+      "type": "html",
+      "html": "<p class=\"small muted\">Click a row to toggle its selected state. Click a header to sort (MRR sorts numerically).</p>",
+      "span": 12
+    }
+  ]
+}

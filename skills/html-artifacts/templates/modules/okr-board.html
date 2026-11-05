@@ -1,0 +1,94 @@
+<!-- ============================================================================
+MODULE: okr-board                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A pure-CSS OKR board (NO SVG). 2-3 Objective cards, each carrying its
+         Key Results as rows: a KR label, a thin progress bar, a % value, and an
+         on-track / at-risk status chip. For quarterly OKR reviews where a
+         qualitative goal is aligned to a few measurable results.
+         Distinction: kpi-tree decomposes ONE metric mathematically (×/÷ operator
+         nodes); project-status reports workstream HEALTH point-in-time; okr-board
+         is goal → measurable-results alignment (Objective owns its Key Results).
+VARIABLES: {{TITLE}}; per objective {{OBJ_KICKER}} (O1/O2), {{OBJECTIVE}};
+           per key result {{KR}}, {{PCT}} (0-100 → inline --okr-v), {{STATUS}}
+           chip text, with .is-ontrack / .is-atrisk on the row.
+SCALING:  cards flow in an auto-fit grid (min 240px). A KR row is a grid:
+          label spanning the top, then a [bar 1fr | % auto | chip auto] meta line.
+          The bar fill width = the inline `--okr-v` percent.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --cat-1..5,
+          --color-success/-warning, --bg-surface, --bg-muted, --border-*, --text-*,
+          --font-mono, --radius-*, --sp-*, --shadow-sm, --dur-mid, --ease, --tracking-eyebrow)
+MODULE CSS: inline the data-module="okr-board" style block once.
+INTERACTION: none required; the bar fill has a width transition (reduced-motion guarded).
+USAGE: one <section class="okr-obj"> per Objective; inside it one <div class="okr-kr">
+       per Key Result. Set the bar via style="--okr-v:72%" and pick .is-ontrack (green)
+       or .is-atrisk (amber) on the row to colour its chip.
+============================================================================ -->
+<style data-module="okr-board">
+  .okr { margin: 0; }
+  .okr-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .okr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); }
+  /* objective card: a kicker eyebrow over the goal statement, then its KR rows */
+  .okr-obj { display: grid; gap: var(--sp-3); padding: var(--sp-4); background: var(--bg-surface); border: 1px solid var(--border-default); border-top: 3px solid color-mix(in srgb, var(--accent) 60%, var(--border-default)); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+  .okr-kicker { font: var(--type-caption); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--accent); }
+  .okr-obj-name { margin: 0; font: var(--type-body); font-weight: 650; color: var(--text-primary); }
+  .okr-krs { display: grid; gap: var(--sp-3); }
+  /* KR row: label on top, then a bar + % + status chip meta line */
+  .okr-kr { display: grid; gap: var(--sp-2); padding-top: var(--sp-3); border-top: 1px solid var(--border-subtle); }
+  .okr-kr-name { font: var(--type-small); color: var(--text-secondary); }
+  .okr-meta { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--sp-2); }
+  .okr-bar { height: 7px; border-radius: var(--radius-pill); background: var(--bg-muted); overflow: hidden; }
+  .okr-bar::before { content: ""; display: block; height: 100%; width: var(--okr-v, 0%); border-radius: inherit; background: var(--okr-c, var(--accent)); transition: width var(--dur-mid) var(--ease); }
+  .okr-pct { font-family: var(--font-mono); font-size: 12px; font-weight: 650; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .okr-chip { padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; white-space: nowrap; color: var(--okr-c); background: color-mix(in srgb, var(--okr-c) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--okr-c) 40%, var(--border-subtle)); }
+  .okr-kr.is-ontrack { --okr-c: var(--color-success); }
+  .okr-kr.is-atrisk  { --okr-c: var(--color-warning); }
+  @media (prefers-reduced-motion: reduce) { .okr-bar::before { transition: none; } }
+</style>
+
+<figure class="okr card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="okr-title">{{TITLE}}</figcaption> <!-- e.g. 2026 Q3 OKR -->
+  <div class="okr-grid">
+
+    <!-- ── one .okr-obj per Objective ─────────────────────────────────────── -->
+    <section class="okr-obj">
+      <span class="okr-kicker">{{OBJ_KICKER}}</span>   <!-- e.g. O1 -->
+      <h3 class="okr-obj-name">{{OBJECTIVE}}</h3>       <!-- e.g. 定着率No.1のプロダクト体験をつくる -->
+      <div class="okr-krs">
+        <!-- ── one .okr-kr per Key Result; .is-ontrack | .is-atrisk sets colour ─ -->
+        <div class="okr-kr is-ontrack">
+          <span class="okr-kr-name">{{KR}}</span>       <!-- e.g. 継続率を35%→48%に -->
+          <div class="okr-meta">
+            <span class="okr-bar" style="--okr-v:72%"></span>
+            <span class="okr-pct">{{PCT}}</span>        <!-- e.g. 72% -->
+            <span class="okr-chip">{{STATUS}}</span>    <!-- e.g. 順調 -->
+          </div>
+        </div>
+        <div class="okr-kr is-atrisk">
+          <span class="okr-kr-name">{{KR}}</span>       <!-- e.g. NPSを+12→+30に -->
+          <div class="okr-meta">
+            <span class="okr-bar" style="--okr-v:41%"></span>
+            <span class="okr-pct">{{PCT}}</span>        <!-- e.g. 41% -->
+            <span class="okr-chip">{{STATUS}}</span>    <!-- e.g. 要注意 -->
+          </div>
+        </div>
+        <!-- ↑ repeat: one .okr-kr per Key Result -->
+      </div>
+    </section>
+
+    <section class="okr-obj">
+      <span class="okr-kicker">{{OBJ_KICKER}}</span>   <!-- e.g. O2 -->
+      <h3 class="okr-obj-name">{{OBJECTIVE}}</h3>       <!-- e.g. 収益基盤を健全化する -->
+      <div class="okr-krs">
+        <div class="okr-kr is-ontrack">
+          <span class="okr-kr-name">{{KR}}</span>       <!-- e.g. 粗利率を58%→65%に -->
+          <div class="okr-meta">
+            <span class="okr-bar" style="--okr-v:88%"></span>
+            <span class="okr-pct">{{PCT}}</span>        <!-- e.g. 88% -->
+            <span class="okr-chip">{{STATUS}}</span>    <!-- e.g. 順調 -->
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ↑ repeat: one .okr-obj per Objective (2-3 recommended) -->
+
+  </div>
+</figure>

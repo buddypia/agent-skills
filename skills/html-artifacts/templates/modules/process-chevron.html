@@ -1,0 +1,66 @@
+<!-- ============================================================================
+MODULE: process-chevron                                    lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS horizontal chevron / arrow band (NO SVG). 3-6 interlocking
+         right-pointing chevrons form a flat "→→→" pipeline; each carries a stage
+         name and a short caption below it, tinted by --cat-N. clip-path polygons
+         cut the arrowheads and the negative left margin nests each point into the
+         next notch. For value chains, linear process pipelines, funnel-of-stages.
+         Distinction: stepper is a numbered sequential-steps UI; flow-diagram has
+         branches / nodes; this is the flat linear value-chain arrow band (no numbers).
+VARIABLES: {{TITLE}}; per stage {{STAGE}} (name) + {{CAPTION}} (one line) with a
+           .cat-N tint; first chevron carries .pcv-first (flat left edge).
+SCALING:   --pcv-d sets the arrow depth (default 22px). Each chevron is a flex
+           item (flex:1). The default clip-path is a 6-point polygon (left notch +
+           right point); .pcv-first drops the notch for a flat leading edge. Every
+           chevron after the first pulls left by --pcv-d so its notch swallows the
+           previous point. Left padding clears the notch so text stays centered.
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --bg-surface, --border-default,
+           --text-*, --radius-*, --sp-*, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="process-chevron" style block once.
+INTERACTION: hover brightens a chevron (paint-only, reduced-motion guarded).
+USAGE: 3-6 .pcv-chev in one .pcv-band; mark the first .pcv-first. Alternate .cat-N
+       so neighbouring chevrons stay distinct across the overlap.
+============================================================================ -->
+<style data-module="process-chevron">
+  .pcv { width: 100%; --pcv-d: 22px; }
+  .pcv-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .pcv-band { display: flex; align-items: stretch; }
+  /* each chevron: notch on the left, point on the right, cat-tinted fill */
+  .pcv-chev { --pc: var(--accent); flex: 1 1 0; min-width: 0; padding: var(--sp-4) var(--sp-3) var(--sp-4) calc(var(--sp-3) + var(--pcv-d)); text-align: center; color: var(--text-primary); background: color-mix(in srgb, var(--pc) 22%, var(--bg-surface)); clip-path: polygon(0 0, calc(100% - var(--pcv-d)) 0, 100% 50%, calc(100% - var(--pcv-d)) 100%, 0 100%, var(--pcv-d) 50%); transition: filter var(--dur-fast) var(--ease); }
+  .pcv-chev + .pcv-chev { margin-left: calc(var(--pcv-d) * -1); }
+  /* leading chevron: flat left edge (no notch) */
+  .pcv-first { padding-left: var(--sp-3); clip-path: polygon(0 0, calc(100% - var(--pcv-d)) 0, 100% 50%, calc(100% - var(--pcv-d)) 100%, 0 100%); }
+  .pcv-chev:hover { filter: brightness(1.06); }
+  .pcv-name { font: var(--type-small); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pcv-cap { margin-top: var(--sp-1); font: var(--type-caption); color: var(--text-secondary); }
+  .pcv-chev.cat-1 { --pc: var(--cat-1); }
+  .pcv-chev.cat-2 { --pc: var(--cat-2); }
+  .pcv-chev.cat-3 { --pc: var(--cat-3); }
+  .pcv-chev.cat-4 { --pc: var(--cat-4); }
+  .pcv-chev.cat-5 { --pc: var(--cat-5); }
+  @media (prefers-reduced-motion: reduce) { .pcv-chev { transition: none; } }
+</style>
+
+<figure class="pcv card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="pcv-title">{{TITLE}}</figcaption>
+  <div class="pcv-band">
+    <!-- ↓ first chevron carries .pcv-first (flat left edge) -->
+    <div class="pcv-chev pcv-first cat-1">
+      <div class="pcv-name">{{STAGE}}</div>   <!-- e.g. 集客 -->
+      <div class="pcv-cap">{{CAPTION}}</div>  <!-- e.g. 広告・SEO -->
+    </div>
+    <div class="pcv-chev cat-2">
+      <div class="pcv-name">{{STAGE}}</div>   <!-- e.g. 獲得 -->
+      <div class="pcv-cap">{{CAPTION}}</div>  <!-- e.g. 会員登録 -->
+    </div>
+    <div class="pcv-chev cat-3">
+      <div class="pcv-name">{{STAGE}}</div>   <!-- e.g. 活性化 -->
+      <div class="pcv-cap">{{CAPTION}}</div>  <!-- e.g. 初回利用 -->
+    </div>
+    <div class="pcv-chev cat-4">
+      <div class="pcv-name">{{STAGE}}</div>   <!-- e.g. 継続 -->
+      <div class="pcv-cap">{{CAPTION}}</div>  <!-- e.g. 定着・課金 -->
+    </div>
+    <!-- ↑ repeat: 3-6 .pcv-chev; alternate .cat-N so neighbours stay distinct -->
+  </div>
+</figure>

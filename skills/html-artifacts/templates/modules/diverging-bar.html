@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: diverging-bar                                      lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A butterfly / diverging (tornado) bar chart (pure CSS - no SVG). A central
+         spine of category labels with bars extending LEFT for series A and RIGHT for
+         series B, mirrored around the center; each value sits at the outer bar end.
+         For contrasting two opposing series per category (男性/女性, 賛成/反対,
+         今期/前期, before/after).
+         Distinction: dot-plot marks a range or two points on ONE shared axis;
+         chart-bar groups the two series' bars side-by-side on the same side; this
+         mirrors them around a central spine so the opposition reads at a glance.
+VARIABLES: {{TITLE}}; series names {{SERIES_A}} {{SERIES_B}}; per row {{CATEGORY}}
+           (spine label) + {{VALUE_A}} {{VALUE_B}} + inline width:NN% on each fill.
+SCALING:   each row is a grid `3em minmax(60px,1fr) auto minmax(60px,1fr) 3em`
+           = valA | trackA | category | trackB | valB. Left fills are right-aligned
+           (grow toward the spine's left), right fills left-aligned; each fill
+           width:NN% is value / rowMax × 100% on a shared scale. Values sit at the
+           fixed outer extremes so rows align.
+REQUIRES:  core/tokens.css (--cat-1, --cat-2, --accent, --bg-surface, --bg-muted,
+           --border-*, --text-*, --font-mono, --radius-*, --sp-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="diverging-bar" style block once.
+INTERACTION: hover brightens a fill (paint only, reduced-motion guarded).
+             aria-label on the figure; categories + values are real text.
+USAGE: one .dvb-row per category; set width:NN% on the .dvb-fill of each side on a
+       shared scale. The two header chips name series A (left) and series B (right).
+============================================================================ -->
+<style data-module="diverging-bar">
+  .dvb { margin: 0; }
+  .dvb-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-3); }
+  .dvb-legend { display: flex; justify-content: center; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+  .dvb-key { display: inline-flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); color: var(--text-secondary); }
+  .dvb-key i { width: 11px; height: 11px; border-radius: var(--radius-xs); }
+  .dvb-key.a i { background: color-mix(in srgb, var(--cat-1) 70%, var(--bg-surface)); }
+  .dvb-key.b i { background: color-mix(in srgb, var(--cat-2) 70%, var(--bg-surface)); }
+  .dvb-rows { display: flex; flex-direction: column; gap: var(--sp-2); }
+  .dvb-row { display: grid; grid-template-columns: 3em minmax(60px, 1fr) auto minmax(60px, 1fr) 3em; align-items: center; gap: var(--sp-2); }
+  .dvb-val { font: var(--type-caption); font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .dvb-val.a { text-align: right; }
+  .dvb-val.b { text-align: left; }
+  .dvb-cat { font: var(--type-caption); font-weight: 600; color: var(--text-primary); text-align: center; white-space: nowrap; padding-inline: var(--sp-2); }
+  /* tracks: A grows toward the spine from the left, B from the right */
+  .dvb-track { height: 16px; display: flex; }
+  .dvb-track.a { justify-content: flex-end; }
+  .dvb-track.b { justify-content: flex-start; }
+  .dvb-fill { width: var(--w, 0%); height: 100%; transition: filter var(--dur-fast) var(--ease); }
+  .dvb-track.a .dvb-fill { border-radius: var(--radius-sm) 0 0 var(--radius-sm); background: color-mix(in srgb, var(--cat-1) 66%, var(--bg-surface)); }
+  .dvb-track.b .dvb-fill { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: color-mix(in srgb, var(--cat-2) 66%, var(--bg-surface)); }
+  .dvb-fill:hover { filter: brightness(1.07); }
+  @media (prefers-reduced-motion: reduce) { .dvb-fill { transition: none; } }
+</style>
+
+<figure class="dvb card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="dvb-title">{{TITLE}}</figcaption>
+  <div class="dvb-legend">
+    <span class="dvb-key a"><i></i>{{SERIES_A}}</span>   <!-- e.g. 賛成 -->
+    <span class="dvb-key b"><i></i>{{SERIES_B}}</span>   <!-- e.g. 反対 -->
+  </div>
+  <div class="dvb-rows">
+    <!-- ↓ one .dvb-row per category; width:NN% = value / rowMax × 100% on a shared scale -->
+    <div class="dvb-row">
+      <span class="dvb-val a">{{VALUE_A}}</span>                          <!-- e.g. 62% -->
+      <span class="dvb-track a"><span class="dvb-fill" style="--w:88%"></span></span>
+      <span class="dvb-cat">{{CATEGORY}}</span>                           <!-- e.g. 20代 -->
+      <span class="dvb-track b"><span class="dvb-fill" style="--w:54%"></span></span>
+      <span class="dvb-val b">{{VALUE_B}}</span>                          <!-- e.g. 38% -->
+    </div>
+    <div class="dvb-row">
+      <span class="dvb-val a">{{VALUE_A}}</span>                          <!-- e.g. 55% -->
+      <span class="dvb-track a"><span class="dvb-fill" style="--w:78%"></span></span>
+      <span class="dvb-cat">{{CATEGORY}}</span>                           <!-- e.g. 30代 -->
+      <span class="dvb-track b"><span class="dvb-fill" style="--w:64%"></span></span>
+      <span class="dvb-val b">{{VALUE_B}}</span>                          <!-- e.g. 45% -->
+    </div>
+    <div class="dvb-row">
+      <span class="dvb-val a">{{VALUE_A}}</span>                          <!-- e.g. 48% -->
+      <span class="dvb-track a"><span class="dvb-fill" style="--w:68%"></span></span>
+      <span class="dvb-cat">{{CATEGORY}}</span>                           <!-- e.g. 40代 -->
+      <span class="dvb-track b"><span class="dvb-fill" style="--w:74%"></span></span>
+      <span class="dvb-val b">{{VALUE_B}}</span>                          <!-- e.g. 52% -->
+    </div>
+    <div class="dvb-row">
+      <span class="dvb-val a">{{VALUE_A}}</span>                          <!-- e.g. 41% -->
+      <span class="dvb-track a"><span class="dvb-fill" style="--w:58%"></span></span>
+      <span class="dvb-cat">{{CATEGORY}}</span>                           <!-- e.g. 50代 -->
+      <span class="dvb-track b"><span class="dvb-fill" style="--w:84%"></span></span>
+      <span class="dvb-val b">{{VALUE_B}}</span>                          <!-- e.g. 59% -->
+    </div>
+    <!-- ↑ repeat: one .dvb-row per category -->
+  </div>
+</figure>

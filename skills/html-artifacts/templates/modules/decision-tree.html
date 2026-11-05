@@ -1,0 +1,85 @@
+<!-- ============================================================================
+MODULE: decision-tree                           lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A left-to-right decision tree (pure CSS - no SVG). A root QUESTION node
+         fans through labeled condition edges (yes/no or custom) into intermediate
+         question nodes and finally into leaf OUTCOME nodes tinted by verdict
+         (success / warning / danger). Built from nested flex "trees": each node is
+         followed by a .dt-children column of .dt-branch rows, and every branch
+         carries a condition pill on the path. For eligibility rules, triage flows,
+         "if X then Y" policy trees.
+         Distinction: flow-diagram is a general process with arbitrary shapes; tree
+         (interactive) is a collapsible file/outline; decision-tree encodes branching
+         CONDITIONS resolving to typed OUTCOMES.
+VARIABLES: {{TITLE}}; per question {{QUESTION}}; per edge {{CONDITION}}; per leaf
+           {{OUTCOME}} (+ tint class dt-ok / dt-warn / dt-danger).
+SCALING:   nesting = depth. A .dt-tree is a flex row [node | .dt-children]; each
+           child is a .dt-branch (flex row) holding a .dt-edge condition pill then
+           either another .dt-tree or a leaf .dt-node. The pill's ::before/::after
+           are the horizontal connector stubs; .dt-children's left spine joins the
+           branches. align-items:center keeps a parent centered against its subtree.
+           Add a branch = one more .dt-branch; deepen = nest another .dt-tree.
+REQUIRES:  core/tokens.css (--accent, --color-success/-warning/-danger, --bg-surface,
+           --bg-card, --border-default, --text-*, --radius-*, --sp-*, --shadow-*),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="decision-tree" style block once.
+INTERACTION: none (static). Hover lifts a node (paint/shadow only, reduced-motion
+             guarded). aria-label on the figure; all nodes and labels are real text.
+USAGE: repeat one .dt-branch per condition; use dt-ok/dt-warn/dt-danger on leaves.
+============================================================================ -->
+<style data-module="decision-tree">
+  .dt { margin: 0; overflow-x: auto; }
+  .dt-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-5); }
+  .dt-tree { display: flex; align-items: center; }
+  .dt-children { display: flex; flex-direction: column; gap: var(--sp-4); position: relative; }
+  /* left spine joins the branch connector stubs into one fan-out */
+  .dt-children::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-default)); }
+  .dt-branch { display: flex; align-items: center; }
+  /* node boxes: questions are accent-tinted, leaves carry a verdict tint */
+  .dt-node { flex: 0 0 auto; max-width: 170px; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-md); border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-primary); font: var(--type-small); font-weight: 600; text-align: center; box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+  .dt-node:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .dt-q { background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default)); }
+  .dt-ok { background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-success) 46%, var(--border-default)); }
+  .dt-warn { background: color-mix(in srgb, var(--color-warning) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-warning) 46%, var(--border-default)); }
+  .dt-danger { background: color-mix(in srgb, var(--color-danger) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-danger) 46%, var(--border-default)); }
+  /* condition pill sits on the path, with connector stubs bridging to each side */
+  .dt-edge { position: relative; flex: 0 0 auto; padding: 1px calc(26px + var(--sp-2)); overflow: hidden; color: var(--text-secondary); font: var(--type-caption); font-weight: 700; white-space: nowrap; z-index: 1; }
+  .dt-edge::before { content: ""; position: absolute; z-index: -1; inset: 0 26px; border-radius: var(--radius-pill); border: 1px solid var(--border-default); background: var(--bg-card); }
+  .dt-edge::after { content: ""; position: absolute; z-index: -2; left: 0; right: 0; top: 50%; border-top: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-default)); }
+  @media (prefers-reduced-motion: reduce) { .dt-node { transition: none; } }
+</style>
+
+<figure class="dt card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="dt-title">{{TITLE}}</figcaption>
+
+  <div class="dt-tree">
+    <div class="dt-node dt-q">{{QUESTION}}</div> <!-- e.g. 年間契約か？ -->
+    <div class="dt-children">
+
+      <!-- ── branch 1 → an intermediate question, then two leaves ──────────── -->
+      <div class="dt-branch">
+        <span class="dt-edge">{{CONDITION}}</span> <!-- e.g. はい -->
+        <div class="dt-tree">
+          <div class="dt-node dt-q">{{QUESTION}}</div> <!-- e.g. 支払遅延あり？ -->
+          <div class="dt-children">
+            <div class="dt-branch">
+              <span class="dt-edge">{{CONDITION}}</span> <!-- e.g. なし -->
+              <div class="dt-node dt-ok">{{OUTCOME}}</div> <!-- e.g. 自動更新 -->
+            </div>
+            <div class="dt-branch">
+              <span class="dt-edge">{{CONDITION}}</span> <!-- e.g. あり -->
+              <div class="dt-node dt-warn">{{OUTCOME}}</div> <!-- e.g. 与信レビュー -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── branch 2 → straight to a leaf outcome ─────────────────────────── -->
+      <div class="dt-branch">
+        <span class="dt-edge">{{CONDITION}}</span> <!-- e.g. いいえ -->
+        <div class="dt-node dt-danger">{{OUTCOME}}</div> <!-- e.g. 都度見積 -->
+      </div>
+      <!-- ↑ repeat: one .dt-branch per condition; nest a .dt-tree to go deeper -->
+
+    </div>
+  </div>
+</figure>

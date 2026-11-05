@@ -1,0 +1,75 @@
+<!-- ============================================================================
+MODULE: progress-ring                                       lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A compact grid of circular progress rings (NO external libs). 2-4 SVG rings
+         side by side, each a track circle + an arc drawn with stroke-dasharray; the
+         centre shows a big % number with a label below. Toned per ring with --cat-N
+         so a dashboard row of completion / utilisation ratios reads at a glance.
+         Distinction: gauge is a single dial (value against zones); progress is a
+         linear bar; this is the multi-widget CIRCULAR % grid - several rings compared
+         side by side, one categorical tone each.
+VARIABLES: {{TITLE}}; per ring {{LABEL}} {{PCT}} (0-100, shown centred) and the
+           stroke-dasharray "SEG GAP" pair.
+GEOMETRY:  viewBox 120×120 per ring; track/arc circle r=52 ⇒ circumference
+           C = 2·π·52 = 326.73. frac = PCT/100. SEG = frac·326.73, GAP = 326.73 − SEG.
+           The arc <circle> is rotated −90° about (60,60) so it starts at 12 o'clock.
+           Examples: 72% → "235.25 91.48"; 45% → "147.03 179.70"; 88% → "287.52 39.21".
+REQUIRES:  core/tokens.css (--cat-1..4, --bg-muted, --text-*, --font-mono, --sp-*,
+           --radius-*), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="progress-ring" style block once.
+INTERACTION: none (static). Each ring SVG carries role="img" + <title>; the centre %
+             and label are real text.
+USAGE: duplicate one <div class="pgr-item cat-N"> per ring; set the arc's
+       stroke-dasharray from the SEG/GAP formula above.
+============================================================================ -->
+<style data-module="progress-ring">
+  .pgr { margin: 0; }
+  .pgr-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .pgr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--sp-4); justify-items: center; }
+  .pgr-item { --tone: var(--cat-1); display: grid; justify-items: center; gap: var(--sp-2); margin: 0; }
+  .pgr-item svg { width: 120px; height: 120px; display: block; }
+  .pgr-track { fill: none; stroke: var(--bg-muted); stroke-width: 10; }
+  .pgr-arc { fill: none; stroke: var(--tone); stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray var(--dur-slow) var(--ease), filter var(--dur-mid) var(--ease); }
+  .pgr-num { fill: var(--text-primary); font: var(--type-h2); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; letter-spacing: var(--tracking-tight); }
+  .pgr-label { font: var(--type-small); color: var(--text-secondary); text-align: center; letter-spacing: var(--tracking-tight); }
+  .pgr-item.cat-1 { --tone: var(--cat-1); }
+  .pgr-item.cat-2 { --tone: var(--cat-2); }
+  .pgr-item.cat-3 { --tone: var(--cat-3); }
+  .pgr-item.cat-4 { --tone: var(--cat-4); }
+  @media (hover: hover) { .pgr-item:hover .pgr-arc { filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--tone) 42%, transparent)); } }
+  @media (prefers-reduced-motion: reduce) { .pgr-arc { transition: filter var(--dur-mid) var(--ease); } }
+</style>
+
+<figure class="pgr card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="pgr-title">{{TITLE}}</figcaption>
+  <div class="pgr-grid">
+    <!-- ↓ one ring per metric (2-4). SEG = PCT/100 × 326.73, GAP = 326.73 − SEG -->
+    <div class="pgr-item cat-1">
+      <svg viewBox="0 0 120 120" role="img" aria-label="{{LABEL}}: {{PCT}}%">
+        <title>{{LABEL}}: {{PCT}}%</title>
+        <circle class="pgr-track" cx="60" cy="60" r="52"/>
+        <circle class="pgr-arc" cx="60" cy="60" r="52" stroke-dasharray="235.25 91.48" transform="rotate(-90 60 60)"/>
+        <text class="pgr-num" x="60" y="60">{{PCT}}%</text>
+      </svg>
+      <span class="pgr-label">{{LABEL}}</span> <!-- e.g. 進捗率 -->
+    </div>
+    <div class="pgr-item cat-2">
+      <svg viewBox="0 0 120 120" role="img" aria-label="{{LABEL}}: {{PCT}}%">
+        <title>{{LABEL}}: {{PCT}}%</title>
+        <circle class="pgr-track" cx="60" cy="60" r="52"/>
+        <circle class="pgr-arc" cx="60" cy="60" r="52" stroke-dasharray="147.03 179.70" transform="rotate(-90 60 60)"/>
+        <text class="pgr-num" x="60" y="60">{{PCT}}%</text>
+      </svg>
+      <span class="pgr-label">{{LABEL}}</span>
+    </div>
+    <div class="pgr-item cat-3">
+      <svg viewBox="0 0 120 120" role="img" aria-label="{{LABEL}}: {{PCT}}%">
+        <title>{{LABEL}}: {{PCT}}%</title>
+        <circle class="pgr-track" cx="60" cy="60" r="52"/>
+        <circle class="pgr-arc" cx="60" cy="60" r="52" stroke-dasharray="287.52 39.21" transform="rotate(-90 60 60)"/>
+        <text class="pgr-num" x="60" y="60">{{PCT}}%</text>
+      </svg>
+      <span class="pgr-label">{{LABEL}}</span>
+    </div>
+    <!-- ↑ repeat (2-4 rings) -->
+  </div>
+</figure>

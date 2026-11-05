@@ -1,0 +1,105 @@
+<!-- ============================================================================
+MODULE: state-diagram                                       lineage: v3 diagrams expansion (UML)
+PURPOSE: Self-contained SVG UML state machine / statechart (NO external libs, no
+         Mermaid). Initial pseudo-state (filled dot), states (rounded rects),
+         final state (double circle), and guarded transition arrows carrying a
+         [guard] condition label. For lifecycle / status modeling (order,
+         subscription, ticket, job状態遷移).
+VARIABLES: {{TITLE}}; per state {{STATE_NAME}}; per transition {{GUARD}} (the
+           condition/event on the arrow, shown as [guard]).
+GEOMETRY:  states sit on a baseline row at midY=70; state box W=128 H=48, so a
+           state centered at cx has box x=cx-64, y=46 (top=46, bottom=94). Row
+           centers are spaced 210px (140, 350, 560 …); add a state by placing the
+           next center at prev+210 and widening the viewBox by +210. Initial dot:
+           r=8 at (32,70), edge exits at x=40. Final: outer circle r=16 + inner
+           filled r=7 at (724,70), left edge = cx-16. A transition is a line from
+           the source right edge (cx+64) to the target left edge (cx-64) at y=70,
+           its [guard] centered above the box top at y=36 so it never collides with
+           state boxes. Branch to a lower row (e.g. cancelled at midY=204): drop
+           vertically or route orthogonally M x,94 V y H tx.
+           Tint terminal-ish states with .is-success / .is-danger.
+REQUIRES:  core/tokens.css (--bg-card, --accent, --border-default, --text-*,
+           --color-success, --color-danger, --font-mono, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="state-diagram" style block once.
+INTERACTION: none (static). role="img" + <title> a11y.
+USAGE: duplicate one <g> (rect.sd-state + text.sd-label) per state; one line/path
+       .sd-edge + text.sd-guard per transition. Marker id is namespaced
+       "state-diagram-arrow". Draw edges first, then state boxes, then guard labels.
+============================================================================ -->
+<style data-module="state-diagram">
+  .sd { width: 100%; }
+  .sd svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .sd { overflow-x: auto; } .sd svg { min-width: 780px; } }
+  .sd-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .sd .sd-initial { fill: var(--text-primary); }
+  .sd .sd-final-outer { fill: none; stroke: var(--text-primary); stroke-width: 1.5; }
+  .sd .sd-final-inner { fill: var(--text-primary); }
+  /* states: card-toned rounded slabs whose hairline warms toward the accent on hover */
+  .sd .sd-state { fill: color-mix(in srgb, var(--accent) 8%, var(--bg-surface)); stroke: var(--border-default); stroke-width: 1.5; transition: stroke var(--dur-fast) var(--ease), fill var(--dur-fast) var(--ease); }
+  .sd .sd-state.is-success { fill: color-mix(in srgb, var(--color-success) 12%, var(--bg-surface)); stroke: color-mix(in srgb, var(--color-success) 45%, var(--border-default)); }
+  .sd .sd-state.is-danger { fill: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface)); stroke: color-mix(in srgb, var(--color-danger) 45%, var(--border-default)); }
+  .sd g:hover .sd-state { stroke: var(--accent); }
+  .sd g:hover .sd-state.is-success { stroke: var(--color-success); }
+  .sd g:hover .sd-state.is-danger { stroke: var(--color-danger); }
+  .sd .sd-label { fill: var(--text-primary); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+  /* transitions: accent-tempered rails; the [guard] reads in mono as a caption with a surface halo */
+  .sd .sd-edge { fill: none; stroke: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); stroke-width: 1.5; }
+  .sd .sd-arrow { fill: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); }
+  .sd .sd-guard { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; paint-order: stroke; stroke: var(--bg-surface); stroke-width: 4px; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: reduce) { .sd .sd-state { transition: none; } }
+</style>
+
+<figure class="sd card-outlined">
+  <figcaption class="sd-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 780 260" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <defs>
+      <marker id="state-diagram-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="sd-arrow" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+    </defs>
+
+    <!-- ── TRANSITION LINES (drawn first so state boxes sit on top) ───────── -->
+    <line class="sd-edge" x1="40" y1="70" x2="76" y2="70" marker-end="url(#state-diagram-arrow)"/>
+    <line class="sd-edge" x1="204" y1="70" x2="286" y2="70" marker-end="url(#state-diagram-arrow)"/>
+    <line class="sd-edge" x1="414" y1="70" x2="496" y2="70" marker-end="url(#state-diagram-arrow)"/>
+    <line class="sd-edge" x1="624" y1="70" x2="700" y2="70" marker-end="url(#state-diagram-arrow)"/>
+    <line class="sd-edge" x1="350" y1="94" x2="350" y2="176" marker-end="url(#state-diagram-arrow)"/>
+    <path class="sd-edge" d="M140,94 V200 H286" marker-end="url(#state-diagram-arrow)"/>
+
+    <!-- ── INITIAL PSEUDO-STATE (filled dot) ─────────────────────────────── -->
+    <circle class="sd-initial" cx="32" cy="70" r="8"/>
+
+    <!-- ── STATES (baseline row) - one <g> each so hover warms the edge ───── -->
+    <g>
+      <rect class="sd-state" x="76" y="46" width="128" height="48" rx="8"/>
+      <text class="sd-label" x="140" y="70">{{STATE_NAME}}</text> <!-- e.g. Draft -->
+    </g>
+    <g>
+      <rect class="sd-state" x="286" y="46" width="128" height="48" rx="8"/>
+      <text class="sd-label" x="350" y="70">{{STATE_NAME}}</text> <!-- e.g. Pending -->
+    </g>
+    <g>
+      <rect class="sd-state is-success" x="496" y="46" width="128" height="48" rx="8"/>
+      <text class="sd-label" x="560" y="70">{{STATE_NAME}}</text> <!-- e.g. Confirmed -->
+    </g>
+
+    <!-- ── LOWER-ROW STATE (terminal-ish branch target) ──────────────────── -->
+    <g>
+      <rect class="sd-state is-danger" x="286" y="176" width="128" height="48" rx="8"/>
+      <text class="sd-label" x="350" y="200">{{STATE_NAME}}</text> <!-- e.g. Cancelled -->
+    </g>
+
+    <!-- ── FINAL STATE (double circle) ───────────────────────────────────── -->
+    <circle class="sd-final-outer" cx="716" cy="70" r="16"/>
+    <circle class="sd-final-inner" cx="716" cy="70" r="7"/>
+
+    <!-- ── GUARD LABELS (drawn last at y=36 above the row so boxes never clip them) -->
+    <text class="sd-guard" x="245" y="36">[{{GUARD}}]</text> <!-- e.g. [submit] -->
+    <text class="sd-guard" x="455" y="36">[{{GUARD}}]</text> <!-- e.g. [approve] -->
+    <text class="sd-guard" x="662" y="36">[{{GUARD}}]</text> <!-- e.g. [fulfill] -->
+    <text class="sd-guard" x="404" y="140">[{{GUARD}}]</text> <!-- e.g. [cancel] -->
+    <text class="sd-guard" x="195" y="188">[{{GUARD}}]</text> <!-- e.g. [discard] -->
+  </svg>
+</figure>

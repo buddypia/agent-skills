@@ -1,0 +1,54 @@
+<!-- ============================================================================
+MODULE: faq                                                 lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: An always-visible question-and-answer list (pure CSS - no SVG, no JS).
+         Each item pairs a round "Q" badge + question heading with a round "A"
+         badge + answer paragraph, separated by thin dividers. For landing-page
+         FAQ sections, product docs, and support pages. Distinction: collapsible
+         is the INTERACTIVE accordion that hides answers behind a JS toggle;
+         glossary maps short TERMS → definitions; faq keeps every Q&A pair open
+         for reading, so it is the static FAQ layout, not a toggle or a lexicon.
+VARIABLES: {{TITLE}}; per item {{QUESTION}} + {{ANSWER}}.
+SCALING:  single-column <dl>; each pair is a .faq-item wrapping a <dt> question
+          and a <dd> answer. Badges are fixed 22px accent/neutral circles; the
+          answer indents to align under the question text. Thin dividers between
+          items; the last item drops its rule.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --bg-card, --bg-surface, --text-*, --border-*, --radius-*, --sp-*,
+          --type-*, --shadow-sm)
+MODULE CSS: inline the data-module="faq" style block once.
+INTERACTION: none (static). Semantic <dl>/<dt>/<dd>; badges are aria-hidden so a
+             screen reader reads the question and answer directly.
+USAGE: one <div class="faq-item"> per pair inside the <dl>, each holding one
+       <dt class="faq-q"> and one <dd class="faq-a">. 4-5 items read best.
+============================================================================ -->
+<style data-module="faq">
+  .faq { margin: 0; }
+  .faq-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .faq-list { margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+  .faq-item { padding: var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  .faq-item:last-child { border-bottom: none; }
+  /* question row: an accent "Q" disc + the heading text */
+  .faq-q { display: flex; align-items: flex-start; gap: var(--sp-3); margin: 0; font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .faq-a { display: flex; align-items: flex-start; gap: var(--sp-3); margin: var(--sp-2) 0 0; font: var(--type-small); color: var(--text-secondary); }
+  /* shared round badge; Q warms to the accent, A stays neutral-quiet */
+  .faq-badge { flex: none; width: 22px; height: 22px; border-radius: var(--radius-pill); display: grid; place-items: center; font: var(--type-caption); font-weight: 700; margin-top: 1px; }
+  .faq-q .faq-badge { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border-subtle)); }
+  .faq-a .faq-badge { color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-default); }
+  .faq-text { flex: 1; }
+</style>
+
+<figure class="faq card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="faq-title">{{TITLE}}</figcaption> <!-- e.g. よくあるご質問 -->
+  <dl class="faq-list">
+
+    <!-- ── one .faq-item per Q&A pair ─────────────────────────────────────── -->
+    <div class="faq-item">
+      <dt class="faq-q"><span class="faq-badge" aria-hidden="true">Q</span><span class="faq-text">{{QUESTION}}</span></dt>
+      <!-- e.g. 無料プランから有料プランへの変更はいつでもできますか？ -->
+      <dd class="faq-a"><span class="faq-badge" aria-hidden="true">A</span><span class="faq-text">{{ANSWER}}</span></dd>
+      <!-- e.g. はい。管理画面からいつでもアップグレードでき、差額は日割りで精算されます。 -->
+    </div>
+    <!-- ↑ repeat: one .faq-item per pair (4-5 items read best) -->
+
+  </dl>
+</figure>

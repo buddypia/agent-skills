@@ -1,0 +1,90 @@
+<!-- ============================================================================
+MODULE: agenda                                              lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A forward-looking meeting / event agenda (pure CSS - no SVG, no JS).
+         Time-slot rows - a mono start-end time, a session title, an owner /
+         speaker chip, and an optional room / track tag - grouped under section
+         dividers for morning / afternoon blocks. For conference programs, sprint
+         schedules, and workshop plans. Distinction: timeline narrates PAST events
+         as a chronology; gantt plans task DURATIONS across a calendar; activity-
+         feed logs what already happened; agenda is the SCHEDULED, still-upcoming
+         program of a single day or session.
+VARIABLES: {{TITLE}}; per block {{BLOCK}} label; per slot {{START}}-{{END}} time,
+           {{SESSION}} title, {{OWNER}} chip, optional {{TRACK}} tag.
+SCALING:  each block is a labeled group of .agd-slot rows. A slot is a grid: a
+          fixed mono time column + a body cell (title over a meta row of the owner
+          chip and track tag). A left accent rail ties each slot to the theme.
+REQUIRES: core/elements.css (.card-outlined, .chip), core/tokens.css (--accent,
+          --bg-card, --bg-surface, --text-*, --border-*, --font-mono, --radius-*,
+          --sp-*, --type-*, --shadow-sm)
+MODULE CSS: inline the data-module="agenda" style block once.
+INTERACTION: none (static). The owner chip reuses the .chip primitive.
+USAGE: one <section class="agd-block"> per block with a .agd-block-label, then
+       one <div class="agd-slot"> per session. Drop .agd-track where unused.
+============================================================================ -->
+<style data-module="agenda">
+  .agd { margin: 0; }
+  .agd-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .agd-list { border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+  /* block divider: an all-caps label on a faint tinted strip */
+  .agd-block-label { margin: 0; padding: var(--sp-2) var(--sp-4); font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-secondary); background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); border-bottom: 1px solid var(--border-subtle); }
+  /* slot: mono time column + body, with an accent rail on the leading edge */
+  .agd-slot { display: grid; grid-template-columns: 6.5em 1fr; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); border-left: 2px solid transparent; }
+  .agd-slot:hover { border-left-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  .agd-slot:last-child { border-bottom: none; }
+  .agd-time { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); white-space: nowrap; padding-top: 1px; }
+  .agd-body { display: grid; gap: var(--sp-2); }
+  .agd-session { margin: 0; font: var(--type-body); font-weight: 600; color: var(--text-primary); }
+  .agd-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+  .agd-track { padding: 1px var(--sp-2); border-radius: var(--radius-xs); font: var(--type-caption); font-weight: 600; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-subtle)); }
+</style>
+
+<figure class="agd card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="agd-title">{{TITLE}}</figcaption> <!-- e.g. カンファレンス Day 1 -->
+  <div class="agd-list">
+
+    <!-- ── one .agd-block per part of the day (morning / afternoon / …) ────── -->
+    <section class="agd-block">
+      <p class="agd-block-label">{{BLOCK}}</p> <!-- e.g. 午前 -->
+
+      <!-- ── one .agd-slot per session ─────────────────────────────────────── -->
+      <div class="agd-slot">
+        <span class="agd-time">{{START}}-{{END}}</span> <!-- e.g. 09:00-09:30 -->
+        <div class="agd-body">
+          <p class="agd-session">{{SESSION}}</p>        <!-- e.g. 開会あいさつと全体像 -->
+          <div class="agd-meta">
+            <span class="chip">{{OWNER}}</span>          <!-- e.g. 田中 実行委員長 -->
+            <span class="agd-track">{{TRACK}}</span>     <!-- e.g. メインホール（省略可） -->
+          </div>
+        </div>
+      </div>
+
+      <div class="agd-slot">
+        <span class="agd-time">{{START}}-{{END}}</span> <!-- e.g. 09:30-10:20 -->
+        <div class="agd-body">
+          <p class="agd-session">{{SESSION}}</p>        <!-- e.g. 基調講演：これからのプロダクト開発 -->
+          <div class="agd-meta">
+            <span class="chip">{{OWNER}}</span>          <!-- e.g. 佐藤 花子 -->
+            <span class="agd-track">{{TRACK}}</span>     <!-- e.g. Track A -->
+          </div>
+        </div>
+      </div>
+      <!-- ↑ repeat: one .agd-slot per session -->
+    </section>
+
+    <section class="agd-block">
+      <p class="agd-block-label">{{BLOCK}}</p> <!-- e.g. 午後 -->
+      <div class="agd-slot">
+        <span class="agd-time">{{START}}-{{END}}</span> <!-- e.g. 13:00-13:45 -->
+        <div class="agd-body">
+          <p class="agd-session">{{SESSION}}</p>        <!-- e.g. 分科会：導入事例に学ぶ -->
+          <div class="agd-meta">
+            <span class="chip">{{OWNER}}</span>          <!-- e.g. 鈴木 太郎 -->
+            <span class="agd-track">{{TRACK}}</span>     <!-- e.g. Track B / 302 -->
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ↑ repeat: one .agd-block per part of the day -->
+
+  </div>
+</figure>

@@ -1,0 +1,83 @@
+{
+  "title": "Checkout Service — Q2 Health Report",
+  "theme": "slate",
+  "lang": "en",
+  "target": "document",
+  "eyebrow": "QUARTERLY REPORT",
+  "subtitle": "Reliability, traffic, and architecture snapshot for April–June 2026",
+  "footer": "Source: internal telemetry / 2026-06-12",
+  "sections": [
+    {
+      "type": "kpi",
+      "label": "Key metrics",
+      "items": [
+        { "label": "Uptime", "value": "99.97%", "delta": "0.02pt", "dir": "up" },
+        { "label": "p95 latency", "value": "184ms", "valueNum": 184, "suffix": "ms", "delta": "12ms", "dir": "down", "tone": "good" },
+        { "label": "Requests / day", "value": "4.2M", "delta": "9%", "dir": "up" },
+        { "label": "Open incidents", "value": "2" }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "title": "Deployments per month",
+      "series": [
+        { "label": "Apr", "value": 18 },
+        { "label": "May", "value": 24 },
+        { "label": "Jun", "value": 31 }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "donut",
+      "title": "Error budget consumption",
+      "total": "38%",
+      "totalLabel": "Consumed",
+      "segments": [
+        { "label": "Timeouts", "value": 21 },
+        { "label": "5xx responses", "value": 11 },
+        { "label": "Dependency faults", "value": 6 },
+        { "label": "Remaining budget", "value": 62 }
+      ]
+    },
+    {
+      "type": "table",
+      "label": "Incident log",
+      "columns": ["Date", "Severity", "Service", "Status"],
+      "paginate": 5,
+      "rows": [
+        ["2026-04-08", { "badge": "danger", "text": "SEV-1" }, "payments-api", { "badge": "success", "text": "Resolved" }],
+        ["2026-05-19", { "badge": "warning", "text": "SEV-2" }, "cart-svc", { "badge": "success", "text": "Resolved" }],
+        ["2026-06-02", { "badge": "warning", "text": "SEV-2" }, "checkout-web", { "badge": "info", "text": "Monitoring" }]
+      ]
+    },
+    {
+      "type": "diagram",
+      "title": "Checkout request path",
+      "layout": "layered",
+      "zones": ["Edge", "Services", "Data"],
+      "groupLabels": { "1": "Stateless", "2": "Stateful" },
+      "nodes": [
+        { "id": "cdn", "label": "CDN", "zone": "Edge", "group": 1 },
+        { "id": "gw", "label": "API Gateway", "sub": "rate-limit / auth", "zone": "Edge", "group": 1 },
+        { "id": "checkout", "label": "checkout-svc", "zone": "Services", "group": 1 },
+        { "id": "payments", "label": "payments-api", "zone": "Services", "group": 1 },
+        { "id": "pg", "label": "PostgreSQL", "zone": "Data", "group": 2 },
+        { "id": "bus", "label": "Event Bus", "zone": "Data", "group": 2 }
+      ],
+      "edges": [
+        { "from": "cdn", "to": "gw" },
+        { "from": "gw", "to": "checkout", "label": "HTTP" },
+        { "from": "checkout", "to": "payments", "label": "gRPC" },
+        { "from": "payments", "to": "pg" },
+        { "from": "checkout", "to": "bus", "proto": "pub-sub", "label": "events" }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Action required",
+      "body": "Error budget is on track to exhaust by mid-July if the timeout regression in payments-api is not fixed. Owner: platform team. Due: 2026-06-26."
+    }
+  ]
+}

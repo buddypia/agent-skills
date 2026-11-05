@@ -1,0 +1,493 @@
+<!-- ============================================================================
+MODULE: wireframe-block                          lineage: html-visual(wireframe) + demo2/wireframe-dashboard.html
+PURPOSE: Low-fi, hand-drawn SCREEN-FLOW wireframe - multiple pages connected by
+         arrows. Grayscale ONLY - no color, no lorem. The default (sketch) skin is faithful to
+         demo2/html-visual/wireframe-dashboard.html: a sketch FONT for in-page content, a faint
+         PAPER grain on the canvas, and a feTurbulence/feDisplacementMap WOBBLE on each page frame
+         (#wf-roughpaper), over dashed/irregular borders + slight rotation. Flat skins (clean/
+         blueprint/mono) switch the three sketch cues off. Image box has an SVG X-cross; text is gray bars.
+CONTENT: Structural placeholder only - fill labels, never copy. Authored literals here
+         (page titles / element labels) so the demo builds without placeholder filling.
+REQUIRES: core/elements.css (.btn .small .muted) ; core/tokens.css (--text-muted,
+          --border-default, --bg-muted, --bg-surface, --accent, --color-success, --sp-*,
+          --radius-*, --font-*, --ease, --dur-fast, --dur-mid, --shadow-lg, --type-caption)
+          ; core/interactions.js (HA.reorder + HA.wfedit + HA.wfflow + HA.designpick).
+MODULE CSS: inline the data-module="wireframe-block" style block once.
+INTERACTION: opt-in HA.reorder + HA.wfedit + HA.wfflow + HA.designpick.
+  • PAGES - [data-wf-flow] holds a [data-wf-flow-track][data-reorder][data-reorder-scope=pages]
+            of [data-wf-page] frames. Drag/keyboard reorder (insert). An SVG overlay
+            (.wf-arrows) auto-draws + re-routes an arrow between each adjacent page pair.
+  • ADD PAGE - [data-wf-add-page] appends a fresh page ; per-page ✕ ([data-wf-del-page]) removes it.
+  • ELEMENTS - each page body is a [data-wf-board] editable element container (insert reorder).
+  • PALETTE - [data-wf-palette] of [data-wf-add=type] buttons. CLICK adds a typed element to the
+            active page ; DRAG a palette button onto any page body to place it at the drop point.
+            16 industry-standard primitives (heading/text/button/link/badge/image/avatar/input/
+            textarea/select/checkbox/radio/toggle/search/list/divider).
+  • DELETE - a focused [data-wf-el]: ✕ button (.wf-el-del) or Delete/Backspace key.
+  • LABELS - [data-wf-editable] spans (button names / option text / page titles…) edit in place.
+  • DESIGN - [data-theme-pick] select swaps the document theme (<html data-theme>) ;
+            [data-wf-skin-pick] select swaps the wireframe skin (sketch/clean/blueprint/mono).
+  • [data-reorder-reset] factory-resets ; [data-reorder-export] copies a layout JSON whose
+    `pages` array carries each page's title + element tree and `flow` the arrow connections.
+USAGE: keep the data-wf-* / data-reorder hooks for the interactive editor; strip them (and
+       .wf-controls + .wf-arrows) for a purely static screen-flow mockup. The factory in
+       HA.wfedit produces byte-identical element nodes for runtime adds.
+============================================================================ -->
+<style data-module="wireframe-block">
+  /* grayscale + sketch only - every value derives from neutral tokens */
+  .wf-sketch { border: 2px dashed var(--border-default);
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; }   /* hand-drawn corner (demo2 ref) */
+
+  /* image box with X-cross */
+  .wf-imgbox { width: 100%; height: 90px; display: block; margin-bottom: var(--sp-2); background: var(--bg-muted); }
+  .wf-imgbox line { stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; }
+  .wf-imgbox rect { fill: none; stroke: var(--border-default); stroke-width: 2; stroke-dasharray: 6 4; }
+
+  /* gray rounded text-line bars (NOT lorem) */
+  .wf-line { height: 10px; background: var(--bg-muted); border-radius: var(--radius-pill); margin: var(--sp-2) 0; }
+  .wf-line.-w90 { width: 90%; } .wf-line.-w75 { width: 75%; }
+  .wf-line.-w60 { width: 60%; } .wf-line.-w45 { width: 45%; }
+  .wf-line.-head { height: 14px; width: 60%; background: var(--text-muted); opacity: .5; }
+
+  /* element head type-label */
+  .wf-label { font-family: var(--wf-content-font); font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ── industry-standard lo-fi primitives (gray-bar / dashed idiom) ── */
+  .wf-btn { display: inline-block; padding: var(--sp-2) var(--sp-5); font-family: var(--wf-content-font);
+    font-size: 11px; color: var(--text-muted); background: transparent; border: 2px dashed var(--border-default);
+    border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px; transform: rotate(-0.6deg); }
+  .wf-link { font-family: var(--wf-content-font); font-size: 12px; color: var(--text-muted);
+    text-decoration: underline dashed; text-underline-offset: 3px; }
+  .wf-badge { display: inline-block; padding: 1px var(--sp-2); font-family: var(--wf-content-font); font-size: 10px;
+    color: var(--text-muted); border: 1.5px dashed var(--border-default); border-radius: var(--radius-pill); }
+  .wf-input { height: 24px; border: 1.5px dashed var(--border-default); border-radius: var(--radius-xs); background: transparent; }
+  .wf-textarea { height: 52px; border: 1.5px dashed var(--border-default); border-radius: var(--radius-xs); background: transparent; }
+  .wf-select { height: 26px; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+    padding: 0 var(--sp-2); border: 1.5px dashed var(--border-default); border-radius: var(--radius-xs); background: transparent; }
+  .wf-select-label { font-family: var(--wf-content-font); font-size: 11px; color: var(--text-muted); }
+  .wf-select-caret { font-family: var(--wf-content-font); font-size: 10px; color: var(--text-muted); }
+  .wf-optrow { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-1) 0; }
+  .wf-check { width: 14px; height: 14px; border: 1.5px dashed var(--text-muted); border-radius: 3px; flex: 0 0 auto; display: inline-block; }
+  .wf-radio { width: 14px; height: 14px; border: 1.5px dashed var(--text-muted); border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+  .wf-toggle { width: 30px; height: 16px; box-sizing: border-box; padding: 2px; display: inline-flex; align-items: center;
+    border: 1.5px dashed var(--text-muted); border-radius: var(--radius-pill); flex: 0 0 auto; }
+  .wf-toggle::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); opacity: .55; }
+  .wf-opt-label, .wf-list-label { font-family: var(--wf-content-font); font-size: 11px; color: var(--text-muted); }
+  .wf-avatar { width: 32px; height: 32px; border: 1.5px dashed var(--text-muted); border-radius: 50%; background: var(--bg-muted); flex: 0 0 auto; display: inline-block; }
+  .wf-avatar-meta { display: flex; flex-direction: column; gap: var(--sp-1); flex: 1 1 auto; }
+  .wf-search { display: flex; align-items: center; gap: var(--sp-2); height: 26px; padding: 0 var(--sp-3);
+    border: 1.5px dashed var(--border-default); border-radius: var(--radius-pill); }
+  .wf-search-ic { position: relative; width: 9px; height: 9px; border: 1.5px solid var(--text-muted); border-radius: 50%; flex: 0 0 auto; opacity: .6; }
+  .wf-search-ic::after { content: ""; position: absolute; right: -3px; bottom: -1px; width: 5px; height: 0; border-top: 1.5px solid var(--text-muted); transform: rotate(45deg); transform-origin: left; }
+  .wf-search-ph { font-family: var(--wf-content-font); font-size: 11px; color: var(--text-muted); opacity: .8; }
+  .wf-listrow { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-1) 0; }
+  .wf-bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); opacity: .55; flex: 0 0 auto; display: inline-block; }
+  .wf-divider { height: 0; border: none; border-top: 2px dashed var(--border-default); margin: var(--sp-2) 0; }
+
+  /* ── interactive layer (HA.reorder) - neutral by default; --accent only as transient affordance ── */
+  .wf-handle { display: inline-flex; align-items: center; justify-content: center;
+    min-width: 32px; min-height: 26px; padding: 3px 6px; box-sizing: border-box;
+    cursor: grab; touch-action: none; user-select: none; flex: 0 0 auto;
+    border: 1.5px dashed var(--border-default); border-radius: var(--radius-xs);
+    background-image: radial-gradient(var(--text-muted) 1.1px, transparent 1.3px);
+    background-size: 7px 6px; background-position: center; background-repeat: round;
+    opacity: .55; transition: opacity var(--dur-fast) var(--ease); }
+  .wf-handle:hover, .wf-card-el:hover > .wf-el-head > .wf-handle, .wf-page:hover > .wf-page-head > .wf-handle { opacity: 1; }
+  .is-grabbed { cursor: grabbing; box-shadow: var(--shadow-lg); }
+  [data-reorder-item] { outline-offset: 3px; }
+  [data-reorder-item]:focus-visible { outline: 2px solid var(--accent); }
+  body.is-wf-dragging { cursor: grabbing; user-select: none; }
+
+  /* insert-mode drop gap */
+  .wf-placeholder { border: 2px dashed var(--accent); border-radius: 12px; min-height: 40px;
+    background: color-mix(in srgb, var(--accent) 7%, transparent); position: relative; pointer-events: none; }
+  .wf-placeholder::after { content: "Drop here"; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font: var(--type-caption); font-family: var(--font-mono); color: var(--accent); }
+  .wf-placeholder.-slim { min-height: 12px; height: 12px; }
+  .wf-placeholder.-slim::after { content: ""; }
+
+  /* swap-mode target ring (used by the reorder-only regression / any swap board) */
+  .is-swap-target { outline: 2px dashed var(--accent); outline-offset: 3px; }
+  .is-swap-target::after { content: "⇄"; position: absolute; top: 6px; right: 8px;
+    font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+
+  /* drop confirmation pulse */
+  @keyframes wf-dropped {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 55%, transparent); }
+    100% { box-shadow: 0 0 0 12px transparent; } }
+  .just-dropped { animation: wf-dropped 0.6s var(--ease); }
+
+  /* drag-to-place ghost chip (palette → page) */
+  .wf-drag-ghost { position: fixed; z-index: 80; pointer-events: none; transform: translate(12px, 12px);
+    padding: 4px var(--sp-3); font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+    background: var(--bg-surface); border: 1.5px dashed var(--accent);
+    border-radius: 10px 4px 10px 4px / 4px 10px 4px 10px; box-shadow: var(--shadow-lg); white-space: nowrap; }
+
+  /* controls (outside the flow) */
+  .wf-controls { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-4); }
+  .wf-hint { font: var(--type-caption); color: var(--text-muted); }
+  .wf-tool.is-copied { color: var(--color-success); border-color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 14%, transparent); }
+  .wf-sink { margin-top: var(--sp-3); padding: var(--sp-3); overflow: auto;
+    border: 1.5px dashed var(--border-default); border-radius: var(--radius-sm);
+    background: var(--bg-muted); color: var(--text-secondary);
+    font-family: var(--font-mono); font-size: 11px; white-space: pre-wrap; }
+
+  /* palette (element kit) */
+  .wf-palette { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center;
+    width: 100%; padding-top: var(--sp-2); border-top: 1.5px dashed var(--border-default); }
+  .wf-pal-group { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
+  .wf-pal-sep { width: 0; align-self: stretch; min-height: 18px; border-left: 1.5px dashed var(--border-default); margin: 0 var(--sp-1); }
+  .wf-add-btn { display: inline-flex; align-items: center; min-height: 28px; padding: 4px var(--sp-3); box-sizing: border-box;
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); background: transparent;
+    border: 1.5px dashed var(--border-default); border-radius: 12px 5px 12px 5px / 5px 12px 5px 12px;
+    cursor: grab; touch-action: none; user-select: none;
+    transition: opacity var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+  .wf-add-btn:hover { opacity: 1; border-color: var(--accent); color: var(--text-secondary);
+    background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .wf-add-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ===== screen-flow: pages connected by arrows (HA.wfflow) ===== */
+  /* hand-drawn (sketch) is the DEFAULT skin - faithful to demo2/html-visual/wireframe-dashboard.html.
+     Three cues layer over the grayscale lo-fi: (a) a sketch FONT for in-page content
+     (--wf-content-font), (b) a faint PAPER grain on the canvas, (c) a feTurbulence WOBBLE on each
+     page frame (.wf-page + #wf-roughpaper). The flat skins (clean/blueprint/mono carry
+     [data-wf-flat]) switch all three off so they read crisp. */
+  .wf-flow { position: relative;
+    --wf-content-font: "Comic Sans MS", "Chalkboard SE", "Segoe Print", "Bradley Hand", "Hannotate SC", cursive, var(--font-mono); }
+  .wf-flow-track { position: relative; display: flex; gap: var(--sp-7); align-items: flex-start;
+    overflow-x: auto; padding: var(--sp-4) var(--sp-2) var(--sp-6);
+    background-image: radial-gradient(color-mix(in srgb, var(--text-muted) 13%, transparent) 1px, transparent 1.5px);
+    background-size: 7px 7px; }   /* paper grain (demo2 ref) - removed under flat skins */
+  .wf-arrows { position: absolute; top: 0; left: 0; z-index: 0; overflow: visible; }
+  /* page-to-page flow connectors - clearly visible (darker token, thicker, higher opacity) so the
+     connection reads at a glance; auto re-routed by HA.wfflow whenever pages move/resize/reorder. */
+  .wf-arrow { fill: none; stroke: var(--text-secondary); stroke-width: 2.5; stroke-dasharray: 7 4; stroke-linecap: round; opacity: .9; }
+  .wf-arrowhead { fill: var(--text-secondary); }
+  .wf-page { position: relative; z-index: 1; flex: 0 0 300px; width: 300px; box-sizing: border-box;
+    padding: var(--sp-4); background: var(--bg-surface);
+    box-shadow: var(--shadow-sm);   /* gentle atmospheric depth - lifts each frame off the paper grain */
+    transition: box-shadow var(--dur-mid) var(--ease), border-color var(--dur-mid) var(--ease);
+    filter: url(#wf-roughpaper); }   /* hand-drawn wobble - PAINT-only: layout/getBoundingClientRect/elementFromPoint
+       are unchanged, so FLIP + the document-driven drag math stay exact (begin() already reparents the
+       fixed ghost to <body> precisely because a filter/transform ancestor would otherwise shift it). */
+  /* calm accent-tied hover: firm the frame's edge + deepen its shadow (NO transform - keeps the wobble
+     filter, FLIP reorder math and resting tilt untouched). Pointer-only so touch/keyboard reorder is unaffected. */
+  @media (hover: hover) { .wf-page:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border-default)); box-shadow: var(--shadow-md); } }
+  /* keep a label CRISP while it is being typed: :has() drops the wobble only when an editable
+     inside this page has focus - NOT during keyboard reorder (there the focused node is the
+     [data-reorder-item], so the hand-drawn look persists through moves). */
+  .wf-page:has([data-wf-editable]:focus) { filter: none; }
+  /* per-template WIDTH tiers (data-wf-width set by HA.wfflow.buildPage from TEMPLATES[t].w):
+     complex layouts grow so their cols2/cols3 aren't squeezed. Default (no attr) stays narrow.
+     The attribute selectors are (0,2,0) so they also hold their width inside the mobile @media
+     below (the flow track scrolls horizontally rather than cramming a kanban into 260px). */
+  .wf-page[data-wf-width="md"] { flex-basis: 420px; width: 420px; }
+  .wf-page[data-wf-width="lg"] { flex-basis: 560px; width: 560px; }
+  .wf-page[data-wf-width="xl"] { flex-basis: 700px; width: 700px; }
+  .wf-page-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3);
+    padding-bottom: var(--sp-2); border-bottom: 1.5px dashed var(--border-default); }
+  .wf-dots { flex: 0 0 auto; width: 30px; height: 8px;
+    background-image: radial-gradient(var(--text-muted) 2px, transparent 2.4px); background-size: 10px 8px;
+    background-repeat: repeat-x; opacity: .5; }
+  .wf-page-title { flex: 1 1 auto; font-family: var(--wf-content-font); font-size: 12px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .04em; }
+  .wf-page-del { flex: 0 0 auto; min-width: 24px; min-height: 24px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); background: transparent;
+    border: 1.5px dashed transparent; border-radius: var(--radius-xs); cursor: pointer; opacity: .5;
+    transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .wf-page:hover .wf-page-del, .wf-page-del:hover, .wf-page-del:focus-visible { opacity: 1; }
+  .wf-page-del:hover { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+    background: color-mix(in srgb, var(--color-danger) 9%, transparent); }
+  .wf-page-del:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); color: var(--accent); }
+
+  /* page body = editable element container (vertical stack of element items) */
+  .wf-card-body, .wf-page-body { display: flex; flex-direction: column; gap: var(--sp-2); min-height: 60px; outline-offset: 4px; }
+  .wf-card-body.wf-active { outline: 2px dashed var(--accent); outline-offset: 5px; border-radius: 10px; }
+  .wf-card-body.wf-drop-hot { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 10px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .wf-card-body:focus-visible { outline: 2px solid var(--accent); }
+  /* :has() (not :empty) so the hint survives the whitespace text nodes left after deletes */
+  .wf-card-body:not(:has(.wf-card-el))::after { content: "Drag or click to add an element"; display: block; text-align: center;
+    padding: var(--sp-3); font: var(--type-caption); font-family: var(--font-mono);
+    color: var(--text-muted); border: 1.5px dashed var(--border-default); border-radius: 10px; }
+
+  /* a single typed element item */
+  .wf-card-el { position: relative; padding: var(--sp-3); background: var(--bg-surface); }
+  .wf-card-el:nth-child(odd)  { transform: rotate(-0.5deg); }   /* matches restRot() position parity (no data-rest-rot) */
+  .wf-card-el:nth-child(even) { transform: rotate(0.5deg); }
+  .wf-el-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+  .wf-el-head .wf-label { flex: 1 1 auto; }
+
+  /* per-element ✕ delete (ghost; --accent only on hover/focus). Keyboard delete = Delete key on the item */
+  .wf-el-del { flex: 0 0 auto; min-width: 24px; min-height: 24px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 13px; color: var(--text-muted);
+    background: transparent; border: 1.5px dashed transparent; border-radius: var(--radius-xs);
+    cursor: pointer; opacity: .55; transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .wf-card-el:hover > .wf-el-head > .wf-el-del, .wf-el-del:hover, .wf-el-del:focus-visible { opacity: 1; }
+  .wf-el-del:hover { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+    background: color-mix(in srgb, var(--color-danger) 9%, transparent); }
+  .wf-el-del:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); color: var(--accent); }
+
+  /* inline-editable labels (button names / option text / page titles) - wired by HA.wfedit.
+     Quiet until hovered/focused so the lo-fi page reads unchanged at rest. */
+  [data-wf-editable] { cursor: text; border-radius: var(--radius-xs); padding: 0 2px;
+    transition: background var(--dur-fast) var(--ease); }
+  [data-wf-editable]:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+  [data-wf-editable]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px;
+    background: var(--bg-surface); color: var(--text-secondary); }
+  [data-wf-editable]:empty::before { content: "(label)"; opacity: .45; }
+
+  /* design pickers (theme / skin / template) */
+  .wf-pick { display: inline-flex; align-items: center; gap: var(--sp-1); }
+  .wf-pick-label { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .wf-select-ctl { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+    background: var(--bg-surface); border: 1.5px dashed var(--border-default); border-radius: var(--radius-xs);
+    padding: 3px var(--sp-2); cursor: pointer; }
+  .wf-select-ctl:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* nested layout containers (complex 2-D placement): columns + card panel, each holds drop-target sub-boards */
+  .wf-cols { display: flex; gap: var(--sp-2); align-items: flex-start; }
+  .wf-cols > .wf-subboard { flex: 1 1 0; min-width: 0; }
+  .wf-subboard { min-height: 40px; padding: var(--sp-2); border: 1.5px dashed var(--border-subtle); border-radius: var(--radius-xs); }
+  .wf-panel { border: 1.5px dashed var(--border-default); border-radius: var(--radius-sm); padding: var(--sp-2); }
+  .wf-panel-title { display: block; font-family: var(--wf-content-font); font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: var(--sp-2); }
+
+  /* ===== selectable SKINS - re-style the wireframe at runtime ([data-wf-skin] on .wf-flow) =====
+     sketch (default) = dashed + tilt. clean/blueprint/mono add [data-wf-flat] (restRot()→0). */
+  [data-wf-skin="clean"] .wf-sketch, [data-wf-skin="clean"] .wf-subboard,
+  [data-wf-skin="clean"] .wf-panel, [data-wf-skin="clean"] .wf-input, [data-wf-skin="clean"] .wf-textarea,
+  [data-wf-skin="clean"] .wf-select, [data-wf-skin="clean"] .wf-search,
+  [data-wf-skin="clean"] .wf-check, [data-wf-skin="clean"] .wf-radio, [data-wf-skin="clean"] .wf-toggle,
+  [data-wf-skin="clean"] .wf-avatar, [data-wf-skin="clean"] .wf-badge { border-style: solid; }
+  [data-wf-skin="clean"] .wf-sketch { border-radius: var(--radius-md); }
+  [data-wf-skin="clean"] .wf-btn { border-style: solid; border-radius: var(--radius-sm); }
+  /* neutralize the resting tilt for flat skins WITHOUT !important: this rule sits AFTER the
+     .wf-card-el:nth-child tilt rules (equal specificity → later wins), so the lo-fi tilt drops,
+     yet HA.reorder's FLIP inline transform (style attribute) still beats this non-important rule
+     and animates the reorder move. (!important here would also kill FLIP → moves would snap.) */
+  [data-wf-flat] .wf-card-el, [data-wf-flat] .wf-btn { transform: none; }
+  /* flat skins also drop the three sketch cues: sketch font → mono, no paper grain, no wobble.
+     (.wf-flow[data-wf-flat] = specificity (0,2,0) so it beats the .wf-flow base var regardless of order.) */
+  .wf-flow[data-wf-flat] { --wf-content-font: var(--font-mono); }
+  [data-wf-flat] .wf-page { filter: none; }
+  [data-wf-flat] .wf-flow-track { background-image: none; }
+
+  [data-wf-skin="mono"] .wf-sketch, [data-wf-skin="mono"] .wf-subboard, [data-wf-skin="mono"] .wf-panel,
+  [data-wf-skin="mono"] .wf-input, [data-wf-skin="mono"] .wf-textarea, [data-wf-skin="mono"] .wf-select,
+  [data-wf-skin="mono"] .wf-search, [data-wf-skin="mono"] .wf-btn { border-style: solid; border-radius: 2px; border-color: var(--text-muted); }
+  /* small marks: normalize stroke only - keep their round/pill shape (no radius override) */
+  [data-wf-skin="mono"] .wf-check, [data-wf-skin="mono"] .wf-radio, [data-wf-skin="mono"] .wf-toggle,
+  [data-wf-skin="mono"] .wf-avatar, [data-wf-skin="mono"] .wf-badge { border-style: solid; border-color: var(--text-muted); }
+  [data-wf-skin="mono"] .wf-page { border-radius: 2px; }
+
+  [data-wf-skin="blueprint"] { --wf-bp: color-mix(in srgb, var(--accent) 70%, var(--color-info)); }
+  [data-wf-skin="blueprint"] .wf-sketch, [data-wf-skin="blueprint"] .wf-subboard, [data-wf-skin="blueprint"] .wf-panel,
+  [data-wf-skin="blueprint"] .wf-input, [data-wf-skin="blueprint"] .wf-textarea, [data-wf-skin="blueprint"] .wf-select,
+  [data-wf-skin="blueprint"] .wf-search, [data-wf-skin="blueprint"] .wf-btn { border-style: solid; border-color: var(--wf-bp); border-radius: var(--radius-sm); }
+  /* small marks: normalize stroke + color only - keep their round/pill shape */
+  [data-wf-skin="blueprint"] .wf-check, [data-wf-skin="blueprint"] .wf-radio, [data-wf-skin="blueprint"] .wf-toggle,
+  [data-wf-skin="blueprint"] .wf-avatar, [data-wf-skin="blueprint"] .wf-badge { border-style: solid; border-color: var(--wf-bp); }
+  [data-wf-skin="blueprint"] .wf-page { background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); }
+  [data-wf-skin="blueprint"] .wf-label, [data-wf-skin="blueprint"] .wf-page-title, [data-wf-skin="blueprint"] .wf-arrow { color: var(--wf-bp); stroke: var(--wf-bp); }
+
+  @media (max-width: 720px) { .wf-page { flex-basis: 260px; width: 260px; } }
+  @media (prefers-reduced-motion: reduce) {
+    /* keep the resting tilt at 0 to match HA.reorder restRot()=0 under reduced motion */
+    .wf-btn, .wf-card-el, .wf-card-el:nth-child(odd), .wf-card-el:nth-child(even) { transform: none; }
+    .wf-page { filter: none; transition: none; }   /* still the hand-drawn wobble off when motion is reduced (demo2 ref) */
+    .just-dropped { animation: none; }
+    .wf-handle, .wf-el-del, .wf-page-del, .wf-add-btn, [data-wf-editable] { transition: none; }
+  }
+</style>
+
+<!-- controls live OUTSIDE the flow so they are not reorderable; the live region preexists -->
+<div class="wf-controls no-print">
+  <button class="btn btn-ghost btn-sm wf-tool" type="button" data-reorder-reset>↺ Reset</button>
+  <button class="btn btn-ghost btn-sm wf-tool" type="button" data-reorder-export>⧉ Copy layout JSON</button>
+  <!-- multiple UI designs: theme (whole-document) + skin (wireframe look) -->
+  <label class="wf-pick"><span class="wf-pick-label">Theme</span>
+    <select class="wf-select-ctl" data-theme-pick aria-label="Select theme">
+      <option value="interactive-warm">Warm</option>
+      <option value="birchline">Birchline</option>
+      <option value="minimal">Minimal</option>
+      <option value="slate">Slate</option>
+      <option value="forest">Forest</option>
+      <option value="rose">Rose</option>
+      <option value="midnight">Midnight</option>
+      <option value="dark-focus">Dark</option>
+    </select>
+  </label>
+  <label class="wf-pick"><span class="wf-pick-label">Design</span>
+    <select class="wf-select-ctl" data-wf-skin-pick aria-label="Select the wireframe design">
+      <option value="sketch">Sketch</option>
+      <option value="clean">Clean</option>
+      <option value="blueprint">Blueprint</option>
+      <option value="mono">Mono</option>
+    </select>
+  </label>
+  <!-- add a page from a complex-screen template -->
+  <label class="wf-pick"><span class="wf-pick-label">Template</span>
+    <select class="wf-select-ctl" data-wf-page-template aria-label="Template for the page to add">
+      <option value="blank">Blank page</option>
+      <option value="login">Login</option>
+      <option value="signup">Sign up</option>
+      <option value="dashboard">Dashboard</option>
+      <option value="analytics">Analytics</option>
+      <option value="form">Form</option>
+      <option value="detail">List + detail</option>
+      <option value="settings">Settings</option>
+      <option value="profile">Profile</option>
+      <option value="pricing">Pricing</option>
+      <option value="checkout">Checkout</option>
+      <option value="table">Table</option>
+      <option value="chat">Chat</option>
+      <option value="feed">Feed</option>
+      <option value="kanban">Kanban</option>
+      <option value="onboarding">Onboarding</option>
+      <option value="search">Search results</option>
+      <option value="empty">Empty state</option>
+      <option value="error">Error</option>
+    </select>
+  </label>
+  <button class="btn btn-ghost btn-sm" type="button" data-wf-add-page>+ Add page</button>
+  <!-- element palette: click adds to the active page · drag onto a page to place at the drop point -->
+  <div class="wf-palette" data-wf-palette role="toolbar" aria-label="UI elements (click to add, drag to place)">
+    <span class="wf-pal-group">Content</span>
+    <button class="wf-add-btn" type="button" data-wf-add="heading">Heading</button>
+    <button class="wf-add-btn" type="button" data-wf-add="text">Text</button>
+    <button class="wf-add-btn" type="button" data-wf-add="image">Image</button>
+    <button class="wf-add-btn" type="button" data-wf-add="avatar">Avatar</button>
+    <button class="wf-add-btn" type="button" data-wf-add="badge">Badge</button>
+    <button class="wf-add-btn" type="button" data-wf-add="link">Link</button>
+    <span class="wf-pal-sep" aria-hidden="true"></span>
+    <span class="wf-pal-group">Form</span>
+    <button class="wf-add-btn" type="button" data-wf-add="input">Input</button>
+    <button class="wf-add-btn" type="button" data-wf-add="textarea">Textarea</button>
+    <button class="wf-add-btn" type="button" data-wf-add="select">Select</button>
+    <button class="wf-add-btn" type="button" data-wf-add="checkbox">Checkbox</button>
+    <button class="wf-add-btn" type="button" data-wf-add="radio">Radio</button>
+    <button class="wf-add-btn" type="button" data-wf-add="toggle">Toggle</button>
+    <button class="wf-add-btn" type="button" data-wf-add="search">Search</button>
+    <button class="wf-add-btn" type="button" data-wf-add="button">Button</button>
+    <span class="wf-pal-sep" aria-hidden="true"></span>
+    <span class="wf-pal-group">Other</span>
+    <button class="wf-add-btn" type="button" data-wf-add="list">List</button>
+    <button class="wf-add-btn" type="button" data-wf-add="divider">Divider</button>
+    <span class="wf-pal-sep" aria-hidden="true"></span>
+    <span class="wf-pal-group">Layout / complex UI</span>
+    <button class="wf-add-btn" type="button" data-wf-add="cols2">2 Columns</button>
+    <button class="wf-add-btn" type="button" data-wf-add="cols3">3 Columns</button>
+    <button class="wf-add-btn" type="button" data-wf-add="card">Card</button>
+    <button class="wf-add-btn" type="button" data-wf-add="dashboard">Dashboard</button>
+    <span class="wf-hint" data-wf-target-readout></span>
+  </div>
+  <span class="wf-hint">Click a palette item to add it to the active page, or drag it to any position. Elements can be <strong>dragged across pages too</strong>, and nested into 2/3 columns or cards to build complex layouts. Delete with Delete, move with the handle / arrow keys, and click a label or page title to edit it (Enter to confirm). Switch the look with Theme / Design, and add complex screens from Template.</span>
+</div>
+<div class="sr-only" data-reorder-live aria-live="polite" aria-atomic="true"></div>
+
+<div class="wf-flow" data-wf-flow>
+  <!-- hand-drawn wobble filter (lineage: demo2/html-visual/wireframe-dashboard.html #roughpaper).
+       Paint-only (feDisplacementMap): hit-testing/layout are untouched, so drag math stays exact.
+       Applied to .wf-page under the sketch skin; off under flat skins, reduced-motion, and while editing. -->
+  <svg class="wf-filter-defs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+    <defs>
+      <filter id="wf-roughpaper">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="7" result="wf-noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="wf-noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+  <div class="wf-flow-track" data-wf-flow-track data-reorder data-reorder-scope="pages" data-reorder-mode="insert" data-reorder-noun="page" role="group" aria-label="Screen flow (reorder pages by dragging or arrow keys; adjacent pages are connected by arrows)">
+
+    <!-- arrow overlay: HA.wfflow draws/re-routes one arrow per adjacent page pair into .wf-arrow-layer -->
+    <svg class="wf-arrows" aria-hidden="true" width="0" height="0">
+      <defs><marker id="wf-ah" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+        <path class="wf-arrowhead" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+      <g class="wf-arrow-layer"></g>
+    </svg>
+
+    <!-- page 1 -->
+    <div class="wf-page wf-sketch" data-reorder-item data-wf-page data-rid="page-1" data-rest-rot="0">
+      <div class="wf-page-head">
+        <span class="wf-handle" data-reorder-handle aria-hidden="true"></span>
+        <span class="wf-dots" aria-hidden="true"></span>
+        <span class="wf-page-title" data-wf-editable>Login</span>
+        <button class="wf-page-del" type="button" data-wf-del-page aria-label="Delete this page">✕</button>
+      </div>
+      <div class="wf-page-body wf-card-body" data-reorder data-reorder-scope="elements" data-reorder-mode="insert" data-reorder-noun="element" data-reorder-cross="el" data-wf-board tabindex="-1">
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="heading" data-rid="el-1">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>HEADING</span></div>
+          <div class="wf-line -head"></div>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="input" data-rid="el-2">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>INPUT</span></div>
+          <div class="wf-input"></div>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="button" data-rid="el-3">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>BUTTON</span></div>
+          <span class="wf-btn" data-wf-editable>Login</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- page 2 -->
+    <div class="wf-page wf-sketch" data-reorder-item data-wf-page data-rid="page-2" data-rest-rot="0">
+      <div class="wf-page-head">
+        <span class="wf-handle" data-reorder-handle aria-hidden="true"></span>
+        <span class="wf-dots" aria-hidden="true"></span>
+        <span class="wf-page-title" data-wf-editable>List</span>
+        <button class="wf-page-del" type="button" data-wf-del-page aria-label="Delete this page">✕</button>
+      </div>
+      <div class="wf-page-body wf-card-body" data-reorder data-reorder-scope="elements" data-reorder-mode="insert" data-reorder-noun="element" data-reorder-cross="el" data-wf-board tabindex="-1">
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="search" data-rid="el-4">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>SEARCH</span></div>
+          <div class="wf-search"><span class="wf-search-ic"></span><span class="wf-search-ph" data-wf-editable>Search…</span></div>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="list" data-rid="el-5">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>LIST</span></div>
+          <div class="wf-listrow"><span class="wf-bullet"></span><span class="wf-list-label" data-wf-editable>Item 1</span></div>
+          <div class="wf-listrow"><span class="wf-bullet"></span><span class="wf-list-label" data-wf-editable>Item 2</span></div>
+          <div class="wf-listrow"><span class="wf-bullet"></span><span class="wf-list-label" data-wf-editable>Item 3</span></div>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="badge" data-rid="el-6">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>BADGE</span></div>
+          <span class="wf-badge" data-wf-editable>NEW</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- page 3 -->
+    <div class="wf-page wf-sketch" data-reorder-item data-wf-page data-rid="page-3" data-rest-rot="0">
+      <div class="wf-page-head">
+        <span class="wf-handle" data-reorder-handle aria-hidden="true"></span>
+        <span class="wf-dots" aria-hidden="true"></span>
+        <span class="wf-page-title" data-wf-editable>Detail</span>
+        <button class="wf-page-del" type="button" data-wf-del-page aria-label="Delete this page">✕</button>
+      </div>
+      <div class="wf-page-body wf-card-body" data-reorder data-reorder-scope="elements" data-reorder-mode="insert" data-reorder-noun="element" data-reorder-cross="el" data-wf-board tabindex="-1">
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="image" data-rid="el-7">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>IMAGE</span></div>
+          <svg class="wf-imgbox" viewBox="0 0 240 90" preserveAspectRatio="none" aria-hidden="true"><rect x="1" y="1" width="238" height="88"/><line x1="1" y1="1" x2="239" y2="89"/><line x1="239" y1="1" x2="1" y2="89"/></svg>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="text" data-rid="el-8">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>TEXT</span></div>
+          <div class="wf-line -w90"></div><div class="wf-line -w75"></div><div class="wf-line -w60"></div>
+        </div>
+        <div class="wf-card-el wf-sketch" data-reorder-item data-wf-el data-el-type="button" data-rid="el-9">
+          <div class="wf-el-head"><span class="wf-handle" data-reorder-handle aria-hidden="true"></span><span class="wf-label" data-wf-editable>BUTTON</span></div>
+          <span class="wf-btn" data-wf-editable>Save</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<pre class="wf-sink no-print" data-reorder-sink hidden></pre>
+<p class="small muted" style="margin-top:var(--sp-4)">A hand-drawn, low-fi screen-flow editor. Each page can be reordered by dragging or with the arrow keys, and adjacent pages are auto-connected by arrows. Use "+ Add page" to grow the flow (from <strong>templates</strong> like Blank, Dashboard, Form, List + detail, etc.), and place elements from the palette (16 standard UI elements plus 2/3-column and card <strong>layout containers</strong>) by clicking or dragging. Elements can be <strong>dragged across pages too</strong>, and nesting them into columns or cards builds the kind of complex UI layout found in real products. Delete with ✕ or Delete, move with the handle / arrow keys, and edit labels and page titles in place by clicking (Enter to confirm). Switch the look with <strong>Theme</strong> (palette) and <strong>Design</strong> (Sketch / Clean / Blueprint / Mono). The page order, each page's element tree (including nesting and labels), and the arrow connections can be exported to JSON.</p>

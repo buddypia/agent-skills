@@ -13,6 +13,20 @@ permissions:
   contents: read
 
 jobs:
+  html-artifacts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: skills/html-artifacts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test tools/*.test.mjs
+      - run: node tools/index.mjs --check
+      - run: node tools/reachability.mjs
+      - run: node tools/refresh-examples.mjs --check
   invariants:
     runs-on: ubuntu-latest
     steps:

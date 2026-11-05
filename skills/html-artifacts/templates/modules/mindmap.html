@@ -1,0 +1,187 @@
+<!-- ============================================================================
+MODULE: mindmap                                              lineage: html-visual(diagram/mindmap) + mindmap-product(demo2)
+PURPOSE: Self-contained radial mindmap (NO external libs). Center root node with
+         branches fanning out via <path data-edge> connectors; each branch
+         is colored --cat-1..5 and ends in rounded-rect child nodes.
+VARIABLES: {{ROOT}}  +  per branch: {{BRANCH}}  +  per child: {{CHILD}}
+LAYOUT:    viewBox 0 0 800 500, root centered at 400,250. Branch hubs at the four
+           "corners" (~210px from center); children offset further out. Each node
+           is a <g data-node transform="translate(X,Y)"> whose rect/ellipse is
+           centered on the node origin; connectors are <path data-edge data-from
+           data-to> that re-route to node centers automatically.
+REQUIRES:  core/tokens.css (--cat-*, --accent, --on-accent, --text-*, --border-*, --bg-surface, --font-mono)
+MODULE CSS: inline the data-module="mindmap" style block once.
+INTERACTION: zoom+pan stage (wheel / +,−,0 / buttons) and draggable nodes - drag a
+             root/branch/child node and its [data-edge] connectors re-route live.
+             role="img" + aria-label / <title> for a11y; nodes focusable+arrow-movable.
+USAGE: repeat one .branch <g> per branch (4 shown); inside each, repeat the child
+       <g data-node> + its <path data-edge> once per leaf. Swap .b1→.b5 to recolor.
+       Give every <g data-node> a UNIQUE id and matching data-from/data-to on edges.
+============================================================================ -->
+<style data-module="mindmap">
+  .mindmap { width: 100%; }
+  /* cap width so a 800-unit viewBox doesn't upscale to the full container at "100%" */
+  .mindmap .stage { position: relative; width: 100%; max-width: 860px; margin-inline: auto; overflow: hidden; border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent) 3%, var(--bg-muted)); box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .mindmap svg { width: 100%; height: auto; font-family: var(--font-sans); display: block; touch-action: none; }
+  /* connectors: a visible default stroke is ESSENTIAL - a path's default stroke is
+     `none`, so without this the lines render invisible even though their geometry
+     is correct. Branch tint is applied below via a COMPOUND selector (.link.bN),
+     because the connector carries both classes on ONE element (class="link bN"). */
+  .mindmap .link { fill: none; stroke: var(--border-default); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .82; transition: opacity var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  /* nodes: hairline border + gentle depth; tinted hover/focus tie back to --accent.
+     transition lives on the node rect/ellipse so re-routes during drag stay crisp. */
+  .mindmap .node { fill: var(--bg-surface); stroke: var(--border-default); stroke-width: 1.5; filter: drop-shadow(0 1px 1.5px color-mix(in srgb, var(--text-primary) 10%, transparent)); transition: fill var(--dur-fast) var(--ease), stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .mindmap [data-node] { cursor: grab; }
+  .mindmap [data-node]:active { cursor: grabbing; }
+  .mindmap [data-node]:focus { outline: none; }
+  /* hover/focus: warm the fill with the node's own branch accent + lift the shadow */
+  .mindmap [data-node]:hover .node { fill: color-mix(in srgb, var(--accent) 7%, var(--bg-surface)); filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--text-primary) 16%, transparent)); }
+  .mindmap [data-node]:hover .child-label, .mindmap [data-node]:hover .branch-label { fill: var(--text-primary); }
+  .mindmap [data-node]:focus-visible .node { stroke: var(--accent); stroke-width: 2.5; }
+  /* dim sibling connectors so a hovered node's lineage reads clearly */
+  .mindmap [data-node]:hover ~ .link, .mindmap .link:hover { opacity: 1; stroke-width: 2.4; }
+  .mindmap .root { fill: var(--accent); stroke: var(--accent); filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--accent) 30%, transparent)); }
+  .mindmap [data-node="root"]:hover .root { fill: color-mix(in srgb, var(--on-accent) 8%, var(--accent)); }
+  .mindmap .root-label { fill: var(--on-accent); font: var(--type-h3); text-anchor: middle; dominant-baseline: middle; }
+  .mindmap .branch-label { fill: var(--text-primary); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; transition: fill var(--dur-fast) var(--ease); }
+  .mindmap .child-label { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; dominant-baseline: middle; transition: fill var(--dur-fast) var(--ease); }
+  /* branch palette - one --cat per branch.
+     NOTE: connectors use a COMPOUND selector (.link.bN: both classes on the same
+     <path>), nodes use a DESCENDANT selector (.bN .node: rect nested under .branch.bN). */
+  .mindmap .link.b1, .mindmap .b1 .node { stroke: var(--cat-1); }
+  .mindmap .link.b2, .mindmap .b2 .node { stroke: var(--cat-2); }
+  .mindmap .link.b3, .mindmap .b3 .node { stroke: var(--cat-3); }
+  .mindmap .link.b4, .mindmap .b4 .node { stroke: var(--cat-4); }
+  .mindmap .link.b5, .mindmap .b5 .node { stroke: var(--cat-5); }
+  /* per-branch hover fill tints back to the branch's own categorical hue (overrides
+     the generic accent tint above for nodes nested under a .bN branch group) */
+  .mindmap .b1 [data-node]:hover .node { fill: color-mix(in srgb, var(--cat-1) 9%, var(--bg-surface)); }
+  .mindmap .b2 [data-node]:hover .node { fill: color-mix(in srgb, var(--cat-2) 9%, var(--bg-surface)); }
+  .mindmap .b3 [data-node]:hover .node { fill: color-mix(in srgb, var(--cat-3) 9%, var(--bg-surface)); }
+  .mindmap .b4 [data-node]:hover .node { fill: color-mix(in srgb, var(--cat-4) 9%, var(--bg-surface)); }
+  .mindmap .b5 [data-node]:hover .node { fill: color-mix(in srgb, var(--cat-5) 9%, var(--bg-surface)); }
+  /* reduced-motion: drop the micro-transitions entirely (no entrance to guard - the
+     section already animates in at the page level; final state is always visible) */
+  @media (prefers-reduced-motion: reduce) {
+    .mindmap .link, .mindmap .node, .mindmap .branch-label, .mindmap .child-label { transition: none; }
+  }
+  /* zoom/pan controls */
+  .mindmap .zoom-controls { position: absolute; top: var(--sp-2); right: var(--sp-2); display: flex; align-items: center; gap: var(--sp-1); z-index: 2; background: color-mix(in srgb, var(--bg-surface) 86%, transparent); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: var(--sp-1); box-shadow: var(--shadow-sm); }
+  .mindmap .zoom-readout { font-family: var(--font-mono); font-size: var(--type-small, 12px); color: var(--text-muted); min-width: 3.2em; text-align: right; }
+</style>
+
+<figure class="mindmap card-outlined">
+  <div class="stage" data-zoompan data-zoom-min="0.5" data-zoom-max="3" tabindex="0">
+    <div class="zoom-controls no-print">
+      <button class="btn btn-ghost btn-sm" data-zoom-in aria-label="Zoom in">+</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-out aria-label="Zoom out">−</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-reset aria-label="Reset">⤢</button>
+      <span class="zoom-readout" data-zoom-readout>100%</span>
+    </div>
+
+    <svg viewBox="0 0 800 500" data-draggable role="img" aria-label="Mindmap: {{ROOT}}">
+      <g data-viewport>
+
+        <!-- ═══ EDGES FIRST (drawn behind every node so connectors sit underneath) ═══ -->
+        <!-- root → branch hub, then branch hub → each child. data-from/data-to = node ids. -->
+        <!-- ↓ repeat one edge group per branch (4 shown) -->
+        <path class="link b1" data-edge data-from="root" data-to="b1-hub"/>
+        <path class="link b1" data-edge data-from="b1-hub" data-to="b1-c1"/>
+        <path class="link b1" data-edge data-from="b1-hub" data-to="b1-c2"/>
+
+        <path class="link b2" data-edge data-from="root" data-to="b2-hub"/>
+        <path class="link b2" data-edge data-from="b2-hub" data-to="b2-c1"/>
+        <path class="link b2" data-edge data-from="b2-hub" data-to="b2-c2"/>
+
+        <path class="link b3" data-edge data-from="root" data-to="b3-hub"/>
+        <path class="link b3" data-edge data-from="b3-hub" data-to="b3-c1"/>
+        <path class="link b3" data-edge data-from="b3-hub" data-to="b3-c2"/>
+
+        <path class="link b4" data-edge data-from="root" data-to="b4-hub"/>
+        <path class="link b4" data-edge data-from="b4-hub" data-to="b4-c1"/>
+        <path class="link b4" data-edge data-from="b4-hub" data-to="b4-c2"/>
+        <!-- ↑ repeat edge group -->
+
+        <!-- ═══ NODES AFTER (on top of the connectors) ═══ -->
+
+        <!-- ↓ repeat one <g class="branch bN"> per branch (4 shown, swap b1..b5 to recolor) -->
+        <!-- BRANCH 1 - top-left -->
+        <g class="branch b1">
+          <!-- branch hub node (origin = node center; rect centered on it) -->
+          <g data-node="b1-hub" transform="translate(230,130)" role="group" aria-label="{{BRANCH}} draggable" tabindex="0">
+            <rect class="node" x="-70" y="-20" width="140" height="40" rx="10"/>
+            <text class="branch-label" x="0" y="0">{{BRANCH}}</text>
+          </g>
+          <!-- ↓ repeat one child <g data-node> per leaf -->
+          <g data-node="b1-c1" transform="translate(85,74)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+          <g data-node="b1-c2" transform="translate(85,170)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+          <!-- ↑ repeat child -->
+        </g>
+
+        <!-- BRANCH 2 - top-right -->
+        <g class="branch b2">
+          <g data-node="b2-hub" transform="translate(570,130)" role="group" aria-label="{{BRANCH}} draggable" tabindex="0">
+            <rect class="node" x="-70" y="-20" width="140" height="40" rx="10"/>
+            <text class="branch-label" x="0" y="0">{{BRANCH}}</text>
+          </g>
+          <g data-node="b2-c1" transform="translate(715,74)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+          <g data-node="b2-c2" transform="translate(715,170)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+        </g>
+
+        <!-- BRANCH 3 - bottom-left -->
+        <g class="branch b3">
+          <g data-node="b3-hub" transform="translate(230,370)" role="group" aria-label="{{BRANCH}} draggable" tabindex="0">
+            <rect class="node" x="-70" y="-20" width="140" height="40" rx="10"/>
+            <text class="branch-label" x="0" y="0">{{BRANCH}}</text>
+          </g>
+          <g data-node="b3-c1" transform="translate(85,330)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+          <g data-node="b3-c2" transform="translate(85,426)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+        </g>
+
+        <!-- BRANCH 4 - bottom-right -->
+        <g class="branch b4">
+          <g data-node="b4-hub" transform="translate(570,370)" role="group" aria-label="{{BRANCH}} draggable" tabindex="0">
+            <rect class="node" x="-70" y="-20" width="140" height="40" rx="10"/>
+            <text class="branch-label" x="0" y="0">{{BRANCH}}</text>
+          </g>
+          <g data-node="b4-c1" transform="translate(715,330)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+          <g data-node="b4-c2" transform="translate(715,426)" role="group" aria-label="{{CHILD}} draggable" tabindex="0">
+            <rect class="node" x="-65" y="-17" width="130" height="34" rx="9"/>
+            <text class="child-label" x="0" y="0">{{CHILD}}</text>
+          </g>
+        </g>
+        <!-- ↑ repeat branch -->
+
+        <!-- ROOT - drawn last so it sits above the connectors -->
+        <g data-node="root" transform="translate(400,250)" role="group" aria-label="{{ROOT}} draggable" tabindex="0">
+          <ellipse class="root node" cx="0" cy="0" rx="78" ry="44">
+            <title>{{ROOT}}</title>
+          </ellipse>
+          <text class="root-label" x="0" y="0">{{ROOT}}</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <button class="btn btn-ghost btn-sm no-print" data-drag-reset>Reset layout</button>
+</figure>

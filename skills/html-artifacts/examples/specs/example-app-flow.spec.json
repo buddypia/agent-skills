@@ -1,0 +1,81 @@
+{
+  "lang": "ko",
+  "target": "mobile-app",
+  "theme": "interactive-warm",
+  "layout": "stack",
+  "header": "banner",
+  "eyebrow": "화면 설계",
+  "title": "여행 준비 앱 — 핵심 사용자 흐름",
+  "subtitle": "온보딩부터 일정 확인까지, 사용자가 거치는 4개 화면과 각 화면 사이의 전환 조건",
+  "footer": "html-artifacts · screenflow 섹션 예시 (node tools/build.mjs examples/specs/example-app-flow.spec.json)",
+  "sections": [
+    {
+      "type": "screenflow",
+      "title": "메인 플로우",
+      "desc": "각 화면 아래 설명은 그 화면의 역할을, 화살표 라벨은 다음 화면으로 넘어가는 조건을 나타냅니다.",
+      "screens": [
+        {
+          "name": "로그인",
+          "appbar": "로그인",
+          "caption": "이메일/비밀번호 또는 소셜 계정으로 시작합니다. 신규 사용자는 회원가입으로 분기합니다.",
+          "elements": [
+            { "t": "heading", "label": "다시 만나서 반가워요" },
+            { "t": "input", "label": "이메일" },
+            { "t": "input", "label": "비밀번호" },
+            { "t": "button", "label": "로그인", "variant": "primary" },
+            { "t": "divider" },
+            { "t": "button", "label": "Google로 계속하기" }
+          ]
+        },
+        {
+          "name": "여행지 검색",
+          "appbar": "어디로 떠나세요?",
+          "caption": "목적지를 검색하거나 추천 여행지를 둘러봅니다. 도시를 선택하면 일정 만들기로 이동합니다.",
+          "elements": [
+            { "t": "search", "label": "도시·국가 검색" },
+            { "t": "chips", "items": ["도쿄", "오사카", "제주", "방콕"] },
+            { "t": "list", "items": ["도쿄 · 4월 벚꽃 시즌", "오사카 · 미식 여행", "제주 · 주말 힐링"] }
+          ],
+          "tabbar": ["홈", "검색", "일정", "마이"],
+          "activeTab": 1
+        },
+        {
+          "name": "일정 만들기",
+          "appbar": "도쿄 3박 4일",
+          "caption": "날짜와 관심사를 고르면 AI가 초안 일정을 만들어 줍니다. 저장하면 홈으로 돌아갑니다.",
+          "elements": [
+            { "t": "heading", "label": "여행 정보 입력" },
+            { "t": "input", "label": "여행 날짜 (4/10 – 4/13)" },
+            { "t": "chips", "items": ["미식", "쇼핑", "자연", "역사"] },
+            { "t": "card", "label": "AI 추천 일정 미리보기", "lines": 3 },
+            { "t": "button", "label": "이 일정으로 저장", "variant": "primary" }
+          ]
+        },
+        {
+          "name": "홈 (일정 확인)",
+          "appbar": "내 여행",
+          "caption": "저장된 여행이 카드로 표시됩니다. 카드를 누르면 일자별 상세 일정으로 들어갑니다.",
+          "elements": [
+            { "t": "heading", "label": "다가오는 여행" },
+            { "t": "card", "label": "도쿄 3박 4일 · D-12", "lines": 2 },
+            { "t": "card", "label": "제주 주말 여행 · D-40", "lines": 2 },
+            { "t": "button", "label": "+ 새 여행 만들기" }
+          ],
+          "tabbar": ["홈", "검색", "일정", "마이"],
+          "activeTab": 0
+        }
+      ],
+      "flows": [
+        { "label": "로그인 성공" },
+        { "label": "도시 선택" },
+        { "label": "일정 저장" }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "note",
+      "title": "읽는 법",
+      "body": "회색 막대는 아직 확정되지 않은 본문 영역(로우파이)이고, 실제 텍스트로 적힌 라벨은 화면에 그대로 들어갈 UI 문구입니다. 분기 흐름(로그인 실패, 빈 검색 결과 등)은 별도 screenflow 섹션으로 추가합니다."
+    }
+  ]
+}

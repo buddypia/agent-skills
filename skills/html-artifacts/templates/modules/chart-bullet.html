@@ -1,0 +1,46 @@
+<!-- ============================================================================
+MODULE: chart-bullet                                        lineage: unified-system original (dashboard/report)
+PURPOSE: Compact horizontal bullet bars (Stephen Few's bullet graph) - an actual
+         value bar over a track, an optional qualitative range banding, and a target
+         tick. Goal-vs-actual KPIs stacked one per row; denser than gauges or bars.
+VARIABLES (per row): {{LABEL}}  {{BAND_STYLE}} (track gradient)  {{VALUE_PCT}}
+                     {{TARGET_PCT}}  {{VALUE_TEXT}}  {{ARIA}}
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --bg-muted,
+          --text-*, --radius-sm/-pill, --sp-*)
+MODULE CSS: inline the data-module="chart-bullet" style block once.
+INTERACTION: none (static). Each track is role="img" with an aria-label stating
+             value / target / max.
+USAGE: PCT = round(value/max*100); target tick left = round(target/max*100)%.
+       Optional bands=[a,b] shade the track into poor/ok/good zones via a gradient.
+============================================================================ -->
+<style data-module="chart-bullet">
+  .bullet-list h2 { margin-bottom: var(--sp-4); }
+  .bl-row { display: grid; grid-template-columns: minmax(90px, 22%) 1fr auto; gap: var(--sp-3); align-items: center; padding: var(--sp-1) var(--sp-2); margin-inline: calc(var(--sp-2) * -1); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  .bl-row + .bl-row { margin-top: var(--sp-2); }
+  .bl-row:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .bl-label { font: var(--type-small); color: var(--text-secondary); transition: color var(--dur-fast) var(--ease); }
+  .bl-row:hover .bl-label { color: var(--text-primary); }
+  /* track - hairline inset, gentle inner depth, accent-tinted edge on hover */
+  .bl-track { position: relative; height: 22px; border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary) 7%, transparent); transition: border-color var(--dur-fast) var(--ease); }
+  .bl-row:hover .bl-track { border-color: color-mix(in srgb, var(--accent) 35%, var(--border-default)); }
+  /* value bar - rounded caps, subtle vertical sheen, settles to accent on hover */
+  .bl-fill { position: absolute; inset-inline-start: 0; top: 50%; transform: translateY(-50%); height: 10px; border-radius: var(--radius-pill); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, var(--bg-surface)), var(--accent)); box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 22%, transparent); transition: filter var(--dur-fast) var(--ease); }
+  .bl-row:hover .bl-fill { filter: brightness(1.06); }
+  /* target tick - rounded cap, reads as a clear goal marker against the bar */
+  .bl-target { position: absolute; top: 2px; bottom: 2px; width: 2px; border-radius: var(--radius-pill); background: var(--text-primary); box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-muted) 70%, transparent); }
+  .bl-val { font: var(--type-small); font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+</style>
+
+<section class="bullet-list card-outlined" aria-label="{{TITLE}}">
+  <h2>{{TITLE}}</h2>
+
+  <!-- ── one .bl-row per measure ────────────────────────────────────────── -->
+  <div class="bl-row">
+    <span class="bl-label">{{LABEL}}</span>
+    <div class="bl-track" style="{{BAND_STYLE}}" role="img" aria-label="{{ARIA}}">
+      <div class="bl-fill" style="width:{{VALUE_PCT}}%"></div>
+      <div class="bl-target" style="inset-inline-start:{{TARGET_PCT}}%"></div>
+    </div>
+    <span class="bl-val">{{VALUE_TEXT}}</span>
+  </div>
+</section>

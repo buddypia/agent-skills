@@ -1,0 +1,121 @@
+<!-- ============================================================================
+MODULE: kpi-tree                                            lineage: v3 diagrams expansion
+PURPOSE: Self-contained SVG KPI / driver / logic tree (NO external libs). A root
+         metric on the LEFT decomposes rightward through two levels of driver
+         nodes; operator chips (× + ÷) sit on the branch junctions to state HOW
+         children combine into the parent. Each node shows a name + a value. For
+         driver trees, unit-economics breakdowns, issue/logic trees
+         (e.g. Revenue = Visits × CVR × AOV).
+VARIABLES: {{TITLE}}; per node {{NODE_NAME}} (line 1) + {{NODE_VALUE}} (line 2,
+           mono); per junction {{OP}} (one of × + ÷).
+GEOMETRY:  left-to-right. A node box is W by H centered on (cx, cy): text name at
+           cy-4, value at cy+13. Columns: root x=20 W=150 H=52; level-1 x=240
+           W=150 H=46; level-2 x=480 W=140 H=44. A parent at (px right edge) fans
+           to its children through a junction bus: run "M pRight,pMid H busX" then
+           the vertical bus "M busX,topChildMid V botChildMid" then "M busX,cMid_i
+           H childLeft" per child. Bus x used: 215 (root→L1), 455 (L1→L2). The
+           operator chip is a circle r=14 centered on the junction (busX, parentMid)
+           drawn ON TOP of the bus. Add a driver: stack it in its level column and
+           extend the vertical bus; deepen a branch by adding an x=720 column.
+REQUIRES:  core/tokens.css (--bg-card, --accent, --border-default, --text-*,
+           --font-mono, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="kpi-tree" style block once.
+INTERACTION: none (static). role="img" + <title> a11y. Connectors carry no
+             arrowheads, so no marker/gradient ids are defined.
+USAGE: draw connector paths first, then operator chips (circle.kt-op + text.kt-op-sym),
+       then one <g> per node (rect.kt-box.lvl-N + text.kt-name + text.kt-val).
+============================================================================ -->
+<style data-module="kpi-tree">
+  .kt { width: 100%; }
+  .kt svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  .kt-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .kt .kt-conn { fill: none; stroke: color-mix(in srgb, var(--accent) 35%, var(--border-default)); stroke-width: 1.5; stroke-linejoin: round; }
+  /* nodes: accent density steps by depth; edge warms toward the accent on hover */
+  .kt .kt-box { stroke: var(--border-default); stroke-width: 1.5; transition: stroke var(--dur-fast) var(--ease), fill var(--dur-fast) var(--ease); }
+  .kt .kt-box.lvl-1 { fill: color-mix(in srgb, var(--accent) 22%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 45%, var(--border-default)); }
+  .kt .kt-box.lvl-2 { fill: color-mix(in srgb, var(--accent) 12%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); }
+  .kt .kt-box.lvl-3 { fill: color-mix(in srgb, var(--accent) 5%, var(--bg-card)); }
+  .kt g:hover .kt-box { stroke: color-mix(in srgb, var(--accent) 60%, var(--border-default)); }
+  .kt .kt-name { fill: var(--text-primary); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
+  .kt .kt-val { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; }
+  /* operator chip: an accent-tinted coin carrying × / + / ÷ at the junction */
+  .kt .kt-op { fill: color-mix(in srgb, var(--accent) 16%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 50%, var(--border-default)); stroke-width: 1.25; }
+  .kt .kt-op-sym { fill: var(--accent); font-size: 15px; font-weight: 700; font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+  @media (prefers-reduced-motion: reduce) { .kt .kt-box { transition: none; } }
+</style>
+
+<figure class="kt card-outlined">
+  <figcaption class="kt-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 660 380" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── CONNECTORS (drawn first so nodes/chips sit on top) ──────────────── -->
+    <!-- root (right edge 170, mid 190) → L1 drivers (mids 70/190/310) via bus x=215 -->
+    <path class="kt-conn" d="M170,190 H215 M215,70 V310 M215,70 H240 M215,190 H240 M215,310 H240"/>
+    <!-- L1 "Visits" (right 390, mid 70) → L2 (mids 34/106) via bus x=455 -->
+    <path class="kt-conn" d="M390,70 H455 M455,34 V106 M455,34 H480 M455,106 H480"/>
+    <!-- L1 "AOV" (right 390, mid 310) → L2 (mids 274/346) via bus x=455 -->
+    <path class="kt-conn" d="M390,310 H455 M455,274 V346 M455,274 H480 M455,346 H480"/>
+
+    <!-- ── OPERATOR CHIPS (on the junctions) ──────────────────────────────── -->
+    <g>
+      <circle class="kt-op" cx="215" cy="190" r="14"/>
+      <text class="kt-op-sym" x="215" y="190">{{OP}}</text> <!-- e.g. × -->
+    </g>
+    <g>
+      <circle class="kt-op" cx="455" cy="70" r="14"/>
+      <text class="kt-op-sym" x="455" y="70">{{OP}}</text>  <!-- e.g. + -->
+    </g>
+    <g>
+      <circle class="kt-op" cx="455" cy="310" r="14"/>
+      <text class="kt-op-sym" x="455" y="310">{{OP}}</text> <!-- e.g. × -->
+    </g>
+
+    <!-- ── ROOT KPI (level 0) ─────────────────────────────────────────────── -->
+    <g>
+      <rect class="kt-box lvl-1" x="20" y="164" width="150" height="52" rx="10"/>
+      <text class="kt-name" x="95" y="186">{{NODE_NAME}}</text>  <!-- e.g. Revenue -->
+      <text class="kt-val"  x="95" y="203">{{NODE_VALUE}}</text> <!-- e.g. ¥12.4M -->
+    </g>
+
+    <!-- ── LEVEL 1 DRIVERS (combine via the × chip) ───────────────────────── -->
+    <g>
+      <rect class="kt-box lvl-2" x="240" y="47" width="150" height="46" rx="9"/>
+      <text class="kt-name" x="315" y="66">{{NODE_NAME}}</text>  <!-- e.g. Visits -->
+      <text class="kt-val"  x="315" y="81">{{NODE_VALUE}}</text> <!-- e.g. 480K -->
+    </g>
+    <g>
+      <rect class="kt-box lvl-2" x="240" y="167" width="150" height="46" rx="9"/>
+      <text class="kt-name" x="315" y="186">{{NODE_NAME}}</text> <!-- e.g. CVR -->
+      <text class="kt-val"  x="315" y="201">{{NODE_VALUE}}</text><!-- e.g. 2.4% -->
+    </g>
+    <g>
+      <rect class="kt-box lvl-2" x="240" y="287" width="150" height="46" rx="9"/>
+      <text class="kt-name" x="315" y="306">{{NODE_NAME}}</text> <!-- e.g. AOV -->
+      <text class="kt-val"  x="315" y="321">{{NODE_VALUE}}</text><!-- e.g. ¥1,080 -->
+    </g>
+
+    <!-- ── LEVEL 2 SUB-DRIVERS (leaf decomposition) ───────────────────────── -->
+    <g>
+      <rect class="kt-box lvl-3" x="480" y="12" width="140" height="44" rx="8"/>
+      <text class="kt-name" x="550" y="30">{{NODE_NAME}}</text>  <!-- e.g. Organic -->
+      <text class="kt-val"  x="550" y="45">{{NODE_VALUE}}</text> <!-- e.g. 310K -->
+    </g>
+    <g>
+      <rect class="kt-box lvl-3" x="480" y="84" width="140" height="44" rx="8"/>
+      <text class="kt-name" x="550" y="102">{{NODE_NAME}}</text> <!-- e.g. Paid -->
+      <text class="kt-val"  x="550" y="117">{{NODE_VALUE}}</text><!-- e.g. 170K -->
+    </g>
+    <g>
+      <rect class="kt-box lvl-3" x="480" y="252" width="140" height="44" rx="8"/>
+      <text class="kt-name" x="550" y="270">{{NODE_NAME}}</text> <!-- e.g. Items/order -->
+      <text class="kt-val"  x="550" y="285">{{NODE_VALUE}}</text><!-- e.g. 1.8 -->
+    </g>
+    <g>
+      <rect class="kt-box lvl-3" x="480" y="324" width="140" height="44" rx="8"/>
+      <text class="kt-name" x="550" y="342">{{NODE_NAME}}</text> <!-- e.g. Unit price -->
+      <text class="kt-val"  x="550" y="357">{{NODE_VALUE}}</text><!-- e.g. ¥600 -->
+    </g>
+    <!-- ↑ repeat one <g> per node; stack drivers in their level column -->
+  </svg>
+</figure>

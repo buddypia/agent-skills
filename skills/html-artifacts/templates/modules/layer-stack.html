@@ -1,0 +1,84 @@
+<!-- ============================================================================
+MODULE: layer-stack                                        lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS horizontal layered stack (NO SVG). Full-width layers stacked top
+         → bottom (tech stack / OSI-style), each with a name in its left gutter and
+         a wrap of item chips in the body; an optional right-side aside carries
+         cross-cutting concern bands (security, observability) spanning the height.
+         For architecture layers, technology stacks, protocol / responsibility tiers.
+         Distinction: pyramid is a triangular hierarchy of importance; arch-diagram
+         is a boxes-and-arrows topology; this is flat, equal-width NAMED layers.
+VARIABLES: {{TITLE}}; per layer {{LAYER}} (name) + {{ITEM}} chips, tinted .cat-N;
+           per cross-cutting concern {{CONCERN}} (vertical aside band), tinted .cat-N.
+SCALING:   .lst-wrap is a flex row: the layer stack (flex:1) plus an optional
+           .lst-cross aside. Each .lst-layer is a 2-col grid (name gutter 150px +
+           1fr body). Concern bands use writing-mode: vertical-rl
+           and stretch to the stack height. Drop the aside if there are no concerns.
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --bg-surface, --bg-muted,
+           --border-default, --border-subtle, --text-*, --font-mono, --radius-*,
+           --sp-*, --shadow-*, --tracking-eyebrow, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="layer-stack" style block once.
+INTERACTION: hover brightens a layer (paint-only, reduced-motion guarded).
+USAGE: one .lst-layer per tier (top layer first); chips are .lst-item. Add an
+       .lst-cross aside with one .lst-concern per cross-cutting concern, or omit it.
+============================================================================ -->
+<style data-module="layer-stack">
+  .lst { width: 100%; }
+  .lst-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .lst-wrap { display: flex; align-items: stretch; gap: var(--sp-2); }
+  .lst-stack { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  /* layer: cat-tinted slab with a bolder name gutter + a chip body */
+  .lst-layer { --lc: var(--accent); display: grid; grid-template-columns: 150px 1fr; align-items: stretch; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid color-mix(in srgb, var(--lc) 38%, var(--border-default)); background: color-mix(in srgb, var(--lc) 10%, var(--bg-surface)); transition: filter var(--dur-fast) var(--ease); }
+  .lst-layer:hover { filter: brightness(1.03); }
+  .lst-name { display: flex; align-items: center; padding: var(--sp-3); font: var(--type-small); font-weight: 600; color: var(--text-primary); background: color-mix(in srgb, var(--lc) 20%, var(--bg-surface)); border-right: 1px solid color-mix(in srgb, var(--lc) 30%, var(--border-default)); }
+  .lst-items { display: flex; flex-wrap: wrap; align-content: center; gap: var(--sp-2); padding: var(--sp-3); }
+  .lst-item { padding: 2px var(--sp-2); border-radius: var(--radius-xs); font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .lst-layer.cat-1 { --lc: var(--cat-1); }
+  .lst-layer.cat-2 { --lc: var(--cat-2); }
+  .lst-layer.cat-3 { --lc: var(--cat-3); }
+  .lst-layer.cat-4 { --lc: var(--cat-4); }
+  .lst-layer.cat-5 { --lc: var(--cat-5); }
+  /* cross-cutting concerns: vertical dashed bands spanning the whole stack */
+  .lst-cross { display: flex; gap: var(--sp-2); }
+  .lst-concern { --cc: var(--accent); display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; padding: var(--sp-2); border-radius: var(--radius-sm); font: var(--type-caption); font-weight: 600; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-primary); background: color-mix(in srgb, var(--cc) 12%, var(--bg-surface)); border: 1px dashed color-mix(in srgb, var(--cc) 42%, var(--border-default)); }
+  .lst-concern.cat-4 { --cc: var(--cat-4); }
+  .lst-concern.cat-5 { --cc: var(--cat-5); }
+  @media (prefers-reduced-motion: reduce) { .lst-layer { transition: none; } }
+</style>
+
+<figure class="lst card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="lst-title">{{TITLE}}</figcaption>
+  <div class="lst-wrap">
+    <div class="lst-stack">
+      <!-- ↓ one .lst-layer per tier, top layer first -->
+      <div class="lst-layer cat-1">
+        <div class="lst-name">{{LAYER}}</div> <!-- e.g. プレゼンテーション -->
+        <div class="lst-items">
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. React -->
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. Next.js -->
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. Tailwind -->
+        </div>
+      </div>
+      <div class="lst-layer cat-2">
+        <div class="lst-name">{{LAYER}}</div> <!-- e.g. アプリケーション -->
+        <div class="lst-items">
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. API Gateway -->
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. 認証サービス -->
+        </div>
+      </div>
+      <div class="lst-layer cat-3">
+        <div class="lst-name">{{LAYER}}</div> <!-- e.g. データ -->
+        <div class="lst-items">
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. PostgreSQL -->
+          <span class="lst-item">{{ITEM}}</span> <!-- e.g. Redis -->
+        </div>
+      </div>
+      <!-- ↑ repeat: one .lst-layer per tier -->
+    </div>
+    <!-- ── CROSS-CUTTING CONCERNS (optional aside; delete if none) ───────────── -->
+    <div class="lst-cross">
+      <div class="lst-concern cat-4">{{CONCERN}}</div> <!-- e.g. セキュリティ -->
+      <div class="lst-concern cat-5">{{CONCERN}}</div> <!-- e.g. 監視 -->
+    </div>
+  </div>
+</figure>

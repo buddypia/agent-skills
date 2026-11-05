@@ -1,0 +1,71 @@
+<!-- ============================================================================
+MODULE: histogram                                           lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Self-contained frequency histogram (pure CSS - no SVG). Contiguous vertical
+         bins with NO gaps between bars (the visual signature), each bin a flex
+         column whose height encodes its frequency; an x-axis of bin labels below and
+         an optional dashed mean-marker line across the plot. Shows the SHAPE of a
+         distribution (spread, skew, modality).
+         Distinction: chart-bar compares discrete categories with GAPPED bars;
+         boxplot condenses a distribution into a five-number quartile glyph; this
+         draws the full distribution as touching frequency bins.
+VARIABLES: {{TITLE}}; optional {{MEAN_LABEL}}; per bin {{FREQ}} (count above the bar)
+           and {{BIN}} (x-axis range label).
+SCALING:   plot height 240px. bar --h = frequency / maxFrequency × 100%. Bars are
+           contiguous (flex:1, no gap); a 1px card-toned border notches each boundary
+           without opening a gap. Mean marker left% = (mean − min)/(max − min) × 100.
+REQUIRES:  core/tokens.css (--cat-1, --accent, --bg-surface, --bg-card, --text-*,
+           --border-default, --font-mono, --radius-pill, --sp-*), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="histogram" style block once.
+INTERACTION: none required. Bins brighten on hover (paint only, reduced-motion guarded).
+             aria-label on the figure; labels are real text.
+USAGE: duplicate one <div class="hgm-bar" style="--h:…%"> per bin and one matching
+       <span class="hgm-tick"> per bin. Delete the .hgm-mean div if no mean marker.
+============================================================================ -->
+<style data-module="histogram">
+  .hgm { margin: 0; }
+  .hgm-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .hgm-plot { position: relative; height: 240px; border-bottom: 1.5px solid color-mix(in srgb, var(--accent) 28%, var(--border-default)); }
+  .hgm-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; }
+  /* contiguous bins: bars fill the row with NO gap (the signature vs chart-bar); a
+     hairline in the card color notches each boundary without opening a gap. */
+  .hgm-bar { flex: 1; height: var(--h); background: color-mix(in srgb, var(--cat-1) 42%, var(--bg-surface)); border-right: 1px solid var(--bg-card); position: relative; transition: background var(--dur-fast) var(--ease); }
+  .hgm-bar:last-child { border-right: 0; }
+  .hgm-bar:hover { background: color-mix(in srgb, var(--cat-1) 66%, var(--bg-surface)); }
+  .hgm-freq { position: absolute; top: -1.5em; left: 0; right: 0; text-align: center; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  /* mean marker: dashed accent rule across the plot with a small tag at the top */
+  .hgm-mean { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed var(--accent); }
+  .hgm-mean-tag { position: absolute; top: 0; left: 4px; padding: 1px var(--sp-2); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); color: var(--text-secondary); font: var(--type-caption); white-space: nowrap; }
+  .hgm-axis { display: flex; margin-top: var(--sp-2); }
+  .hgm-tick { flex: 1; text-align: center; font: var(--type-caption); color: var(--text-muted); letter-spacing: var(--tracking-tight); }
+  @media (prefers-reduced-motion: reduce) { .hgm-bar { transition: none; } }
+</style>
+
+<figure class="hgm card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="hgm-title">{{TITLE}}</figcaption>
+  <div class="hgm-plot">
+    <!-- optional mean marker: left% = (mean − min)/(max − min) × 100 -->
+    <div class="hgm-mean" style="left:56%"><span class="hgm-mean-tag">{{MEAN_LABEL}}</span></div> <!-- e.g. 平均 68点 -->
+    <div class="hgm-bars">
+      <!-- ↓ one bar per bin; --h = frequency / maxFrequency × 100% -->
+      <div class="hgm-bar" style="--h:16%"><span class="hgm-freq">{{FREQ}}</span></div>  <!-- e.g. 4 -->
+      <div class="hgm-bar" style="--h:38%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <div class="hgm-bar" style="--h:64%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <div class="hgm-bar" style="--h:100%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <div class="hgm-bar" style="--h:72%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <div class="hgm-bar" style="--h:40%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <div class="hgm-bar" style="--h:18%"><span class="hgm-freq">{{FREQ}}</span></div>
+      <!-- ↑ repeat -->
+    </div>
+  </div>
+  <div class="hgm-axis">
+    <!-- ↓ one tick per bin (bin range or upper edge) -->
+    <span class="hgm-tick">{{BIN}}</span>  <!-- e.g. 40-50 -->
+    <span class="hgm-tick">{{BIN}}</span>
+    <span class="hgm-tick">{{BIN}}</span>
+    <span class="hgm-tick">{{BIN}}</span>
+    <span class="hgm-tick">{{BIN}}</span>
+    <span class="hgm-tick">{{BIN}}</span>
+    <span class="hgm-tick">{{BIN}}</span>
+    <!-- ↑ repeat -->
+  </div>
+</figure>

@@ -1,0 +1,65 @@
+<!-- ============================================================================
+MODULE: feature-grid                                        lineage: unified-system original (report/landing/content)
+PURPOSE: Capability and feature showcase.
+         ANTI-SLOP (design-taste-frontend):
+         - NO generic "three identical cards" row: provides rhythmic 2-column,
+           asymmetric feature-card (hero card + supporting items), and clean divider layouts.
+         - Icons use crisp SVG line glyphs styled with semantic tokens, never bloated custom illustrations.
+VARIABLES (per card): {{ICON_PATH}} (inline SVG path)  {{TITLE}}  {{BODY}}  {{TAG}}
+REQUIRES: core/elements.css (.card-outlined, .badge, .badge-accent), core/tokens.css
+          (--accent, --bg-surface, --text-*, --radius-md, --sp-*, --type-*)
+MODULE CSS: inline the data-module="feature-grid" style block once. Set
+            style="--feat-cols:N" (default 2 or asymmetric 1+2) on .feat-grid.
+INTERACTION: none (static).
+USAGE: one .feat-grid with <article class="feat card-outlined"> per feature.
+============================================================================ -->
+<style data-module="feature-grid">
+  .feat-sec h2 { margin-bottom: var(--sp-5); letter-spacing: var(--tracking-tight); }
+  /* Default 2-column balanced rhythm or asymmetric 1+2 layout (anti-slop: avoid 3 equal cards) */
+  .feat-grid { display: grid; grid-template-columns: repeat(var(--feat-cols, 2), minmax(0, 1fr)); gap: var(--sp-5); }
+  /* Asymmetric layout option: featured card spans 2 columns or takes full height */
+  .feat-grid.feat-asymmetric { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+  @media (max-width: 840px) { .feat-grid, .feat-grid.feat-asymmetric { grid-template-columns: 1fr; } }
+  .feat { display: grid; gap: var(--sp-2); align-content: start; padding: var(--sp-5); }
+  .feat.feat-highlight { border-color: color-mix(in srgb, var(--accent) 35%, var(--border-default)); background: color-mix(in srgb, var(--accent) 3%, var(--bg-surface)); }
+  .feat-ic {
+    width: 38px; height: 38px; border-radius: var(--radius-sm);
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
+    color: var(--accent); margin-bottom: var(--sp-1);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border-subtle));
+    box-shadow: var(--shadow-sm);
+    transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+                box-shadow var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+  .feat-ic svg { width: 20px; height: 20px; }
+  .feat:hover .feat-ic { background: color-mix(in srgb, var(--accent) 20%, var(--bg-surface)); border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle)); }
+  .feat-title { font: var(--type-h3); color: var(--text-primary); }
+  .feat-body { font: var(--type-small); color: var(--text-secondary); line-height: 1.6; }
+  .feat-tag { justify-self: start; margin-top: var(--sp-1); }
+</style>
+
+<section class="feat-sec" aria-label="{{TITLE}}">
+  <h2>{{TITLE}}</h2>
+  <div class="feat-grid" style="--feat-cols:2">
+
+    <!-- Feature cards (2-column rhythm, not generic 3-card monotony) -->
+    <article class="feat card-outlined feat-highlight">
+      <span class="feat-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ICON_PATH}}</svg>
+      </span>
+      <h3 class="feat-title">{{TITLE}}</h3>
+      <p class="feat-body">{{BODY}}</p>
+      <span class="badge badge-accent feat-tag">{{TAG}}</span>
+    </article>
+
+    <article class="feat card-outlined">
+      <span class="feat-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ICON_PATH}}</svg>
+      </span>
+      <h3 class="feat-title">{{TITLE}}</h3>
+      <p class="feat-body">{{BODY}}</p>
+      <span class="badge badge-accent feat-tag">{{TAG}}</span>
+    </article>
+  </div>
+</section>

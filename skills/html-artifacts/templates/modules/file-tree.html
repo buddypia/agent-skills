@@ -1,0 +1,56 @@
+<!-- ============================================================================
+MODULE: file-tree                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Pure-CSS static directory listing (NO SVG). A mono-font project tree whose
+         guides (├─ └─ │) are literal box-drawing glyphs in a dimmed lead column;
+         folder rows read bold + accent, file rows plain, and an optional per-line
+         annotation sits dimmed at the right. For the always-visible project-layout
+         block in READMEs / specs.
+         Distinction: tree (interactive) collapses arbitrary hierarchies via HA.tree;
+         code-snippet shows a file's contents; file-tree is the flat, printed listing
+         of a folder structure that never collapses and needs no JS.
+VARIABLES: {{TITLE}}; per row {{GUIDE}} (box-drawing prefix, e.g. "├─ ") {{NAME}}
+           (add .-dir for folders, else file) + optional {{NOTE}} (right annotation).
+REQUIRES: core/tokens.css (--accent, --bg-muted, --border-*, --text-*, --font-mono,
+          --radius-*, --sp-*), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="file-tree" style block once.
+INTERACTION: hover tints a row (paint-only, reduced-motion guarded).
+USAGE: one .ftr-row per entry; put the ASCII guide (│ ├─ └─ + spaces) in .ftr-guide,
+       mark folders .ftr-name.-dir, and push an optional # comment via .ftr-note.
+============================================================================ -->
+<style data-module="file-tree">
+  .ftr { margin: 0; }
+  .ftr-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .ftr-tree { margin: 0; padding: var(--sp-3) 0; background: var(--bg-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow-x: auto; }
+  .ftr-row { display: flex; align-items: baseline; gap: var(--sp-2); padding: 1px var(--sp-4); font: var(--type-small); font-family: var(--font-mono); line-height: 1.7; white-space: nowrap; transition: background var(--dur-fast) var(--ease); }
+  /* box-drawing guides - literal glyphs, dimmed so the names lead the eye */
+  .ftr-guide { color: var(--text-muted); opacity: .7; white-space: pre; }
+  .ftr-name { color: var(--text-secondary); }
+  .ftr-name.-dir { color: var(--accent); font-weight: 700; }
+  /* right-aligned annotation comment, dimmed */
+  .ftr-note { margin-inline-start: auto; padding-inline-start: var(--sp-4); color: var(--text-muted); opacity: .8; }
+  @media (hover: hover) { .ftr-row:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .ftr-row { transition: none; } }
+</style>
+
+<figure class="ftr card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="ftr-title">{{TITLE}}</figcaption> <!-- e.g. ディレクトリ構成 -->
+  <div class="ftr-tree" role="group" aria-label="{{TITLE}}">
+
+    <!-- ── one .ftr-row per entry; guide = literal ├─ └─ │ + indent ────────── -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name -dir">{{NAME}}</span><span class="ftr-note">{{NOTE}}</span></div>
+    <!-- e.g. GUIDE=""      NAME="src/"        NOTE=# アプリ本体 -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name -dir">{{NAME}}</span><span class="ftr-note">{{NOTE}}</span></div>
+    <!-- e.g. GUIDE="├─ "   NAME="components/" NOTE=# UI部品 -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name">{{NAME}}</span></div>
+    <!-- e.g. GUIDE="│  ├─ " NAME="Button.tsx" -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name">{{NAME}}</span><span class="ftr-note">{{NOTE}}</span></div>
+    <!-- e.g. GUIDE="│  └─ " NAME="Modal.tsx"  NOTE=# 要リファクタ -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name -dir">{{NAME}}</span></div>
+    <!-- e.g. GUIDE="├─ "   NAME="lib/" -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name">{{NAME}}</span></div>
+    <!-- e.g. GUIDE="│  └─ " NAME="api.ts" -->
+    <div class="ftr-row"><span class="ftr-guide">{{GUIDE}}</span><span class="ftr-name">{{NAME}}</span><span class="ftr-note">{{NOTE}}</span></div>
+    <!-- e.g. GUIDE="└─ "   NAME="README.md" NOTE=# セットアップ手順 -->
+    <!-- ↑ repeat: one .ftr-row per file/folder; keep guide glyphs aligned in mono -->
+  </div>
+</figure>

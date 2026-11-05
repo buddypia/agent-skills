@@ -1,0 +1,235 @@
+{
+  "title": "Relay CLI v3.0.0「Nebula」リリースのお知らせ",
+  "theme": "sunset",
+  "layout": "stack",
+  "header": "none",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "footer": "Relay Inc. · リリース 2026-07-08 · relay-cli v3.0.0（Nebula）",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<section class=\"hro\" aria-label=\"Relay CLI v3.0.0 Nebula\">\n  <div class=\"hro-inner\">\n    <p class=\"hro-eyebrow\">RELAY CLI v3.0.0 - NEBULA</p>\n    <h1 class=\"hro-headline\">デプロイを、<span class=\"hro-mark\">3倍速く</span>。</h1>\n    <p class=\"hro-lede\">並列ビルド、プルリクごとのプレビュー環境、数秒で戻せるロールバック。開発者のためのエッジデプロイ CLI が、メジャーアップデートで生まれ変わりました。</p>\n    <div class=\"hro-actions\">\n      <a class=\"btn\" href=\"#launch-changelog\">変更点を見る</a>\n      <a class=\"btn btn-ghost\" href=\"#launch-faq\">移行ガイド（FAQ）</a>\n    </div>\n  </div>\n</section>",
+      "cssModules": [
+        "hero-cta"
+      ]
+    },
+    {
+      "type": "features",
+      "title": "v3.0 の新機能ハイライト",
+      "columns": 2,
+      "items": [
+        {
+          "icon": "rocket",
+          "title": "並列ビルドエンジン",
+          "body": "モノレポを依存グラフ単位で並列化。ビルド時間を最大68%短縮します。",
+          "tag": "最大68%短縮"
+        },
+        {
+          "icon": "globe",
+          "title": "プレビュー環境の自動生成",
+          "body": "プルリクごとに隔離URLを自動発行。本番相当の環境でレビューできます。",
+          "tag": "PR毎に自動"
+        },
+        {
+          "icon": "shield",
+          "title": "ゼロダウンタイム・ロールバック",
+          "body": "直前のデプロイへ数秒で切り戻し。トラフィックは段階的に移行します。",
+          "tag": "数秒で復旧"
+        },
+        {
+          "icon": "layers",
+          "title": "エッジ・キャッシュ制御",
+          "body": "ルート単位でTTLとタグ無効化を宣言的に設定できます。",
+          "tag": "宣言的設定"
+        },
+        {
+          "icon": "bolt",
+          "title": "インクリメンタル・デプロイ",
+          "body": "変更差分のみを配信し、転送量とデプロイ時間を削減します。",
+          "tag": "差分配信"
+        },
+        {
+          "icon": "lock",
+          "title": "監査ログ & SSO",
+          "body": "全操作を追跡可能なログに記録。SAML/OIDCに対応します。",
+          "tag": "Enterprise"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"clg card-outlined\" id=\"launch-changelog\" aria-label=\"変更履歴\">\n  <figcaption class=\"clg-title\">変更履歴</figcaption>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v3.0.0</span>\n      <span class=\"clg-date\">2026-07-08</span>\n      <span class=\"clg-latest\">latest</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -added\">追加</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">依存グラフ単位の並列ビルドエンジンを追加</li>\n        <li class=\"clg-entry\">プルリクごとのプレビュー環境を自動生成</li>\n        <li class=\"clg-entry\">互換性診断コマンド relay doctor を追加</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -changed\">変更</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">設定を relay.config.ts に統一（旧 .relayrc は非推奨）</li>\n        <li class=\"clg-entry\">既定の Node を 20 LTS に引き上げ</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">monorepo でのキャッシュ取りこぼしを修正</li>\n        <li class=\"clg-entry\">Windows でのパス解決を修正</li>\n      </ul>\n    </div>\n  </section>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v2.9.2</span>\n      <span class=\"clg-date\">2026-06-10</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">エッジ関数のコールドスタート遅延を改善</li>\n      </ul>\n    </div>\n  </section>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v2.9.0</span>\n      <span class=\"clg-date\">2026-05-02</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -added\">追加</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">環境変数のグループ管理に対応</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">CLI ログイン時のトークン更新不具合を修正</li>\n      </ul>\n    </div>\n  </section>\n</figure>",
+      "cssModules": [
+        "changelog"
+      ]
+    },
+    {
+      "type": "stepper",
+      "title": "v2 系からのアップグレード手順",
+      "desc": "所要5〜10分。破壊的変更は移行コマンドが自動対応します。",
+      "steps": [
+        {
+          "n": 1,
+          "title": "CLI を更新",
+          "desc": "グローバルインストールを v3 系へ更新します。",
+          "fn": "npm i -g relay-cli@3",
+          "level": "info"
+        },
+        {
+          "n": 2,
+          "title": "設定を移行",
+          "desc": ".relayrc を relay.config.ts へ自動変換します。",
+          "fn": "relay migrate --to v3",
+          "level": "info",
+          "branches": [
+            {
+              "label": "要手動確認",
+              "desc": "カスタムスクリプトは変換後に挙動を確認",
+              "kind": "warn"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "互換性を診断",
+          "desc": "破壊的変更の影響範囲を事前チェックします。",
+          "fn": "relay doctor",
+          "level": "soft"
+        },
+        {
+          "n": 4,
+          "title": "本番へデプロイ",
+          "desc": "段階的にロールアウト。問題時は自動で切り戻します。",
+          "fn": "relay deploy --prod",
+          "level": "critical"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"faq card-outlined\" id=\"launch-faq\" aria-label=\"よくあるご質問\">\n  <figcaption class=\"faq-title\">よくあるご質問</figcaption>\n  <dl class=\"faq-list\">\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">破壊的変更はありますか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">設定ファイル形式が relay.config.ts に変わります。relay migrate で自動変換でき、旧 .relayrc も2026年内は読み込み可能です。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">料金は変わりますか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">既存プランの料金は据え置きです。並列ビルドは全プランで利用でき、監査ログと SSO は対象プランのみ提供します。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">v2 系のサポートはいつまでですか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">セキュリティ修正を 2026 年 12 月 31 日まで提供します。それ以降は v3 系への移行をお願いします。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">対応する Node.js のバージョンは？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">Node.js 20 LTS 以上が必要です。18 系は非対応となりました。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">移行に不安がある場合は？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">relay doctor で影響範囲を可視化できます。Enterprise プランは移行サポートを無償でご利用いただけます。</span></dd>\n    </div>\n  </dl>\n</figure>",
+      "cssModules": [
+        "faq"
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "v2 系サポート期限とお問い合わせ",
+      "body": "v2 系のセキュリティ修正は 2026 年 12 月 31 日で終了します。移行のご相談は Discord コミュニティ（#relay-v3）または support@relay.example までご連絡ください。Enterprise プランは専任の移行サポートを無償でご利用いただけます。"
+    }
+  ],
+  "_recipe": {
+    "id": "product-launch",
+    "name": "製品リリース資料（社外向け発表/リリースノート）",
+    "genre": "リリース資料",
+    "purpose": "新バージョンの価値・変更点・移行手順を社外の利用者/開発者へ一枚で伝え、円滑なアップグレードを促す。",
+    "audience": "既存ユーザー・開発者・技術メディア",
+    "triggers": {
+      "ja": [
+        "リリースノートを作って",
+        "新バージョンの発表資料",
+        "製品アップデートのお知らせ",
+        "changelogと移行手順をまとめて",
+        "社外向けのリリース資料"
+      ],
+      "en": [
+        "release notes",
+        "product launch page",
+        "changelog and upgrade guide"
+      ],
+      "ko": [
+        "릴리스 노트",
+        "제품 출시 안내",
+        "변경 이력과 마이그레이션 가이드"
+      ]
+    },
+    "axes": {
+      "theme": "sunset",
+      "layout": "stack",
+      "header": "none",
+      "density": "comfortable",
+      "rationale": "発表資料はsunsetの暖色でローンチの高揚感を演出。header=noneはhero-ctaが冒頭のヒーロー領域を兼ねるため二重ヘッダーを避ける選択（provenanceはhero eyebrowとfooterで担保）。stackで発表→機能→変更→手順→FAQと縦に読ませる。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:hero-cta",
+        "role": "発表ヒーロー",
+        "required": true,
+        "guide": "バージョン名と最大の価値を大見出しで。CTAのhrefは実在セクションid（#launch-changelog / #launch-faq）へ。ダミーの空アンカーは使わない。",
+        "volume": "1ブロック"
+      },
+      {
+        "n": 2,
+        "type": "features",
+        "role": "新機能ハイライト",
+        "required": true,
+        "guide": "主要機能をアイコンカードで。効果はtagに数値で。",
+        "volume": "4〜6枚"
+      },
+      {
+        "n": 3,
+        "type": "html:changelog",
+        "role": "変更履歴",
+        "required": true,
+        "guide": "最新版にlatestバッジ+旧版。追加/変更/修正に整理。figureのid=launch-changelogはhero CTAのアンカー先。",
+        "volume": "3リリース"
+      },
+      {
+        "n": 4,
+        "type": "stepper",
+        "role": "アップグレード手順",
+        "required": true,
+        "guide": "コマンドをfnで明示。破壊的変更はbranchで注記。",
+        "volume": "4手順"
+      },
+      {
+        "n": 5,
+        "type": "html:faq",
+        "role": "よくある質問",
+        "required": true,
+        "guide": "破壊的変更/料金/サポート期限/対応バージョンなど。figureのid=launch-faqはhero CTAのアンカー先。",
+        "volume": "5件"
+      },
+      {
+        "n": 6,
+        "type": "callout",
+        "role": "サポート窓口・期限",
+        "required": true,
+        "guide": "旧版のサポート終了日と問い合わせ先を明示。",
+        "volume": "1段落"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 1,
+        "default": "html:hero-cta + header:none",
+        "alternative": "header:banner + 通常見出し",
+        "when": "発表色を抑え社内向け告知にするとき"
+      },
+      {
+        "slot": 2,
+        "default": "features アイコンカード",
+        "alternative": "comparison（旧版 vs 新版）",
+        "when": "バージョン間の差分を対比で見せたいとき"
+      },
+      {
+        "slot": 4,
+        "default": "stepper 手順",
+        "alternative": "html:code-snippet（一括移行スクリプト）",
+        "when": "手順をコマンド列で一気に示すとき"
+      }
+    ],
+    "modules": [
+      "hero-cta",
+      "features",
+      "changelog",
+      "stepper",
+      "faq",
+      "callout"
+    ]
+  }
+}

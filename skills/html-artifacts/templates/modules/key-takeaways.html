@@ -1,0 +1,64 @@
+<!-- ============================================================================
+MODULE: key-takeaways                                      lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Pure-CSS TL;DR / executive-summary panel (NO SVG). An accent-framed box
+         titled 要点 / Key Takeaways holding 3-5 numbered rows; each row pairs a
+         number badge with a one-line bold lead and an optional short elaboration.
+         For the up-front "if you read nothing else" summary of a report or deck.
+         Distinction: callout-box is a single aside note; stat-list is numeric key→
+         value facts; checklist is actionable to-dos with checkboxes; key-takeaways
+         is the ordered set of conclusions the reader should walk away with.
+VARIABLES: {{TITLE}} (panel heading, e.g. 要点); per row {{LEAD}} (bold one-liner)
+           + optional {{ELAB}} (short elaboration). Number badges are auto (1..N).
+REQUIRES: core/tokens.css (--accent, --bg-surface, --bg-muted, --border-*, --text-*,
+          --radius-*, --sp-*, --shadow-sm), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="key-takeaways" style block once.
+INTERACTION: hover warms a row's number badge + wash (paint-only, reduced-motion guarded).
+USAGE: one .ktw-row per takeaway (keep to 3-5). Drop the .ktw-elab span when a lead
+       stands alone. The accent frame is on the figure via .ktw (1px accent-tinted border).
+============================================================================ -->
+<style data-module="key-takeaways">
+  .ktw { margin: 0; border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-default)); background: color-mix(in srgb, var(--accent) 3%, var(--bg-surface)); }
+  .ktw-title { display: flex; align-items: center; gap: var(--sp-2); font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .ktw-list { margin: 0; padding: 0; list-style: none; counter-reset: ktw; display: flex; flex-direction: column; gap: var(--sp-2); }
+  .ktw-row { counter-increment: ktw; display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: start; padding: var(--sp-3); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  /* number badge: accent-tinted disc carrying the auto counter */
+  .ktw-num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: var(--type-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border-default)); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .ktw-num::before { content: counter(ktw); }
+  .ktw-body { min-width: 0; padding-top: 2px; }
+  .ktw-lead { font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .ktw-elab { display: block; margin-top: 2px; font: var(--type-small); color: var(--text-secondary); }
+  @media (hover: hover) {
+    .ktw-row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+    .ktw-row:hover .ktw-num { background: var(--accent); color: var(--bg-surface); border-color: var(--accent); }
+  }
+  @media (prefers-reduced-motion: reduce) { .ktw-row, .ktw-num { transition: none; } }
+</style>
+
+<figure class="ktw card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="ktw-title">{{TITLE}}</figcaption> <!-- e.g. 要点 -->
+  <ol class="ktw-list">
+
+    <!-- ── one .ktw-row per takeaway (3-5 total; badge numbers auto) ───────── -->
+    <li class="ktw-row">
+      <span class="ktw-num" aria-hidden="true"></span>
+      <div class="ktw-body">
+        <span class="ktw-lead">{{LEAD}}</span>          <!-- e.g. 導入により問い合わせ対応時間が42%短縮 -->
+        <span class="ktw-elab">{{ELAB}}</span>          <!-- e.g. 主因はテンプレート返信の自動提案。3か月の実測値。 -->
+      </div>
+    </li>
+    <li class="ktw-row">
+      <span class="ktw-num" aria-hidden="true"></span>
+      <div class="ktw-body">
+        <span class="ktw-lead">{{LEAD}}</span>          <!-- e.g. 初期費用ゼロで既存フローに追加可能 -->
+      </div>
+    </li>
+    <li class="ktw-row">
+      <span class="ktw-num" aria-hidden="true"></span>
+      <div class="ktw-body">
+        <span class="ktw-lead">{{LEAD}}</span>          <!-- e.g. 次の意思決定はPoC対象部署の選定 -->
+        <span class="ktw-elab">{{ELAB}}</span>          <!-- e.g. 候補はサポート部とCS部。7月中に決定。 -->
+      </div>
+    </li>
+    <!-- ↑ repeat: one .ktw-row per takeaway -->
+  </ol>
+</figure>

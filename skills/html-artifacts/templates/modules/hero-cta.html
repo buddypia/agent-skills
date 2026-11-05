@@ -1,0 +1,57 @@
+<!-- ============================================================================
+MODULE: hero-cta                                            lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: A landing-page hero / conversion block (pure CSS - no SVG, no JS). An
+         eyebrow label, a headline with crisp typography, a supporting sub-lede
+         (<= 20 words), and a primary + secondary CTA pair.
+         ANTI-SLOP (design-taste-frontend): Zero radial mesh gradients or fake AI glows.
+         Hero fits in the initial viewport (headline <= 2 lines, lede <= 20 words,
+         CTAs visible without scroll). Supports both balanced centered layout and
+         modern left-aligned / split composition. Trust logo walls belong in a
+         dedicated logo-wall section BELOW the hero, not stuffed inside.
+VARIABLES: {{EYEBROW}}; {{HEAD_A}} + {{HEAD_MARK}} (accent span) + {{HEAD_B}};
+           {{LEDE}}; {{CTA_PRIMARY}} + {{CTA_SECONDARY}}.
+           {{..._HREF}} = where the CTA goes ("#pricing", "https://..."). No destination? Replace the
+           <a> with <span class="btn ...">label</span> - an illustrative CTA must not be a dead link.
+SCALING:  centered column (max-width ~680px) or left-aligned split. Headline uses
+          --type-display with proper descender clearance. Buttons wrap cleanly on mobile.
+REQUIRES: core/elements.css (.btn, .btn-ghost), core/tokens.css (--accent,
+          --bg-surface, --bg-page, --text-*, --border-*, --radius-lg, --sp-*,
+          --type-*, --tracking-*, --shadow-sm)
+MODULE CSS: inline the data-module="hero-cta" style block once.
+INTERACTION: none beyond the .btn primitives' own hover (paint + 1px lift,
+             reduced-motion guarded in elements.css).
+USAGE: fill the eyebrow (optional), headline, lede, and label CTAs.
+============================================================================ -->
+<style data-module="hero-cta">
+  .hro { margin: 0; padding: var(--sp-7) var(--sp-6); border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+  .hro-inner { max-width: 680px; margin-inline: auto; display: grid; gap: var(--sp-4); text-align: center; justify-items: center; }
+  /* Optional left-aligned split composition */
+  .hro-split .hro-inner { max-width: none; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center; text-align: left; justify-items: start; }
+  .hro-eyebrow { font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--accent); margin: 0; }
+  .hro-headline { font: var(--type-display); letter-spacing: var(--tracking-display); color: var(--text-primary); margin: 0; text-wrap: balance; line-height: 1.15; }
+  /* accent-highlighted phrase: intentional typography, no fake marker glows */
+  .hro-mark { color: var(--accent); font-weight: 800; }
+  .hro-lede { font: var(--type-body); color: var(--text-secondary); margin: 0; max-width: 54ch; line-height: 1.6; }
+  .hro-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-top: var(--sp-2); }
+  .hro-split .hro-actions { justify-content: flex-start; }
+  .hro-actions .btn { padding: var(--sp-3) var(--sp-5); }
+  @media (max-width: 768px) {
+    .hro { padding: var(--sp-6) var(--sp-4); }
+    .hro-split .hro-inner { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .hro-split .hro-actions { justify-content: center; }
+  }
+</style>
+
+<section class="hro" aria-label="{{EYEBROW}}">
+  <div class="hro-inner">
+    <p class="hro-eyebrow">{{EYEBROW}}</p> <!-- e.g. 新機能 -->
+    <h1 class="hro-headline">{{HEAD_A}}<span class="hro-mark">{{HEAD_MARK}}</span>{{HEAD_B}}</h1>
+    <!-- e.g. デプロイの待ち時間を、<span class="hro-mark">数秒へ</span>短縮。 -->
+    <p class="hro-lede">{{LEDE}}</p>
+    <!-- e.g. 並列エッジビルドと自動環境プレビューで、チームの開発サイクルを高速化します。 -->
+    <div class="hro-actions">
+      <a class="btn" href="{{CTA_PRIMARY_HREF}}">{{CTA_PRIMARY}}</a>            <!-- e.g. 無料で試す -->
+      <a class="btn btn-ghost" href="{{CTA_SECONDARY_HREF}}">{{CTA_SECONDARY}}</a> <!-- e.g. ドキュメントを見る -->
+    </div>
+  </div>
+</section>

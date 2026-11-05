@@ -1,0 +1,322 @@
+{
+  "title": "地方移住・二拠点生活に関する意識調査 2026",
+  "theme": "birchline",
+  "layout": "stack",
+  "header": "banner",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "USER RESEARCH REPORT",
+  "subtitle": "全国のリモートワーカー1,200名に聞いた移住意識と障壁",
+  "footer": "調査・分析: リブフィールド総研 / 発行 2026-06-30",
+  "meta": [
+    {
+      "k": "調査期間",
+      "v": "2026-05-12 〜 05-26"
+    },
+    {
+      "k": "調査手法",
+      "v": "オンラインアンケート"
+    },
+    {
+      "k": "有効回答",
+      "v": "n = 1,200"
+    },
+    {
+      "k": "対象",
+      "v": "週3日以上在宅のリモートワーカー"
+    }
+  ],
+  "sections": [
+    {
+      "type": "html",
+      "html": "<figure class=\"ktw card-outlined\" aria-label=\"主要ファインディング\">\n  <figcaption class=\"ktw-title\">主要ファインディング</figcaption>\n  <ol class=\"ktw-list\">\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">リモートワーカーの62%が地方移住・二拠点生活に前向き</span>\n        <span class=\"ktw-elab\">前年調査比 +9ポイント。特に20〜30代で関心が突出している。</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">最大の障壁は「収入・仕事の継続」への不安</span>\n        <span class=\"ktw-elab\">検討層の58%が懸念として挙げた。</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">移住支援制度への期待は若年層ほど高い</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">次の一手は「収入継続を支える求人・副業マッチング支援」</span>\n        <span class=\"ktw-elab\">慎重層を検討層へ転換する鍵になる。</span>\n      </div>\n    </li>\n  </ol>\n</figure>",
+      "cssModules": [
+        "key-takeaways"
+      ]
+    },
+    {
+      "type": "statlist",
+      "title": "調査概要",
+      "columns": 2,
+      "items": [
+        {
+          "k": "有効回答数",
+          "v": "1,200件"
+        },
+        {
+          "k": "回収率",
+          "v": "38.4%"
+        },
+        {
+          "k": "調査期間",
+          "v": "2026-05-12〜05-26"
+        },
+        {
+          "k": "調査手法",
+          "v": "オンラインアンケート"
+        },
+        {
+          "k": "対象",
+          "v": "全国のリモートワーカー"
+        },
+        {
+          "k": "平均年齢",
+          "v": "36.8歳"
+        },
+        {
+          "k": "男女比",
+          "v": "52 : 48"
+        },
+        {
+          "k": "移住検討層",
+          "v": "62.1%",
+          "badge": "success"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "title": "「地方移住・二拠点生活への関心」回答分布（%）",
+      "series": [
+        {
+          "label": "非常に関心がある",
+          "value": 27
+        },
+        {
+          "label": "やや関心がある",
+          "value": 35
+        },
+        {
+          "label": "どちらともいえない",
+          "value": 21
+        },
+        {
+          "label": "あまり関心がない",
+          "value": 12
+        },
+        {
+          "label": "まったく関心がない",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"dvb card-outlined\" aria-label=\"「支援制度があれば移住を検討」年代別 賛成/反対\">\n  <figcaption class=\"dvb-title\">「支援制度があれば移住を検討」年代別 賛成/反対</figcaption>\n  <div class=\"dvb-legend\">\n    <span class=\"dvb-key a\"><i></i>賛成</span>\n    <span class=\"dvb-key b\"><i></i>反対</span>\n  </div>\n  <div class=\"dvb-rows\">\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">71%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:100%\"></span></span>\n      <span class=\"dvb-cat\">20代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:20%\"></span></span>\n      <span class=\"dvb-val b\">14%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">64%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:90%\"></span></span>\n      <span class=\"dvb-cat\">30代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:30%\"></span></span>\n      <span class=\"dvb-val b\">21%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">52%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:73%\"></span></span>\n      <span class=\"dvb-cat\">40代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:46%\"></span></span>\n      <span class=\"dvb-val b\">33%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">43%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:61%\"></span></span>\n      <span class=\"dvb-cat\">50代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:62%\"></span></span>\n      <span class=\"dvb-val b\">44%</span>\n    </div>\n  </div>\n</figure>",
+      "cssModules": [
+        "diverging-bar"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<section class=\"psn-sec\" aria-label=\"代表的なユーザー像\">\n  <h2>代表的なユーザー像</h2>\n  <div class=\"psn-grid\" style=\"--psn-cols:2\">\n    <article class=\"psn card-outlined cat-1\">\n      <div class=\"psn-top\">\n        <span class=\"psn-avatar\" aria-hidden=\"true\">RK</span>\n        <div>\n          <div class=\"psn-name\">木村 涼太</div>\n          <div class=\"psn-meta\">フリーランスエンジニア · 29歳 · 都内在住</div>\n        </div>\n      </div>\n      <p class=\"psn-quote\">「仕事さえ続けられるなら、来年にでも地方へ移りたい」</p>\n      <div class=\"psn-block psn-goals\">\n        <span class=\"psn-h\">ゴール</span>\n        <ul class=\"psn-list\"><li>自然の近くで子育てをしたい</li><li>生活コストを下げたい</li></ul>\n      </div>\n      <div class=\"psn-block psn-frus\">\n        <span class=\"psn-h\">不満・不安</span>\n        <ul class=\"psn-list\"><li>移住先の高速回線が不安</li><li>仕事を継続できるか確信が持てない</li></ul>\n      </div>\n      <div class=\"psn-block psn-behav\">\n        <span class=\"psn-h\">行動特性</span>\n        <ul class=\"psn-list\"><li>週末に候補地を訪問</li><li>自治体の移住サイトを常時チェック</li></ul>\n      </div>\n      <div class=\"psn-tags\">\n        <span class=\"chip\">リモート勤務</span>\n        <span class=\"chip\">二拠点希望</span>\n        <span class=\"chip\">20代後半</span>\n      </div>\n    </article>\n    <article class=\"psn card-outlined cat-2\">\n      <div class=\"psn-top\">\n        <span class=\"psn-avatar\" aria-hidden=\"true\">HS</span>\n        <div>\n          <div class=\"psn-name\">橋本 さゆり</div>\n          <div class=\"psn-meta\">会社員（人事） · 45歳 · 郊外在住</div>\n        </div>\n      </div>\n      <p class=\"psn-quote\">「魅力は感じるが、収入と教育環境が読めないと動けない」</p>\n      <div class=\"psn-block psn-goals\">\n        <span class=\"psn-h\">ゴール</span>\n        <ul class=\"psn-list\"><li>家族の生活水準を維持したい</li><li>子の教育環境を確保したい</li></ul>\n      </div>\n      <div class=\"psn-block psn-frus\">\n        <span class=\"psn-h\">不満・不安</span>\n        <ul class=\"psn-list\"><li>進学先の選択肢が限られる</li><li>転職で収入が下がる懸念</li></ul>\n      </div>\n      <div class=\"psn-block psn-behav\">\n        <span class=\"psn-h\">行動特性</span>\n        <ul class=\"psn-list\"><li>情報収集は熱心だが行動は保留</li><li>まず二拠点から試したい</li></ul>\n      </div>\n      <div class=\"psn-tags\">\n        <span class=\"chip\">慎重派</span>\n        <span class=\"chip\">家族優先</span>\n        <span class=\"chip\">40代</span>\n      </div>\n    </article>\n  </div>\n</section>",
+      "cssModules": [
+        "persona-card"
+      ]
+    },
+    {
+      "type": "comparison",
+      "label": "関心セグメント比較",
+      "options": [
+        {
+          "name": "積極層",
+          "metrics": [
+            {
+              "k": "割合",
+              "v": "27%"
+            },
+            {
+              "k": "平均年齢",
+              "v": "32歳"
+            },
+            {
+              "k": "転換の鍵",
+              "v": "制度の即時性"
+            }
+          ],
+          "pros": [
+            "支援制度があれば即行動",
+            "情報感度が高い"
+          ],
+          "cons": [
+            "高速回線や仕事継続に不安"
+          ]
+        },
+        {
+          "name": "中間層",
+          "metrics": [
+            {
+              "k": "割合",
+              "v": "35%"
+            },
+            {
+              "k": "平均年齢",
+              "v": "37歳"
+            },
+            {
+              "k": "転換の鍵",
+              "v": "具体的な成功事例"
+            }
+          ],
+          "pros": [
+            "きっかけ次第で動く"
+          ],
+          "cons": [
+            "決め手に欠け保留しがち"
+          ]
+        },
+        {
+          "name": "慎重層",
+          "metrics": [
+            {
+              "k": "割合",
+              "v": "38%"
+            },
+            {
+              "k": "平均年齢",
+              "v": "44歳"
+            },
+            {
+              "k": "転換の鍵",
+              "v": "収入・教育の保証"
+            }
+          ],
+          "pros": [
+            "家計が安定している"
+          ],
+          "cons": [
+            "収入減と教育環境への懸念が強い"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "推奨アクション",
+      "body": "検討層を実際の移住へ動かす最大のレバーは「収入・仕事の継続」への不安解消である。地方求人・リモート副業のマッチング支援と、移住後の収入シミュレーション提示を優先施策とし、まず関心の高い20〜30代を対象にパイロット自治体2件で3か月検証することを推奨する。"
+    }
+  ],
+  "_recipe": {
+    "id": "research-summary",
+    "name": "調査報告書（市場/ユーザー調査）",
+    "genre": "調査報告",
+    "purpose": "市場・ユーザー調査の結果を主要ファインディング起点で整理し、意思決定者へ推奨アクションを提示する。",
+    "audience": "事業責任者・企画・マーケ・政策担当",
+    "triggers": {
+      "ja": [
+        "ユーザー調査の報告書を作って",
+        "アンケート結果をまとめて",
+        "市場調査レポートを作りたい",
+        "調査の主要ファインディングを可視化",
+        "定量調査のサマリー"
+      ],
+      "en": [
+        "survey report",
+        "user research summary",
+        "market research findings"
+      ],
+      "ko": [
+        "설문 조사 보고서",
+        "사용자 리서치 요약",
+        "시장 조사 리포트"
+      ]
+    },
+    "axes": {
+      "theme": "birchline",
+      "layout": "stack",
+      "header": "banner",
+      "density": "comfortable",
+      "rationale": "読み物としての調査報告はbirchline+stackで縦読みの可読性を優先。bannerヘッダーで調査期間/手法/n数のprovenanceを冒頭バンドに明示し、default-sandwich警告も回避する。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:key-takeaways",
+        "role": "主要ファインディング（結論先出し）",
+        "required": true,
+        "guide": "3〜5個の結論を数字付きで。読者が最初に読む要点。",
+        "volume": "4行"
+      },
+      {
+        "n": 2,
+        "type": "statlist",
+        "role": "調査概要",
+        "required": true,
+        "guide": "n数/回収率/対象/期間/手法などのメタ数値を一覧化。",
+        "volume": "6〜8項目"
+      },
+      {
+        "n": 3,
+        "type": "chart",
+        "role": "回答分布",
+        "required": true,
+        "guide": "主要設問の回答分布をbarで。合計100%になる構成に。",
+        "volume": "5件"
+      },
+      {
+        "n": 4,
+        "type": "html:diverging-bar",
+        "role": "賛否の年代別対比",
+        "required": true,
+        "guide": "賛成/反対を年代別に左右対比。widthは共通スケールで value/max。",
+        "volume": "4行"
+      },
+      {
+        "n": 5,
+        "type": "html:persona-card",
+        "role": "代表的なユーザー像",
+        "required": false,
+        "guide": "主要セグメントを擬人化（ゴール/不満/行動）。",
+        "volume": "2枚"
+      },
+      {
+        "n": 6,
+        "type": "comparison",
+        "role": "セグメント比較",
+        "required": true,
+        "guide": "関心セグメントを横並びで比較（割合/年齢/障壁）。割合の合計は100%。",
+        "volume": "3列"
+      },
+      {
+        "n": 7,
+        "type": "callout",
+        "role": "推奨アクション",
+        "required": true,
+        "guide": "最優先施策と検証方法（対象・期間）を提示。",
+        "volume": "1段落"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 5,
+        "default": "html:persona-card",
+        "alternative": "html:quote-block（代表的な自由回答）",
+        "when": "生の声を引用で見せたいとき"
+      },
+      {
+        "slot": 3,
+        "default": "chart(bar) 回答分布",
+        "alternative": "chart(donut) 構成比",
+        "when": "割合の内訳を強調したいとき"
+      },
+      {
+        "slot": 6,
+        "default": "comparison セグメント比較",
+        "alternative": "table クロス集計",
+        "when": "多軸のクロス集計を細かく見せたいとき"
+      }
+    ],
+    "modules": [
+      "key-takeaways",
+      "statlist",
+      "chart",
+      "diverging-bar",
+      "persona-card",
+      "comparison",
+      "callout"
+    ]
+  }
+}

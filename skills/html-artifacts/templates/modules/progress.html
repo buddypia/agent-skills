@@ -1,0 +1,56 @@
+<!-- ============================================================================
+MODULE: progress                                            lineage: unified-system original (report/dashboard)
+PURPOSE: A stack of labeled linear progress / meter bars - completion %, budget
+         usage, capacity, quota, score-to-target. Each row: label + value readout
+         + a rounded track with an accent (or status-toned) fill. Pure CSS, no SVG.
+VARIABLES (per row): {{LABEL}}  {{VALUE}} (display text)  {{VALUE_NUMBER}} (bare number)
+                     {{MAX}}  {{PCT}} (= round(value/max*100))
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --color-success/-warning/-danger/-info, --bg-muted, --radius-pill, --sp-*)
+MODULE CSS: inline the data-module="progress" style block once. Tone modifiers
+            (.pr-success / -warning / -danger / -info) re-color the fill.
+INTERACTION: none (static). Fill width is an inline style="width:N%".
+USAGE: one <section class="progress-list"> with one .pr-row per metric. Set the
+       fill width inline and the role="progressbar" aria-value* on the track.
+============================================================================ -->
+<style data-module="progress">
+  .progress-list h2 { margin-bottom: var(--sp-5); }
+  .progress-list .pr-row + .pr-row { margin-top: var(--sp-4); }
+  /* row hover lifts the readout + brightens the track edge - accent-tied, calm */
+  .pr-row { border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  .pr-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); margin-bottom: var(--sp-2); }
+  .pr-label { font: var(--type-small); color: var(--text-secondary); transition: color var(--dur-fast) var(--ease); }
+  .pr-val { font: var(--type-small); font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; transition: color var(--dur-fast) var(--ease); }
+  /* track: hairline ring + faint inset depth so the fill reads as seated in a channel */
+  .pr-track { position: relative; height: 10px; border-radius: var(--radius-pill); background: var(--bg-muted); box-shadow: inset 0 0 0 1px var(--border-subtle); overflow: hidden; transition: box-shadow var(--dur-fast) var(--ease); }
+  /* fill: a soft lengthwise sheen + rounded cap; width still animates via inline style */
+  .pr-fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); background-image: linear-gradient(180deg, color-mix(in srgb, var(--on-accent) 18%, transparent) 0%, transparent 48%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on-accent) 12%, transparent); transition: width var(--dur-slow) var(--ease), filter var(--dur-fast) var(--ease); }
+  .pr-success { background: var(--color-success); }
+  .pr-warning { background: var(--color-warning); }
+  .pr-danger  { background: var(--color-danger); }
+  .pr-info    { background: var(--color-info); }
+  /* hover: accent-tinted row wash, sharpened track ring, the fill brightens a touch */
+  @media (hover: hover) {
+    .pr-row:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+    .pr-row:hover .pr-track { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, var(--border-subtle)); }
+    .pr-row:hover .pr-fill { filter: brightness(1.05); }
+    .pr-row:hover .pr-label { color: var(--text-primary); }
+    .pr-row:hover .pr-val { color: var(--accent); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pr-fill { transition: filter var(--dur-fast) var(--ease); } }
+</style>
+
+<section class="progress-list card-outlined" aria-label="{{LABEL}}">
+  <h2>{{TITLE}}</h2>
+
+  <!-- ── one .pr-row per metric ─────────────────────────────────────────── -->
+  <div class="pr-row">
+    <div class="pr-head">
+      <span class="pr-label">{{LABEL}}</span>
+      <span class="pr-val">{{VALUE}}</span>
+    </div>
+    <div class="pr-track" role="progressbar" aria-label="{{LABEL}}" aria-valuenow="{{VALUE_NUMBER}}" aria-valuemin="0" aria-valuemax="{{MAX}}">
+      <span class="pr-fill" style="width:{{PCT}}%"></span>
+    </div>
+  </div>
+</section>

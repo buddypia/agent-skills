@@ -1,0 +1,45 @@
+<!-- ============================================================================
+MODULE: stat-list                                           lineage: unified-system original (spec/report/decision)
+PURPOSE: A definition / spec sheet - a bordered key→value list for metadata,
+         configuration, API parameters, environment facts, "at a glance" details.
+         Term on the lead edge, a mono value on the trailing edge, an optional note.
+         The structural counterpart to comparison-grid (one subject, many facts).
+VARIABLES (per row): {{K}} (term)  {{V}} (value)  {{NOTE}} (optional sub-line)
+REQUIRES: core/tokens.css (--border-*, --bg-surface, --text-*, --font-mono,
+          --radius-md, --sp-*)
+MODULE CSS: inline the data-module="stat-list" style block once. Set
+            style="--sl-cols:N" (1-3) on the <dl> for a multi-column sheet.
+INTERACTION: none (static). Semantic <dl>/<dt>/<dd> for accessibility.
+USAGE: one <dl class="stat-list"> with one <div class="sl-item"><dt><dd> per fact.
+============================================================================ -->
+<style data-module="stat-list">
+  .sl-title { margin-bottom: var(--sp-4); }
+  .stat-list { display: grid; grid-template-columns: repeat(var(--sl-cols, 1), 1fr); margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-surface); overflow: hidden; box-shadow: var(--shadow-sm); }
+  /* each row carries an inset accent rail that reveals on hover; position:relative
+     scopes it, the rail itself is a left inset shadow that animates in width via a tint. */
+  .sl-item { position: relative; display: grid; grid-template-columns: minmax(110px, 38%) 1fr; gap: var(--sp-3); align-items: baseline; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .sl-item:hover { background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); box-shadow: inset 2px 0 0 var(--accent); }
+  .sl-item:hover .sl-k { color: var(--text-secondary); }
+  .sl-k { font: var(--type-small); color: var(--text-muted); transition: color var(--dur-fast) var(--ease); }
+  .sl-v { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 0; font: var(--type-small); font-family: var(--font-mono); color: var(--text-primary); word-break: break-word; }
+  .sl-note { font: var(--type-caption); color: var(--text-secondary); }
+  .sl-item.sl-lastrow { border-bottom: none; }                                   /* last grid row → no doubled hairline */
+  .sl-item.sl-sep { border-inline-start: 1px solid var(--border-subtle); }       /* column separator (multi-col) */
+  @media (max-width: 720px) {
+    .stat-list { grid-template-columns: 1fr; }
+    .sl-item.sl-sep { border-inline-start: none; }
+    .sl-item.sl-lastrow:not(:last-child) { border-bottom: 1px solid var(--border-subtle); }
+  }
+</style>
+
+<section aria-label="{{TITLE}}">
+  <h2 class="sl-title">{{TITLE}}</h2>
+  <dl class="stat-list" style="--sl-cols:1">
+
+    <!-- ── one .sl-item per fact ──────────────────────────────────────────── -->
+    <div class="sl-item">
+      <dt class="sl-k">{{K}}</dt>
+      <dd class="sl-v">{{V}}<span class="sl-note">{{NOTE}}</span></dd>
+    </div>
+  </dl>
+</section>

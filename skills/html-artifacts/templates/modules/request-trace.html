@@ -1,0 +1,110 @@
+<!-- ============================================================================
+MODULE: request-trace                                    lineage: unified-system v7 architecture
+PURPOSE: Latency waterfall for ONE request as it crosses the system - each hop is a
+         bar placed on a shared time axis, so the reader sees both the ORDER of the
+         hops and where the time actually goes. An architecture diagram shows what
+         connects to what; this shows what it costs.
+VARIABLES: {{TITLE}} {{DESC}} {{TOTAL}} {{UNIT}} + one row per hop
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="request-trace" style block once.
+BUILDER: section.type "request-trace" -
+  { title, desc, unit, total, hops: [{ component, op, start, dur, kind, note }] }
+  kind: network | compute | db | queue | external | cache  (drives the bar colour)
+  start/dur are in `unit` (default ms); `total` defaults to the end of the last hop.
+INTERACTION: none (static). Bars are labelled in text, so it survives print and
+  screen readers without needing hover.
+============================================================================ -->
+<style data-module="request-trace">
+  .rtrace { width: 100%; display: grid; gap: var(--sp-4); }
+  .rtrace-head h2 { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .rtrace-desc { font: var(--type-small); color: var(--text-secondary); margin-top: var(--sp-1); max-width: 75ch; }
+
+  .rtrace-summary { display: flex; flex-wrap: wrap; gap: var(--sp-4); padding: var(--sp-3) var(--sp-4); background: var(--bg-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }
+  .rtrace-sum-item { display: grid; gap: 2px; }
+  .rtrace-sum-key { font: var(--type-caption); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .rtrace-sum-val { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--text-primary); }
+
+  /* axis */
+  .rtrace-axis { display: grid; grid-template-columns: var(--rt-label, 240px) 1fr; gap: var(--sp-3); align-items: end; padding-bottom: var(--sp-1); border-bottom: 1px solid var(--border-subtle); }
+  .rtrace-axis-ticks { position: relative; height: 16px; }
+  .rtrace-tick { position: absolute; top: 0; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); transform: translateX(-50%); white-space: nowrap; }
+  .rtrace-tick::after { content: ''; position: absolute; left: 50%; top: 15px; width: 1px; height: 6px; background: var(--border-default); }
+
+  /* rows */
+  .rtrace-rows { display: grid; gap: 3px; }
+  .rtrace-row { display: grid; grid-template-columns: var(--rt-label, 240px) 1fr; gap: var(--sp-3); align-items: center; padding: var(--sp-1) 0; border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  .rtrace-row:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .rtrace-label { display: grid; gap: 1px; min-width: 0; }
+  .rtrace-comp { font-size: 12.5px; font-weight: 700; color: var(--text-primary); display: flex; align-items: baseline; gap: var(--sp-2); }
+  .rtrace-n { font-family: var(--font-mono); font-size: 10.5px; font-weight: 800; color: var(--on-accent); background: var(--text-muted); border-radius: var(--radius-pill); padding: 1px 6px; flex: none; }
+  .rtrace-op { font-size: 11px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .rtrace-track { position: relative; height: 26px; background: linear-gradient(to right, var(--border-subtle) 1px, transparent 1px) 0 0 / var(--rt-grid, 25%) 100%; border-radius: var(--radius-xs); }
+  .rtrace-bar { position: absolute; top: 3px; height: 20px; border-radius: var(--radius-xs); background: var(--rt-c, var(--accent)); display: flex; align-items: center; padding: 0 6px; min-width: 3px; box-shadow: var(--shadow-sm); }
+  .rtrace-dur { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: var(--on-accent); white-space: nowrap; }
+  /* A narrow bar cannot hold its own label; park it just outside instead. */
+  .rtrace-dur-out { position: absolute; top: 3px; height: 20px; display: flex; align-items: center; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; padding-left: 9px; }
+
+  /* hop kinds - same hues as arch-explorer node types so the two read as one system */
+  .rtrace-k-network  { --rt-c: var(--cat-1); }
+  .rtrace-k-compute  { --rt-c: var(--cat-4); }
+  .rtrace-k-db       { --rt-c: var(--cat-5); }
+  .rtrace-k-queue    { --rt-c: var(--color-warning); }
+  .rtrace-k-cache    { --rt-c: var(--cat-2); }
+  .rtrace-k-external { --rt-c: var(--cat-3); }
+
+  .rtrace-note { grid-column: 2; font-size: 11px; color: var(--text-muted); margin-top: -2px; padding-left: 2px; }
+
+  .rtrace-legend { display: flex; flex-wrap: wrap; gap: var(--sp-3); font: var(--type-caption); color: var(--text-secondary); padding-top: var(--sp-2); border-top: 1px solid var(--border-subtle); }
+  .rtrace-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+  .rtrace-swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--rt-c, var(--accent)); }
+
+  @media (max-width: 640px) {
+    .rtrace-axis, .rtrace-row { grid-template-columns: 1fr; gap: var(--sp-1); }
+    .rtrace-note { grid-column: 1; }
+  }
+</style>
+
+<section class="rtrace card-outlined" aria-label="{{TITLE}}">
+  <header class="rtrace-head">
+    <h2>{{TITLE}}</h2>
+    <p class="rtrace-desc">{{DESC}}</p>
+  </header>
+
+  <div class="rtrace-summary">
+    <div class="rtrace-sum-item"><span class="rtrace-sum-key">{{TOTAL_LABEL}}</span><span class="rtrace-sum-val">{{TOTAL}}{{UNIT}}</span></div>
+    <div class="rtrace-sum-item"><span class="rtrace-sum-key">{{HOPS_LABEL}}</span><span class="rtrace-sum-val">{{HOP_COUNT}}</span></div>
+    <div class="rtrace-sum-item"><span class="rtrace-sum-key">{{SLOWEST_LABEL}}</span><span class="rtrace-sum-val">{{SLOWEST}}</span></div>
+  </div>
+
+  <div class="rtrace-axis" role="presentation">
+    <span></span>
+    <div class="rtrace-axis-ticks">
+      <span class="rtrace-tick" style="left:0%">0{{UNIT}}</span>
+      <span class="rtrace-tick" style="left:50%">{{HALF}}{{UNIT}}</span>
+      <span class="rtrace-tick" style="left:100%">{{TOTAL}}{{UNIT}}</span>
+    </div>
+  </div>
+
+  <!-- one .rtrace-row per hop; bar left/width are percentages of the total window -->
+  <div class="rtrace-rows">
+    <div class="rtrace-row rtrace-k-network">
+      <div class="rtrace-label">
+        <span class="rtrace-comp"><span class="rtrace-n">1</span>{{COMPONENT}}</span>
+        <span class="rtrace-op">{{OP}}</span>
+      </div>
+      <div class="rtrace-track">
+        <div class="rtrace-bar" style="left:0%;width:18%"><span class="rtrace-dur">{{DUR}}{{UNIT}}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="rtrace-legend">
+    <span class="rtrace-legend-item rtrace-k-network"><span class="rtrace-swatch"></span>{{K_NETWORK}}</span>
+    <span class="rtrace-legend-item rtrace-k-compute"><span class="rtrace-swatch"></span>{{K_COMPUTE}}</span>
+    <span class="rtrace-legend-item rtrace-k-db"><span class="rtrace-swatch"></span>{{K_DB}}</span>
+    <span class="rtrace-legend-item rtrace-k-queue"><span class="rtrace-swatch"></span>{{K_QUEUE}}</span>
+    <span class="rtrace-legend-item rtrace-k-cache"><span class="rtrace-swatch"></span>{{K_CACHE}}</span>
+    <span class="rtrace-legend-item rtrace-k-external"><span class="rtrace-swatch"></span>{{K_EXTERNAL}}</span>
+  </footer>
+</section>

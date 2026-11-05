@@ -1,0 +1,79 @@
+<!-- ============================================================================
+MODULE: roadmap                                            lineage: unified-system original (v5 high-frequency pass)
+PURPOSE: Pure-CSS product roadmap (NO SVG). A coarse period × theme planning grid:
+         columns are time periods (Q1..Q4 / H1..H2), rows are theme lanes, and
+         colored initiative bars span one or more periods via CSS grid-column.
+         For exec / product roadmaps where WHEN is a quarter-grain band, not a date.
+         Distinction: gantt is task-level with precise dates, % progress and
+         dependencies; roadmap is coarse period×theme planning for exec docs.
+VARIABLES: {{TITLE}}; {{N}} (period count → --rdm-cols); per period {{PERIOD}};
+           per lane {{LANE}}; per initiative {{INITIATIVE}} placed with
+           style="grid-column:<startLine> / <endLine>" and a .cat-N tint.
+SCALING:   the header and every lane share grid-template-columns
+           `var(--rdm-lane) repeat(N,1fr)`, so columns stay aligned. Column LINE 1
+           starts the lane-name gutter; line 2 = period 1 (Q1), line 3 = period 2 …
+           An initiative over periods [a,b] uses grid-column: (a+1) / (b+2).
+           e.g. Q1-Q2 → 2/4, Q3 only → 4/5. To stack two bars in one lane, give the
+           second bar style="grid-row:2" (lanes use grid-auto-rows).
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --bg-surface, --bg-muted,
+           --border-default, --border-subtle, --text-*, --font-mono, --radius-*,
+           --sp-*, --shadow-*, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="roadmap" style block once.
+INTERACTION: hover brightens an initiative bar (paint-only, reduced-motion guarded).
+USAGE: set --rdm-cols to the period count. One .rdm-lane per theme (its .rdm-lane-name
+       in the gutter); drop one .rdm-bar per initiative with an inline grid-column span.
+============================================================================ -->
+<style data-module="roadmap">
+  .rdm { width: 100%; --rdm-lane: 132px; --rdm-cols: 4; }
+  .rdm-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .rdm-head, .rdm-lane { display: grid; grid-template-columns: var(--rdm-lane) repeat(var(--rdm-cols), minmax(0, 1fr)); }
+  /* period header: mono kickers over each column, dashed period seams */
+  .rdm-corner { border-bottom: 2px solid var(--border-default); }
+  .rdm-period { padding: var(--sp-2); text-align: center; font: var(--type-caption); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); border-bottom: 2px solid var(--border-default); }
+  .rdm-period + .rdm-period { border-left: 1px dashed var(--border-subtle); }
+  /* theme lanes: zebra bands with a labeled gutter; bars sit in the period columns */
+  .rdm-lane { grid-auto-rows: minmax(40px, auto); align-items: center; border-bottom: 1px solid var(--border-subtle); }
+  .rdm-lane:nth-of-type(even) { background: color-mix(in srgb, var(--bg-muted) 40%, transparent); }
+  .rdm-lane-name { grid-column: 1; padding: var(--sp-3) var(--sp-3) var(--sp-3) 0; font: var(--type-small); font-weight: 600; color: var(--text-primary); border-right: 1px solid var(--border-subtle); }
+  /* initiative bar: cat-tinted pill spanning its period columns */
+  .rdm-bar { --bc: var(--accent); margin: var(--sp-1) var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--bc) 20%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--bc) 48%, var(--border-default)); box-shadow: var(--shadow-sm); transition: filter var(--dur-fast) var(--ease); }
+  .rdm-bar:hover { filter: brightness(1.06); }
+  .rdm-bar.cat-1 { --bc: var(--cat-1); }
+  .rdm-bar.cat-2 { --bc: var(--cat-2); }
+  .rdm-bar.cat-3 { --bc: var(--cat-3); }
+  .rdm-bar.cat-4 { --bc: var(--cat-4); }
+  .rdm-bar.cat-5 { --bc: var(--cat-5); }
+  @media (max-width: 640px) { .rdm { --rdm-lane: 88px; } .rdm-period { padding-inline: var(--sp-1); letter-spacing: 0; overflow-wrap: anywhere; } }
+  @media (prefers-reduced-motion: reduce) { .rdm-bar { transition: none; } }
+</style>
+
+<figure class="rdm card-outlined" style="--rdm-cols:{{N}}" aria-label="{{TITLE}}"> <!-- N = period count, e.g. 4 -->
+  <figcaption class="rdm-title">{{TITLE}}</figcaption>
+
+  <!-- ── PERIOD HEADER (corner gutter + one .rdm-period per period) ──────────── -->
+  <div class="rdm-head">
+    <div class="rdm-corner"></div>
+    <div class="rdm-period">{{PERIOD}}</div> <!-- e.g. Q1 -->
+    <div class="rdm-period">{{PERIOD}}</div> <!-- e.g. Q2 -->
+    <div class="rdm-period">{{PERIOD}}</div> <!-- e.g. Q3 -->
+    <div class="rdm-period">{{PERIOD}}</div> <!-- e.g. Q4 -->
+    <!-- ↑ repeat: one .rdm-period per period; keep --rdm-cols in sync -->
+  </div>
+
+  <!-- ── THEME LANES (name in gutter + initiative bars in period columns) ────── -->
+  <div class="rdm-lane">
+    <div class="rdm-lane-name">{{LANE}}</div> <!-- e.g. 検索体験 -->
+    <span class="rdm-bar cat-1" style="grid-column:2 / 4">{{INITIATIVE}}</span> <!-- e.g. 新検索UI (Q1-Q2) -->
+    <span class="rdm-bar cat-3" style="grid-column:4 / 6">{{INITIATIVE}}</span> <!-- e.g. パーソナライズ (Q3-Q4) -->
+  </div>
+  <div class="rdm-lane">
+    <div class="rdm-lane-name">{{LANE}}</div> <!-- e.g. 決済基盤 -->
+    <span class="rdm-bar cat-2" style="grid-column:2 / 5">{{INITIATIVE}}</span> <!-- e.g. 決済リプレース (Q1-Q3) -->
+    <span class="rdm-bar cat-4" style="grid-column:5 / 6">{{INITIATIVE}}</span> <!-- e.g. 分割払い (Q4) -->
+  </div>
+  <div class="rdm-lane">
+    <div class="rdm-lane-name">{{LANE}}</div> <!-- e.g. 運用・信頼性 -->
+    <span class="rdm-bar cat-5" style="grid-column:3 / 5">{{INITIATIVE}}</span> <!-- e.g. 監視刷新 (Q2-Q3) -->
+  </div>
+  <!-- ↑ repeat: one .rdm-lane per theme; place bars with grid-column:(a+1)/(b+2) -->
+</figure>

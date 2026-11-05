@@ -1,0 +1,63 @@
+<!-- ============================================================================
+MODULE: treemap                                             lineage: unified-system original (dashboard/report)
+PURPOSE: Area-proportional treemap (pure CSS - NO SVG). Big categories become
+         columns whose width ∝ the category's share of the whole; inside each,
+         tiles stack with height ∝ the tile's share of its category - so a tile's
+         area ≈ its share of the grand total. Tiles carry a label + value and a
+         --cat-N wash; text on tiles that are too small is hidden. For budget mix,
+         portfolio weight, storage/traffic breakdowns, market share.
+VARIABLES: {{TITLE}}; per category {{COL_PCT}} (width %); per tile {{TILE_PCT}}
+           (height %), {{CAT}} (cat-1..5), {{LABEL}}, {{VALUE}}.
+SCALING:   COL_PCT  = round(categoryTotal / grandTotal * 100).
+           TILE_PCT = round(value / categoryTotal * 100).
+           → tile area ≈ COL_PCT% × TILE_PCT% ≈ value / grandTotal.
+REQUIRES:  core/tokens.css (--cat-1..5, --bg-card, --text-*, --border-subtle,
+           --radius-sm, --sp-*)
+MODULE CSS: inline the data-module="treemap" style block once.
+INTERACTION: none (static). Section carries aria-label; labels + values are real text.
+USAGE: one .tm-canvas; one .tm-col per category (flex-basis = COL_PCT%); one .tm-tile
+       per value (flex-basis = TILE_PCT%). Add .is-tiny to any tile too small for its
+       value line (hides the value, keeps the clipped label). % = value / total.
+============================================================================ -->
+<style data-module="treemap">
+  .treemap { width: 100%; }
+  .treemap-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .treemap .tm-canvas { display: flex; gap: var(--sp-2); height: 360px; }
+  .treemap .tm-col { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  /* tile: a --cat wash mixed over the card so --text-primary stays legible in any theme */
+  .treemap .tm-tile { display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
+    min-height: 0; overflow: hidden; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--cat-1) 70%, var(--bg-card)); color: var(--text-primary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 8%, transparent);
+    transition: filter var(--dur-fast) var(--ease); }
+  .treemap .tm-tile.cat-1 { background: color-mix(in srgb, var(--cat-1) 70%, var(--bg-card)); }
+  .treemap .tm-tile.cat-2 { background: color-mix(in srgb, var(--cat-2) 70%, var(--bg-card)); }
+  .treemap .tm-tile.cat-3 { background: color-mix(in srgb, var(--cat-3) 70%, var(--bg-card)); }
+  .treemap .tm-tile.cat-4 { background: color-mix(in srgb, var(--cat-4) 70%, var(--bg-card)); }
+  .treemap .tm-tile.cat-5 { background: color-mix(in srgb, var(--cat-5) 70%, var(--bg-card)); }
+  .treemap .tm-label { font: var(--type-small); font-weight: 600; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .treemap .tm-value { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--text-primary) 78%, transparent); white-space: nowrap; }
+  /* tiles too small for two lines: keep only the (clipped) label */
+  .treemap .tm-tile.is-tiny { padding: var(--sp-1) var(--sp-2); }
+  .treemap .tm-tile.is-tiny .tm-value { display: none; }
+  @media (hover: hover) { .treemap .tm-tile:hover { filter: brightness(1.05); } }
+  @media (prefers-reduced-motion: reduce) { .treemap .tm-tile { transition: none; } }
+</style>
+
+<figure class="treemap card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="treemap-title">{{TITLE}}</figcaption>
+  <div class="tm-canvas">
+    <!-- ↓ repeat one .tm-col per category (flex-basis = COL_PCT%) -->
+    <div class="tm-col" style="flex-basis:{{COL_PCT}}%"> <!-- e.g. 45 -->
+      <!-- ↓ repeat one .tm-tile per value (flex-basis = TILE_PCT%; set cat-1..5) -->
+      <div class="tm-tile cat-1" style="flex-basis:{{TILE_PCT}}%"> <!-- e.g. 60 -->
+        <span class="tm-label">{{LABEL}}</span>   <!-- e.g. Compute -->
+        <span class="tm-value">{{VALUE}}</span>   <!-- e.g. $12.4k -->
+      </div>
+      <!-- ↑ repeat tile -->
+    </div>
+    <!-- ↑ repeat column -->
+  </div>
+</figure>

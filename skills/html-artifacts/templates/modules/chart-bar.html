@@ -1,0 +1,51 @@
+<!-- ============================================================================
+MODULE: chart-bar                                            lineage: html-visual(chart/dashboard)
+PURPOSE: Bar chart on the HTML-hybrid plot frame (NO external libs, NO SVG text).
+         Bars are divs sized in % of a fixed-height plot; ticks, values and category
+         labels are HTML, so they stay legible at any card width (the old 720-unit
+         SVG printed 8px labels in a half-width card and 4px labels on a phone).
+VARIABLES: {{TITLE}} · per tick {{TICK_PCT}} {{TICK_LABEL}} · per bar {{BOTTOM_PCT}}
+           {{HEIGHT_PCT}} {{VALUE}} {{LABEL}} · {{YW}} = y-label column width in px.
+SCALING:   pick a "nice" top T ≥ max (e.g. max 92 → T 100, ticks 0/25/50/75/100).
+           HEIGHT_PCT = value / T × 100, BOTTOM_PCT = 0 (bars keep a zero baseline);
+           TICK_PCT = tick / T × 100. Prefer the builder: `chart` (variant bar) does all
+           of this, plus negative bars, `target` lines and axis-unit inference.
+REQUIRES:  core/elements.css (.hc frame: .hc-body/.hc-y/.hc-plot/.hc-grid/.hc-x/.hc-bar/.hc-val)
+MODULE CSS: inline the data-module="chart-bar" style block once.
+INTERACTION: [data-chart-tip] on the figure + data-tip on each .hc-bar → floating tooltip
+             (interactions.js). The .hc-body carries role="img" + an aria-label listing the data.
+============================================================================ -->
+<style data-module="chart-bar">
+  .chart { width: 100%; }
+  .chart-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-2); letter-spacing: var(--tracking-tight); }
+  /* the card firms its edge on hover, matching the dashboard's shared interaction language */
+  .chart.card-outlined:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border-default)); box-shadow: var(--shadow-sm); }
+</style>
+
+<figure class="chart hc card-outlined" data-chart-tip>
+  <figcaption class="chart-title">{{TITLE}}</figcaption>
+  <div class="hc-body" role="img" aria-label="{{TITLE}}: {{LABEL}} {{VALUE}}, …" style="--hc-h:240px;--hc-yw:{{YW}}px">
+    <div class="hc-y" aria-hidden="true">
+      <!-- ↓ one span per tick, bottom = TICK_PCT -->
+      <span style="bottom:{{TICK_PCT}}%">{{TICK_LABEL}}</span>
+    </div>
+    <div class="hc-plot">
+      <div class="hc-grid" aria-hidden="true">
+        <!-- ↓ one gridline per tick; the zero line gets class="hc-base" -->
+        <i class="hc-base" style="bottom:0%"></i>
+        <i style="bottom:{{TICK_PCT}}%"></i>
+      </div>
+      <div class="hc-bars">
+        <!-- ↓ repeat one slot per bar (slots share the width equally) -->
+        <div class="hc-slot">
+          <div class="hc-bar cat-1" style="bottom:{{BOTTOM_PCT}}%;height:{{HEIGHT_PCT}}%" data-tip="{{LABEL}}: {{VALUE}}"><span class="hc-val">{{VALUE}}</span></div>
+        </div>
+        <!-- ↑ repeat -->
+      </div>
+    </div>
+    <div class="hc-x" aria-hidden="true">
+      <!-- ↓ one label per slot, same order -->
+      <span>{{LABEL}}</span>
+    </div>
+  </div>
+</figure>

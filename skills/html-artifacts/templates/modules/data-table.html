@@ -1,0 +1,97 @@
+<!-- ============================================================================
+MODULE: data-table                                          lineage: html-visual(table) + demo2(table-users)
+PURPOSE: Sortable + live-filterable + paginated table (NO external libs). Search box
+         filters rows by text; click any <th> to sort asc/desc with an ▲/▼ indicator;
+         rows paginate (8/page) and toggle a selected state on click.
+VARIABLES: {{PLACEHOLDER}}  +  per column header: {{COL}}
+           per row cells: {{NAME}} {{EMAIL}} {{ROLE}} {{STATUS}} {{STATUS_CLASS}}
+           ({{STATUS_CLASS}} = badge-success | badge-warning | badge-danger | badge-info)
+           NOTE: data-page-size="8" sets rows/page; with ≤8 rows the pager stays empty.
+REQUIRES: core/elements.css (table .badge* .hidden .selected) + core/interactions.js
+MODULE CSS: inline the data-module="data-table" style block once (sort caret + cursor).
+INTERACTION: input[data-filter][data-filter-in=".dt-row"] live-filters .dt-row;
+             table[data-sortable] sorts on <th> click; table[data-paginate][data-page-size="8"]
+             pages rows into the sibling [data-pager]; data-row-select toggles .selected on
+             row click - all wired by interactions.js (no per-module script).
+USAGE: repeat the <tr class="dt-row"> block once per row inside <tbody>.
+       Numeric columns: add class="num" to that column's <th> and <td>s (right-aligned tabular figures).
+============================================================================ -->
+<style data-module="data-table">
+  .dt-search { width: 100%; max-width: 320px; padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-4); background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: var(--radius-sm); font: var(--type-small); transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .dt-search:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default)); }
+  .dt-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .dt-search::placeholder { color: var(--text-muted); }
+  .data-table th { cursor: pointer; user-select: none; white-space: nowrap; transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  /* hover affordance on the clickable header - tints the cell + reveals a hairline accent rail */
+  .data-table thead th:hover { color: var(--text-secondary); background: color-mix(in srgb, var(--accent) 6%, transparent); box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  /* active sort column carries a full accent underline + accent label */
+  .data-table th[data-sort="asc"], .data-table th[data-sort="desc"] { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+  .data-table th[data-sort="asc"]::after  { content: " \25B2"; color: var(--accent); font-size: .85em; }
+  .data-table th[data-sort="desc"]::after { content: " \25BC"; color: var(--accent); font-size: .85em; }
+  /* selected-row refinement - softer accent tint reinforcing the inherited accent rail */
+  .data-table tbody tr.selected:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  /* numeric columns (class="num" - the builder detects them): right-aligned tabular figures so magnitudes line up */
+  .data-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .data-table tbody td.num { font-family: var(--font-mono); font-size: .92em; }
+  /* a table with good/bad pills centres every numeric column, so pills and plain figures share one axis per column and across columns */
+  .data-table .num-badge { text-align: center; }
+  .data-table td.num .badge { font: inherit; font-weight: 600; }
+  /* long metric headers wrap instead of pushing the figures off-screen; the row label column keeps a readable width */
+  .data-table thead th.num { white-space: normal; min-width: 6.5em; }
+  .data-table tbody td:first-child { min-width: 8em; }
+  /* pager controls - accent-tied hover */
+  .data-table [data-pager] button { transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .data-table [data-pager] button:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default)); color: var(--accent); }
+  /* density:"compact" - builder adds .dt-compact to the <table> */
+  .dt-compact thead th { padding: var(--sp-2); }
+  .dt-compact tbody td { padding: var(--sp-2) var(--sp-3); font-size: 13px; }
+  /* table caption - section title rendered as <caption> when the spec sets `title` (parity with chart/heatmap/diagram titles) */
+  .data-table .dt-title { caption-side: top; text-align: left; font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); letter-spacing: var(--tracking-tight); }
+</style>
+
+<section class="data-table" aria-label="Data table">
+  <input class="dt-search" type="search" data-filter data-filter-in=".dt-row"
+         placeholder="{{PLACEHOLDER}}" aria-label="{{PLACEHOLDER}}">
+
+  <table data-sortable data-paginate data-page-size="8" data-row-select>
+    <thead>
+      <tr>
+        <th>{{COL_NAME}}</th>
+        <th>{{COL_EMAIL}}</th>
+        <th>{{COL_ROLE}}</th>
+        <th>{{COL_STATUS}}</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- ↓ repeat one <tr class="dt-row"> per row -->
+      <tr class="dt-row">
+        <td>{{NAME}}</td>
+        <td>{{EMAIL}}</td>
+        <td>{{ROLE}}</td>
+        <td><span class="badge {{STATUS_CLASS}}">{{STATUS}}</span></td>
+      </tr>
+      <!-- ↑ repeat -->
+
+      <!-- sample rows (replace/remove) -->
+      <tr class="dt-row">
+        <td>Aoi Tanaka</td>      <td>aoi@example.com</td>   <td>Admin</td>   <td><span class="badge badge-success">Active</span></td>
+      </tr>
+      <tr class="dt-row">
+        <td>Ben Carter</td>      <td>ben@example.com</td>   <td>Editor</td>  <td><span class="badge badge-warning">Pending</span></td>
+      </tr>
+      <tr class="dt-row">
+        <td>Chen Wei</td>        <td>chen@example.com</td>  <td>Viewer</td>  <td><span class="badge badge-info">Invited</span></td>
+      </tr>
+      <tr class="dt-row">
+        <td>Dara Okoye</td>      <td>dara@example.com</td>  <td>Editor</td>  <td><span class="badge badge-danger">Suspended</span></td>
+      </tr>
+      <tr class="dt-row">
+        <td>Emi Sato</td>        <td>emi@example.com</td>   <td>Viewer</td>  <td><span class="badge badge-success">Active</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <div data-pager class="no-print"></div>
+</section>

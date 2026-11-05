@@ -1,0 +1,56 @@
+<!-- ============================================================================
+MODULE: gauge                                               lineage: unified-system original (dashboard/report)
+PURPOSE: A grid of radial gauges (circular progress rings) - a single value vs a
+         target/max with the percentage (or display value) at the centre. Stacked
+         <circle> rings drawn with stroke-dasharray (same idiom as chart-donut),
+         tonable to status colors. For headline ratios that a bar can't dramatize.
+VARIABLES (per gauge): {{LABEL}}  {{DISPLAY}} (centre text, e.g. "72%")
+                       {{SEG}} {{GAP}} (stroke-dasharray pair; SEG = frac·326.73)
+REQUIRES: core/tokens.css (--accent, --color-*, --bg-muted, --border-subtle, --sp-*)
+MODULE CSS: inline the data-module="gauge" style block once. Tone modifiers
+            (.g-success / -warning / -danger / -info) re-color the arc.
+INTERACTION: none (static).
+USAGE: one .gauge-grid with one <figure class="gauge"> per ring. DASHARRAY MATH:
+       r=52 -> circumference C = 2·π·52 = 326.73. frac = value/max (0..1).
+       SEG = frac·C, GAP = C − SEG. The arc <g> is rotated −90° to start at 12 o'clock.
+============================================================================ -->
+<style data-module="gauge">
+  .gauge-sec h2 { margin-bottom: var(--sp-5); }
+  .gauge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-4); }
+  /* --tone defaults to the accent; tone modifiers re-point it so hover tints,
+     the centred value and the ring all read from one channel per gauge. */
+  .gauge { --tone: var(--accent); display: grid; justify-items: center; gap: var(--sp-2); margin: 0; padding: var(--sp-5) var(--sp-4); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); transition: border-color var(--dur-mid) var(--ease), box-shadow var(--dur-mid) var(--ease), background var(--dur-mid) var(--ease); }
+  .gauge svg { width: 116px; height: 116px; display: block; }
+  .gauge-track { fill: none; stroke: var(--bg-muted); stroke-width: 12; }
+  .gauge-arc { fill: none; stroke: var(--tone); stroke-width: 12; stroke-linecap: round; transition: stroke-dasharray var(--dur-slow) var(--ease), filter var(--dur-mid) var(--ease); }
+  .gauge-val { fill: var(--text-primary); font: var(--type-h3); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; letter-spacing: var(--tracking-tight); transition: fill var(--dur-fast) var(--ease); }
+  .gauge-label { font: var(--type-small); color: var(--text-secondary); text-align: center; letter-spacing: var(--tracking-tight); }
+  .g-success { --tone: var(--color-success); }
+  .g-warning { --tone: var(--color-warning); }
+  .g-danger  { --tone: var(--color-danger); }
+  .g-info    { --tone: var(--color-info); }
+  /* hover: firm the hairline to the tone, lift on a soft tinted glow and warm
+     the surface - accent-tied depth, no transform so dense grids stay calm. */
+  .gauge:hover { border-color: color-mix(in srgb, var(--tone) 42%, var(--border-subtle)); background: color-mix(in srgb, var(--tone) 4%, var(--bg-surface)); box-shadow: var(--shadow-sm), 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent); }
+  .gauge:hover .gauge-val { fill: var(--tone); }
+  @media (hover: hover) {
+    .gauge:hover .gauge-arc { filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--tone) 38%, transparent)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .gauge-arc { transition: filter var(--dur-mid) var(--ease); } }
+</style>
+
+<section class="gauge-sec" aria-label="{{TITLE}}">
+  <h2>{{TITLE}}</h2>
+  <div class="gauge-grid">
+
+    <!-- ── one <figure class="gauge"> per ring ──────────────────────────── -->
+    <figure class="gauge">
+      <svg viewBox="0 0 120 120" role="img" aria-label="{{LABEL}}: {{DISPLAY}}">
+        <circle class="gauge-track" cx="60" cy="60" r="52"/>
+        <circle class="gauge-arc" cx="60" cy="60" r="52" stroke-dasharray="{{SEG}} {{GAP}}" transform="rotate(-90 60 60)"/>
+        <text class="gauge-val" x="60" y="60">{{DISPLAY}}</text>
+      </svg>
+      <figcaption class="gauge-label">{{LABEL}}</figcaption>
+    </figure>
+  </div>
+</section>

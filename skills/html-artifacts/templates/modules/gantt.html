@@ -1,0 +1,119 @@
+<!-- ============================================================================
+MODULE: gantt                                               lineage: v3 diagrams expansion
+PURPOSE: Self-contained SVG Gantt chart / roadmap (NO external libs). A period
+         axis across the top (month / week labels), one task row per bar with an
+         inner progress rect (% complete painted over a tinted track), milestone
+         diamonds, and a dashed "today" marker line. For project plans, release
+         roadmaps, delivery schedules.
+VARIABLES: {{TITLE}}; per task {{TASK_LABEL}}, {{PCT}} (e.g. "70%"); per period
+           {{PERIOD}} (month/week label); milestone {{MS_LABEL}}; {{TODAY_LABEL}}.
+GEOMETRY:  label column is x=0→140; the plot is x=140→770 split into equal periods
+           of W=105 (period k spans 140+k*105 → 140+(k+1)*105; label centered at
+           140+k*105+52.5, y=22). Header band = y 0→34. Rows are H=40: row i top =
+           34 + i*40, its midline = top+20. A bar covering periods [a,b) is
+           x=140+a*105+4, width=(b-a)*105-8, y=midline-9, H=18, rx=4; the progress
+           fill shares x/y/H with width = barWidth*pct/100. A value at period p is
+           at x=140+p*105. Milestone diamond of half-size 9 at (cx,cy):
+           "cx,cy-9 cx+9,cy cx,cy+9 cx-9,cy". Today line = full-height dashed rule
+           at x=140+t*105. Add a task: +40 to viewBox height; add a period: widen.
+REQUIRES:  core/tokens.css (--bg-card, --accent, --cat-1..5, --color-danger,
+           --border-default, --border-subtle, --text-*, --font-mono, --dur-fast,
+           --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="gantt" style block once.
+INTERACTION: none (static). role="img" + <title> a11y.
+USAGE: one task row = a <g class="gt-row"> holding rect.gt-bar (track, cat-n) +
+       rect.gt-bar-fill (progress, cat-n) + text.gt-pct + text.gt-task-label. A
+       milestone row uses polygon.gt-milestone + text.gt-ms-label instead of bars.
+============================================================================ -->
+<style data-module="gantt">
+  .gt { width: 100%; }
+  .gt svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  @media (max-width: 640px) { .gt { overflow-x: auto; } .gt svg { min-width: 800px; } }
+  .gt-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .gt .gt-grid { stroke: var(--border-subtle); stroke-width: 1; }
+  .gt .gt-axis { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; }
+  .gt .gt-task-label { fill: var(--text-primary); font-size: 12px; text-anchor: end; dominant-baseline: middle; }
+  /* bars: cat-tinted track with a solid cat progress fill; hover lifts brightness */
+  .gt .gt-bar.cat-1 { fill: color-mix(in srgb, var(--cat-1) 22%, var(--bg-card)); }
+  .gt .gt-bar.cat-2 { fill: color-mix(in srgb, var(--cat-2) 22%, var(--bg-card)); }
+  .gt .gt-bar.cat-3 { fill: color-mix(in srgb, var(--cat-3) 22%, var(--bg-card)); }
+  .gt .gt-bar.cat-4 { fill: color-mix(in srgb, var(--cat-4) 22%, var(--bg-card)); }
+  .gt .gt-bar.cat-5 { fill: color-mix(in srgb, var(--cat-5) 22%, var(--bg-card)); }
+  .gt .gt-bar-fill.cat-1 { fill: var(--cat-1); }
+  .gt .gt-bar-fill.cat-2 { fill: var(--cat-2); }
+  .gt .gt-bar-fill.cat-3 { fill: var(--cat-3); }
+  .gt .gt-bar-fill.cat-4 { fill: var(--cat-4); }
+  .gt .gt-bar-fill.cat-5 { fill: var(--cat-5); }
+  .gt .gt-bar, .gt .gt-bar-fill { transition: filter var(--dur-fast) var(--ease); }
+  .gt .gt-row:hover .gt-bar, .gt .gt-row:hover .gt-bar-fill { filter: brightness(1.06); }
+  .gt .gt-pct { fill: var(--text-secondary); font-size: 10.5px; font-family: var(--font-mono); dominant-baseline: middle; }
+  .gt .gt-milestone { fill: color-mix(in srgb, var(--accent) 80%, var(--bg-card)); stroke: var(--accent); stroke-width: 1.25; }
+  .gt .gt-ms-label { fill: var(--text-secondary); font-size: 11px; dominant-baseline: middle; }
+  .gt .gt-today { stroke: var(--color-danger); stroke-width: 1.25; stroke-dasharray: 4 3; }
+  .gt .gt-today-label { fill: var(--color-danger); font-size: 10.5px; font-family: var(--font-mono); font-weight: 600; text-anchor: start; }
+  @media (prefers-reduced-motion: reduce) { .gt .gt-bar, .gt .gt-bar-fill { transition: none; } }
+</style>
+
+<figure class="gt card-outlined">
+  <figcaption class="gt-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 800 244" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── PERIOD AXIS + GRID (labels then boundary lines) ─────────────────── -->
+    <text class="gt-axis" x="192.5" y="22">{{PERIOD}}</text> <!-- e.g. Jan -->
+    <text class="gt-axis" x="297.5" y="22">{{PERIOD}}</text> <!-- e.g. Feb -->
+    <text class="gt-axis" x="402.5" y="22">{{PERIOD}}</text> <!-- e.g. Mar -->
+    <text class="gt-axis" x="507.5" y="22">{{PERIOD}}</text> <!-- e.g. Apr -->
+    <text class="gt-axis" x="612.5" y="22">{{PERIOD}}</text> <!-- e.g. May -->
+    <text class="gt-axis" x="717.5" y="22">{{PERIOD}}</text> <!-- e.g. Jun -->
+    <line class="gt-grid" x1="140" y1="34" x2="140" y2="234"/>
+    <line class="gt-grid" x1="245" y1="34" x2="245" y2="234"/>
+    <line class="gt-grid" x1="350" y1="34" x2="350" y2="234"/>
+    <line class="gt-grid" x1="455" y1="34" x2="455" y2="234"/>
+    <line class="gt-grid" x1="560" y1="34" x2="560" y2="234"/>
+    <line class="gt-grid" x1="665" y1="34" x2="665" y2="234"/>
+    <line class="gt-grid" x1="770" y1="34" x2="770" y2="234"/>
+
+    <!-- ── TASK ROWS (track + progress fill + % + label) ──────────────────── -->
+    <!-- row0 · periods [0,2) · 100% -->
+    <g class="gt-row">
+      <text class="gt-task-label" x="132" y="54">{{TASK_LABEL}}</text> <!-- e.g. Discovery -->
+      <rect class="gt-bar cat-1" x="144" y="45" width="202" height="18" rx="4"/>
+      <rect class="gt-bar-fill cat-1" x="144" y="45" width="202" height="18" rx="4"/>
+      <text class="gt-pct" x="354" y="54">{{PCT}}</text> <!-- e.g. 100% -->
+    </g>
+    <!-- row1 · periods [1,3) · 70% → fill width = 202*0.7 = 141 -->
+    <g class="gt-row">
+      <text class="gt-task-label" x="132" y="94">{{TASK_LABEL}}</text> <!-- e.g. Design -->
+      <rect class="gt-bar cat-2" x="249" y="85" width="202" height="18" rx="4"/>
+      <rect class="gt-bar-fill cat-2" x="249" y="85" width="141" height="18" rx="4"/>
+      <text class="gt-pct" x="459" y="94">{{PCT}}</text> <!-- e.g. 70% -->
+    </g>
+    <!-- row2 · periods [2,5) · 40% → fill width = 307*0.4 = 123 -->
+    <g class="gt-row">
+      <text class="gt-task-label" x="132" y="134">{{TASK_LABEL}}</text> <!-- e.g. Build -->
+      <rect class="gt-bar cat-3" x="354" y="125" width="307" height="18" rx="4"/>
+      <rect class="gt-bar-fill cat-3" x="354" y="125" width="123" height="18" rx="4"/>
+      <text class="gt-pct" x="669" y="134">{{PCT}}</text> <!-- e.g. 40% -->
+    </g>
+    <!-- row3 · periods [4,6) · 15% → fill width = 202*0.15 = 30 -->
+    <g class="gt-row">
+      <text class="gt-task-label" x="132" y="174">{{TASK_LABEL}}</text> <!-- e.g. Beta -->
+      <rect class="gt-bar cat-4" x="564" y="165" width="202" height="18" rx="4"/>
+      <rect class="gt-bar-fill cat-4" x="564" y="165" width="30" height="18" rx="4"/>
+      <text class="gt-pct" x="600" y="174">{{PCT}}</text> <!-- e.g. 15% -->
+    </g>
+    <!-- ↑ repeat one <g class="gt-row"> per task (top += 40) -->
+
+    <!-- ── MILESTONE ROW (diamonds instead of bars) ───────────────────────── -->
+    <text class="gt-task-label" x="132" y="214">{{TASK_LABEL}}</text> <!-- e.g. Milestones -->
+    <polygon class="gt-milestone" points="560,205 569,214 560,223 551,214"/>
+    <text class="gt-ms-label" x="574" y="214">{{MS_LABEL}}</text> <!-- e.g. Feature freeze -->
+    <polygon class="gt-milestone" points="717,205 726,214 717,223 708,214"/>
+    <text class="gt-ms-label" x="731" y="214">{{MS_LABEL}}</text> <!-- e.g. GA -->
+
+    <!-- ── TODAY MARKER (dashed full-height rule) ─────────────────────────── -->
+    <line class="gt-today" x1="413" y1="30" x2="413" y2="234"/>
+    <text class="gt-today-label" x="417" y="12">{{TODAY_LABEL}}</text> <!-- e.g. Today -->
+  </svg>
+</figure>

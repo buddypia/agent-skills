@@ -1,0 +1,63 @@
+<!-- ============================================================================
+MODULE: concentric                              lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG onion / concentric-circles diagram (NO external libs).
+         A labeled CORE at the center wrapped by 3-4 nested rings, each ring a real
+         <text> label and a per-ring --cat tint (color-mix) that deepens toward the
+         center. For layered scopes / spheres of influence / maturity shells:
+         core→context, self→team→org→market, data→model→product.
+         Distinction: pyramid ranks layers vertically by breadth and venn shows
+         overlap between sets - concentric encodes CONTAINMENT (each ring wholly
+         wraps the ones inside it).
+VARIABLES: {{TITLE}}; core {{CORE}}; per ring {{RING_LABEL}} (+ inline --ri density).
+GEOMETRY:  viewBox 0 0 520 520, center (260,260). Circles are filled largest-first
+           (painter's algorithm) so each smaller circle carves the next band: radii
+           240 / 180 / 120 / core 60. A band between r_out and r_in shows a mid-band
+           label at the TOP: y = 260 − (r_out+r_in)/2 → outer 50, mid 110, inner 170;
+           core label at center (260,260). For 3 rings drop the r=120 circle and
+           relabel; step radii evenly if you change the count.
+REQUIRES:  core/tokens.css (--cat-2..4, --accent, --on-accent, --bg-surface,
+           --text-primary, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="concentric" style block once.
+INTERACTION: none (static). Hovering a ring deepens its tint (paint only, reduced-
+             motion guarded). role="img" + <title> a11y; labels are real text.
+USAGE: one <circle class="cc-ring cat-N" style="--ri:NN%"> per ring (largest first,
+       lowest --ri outermost), then the core circle, then labels on top.
+============================================================================ -->
+<style data-module="concentric">
+  .cc { margin: 0; }
+  .cc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cc svg { width: 100%; height: auto; max-width: 480px; margin-inline: auto; display: block; overflow: visible; font-family: var(--font-sans); }
+  @media (max-width: 640px) { .cc { overflow-x: auto; } .cc svg { min-width: 520px; } }
+  /* rings: tint = --cat (via --rc) mixed toward surface, density from inline --ri */
+  .cc-ring { fill: color-mix(in srgb, var(--rc, var(--accent)) var(--ri, 26%), var(--bg-surface)); stroke: var(--bg-surface); stroke-width: 2; transition: fill var(--dur-fast) var(--ease); }
+  .cc-ring.cat-2 { --rc: var(--cat-2); }
+  .cc-ring.cat-3 { --rc: var(--cat-3); }
+  .cc-ring.cat-4 { --rc: var(--cat-4); }
+  .cc-ring:hover { fill: color-mix(in srgb, var(--rc, var(--accent)) calc(var(--ri, 26%) + 14%), var(--bg-surface)); }
+  .cc-core { fill: color-mix(in srgb, var(--accent) 82%, var(--bg-surface)); stroke: var(--bg-surface); stroke-width: 2; }
+  .cc-label { fill: var(--text-primary); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+  .cc-core-label { fill: var(--on-accent); font-size: 14px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+  @media (prefers-reduced-motion: reduce) { .cc-ring { transition: none; } }
+</style>
+
+<figure class="cc card-outlined">
+  <figcaption class="cc-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 520 520" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── rings, largest → smallest (each carves the next band) ────────────── -->
+    <circle class="cc-ring cat-4" style="--ri:16%" cx="260" cy="260" r="240"/>
+    <circle class="cc-ring cat-3" style="--ri:26%" cx="260" cy="260" r="180"/>
+    <circle class="cc-ring cat-2" style="--ri:38%" cx="260" cy="260" r="120"/>
+    <!-- ↑ repeat: one .cc-ring per shell; drop a circle for 3 rings -->
+
+    <!-- ── core (innermost, on top of the rings) ───────────────────────────── -->
+    <circle class="cc-core" cx="260" cy="260" r="60"/>
+
+    <!-- ── labels - ring labels sit on each band's top, core in the center ───── -->
+    <text class="cc-label" x="260" y="50">{{RING_LABEL}}</text>   <!-- e.g. 市場 -->
+    <text class="cc-label" x="260" y="110">{{RING_LABEL}}</text>  <!-- e.g. 組織 -->
+    <text class="cc-label" x="260" y="170">{{RING_LABEL}}</text>  <!-- e.g. チーム -->
+    <text class="cc-core-label" x="260" y="260">{{CORE}}</text>   <!-- e.g. 自分 -->
+  </svg>
+</figure>

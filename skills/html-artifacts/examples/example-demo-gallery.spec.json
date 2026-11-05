@@ -1,0 +1,2107 @@
+{
+  "title": "html-artifacts — Component Demo Gallery",
+  "eyebrow": "ALL 37 TEMPLATES",
+  "subtitle": "Every template in one self-contained, dependency-free file · 5 families · 37 modules",
+  "theme": "slate",
+  "layout": "stack",
+  "header": "banner",
+  "density": "comfortable",
+  "meta": [
+    {
+      "k": "Modules",
+      "v": "37"
+    },
+    {
+      "k": "Families",
+      "v": "5"
+    },
+    {
+      "k": "Dependencies",
+      "v": "0"
+    }
+  ],
+  "footer": "Generated demo gallery · html-artifacts unified system",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<style>\n.fam-divider { margin: var(--sp-7) 0 var(--sp-4); padding: var(--sp-5) var(--sp-5) var(--sp-4); background: var(--bg-surface); border: 1px solid var(--border-default); border-left: 4px solid var(--accent); border-radius: var(--radius-lg); }\n.fam-divider .fd-eyebrow { display: inline-block; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); background: var(--bg-muted); padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-pill); margin-bottom: var(--sp-2); }\n.fam-divider .fd-name { font-size: 1.9rem; font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.1; text-transform: capitalize; }\n.fam-divider .fd-count { display: block; margin-top: var(--sp-2); font-size: 0.82rem; color: var(--text-muted); }\n.mod-head { margin: var(--sp-5) 0 var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }\n.mod-head .mod-fam { display: inline-block; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--radius-pill); padding: 1px var(--sp-2); margin-bottom: var(--sp-2); }\n.mod-head h2 { margin: 0; font-size: 1.18rem; font-weight: 650; color: var(--text-primary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }\n.mod-head p { margin: var(--sp-1) 0 0; font-size: 0.86rem; color: var(--text-secondary); line-height: 1.45; }\n</style>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"fam-divider\" data-fam=\"charts\"><span class=\"fd-eyebrow\">charts</span><h2 class=\"fd-name\">charts</h2><span class=\"fd-count\">13 modules · quantitative visualization (metrics, charts, gauges)</span></div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"kpi-grid\"><span class=\"mod-fam\">charts</span><h2>kpi-grid</h2><p>Row of headline metric cards (value + label + delta) that count up on reveal.</p></div>"
+    },
+    {
+      "type": "kpi",
+      "title": "kpi-grid",
+      "label": "kpi-grid",
+      "items": [
+        {
+          "label": "MRR",
+          "value": "$248.6k",
+          "valueNum": 248600,
+          "delta": "9.4%",
+          "dir": "up"
+        },
+        {
+          "label": "Active workspaces",
+          "value": "12,840",
+          "valueNum": 12840,
+          "delta": "612",
+          "dir": "up"
+        },
+        {
+          "label": "p95 query latency",
+          "value": "184ms",
+          "valueNum": 184,
+          "suffix": "ms",
+          "delta": "12ms",
+          "dir": "down", "tone": "good"
+        },
+        {
+          "label": "Net revenue retention",
+          "value": "118%",
+          "valueNum": 118,
+          "suffix": "%",
+          "delta": "3pt",
+          "dir": "up"
+        },
+        {
+          "label": "Open support tickets",
+          "value": "37",
+          "valueNum": 37,
+          "delta": "8",
+          "dir": "down"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"stat-trend\"><span class=\"mod-fam\">charts</span><h2>stat-trend</h2><p>KPI card with headline value + delta plus an inline sparkline of the recent trajectory.</p></div>"
+    },
+    {
+      "type": "stattrend",
+      "title": "stat-trend",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Monthly recurring revenue",
+          "value": "$248.6k",
+          "valueNum": 248600,
+          "delta": "9.4%",
+          "dir": "up",
+          "trend": "up",
+          "series": [
+            182,
+            196,
+            205,
+            219,
+            231,
+            248
+          ]
+        },
+        {
+          "label": "Events ingested / day",
+          "value": "9.7B",
+          "valueNum": 9.7,
+          "suffix": "B",
+          "delta": "14%",
+          "dir": "up",
+          "trend": "up",
+          "series": [
+            6.1,
+            6.8,
+            7.4,
+            8.2,
+            8.9,
+            9.7
+          ]
+        },
+        {
+          "label": "Monthly churned seats",
+          "value": "428",
+          "valueNum": 428,
+          "delta": "11%",
+          "dir": "down",
+          "trend": "down",
+          "series": [
+            612,
+            564,
+            530,
+            498,
+            471,
+            428
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"chart-bar\"><span class=\"mod-fam\">charts</span><h2>chart-bar</h2><p>Self-contained SVG vertical bar chart comparing one value per category.</p></div>"
+    },
+    {
+      "type": "chart",
+      "variant": "bar",
+      "title": "chart-bar",
+      "series": [
+        {
+          "label": "Jan",
+          "value": 182,
+          "display": "$182k"
+        },
+        {
+          "label": "Feb",
+          "value": 196,
+          "display": "$196k"
+        },
+        {
+          "label": "Mar",
+          "value": 205,
+          "display": "$205k"
+        },
+        {
+          "label": "Apr",
+          "value": 219,
+          "display": "$219k"
+        },
+        {
+          "label": "May",
+          "value": 231,
+          "display": "$231k"
+        },
+        {
+          "label": "Jun",
+          "value": 248,
+          "display": "$248k"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"chart-line\"><span class=\"mod-fam\">charts</span><h2>chart-line</h2><p>Self-contained SVG line/area chart for a value's trend over an ordered axis.</p></div>"
+    },
+    {
+      "type": "chart",
+      "variant": "line",
+      "title": "chart-line",
+      "points": [
+        {
+          "label": "Jan",
+          "value": 4.9
+        },
+        {
+          "label": "Feb",
+          "value": 5.6
+        },
+        {
+          "label": "Mar",
+          "value": 6.3
+        },
+        {
+          "label": "Apr",
+          "value": 7.1
+        },
+        {
+          "label": "May",
+          "value": 8.4
+        },
+        {
+          "label": "Jun",
+          "value": 9.7
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"chart-donut\"><span class=\"mod-fam\">charts</span><h2>chart-donut</h2><p>SVG donut composition chart with a center total and color-dot legend showing each slice's share.</p></div>"
+    },
+    {
+      "type": "chart",
+      "variant": "donut",
+      "title": "chart-donut",
+      "total": "$248.6k",
+      "totalLabel": "MRR by plan",
+      "segments": [
+        {
+          "label": "Enterprise",
+          "value": 124,
+          "cat": 1
+        },
+        {
+          "label": "Business",
+          "value": 78,
+          "cat": 2
+        },
+        {
+          "label": "Team",
+          "value": 34,
+          "cat": 3
+        },
+        {
+          "label": "Starter",
+          "value": 12,
+          "cat": 4
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"chart-stacked\"><span class=\"mod-fam\">charts</span><h2>chart-stacked</h2><p>Multi-series SVG part-to-whole chart: stacked/grouped/100% bars or stacked/100% filled areas with a shared x-axis.</p></div>"
+    },
+    {
+      "type": "barstacked",
+      "title": "chart-stacked (bar)",
+      "mode": "stacked",
+      "categories": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun"
+      ],
+      "series": [
+        {
+          "label": "Enterprise",
+          "cat": 1,
+          "values": [
+            96,
+            102,
+            108,
+            114,
+            119,
+            124
+          ]
+        },
+        {
+          "label": "Business",
+          "cat": 2,
+          "values": [
+            58,
+            62,
+            66,
+            70,
+            74,
+            78
+          ]
+        },
+        {
+          "label": "Team",
+          "cat": 3,
+          "values": [
+            22,
+            25,
+            27,
+            30,
+            32,
+            34
+          ]
+        },
+        {
+          "label": "Starter",
+          "cat": 4,
+          "values": [
+            6,
+            7,
+            9,
+            10,
+            11,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "type": "areastacked",
+      "title": "chart-stacked (area)",
+      "mode": "stacked",
+      "xLabels": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun"
+      ],
+      "series": [
+        {
+          "label": "Dashboards",
+          "cat": 1,
+          "values": [
+            3.1,
+            3.4,
+            3.8,
+            4.2,
+            4.6,
+            5
+          ]
+        },
+        {
+          "label": "API queries",
+          "cat": 2,
+          "values": [
+            1.4,
+            1.7,
+            1.9,
+            2.2,
+            2.6,
+            3
+          ]
+        },
+        {
+          "label": "Scheduled reports",
+          "cat": 3,
+          "values": [
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            1.2,
+            1.7
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"gauge\"><span class=\"mod-fam\">charts</span><h2>gauge</h2><p>Grid of radial gauge rings, each showing a single value against a target/max with a center readout.</p></div>"
+    },
+    {
+      "type": "gauge",
+      "title": "gauge",
+      "items": [
+        {
+          "label": "Uptime SLA",
+          "value": 99.97,
+          "max": 100,
+          "display": "99.97%",
+          "tone": "success"
+        },
+        {
+          "label": "Error budget used",
+          "value": 62,
+          "max": 100,
+          "display": "62%",
+          "tone": "warning"
+        },
+        {
+          "label": "Ingest pipeline load",
+          "value": 81,
+          "max": 100,
+          "display": "81%",
+          "tone": "danger"
+        },
+        {
+          "label": "Cache hit rate",
+          "value": 94,
+          "max": 100,
+          "display": "94%",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"radar\"><span class=\"mod-fam\">charts</span><h2>radar</h2><p>Multi-axis radar/spider chart plotting one or more series across shared axes as translucent polygons.</p></div>"
+    },
+    {
+      "type": "radar",
+      "title": "radar",
+      "axes": [
+        "Query speed",
+        "Ingest scale",
+        "Visualization",
+        "Alerting",
+        "Governance",
+        "Cost efficiency"
+      ],
+      "max": 5,
+      "series": [
+        {
+          "label": "Pulselytics",
+          "cat": 1,
+          "values": [
+            5,
+            5,
+            4,
+            4,
+            4,
+            3
+          ]
+        },
+        {
+          "label": "Legacy BI vendor",
+          "cat": 2,
+          "values": [
+            3,
+            2,
+            5,
+            3,
+            5,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"funnel\"><span class=\"mod-fam\">charts</span><h2>funnel</h2><p>Vertical conversion funnel: stages taper by value with per-stage value readout and conversion % vs the top.</p></div>"
+    },
+    {
+      "type": "funnel",
+      "title": "funnel",
+      "stages": [
+        {
+          "label": "Signed up",
+          "value": 18400,
+          "display": "18,400"
+        },
+        {
+          "label": "Connected a data source",
+          "value": 11200,
+          "display": "11,200"
+        },
+        {
+          "label": "Built first dashboard",
+          "value": 7350,
+          "display": "7,350"
+        },
+        {
+          "label": "Invited a teammate",
+          "value": 4120,
+          "display": "4,120"
+        },
+        {
+          "label": "Converted to paid",
+          "value": 2480,
+          "display": "2,480"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"progress\"><span class=\"mod-fam\">charts</span><h2>progress</h2><p>Stack of labeled linear progress/meter bars (completion, budget, quota, capacity) with optional status tone per row.</p></div>"
+    },
+    {
+      "type": "progress",
+      "title": "progress",
+      "items": [
+        {
+          "label": "Q2 ARR target",
+          "value": 2980,
+          "max": 3200,
+          "display": "$2.98M / $3.2M",
+          "tone": "success"
+        },
+        {
+          "label": "Onboarding completion rate",
+          "value": 73,
+          "max": 100,
+          "suffix": "%",
+          "tone": "info"
+        },
+        {
+          "label": "Ingest capacity used",
+          "value": 81,
+          "max": 100,
+          "suffix": "%",
+          "tone": "warning"
+        },
+        {
+          "label": "Error budget remaining",
+          "value": 38,
+          "max": 100,
+          "suffix": "%",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"chart-bullet\"><span class=\"mod-fam\">charts</span><h2>chart-bullet</h2><p>Goal-vs-actual bullet bars (Stephen Few): value bar over a track with a target tick and optional qualitative bands.</p></div>"
+    },
+    {
+      "type": "bullet",
+      "title": "chart-bullet",
+      "rows": [
+        {
+          "label": "New MRR",
+          "value": 248,
+          "target": 260,
+          "max": 300,
+          "bands": [
+            180,
+            240
+          ],
+          "valueText": "$248k"
+        },
+        {
+          "label": "Expansion MRR",
+          "value": 92,
+          "target": 80,
+          "max": 120,
+          "bands": [
+            50,
+            75
+          ],
+          "valueText": "$92k"
+        },
+        {
+          "label": "Trial-to-paid %",
+          "value": 13.5,
+          "target": 15,
+          "max": 20,
+          "bands": [
+            10,
+            14
+          ],
+          "valueText": "13.5%"
+        },
+        {
+          "label": "Avg dashboards / account",
+          "value": 9.2,
+          "target": 8,
+          "max": 12,
+          "bands": [
+            5,
+            8
+          ],
+          "valueText": "9.2"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"heatmap\"><span class=\"mod-fam\">charts</span><h2>heatmap</h2><p>Value-shaded matrix heatmap (a real labeled table) for cohort/activity/correlation/risk grids; intensity = accent color-mix.</p></div>"
+    },
+    {
+      "type": "heatmap",
+      "title": "heatmap",
+      "xLabels": [
+        "00",
+        "04",
+        "08",
+        "12",
+        "16",
+        "20"
+      ],
+      "yLabels": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "rows": [
+        [
+          18,
+          12,
+          64,
+          92,
+          88,
+          41
+        ],
+        [
+          21,
+          14,
+          71,
+          96,
+          90,
+          44
+        ],
+        [
+          19,
+          13,
+          69,
+          94,
+          91,
+          46
+        ],
+        [
+          22,
+          15,
+          73,
+          98,
+          95,
+          49
+        ],
+        [
+          25,
+          17,
+          78,
+          89,
+          82,
+          58
+        ],
+        [
+          12,
+          9,
+          34,
+          47,
+          52,
+          61
+        ],
+        [
+          8,
+          6,
+          22,
+          31,
+          38,
+          44
+        ]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"cal-heatmap\"><span class=\"mod-fam\">charts</span><h2>cal-heatmap</h2><p>GitHub-style contribution calendar: week columns x weekday rows, day cells tinted by a 0-4 intensity bucket with Less/More legend.</p></div>"
+    },
+    {
+      "type": "calendar",
+      "title": "cal-heatmap",
+      "legend": true,
+      "weeks": [
+        [
+          {
+            "value": 12,
+            "bucket": 1
+          },
+          {
+            "value": 41,
+            "bucket": 3
+          },
+          {
+            "value": 38,
+            "bucket": 3
+          },
+          {
+            "value": 52,
+            "bucket": 4
+          },
+          {
+            "value": 49,
+            "bucket": 4
+          },
+          {
+            "value": 18,
+            "bucket": 2
+          },
+          {
+            "value": 4,
+            "bucket": 0
+          }
+        ],
+        [
+          {
+            "value": 9,
+            "bucket": 1
+          },
+          {
+            "value": 33,
+            "bucket": 2
+          },
+          {
+            "value": 44,
+            "bucket": 3
+          },
+          {
+            "value": 47,
+            "bucket": 4
+          },
+          {
+            "value": 51,
+            "bucket": 4
+          },
+          {
+            "value": 22,
+            "bucket": 2
+          },
+          {
+            "value": 6,
+            "bucket": 1
+          }
+        ],
+        [
+          {
+            "value": 14,
+            "bucket": 1
+          },
+          {
+            "value": 28,
+            "bucket": 2
+          },
+          {
+            "value": 39,
+            "bucket": 3
+          },
+          {
+            "value": 55,
+            "bucket": 4
+          },
+          {
+            "value": 43,
+            "bucket": 3
+          },
+          {
+            "value": 16,
+            "bucket": 2
+          },
+          {
+            "value": 3,
+            "bucket": 0
+          }
+        ],
+        [
+          {
+            "value": 11,
+            "bucket": 1
+          },
+          {
+            "value": 36,
+            "bucket": 3
+          },
+          {
+            "value": 42,
+            "bucket": 3
+          },
+          {
+            "value": 48,
+            "bucket": 4
+          },
+          {
+            "value": 58,
+            "bucket": 4
+          },
+          {
+            "value": 25,
+            "bucket": 2
+          },
+          {
+            "value": 7,
+            "bucket": 1
+          }
+        ],
+        [
+          {
+            "value": 8,
+            "bucket": 1
+          },
+          {
+            "value": 31,
+            "bucket": 2
+          },
+          {
+            "value": 37,
+            "bucket": 3
+          },
+          {
+            "value": 50,
+            "bucket": 4
+          },
+          {
+            "value": 46,
+            "bucket": 4
+          },
+          {
+            "value": 19,
+            "bucket": 2
+          },
+          {
+            "value": 5,
+            "bucket": 0
+          }
+        ]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"fam-divider\" data-fam=\"diagrams\"><span class=\"fd-eyebrow\">diagrams</span><h2 class=\"fd-name\">diagrams</h2><span class=\"fd-count\">10 modules · structure, relationships, processes, screens</span></div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"flow-diagram\"><span class=\"mod-fam\">diagrams</span><h2>flow-diagram</h2><p>SVG flowchart with draggable nodes (Start/Process/Decision shapes) and auto-routed orthogonal connectors with Yes/No labels.</p></div>"
+    },
+    {
+      "type": "diagram",
+      "layout": "vertical",
+      "title": "flow-diagram",
+      "nodes": [
+        {
+          "id": "ingest",
+          "label": "Metric ingest",
+          "sub": "OTLP collector"
+        },
+        {
+          "id": "eval",
+          "label": "Rule evaluation",
+          "sub": "threshold + anomaly"
+        },
+        {
+          "id": "dedupe",
+          "label": "Dedupe & group",
+          "sub": "fingerprint window"
+        },
+        {
+          "id": "route",
+          "label": "Route to on-call",
+          "sub": "escalation policy"
+        },
+        {
+          "id": "notify",
+          "label": "Notify",
+          "sub": "push / SMS / Slack"
+        }
+      ],
+      "edges": [
+        {
+          "from": "ingest",
+          "to": "eval",
+          "label": "15s scrape"
+        },
+        {
+          "from": "eval",
+          "to": "dedupe",
+          "label": "breach"
+        },
+        {
+          "from": "dedupe",
+          "to": "route",
+          "label": "new incident"
+        },
+        {
+          "from": "route",
+          "to": "notify",
+          "label": "page"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"arch-diagram\"><span class=\"mod-fam\">diagrams</span><h2>arch-diagram</h2><p>Layered system architecture diagram: services in dashed zones (Frontend/Backend/Data/External) with draggable nodes, protocol edges, zoom/pan.</p></div>"
+    },
+    {
+      "type": "diagram",
+      "layout": "layered",
+      "title": "arch-diagram",
+      "zones": [
+        "Edge",
+        "Services",
+        "Data"
+      ],
+      "groupLabels": {
+        "1": "Edge",
+        "2": "Services",
+        "3": "Data"
+      },
+      "nodes": [
+        {
+          "id": "cdn",
+          "label": "Edge CDN",
+          "sub": "TLS + WAF",
+          "zone": "Edge",
+          "group": 1
+        },
+        {
+          "id": "gw",
+          "label": "API Gateway",
+          "sub": "rate limit",
+          "zone": "Edge",
+          "group": 1
+        },
+        {
+          "id": "ingest",
+          "label": "Ingest API",
+          "sub": "gRPC",
+          "zone": "Services",
+          "group": 2
+        },
+        {
+          "id": "alerting",
+          "label": "Alerting",
+          "sub": "rule engine",
+          "zone": "Services",
+          "group": 2
+        },
+        {
+          "id": "oncall",
+          "label": "On-call",
+          "sub": "escalation",
+          "zone": "Services",
+          "group": 2
+        },
+        {
+          "id": "tsdb",
+          "label": "TSDB",
+          "sub": "metrics store",
+          "zone": "Data",
+          "group": 3
+        },
+        {
+          "id": "pg",
+          "label": "Postgres",
+          "sub": "incidents",
+          "zone": "Data",
+          "group": 3
+        },
+        {
+          "id": "kafka",
+          "label": "Kafka",
+          "sub": "event bus",
+          "zone": "Data",
+          "group": 3
+        }
+      ],
+      "edges": [
+        {
+          "from": "cdn",
+          "to": "gw",
+          "proto": "HTTP"
+        },
+        {
+          "from": "gw",
+          "to": "ingest",
+          "proto": "gRPC"
+        },
+        {
+          "from": "ingest",
+          "to": "tsdb",
+          "proto": "HTTP"
+        },
+        {
+          "from": "ingest",
+          "to": "kafka",
+          "proto": "pub-sub"
+        },
+        {
+          "from": "alerting",
+          "to": "kafka",
+          "proto": "pub-sub"
+        },
+        {
+          "from": "alerting",
+          "to": "oncall",
+          "proto": "gRPC"
+        },
+        {
+          "from": "oncall",
+          "to": "pg",
+          "proto": "HTTP"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"erd\"><span class=\"mod-fam\">diagrams</span><h2>erd</h2><p>Entity-relationship diagram: table cards with PK/FK chips and typed columns, linked by 1:1/1:N/N:M cardinality connectors.</p></div>"
+    },
+    {
+      "type": "html",
+      "cssModules": [
+        "erd"
+      ],
+      "navTitle": "Entity relationship diagram",
+      "html": "<section class=\"erd stack\" aria-label=\"Entity relationship diagram\">\n  <h2>erd</h2>\n  <p class=\"muted small\">Pulseboard data model. A monitored service raises many incidents; each incident is opened by an alert rule and assigned to an on-call engineer. Services and engineers connect many-to-many through on-call rotations.</p>\n  <div class=\"erd-stage\" data-zoompan data-zoom-min=\"0.5\" data-zoom-max=\"2.4\" tabindex=\"0\">\n    <div class=\"zoom-controls no-print\">\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-in aria-label=\"Zoom in\">+</button>\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-out aria-label=\"Zoom out\">&minus;</button>\n      <button class=\"btn btn-ghost btn-sm\" data-zoom-reset aria-label=\"Reset zoom\">&#x2922;</button>\n      <span class=\"zoom-readout\" data-zoom-readout>100%</span>\n    </div>\n    <svg viewBox=\"0 0 800 470\" data-draggable role=\"img\" aria-label=\"Entity relationship diagram of the Pulseboard observability schema (drag entities to rearrange)\">\n      <defs>\n        <marker id=\"erd-arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\">\n          <path d=\"M0,0 L10,5 L0,10 z\" fill=\"var(--text-muted)\"/>\n        </marker>\n      </defs>\n      <g data-viewport>\n        <line class=\"erd-link\" data-edge data-from=\"services\" data-to=\"incidents\" marker-end=\"url(#erd-arrow)\"/>\n        <text class=\"erd-link-label\" data-edge-label=\"services-incidents\">1:N</text>\n        <line class=\"erd-link nm\" data-edge data-from=\"incidents\" data-to=\"engineers\" marker-end=\"url(#erd-arrow)\" marker-start=\"url(#erd-arrow)\"/>\n        <text class=\"erd-link-label\" data-edge-label=\"incidents-engineers\">N:M</text>\n      <g class=\"erd-node\" data-node=\"services\" transform=\"translate(40,50)\" role=\"group\" aria-label=\"services entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"236\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"236\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">services</header>\n            <ul class=\"erd-rows\">\n              <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">name</span><span class=\"erd-type\">varchar(120)</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">environment</span><span class=\"erd-type\">enum</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">slo_target</span><span class=\"erd-type\">numeric(5,3)</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">created_at</span><span class=\"erd-type\">timestamptz</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      <g class=\"erd-node\" data-node=\"incidents\" transform=\"translate(520,40)\" role=\"group\" aria-label=\"incidents entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"274\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"274\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">incidents</header>\n            <ul class=\"erd-rows\">\n              <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">service_id</span><span class=\"chip fk\">FK</span><span class=\"erd-type\">uuid</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">severity</span><span class=\"erd-type\">enum</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">status</span><span class=\"erd-type\">enum</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">acked_at</span><span class=\"erd-type\">timestamptz</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">resolved_at</span><span class=\"erd-type\">timestamptz</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      <g class=\"erd-node\" data-node=\"engineers\" transform=\"translate(280,210)\" role=\"group\" aria-label=\"engineers entity (draggable)\">\n        <rect class=\"erd-hit\" x=\"0\" y=\"0\" width=\"240\" height=\"236\" rx=\"12\"/>\n        <foreignObject x=\"0\" y=\"0\" width=\"240\" height=\"236\">\n          <article class=\"erd-entity card-outlined\" xmlns=\"http://www.w3.org/1999/xhtml\">\n            <header class=\"erd-head\">engineers</header>\n            <ul class=\"erd-rows\">\n              <li class=\"erd-row\"><span class=\"erd-col\">id</span><span class=\"chip pk\">PK</span><span class=\"erd-type\">uuid</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">email</span><span class=\"erd-type\">varchar(255)</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">full_name</span><span class=\"erd-type\">varchar(120)</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">team</span><span class=\"erd-type\">varchar(80)</span></li>\n              <li class=\"erd-row\"><span class=\"erd-col\">on_call</span><span class=\"erd-type\">boolean</span></li>\n            </ul>\n          </article>\n        </foreignObject>\n      </g>\n      </g>\n    </svg>\n  </div>\n  <div class=\"cluster no-print\">\n    <button class=\"btn btn-ghost btn-sm\" data-drag-reset>Reset layout</button>\n  </div>\n  <div class=\"cluster erd-legend\" aria-label=\"Cardinality legend\">\n    <span><span class=\"chip\">1:1</span> One-to-one</span>\n    <span><span class=\"chip\">1:N</span> One-to-many</span>\n    <span><span class=\"chip\">N:M</span> Many-to-many (dashed)</span>\n  </div>\n</section>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"node-graph\"><span class=\"mod-fam\">diagrams</span><h2>node-graph</h2><p>Interactive node-edge network graph: group-tinted nodes, auto-tracking edges, zoom/pan, and a cross-filter legend that dims by group.</p></div>"
+    },
+    {
+      "type": "diagram",
+      "layout": "grid",
+      "title": "node-graph",
+      "groupLabels": {
+        "1": "Edge",
+        "2": "Core",
+        "3": "Async workers"
+      },
+      "nodes": [
+        {
+          "id": "web",
+          "label": "Web app",
+          "sub": "Next.js",
+          "group": 1
+        },
+        {
+          "id": "gw",
+          "label": "Gateway",
+          "sub": "Envoy",
+          "group": 1
+        },
+        {
+          "id": "ingest",
+          "label": "Ingest",
+          "sub": "Go",
+          "group": 2
+        },
+        {
+          "id": "alert",
+          "label": "Alerting",
+          "sub": "Rust",
+          "group": 2
+        },
+        {
+          "id": "oncall",
+          "label": "On-call",
+          "sub": "Elixir",
+          "group": 2
+        },
+        {
+          "id": "notifier",
+          "label": "Notifier",
+          "sub": "worker",
+          "group": 3
+        },
+        {
+          "id": "rollup",
+          "label": "Rollup",
+          "sub": "worker",
+          "group": 3
+        }
+      ],
+      "edges": [
+        {
+          "from": "web",
+          "to": "gw",
+          "label": "REST"
+        },
+        {
+          "from": "gw",
+          "to": "ingest",
+          "label": "gRPC"
+        },
+        {
+          "from": "gw",
+          "to": "alert",
+          "label": "gRPC"
+        },
+        {
+          "from": "alert",
+          "to": "oncall",
+          "label": "event"
+        },
+        {
+          "from": "oncall",
+          "to": "notifier",
+          "label": "queue"
+        },
+        {
+          "from": "ingest",
+          "to": "rollup",
+          "label": "stream"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"mindmap\"><span class=\"mod-fam\">diagrams</span><h2>mindmap</h2><p>Radial mindmap: a central root with colored branches fanning out to child leaves; drag + zoom/pan.</p></div>"
+    },
+    {
+      "type": "diagram",
+      "layout": "radial",
+      "title": "mindmap",
+      "nodes": [
+        {
+          "id": "root",
+          "label": "Pulseboard",
+          "root": true
+        },
+        {
+          "id": "monitor",
+          "label": "Monitoring",
+          "sub": "metrics + logs",
+          "group": 1
+        },
+        {
+          "id": "alert",
+          "label": "Alerting",
+          "sub": "rules + AI",
+          "group": 2
+        },
+        {
+          "id": "oncall",
+          "label": "On-call",
+          "sub": "rotations",
+          "group": 3
+        },
+        {
+          "id": "incident",
+          "label": "Incidents",
+          "sub": "war rooms",
+          "group": 4
+        },
+        {
+          "id": "postmortem",
+          "label": "Postmortems",
+          "sub": "templates",
+          "group": 5
+        },
+        {
+          "id": "status",
+          "label": "Status pages",
+          "sub": "public",
+          "group": 1
+        }
+      ],
+      "edges": [
+        {
+          "from": "root",
+          "to": "monitor"
+        },
+        {
+          "from": "root",
+          "to": "alert"
+        },
+        {
+          "from": "root",
+          "to": "oncall"
+        },
+        {
+          "from": "root",
+          "to": "incident"
+        },
+        {
+          "from": "root",
+          "to": "postmortem"
+        },
+        {
+          "from": "root",
+          "to": "status"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"timeline\"><span class=\"mod-fam\">diagrams</span><h2>timeline</h2><p>Vertical chronological milestone timeline (pure CSS): dated events on a left rail with done/active/todo status dots.</p></div>"
+    },
+    {
+      "type": "timeline",
+      "label": "timeline",
+      "title": "timeline",
+      "events": [
+        {
+          "date": "14:02 UTC",
+          "title": "Anomaly detected",
+          "body": "Anomaly detector flags p99 latency spike on Checkout API.",
+          "status": "done"
+        },
+        {
+          "date": "14:03 UTC",
+          "title": "Incident opened",
+          "body": "SEV-1 auto-created; primary on-call paged via push + SMS.",
+          "status": "done"
+        },
+        {
+          "date": "14:09 UTC",
+          "title": "Acknowledged",
+          "body": "On-call engineer ACKs and starts the incident war room.",
+          "status": "done"
+        },
+        {
+          "date": "14:21 UTC",
+          "title": "Mitigated",
+          "body": "Bad deploy rolled back; error rate returns to baseline.",
+          "status": "active"
+        },
+        {
+          "date": "15:30 UTC",
+          "title": "Postmortem due",
+          "body": "Blameless review scheduled; action items tracked to closure.",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"stepper\"><span class=\"mod-fam\">diagrams</span><h2>stepper</h2><p>Numbered vertical stepper: ordered steps with an event tag, a mechanism (inline code), level coloring, and pass/block/advisory branch chips.</p></div>"
+    },
+    {
+      "type": "stepper",
+      "title": "stepper",
+      "desc": "How an unacknowledged SEV-1 escalates through the on-call chain.",
+      "steps": [
+        {
+          "n": 1,
+          "title": "Detect & open incident",
+          "desc": "Rule engine breaches threshold and opens a SEV-1.",
+          "event": "alert.fired",
+          "fn": "evaluateRule()",
+          "level": "critical",
+          "branches": [
+            {
+              "label": "Page primary",
+              "desc": "Push + SMS within 5s",
+              "kind": "go"
+            },
+            {
+              "label": "Duplicate",
+              "desc": "Grouped into open incident",
+              "kind": "warn"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "title": "Wait for ACK",
+          "desc": "Primary on-call has 5 minutes to acknowledge.",
+          "event": "incident.routed",
+          "fn": "awaitAck(300)",
+          "level": "block",
+          "branches": [
+            {
+              "label": "Acknowledged",
+              "desc": "Timer stops, war room opens",
+              "kind": "go"
+            },
+            {
+              "label": "No ACK",
+              "desc": "Escalate to secondary",
+              "kind": "stop"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "title": "Escalate to secondary",
+          "desc": "Secondary on-call is paged after timeout.",
+          "event": "escalation.tier2",
+          "fn": "escalate(2)",
+          "level": "soft",
+          "branches": [
+            {
+              "label": "Secondary ACKs",
+              "desc": "Joins the incident",
+              "kind": "go"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "title": "Notify incident commander",
+          "desc": "IC is looped in for coordination and comms.",
+          "event": "escalation.ic",
+          "fn": "pageIC()",
+          "level": "info",
+          "branches": [
+            {
+              "label": "Comms started",
+              "desc": "Status page updated",
+              "kind": "go"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"mockup-frame\"><span class=\"mod-fam\">diagrams</span><h2>mockup-frame</h2><p>Hi-fi single phone mockup with a live screen switcher: notch, status bar, app bar, scrollable rows, bottom tab bar, tap-to-swap screens.</p></div>"
+    },
+    {
+      "type": "device",
+      "title": "mockup-frame",
+      "appTitle": "Pulseboard On-Call",
+      "eyebrow": "Mobile app",
+      "desc": "The on-call companion app: triage and acknowledge incidents from your phone.",
+      "icon": "◎",
+      "statusBar": "14:03",
+      "badge": "SEV-1",
+      "notes": [
+        "Swipe to acknowledge or snooze a page",
+        "One-tap join into the incident war room",
+        "Live error-rate sparkline per service"
+      ],
+      "cta": "Acknowledge",
+      "input": "Add a note to the incident…",
+      "html": "<div class=\"stack\" style=\"padding:var(--sp-3); gap:var(--sp-3)\">\n  <article class=\"card-outlined\" style=\"padding:var(--sp-3)\">\n    <p class=\"eyebrow\" style=\"color:var(--color-danger)\">SEV-1 · ACTIVE</p>\n    <h3 style=\"margin:var(--sp-1) 0\">Checkout API latency</h3>\n    <p class=\"small muted\">p99 = 1,840 ms · threshold 500 ms · 6 min ago</p>\n  </article>\n  <article class=\"card-outlined\" style=\"padding:var(--sp-3)\">\n    <p class=\"small muted\">Affected service</p>\n    <p style=\"margin:var(--sp-1) 0; font-weight:600\">checkout-api · prod</p>\n    <p class=\"small muted\">Error rate 4.2% &uarr; · 3 alerts grouped</p>\n  </article>\n  <article class=\"card-outlined\" style=\"padding:var(--sp-3)\">\n    <p class=\"small muted\">On-call now</p>\n    <p style=\"margin:var(--sp-1) 0; font-weight:600\">Priya Nair · Platform</p>\n    <p class=\"small muted\">Escalates to secondary in 4:12</p>\n  </article>\n</div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"screen-flow\"><span class=\"mod-fam\">diagrams</span><h2>screen-flow</h2><p>Static whole-app screen-flow map: lo-fi phone screens side by side, joined by labeled transition arrows, each captioned with name + reason.</p></div>"
+    },
+    {
+      "type": "screenflow",
+      "title": "screen-flow",
+      "desc": "The on-call incident-response journey, from page to postmortem.",
+      "screens": [
+        {
+          "name": "Page",
+          "appbar": "Pulseboard",
+          "caption": "A SEV-1 page lands on the on-call engineer's phone. They triage and acknowledge.",
+          "elements": [
+            {
+              "t": "heading",
+              "label": "SEV-1 · Checkout API"
+            },
+            {
+              "t": "text",
+              "label": "p99 latency 1,840 ms · 6 min ago"
+            },
+            {
+              "t": "card",
+              "label": "Affected: checkout-api (prod)",
+              "lines": 2
+            },
+            {
+              "t": "button",
+              "label": "Acknowledge",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "name": "War room",
+          "appbar": "Incident #4821",
+          "tabbar": [
+            "Timeline",
+            "Graphs",
+            "Runbook"
+          ],
+          "activeTab": 0,
+          "caption": "The incident war room opens with a live timeline, metrics, and the linked runbook.",
+          "elements": [
+            {
+              "t": "search",
+              "label": "Search runbooks…"
+            },
+            {
+              "t": "list",
+              "items": [
+                "Auto-rollback triggered",
+                "Secondary on-call paged",
+                "Error rate recovering"
+              ]
+            },
+            {
+              "t": "button",
+              "label": "Resolve incident",
+              "variant": "primary"
+            }
+          ]
+        },
+        {
+          "name": "Postmortem",
+          "appbar": "Postmortem",
+          "caption": "After resolution, a blameless postmortem is drafted from the captured timeline.",
+          "elements": [
+            {
+              "t": "heading",
+              "label": "Blameless review"
+            },
+            {
+              "t": "input",
+              "label": "Root cause summary"
+            },
+            {
+              "t": "chips",
+              "items": [
+                "Bad deploy",
+                "Missing canary",
+                "Action: add gate"
+              ]
+            },
+            {
+              "t": "button",
+              "label": "Publish report",
+              "variant": "primary"
+            }
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "label": "acknowledged"
+        },
+        {
+          "label": "resolved"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"wireframe-block\"><span class=\"mod-fam\">diagrams</span><h2>wireframe-block</h2><p>Drag-editable lo-fi wireframe screen-flow editor with palette, multi-page canvas, auto-linked arrows, and runtime theme/skin switching.</p></div>"
+    },
+    {
+      "type": "html",
+      "cssModules": [
+        "wireframe-block"
+      ],
+      "navTitle": "Screen flow wireframe",
+      "html": "<h2 style=\"margin-bottom:var(--sp-3)\">wireframe-block</h2>\n<div class=\"wf-controls no-print\">\n  <button class=\"btn btn-ghost btn-sm wf-tool\" type=\"button\" data-reorder-reset>↺ Reset</button>\n  <button class=\"btn btn-ghost btn-sm wf-tool\" type=\"button\" data-reorder-export>⧉ Copy layout JSON</button>\n  <label class=\"wf-pick\"><span class=\"wf-pick-label\">Theme</span>\n    <select class=\"wf-select-ctl\" data-theme-pick aria-label=\"Select theme\">\n      <option value=\"slate\">Slate</option>\n      <option value=\"minimal\">Minimal</option>\n      <option value=\"forest\">Forest</option>\n      <option value=\"midnight\">Midnight</option>\n    </select>\n  </label>\n  <label class=\"wf-pick\"><span class=\"wf-pick-label\">Design</span>\n    <select class=\"wf-select-ctl\" data-wf-skin-pick aria-label=\"Select the wireframe design\">\n      <option value=\"sketch\">Sketch</option>\n      <option value=\"clean\">Clean</option>\n      <option value=\"blueprint\">Blueprint</option>\n      <option value=\"mono\">Mono</option>\n    </select>\n  </label>\n  <button class=\"btn btn-ghost btn-sm\" type=\"button\" data-wf-add-page>+ Add page</button>\n  <div class=\"wf-palette\" data-wf-palette role=\"toolbar\" aria-label=\"UI elements (click to add, drag to place)\">\n    <span class=\"wf-pal-group\">Content</span>\n    <button class=\"wf-add-btn\" type=\"button\" data-wf-add=\"heading\">Heading</button>\n    <button class=\"wf-add-btn\" type=\"button\" data-wf-add=\"text\">Text</button>\n    <button class=\"wf-add-btn\" type=\"button\" data-wf-add=\"input\">Input</button>\n    <button class=\"wf-add-btn\" type=\"button\" data-wf-add=\"button\">Button</button>\n    <span class=\"wf-hint\" data-wf-target-readout></span>\n  </div>\n  <span class=\"wf-hint\">Click a palette item to add it to the active page, or drag it to any position. Drag pages or use arrow keys to reorder; adjacent pages auto-connect.</span>\n</div>\n<div class=\"sr-only\" data-reorder-live aria-live=\"polite\" aria-atomic=\"true\"></div>\n\n<div class=\"wf-flow\" data-wf-flow>\n  <svg class=\"wf-filter-defs\" width=\"0\" height=\"0\" aria-hidden=\"true\" focusable=\"false\" style=\"position:absolute;width:0;height:0;overflow:hidden\">\n    <defs>\n      <filter id=\"wf-roughpaper\">\n        <feTurbulence type=\"fractalNoise\" baseFrequency=\"0.012\" numOctaves=\"2\" seed=\"7\" result=\"wf-noise\"/>\n        <feDisplacementMap in=\"SourceGraphic\" in2=\"wf-noise\" scale=\"1.8\" xChannelSelector=\"R\" yChannelSelector=\"G\"/>\n      </filter>\n    </defs>\n  </svg>\n  <div class=\"wf-flow-track\" data-wf-flow-track data-reorder data-reorder-scope=\"pages\" data-reorder-mode=\"insert\" data-reorder-noun=\"page\" role=\"group\" aria-label=\"Screen flow (reorder pages by dragging or arrow keys; adjacent pages are connected by arrows)\">\n\n    <svg class=\"wf-arrows\" aria-hidden=\"true\" width=\"0\" height=\"0\">\n      <defs><marker id=\"wf-ah\" viewBox=\"0 0 10 10\" refX=\"8.5\" refY=\"5\" markerWidth=\"9\" markerHeight=\"9\" orient=\"auto\">\n        <path class=\"wf-arrowhead\" d=\"M0 0 L10 5 L0 10 z\"/></marker></defs>\n      <g class=\"wf-arrow-layer\"></g>\n    </svg>\n\n    <div class=\"wf-page wf-sketch\" data-reorder-item data-wf-page data-rid=\"page-1\" data-rest-rot=\"0\">\n      <div class=\"wf-page-head\">\n        <span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span>\n        <span class=\"wf-dots\" aria-hidden=\"true\"></span>\n        <span class=\"wf-page-title\" data-wf-editable>Alert received</span>\n        <button class=\"wf-page-del\" type=\"button\" data-wf-del-page aria-label=\"Delete this page\">✕</button>\n      </div>\n      <div class=\"wf-page-body wf-card-body\" data-reorder data-reorder-scope=\"elements\" data-reorder-mode=\"insert\" data-reorder-noun=\"element\" data-reorder-cross=\"el\" data-wf-board tabindex=\"-1\">\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"heading\" data-rid=\"el-1\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>SEV-1 ALERT</span></div>\n          <div class=\"wf-line -head\"></div>\n        </div>\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"text\" data-rid=\"el-2\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>CHECKOUT API · p99 LATENCY</span></div>\n          <div class=\"wf-line -w90\"></div>\n          <div class=\"wf-line -w75\"></div>\n        </div>\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"button\" data-rid=\"el-3\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>BUTTON</span></div>\n          <span class=\"wf-btn\" data-wf-editable>Acknowledge</span>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"wf-page wf-sketch\" data-reorder-item data-wf-page data-rid=\"page-2\" data-rest-rot=\"0\">\n      <div class=\"wf-page-head\">\n        <span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span>\n        <span class=\"wf-dots\" aria-hidden=\"true\"></span>\n        <span class=\"wf-page-title\" data-wf-editable>Incident room</span>\n        <button class=\"wf-page-del\" type=\"button\" data-wf-del-page aria-label=\"Delete this page\">✕</button>\n      </div>\n      <div class=\"wf-page-body wf-card-body\" data-reorder data-reorder-scope=\"elements\" data-reorder-mode=\"insert\" data-reorder-noun=\"element\" data-reorder-cross=\"el\" data-wf-board tabindex=\"-1\">\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"search\" data-rid=\"el-4\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>SEARCH</span></div>\n          <div class=\"wf-search\"><span class=\"wf-search-ic\"></span><span class=\"wf-search-ph\" data-wf-editable>Search runbooks…</span></div>\n        </div>\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"list\" data-rid=\"el-5\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>TIMELINE</span></div>\n          <div class=\"wf-listrow\"><span class=\"wf-bullet\"></span><span class=\"wf-list-label\" data-wf-editable>Auto-rollback triggered</span></div>\n          <div class=\"wf-listrow\"><span class=\"wf-bullet\"></span><span class=\"wf-list-label\" data-wf-editable>Paged secondary on-call</span></div>\n          <div class=\"wf-listrow\"><span class=\"wf-bullet\"></span><span class=\"wf-list-label\" data-wf-editable>Error rate recovering</span></div>\n        </div>\n        <div class=\"wf-card-el wf-sketch\" data-reorder-item data-wf-el data-el-type=\"button\" data-rid=\"el-6\">\n          <div class=\"wf-el-head\"><span class=\"wf-handle\" data-reorder-handle aria-hidden=\"true\"></span><span class=\"wf-label\" data-wf-editable>BUTTON</span></div>\n          <span class=\"wf-btn\" data-wf-editable>Resolve incident</span>\n        </div>\n      </div>\n    </div>\n\n  </div>\n</div>\n<pre class=\"wf-sink no-print\" data-reorder-sink hidden></pre>\n<p class=\"small muted\" style=\"margin-top:var(--sp-4)\">A hand-drawn, low-fi incident-response screen flow: two pages connected by an auto-routed arrow. Reorder pages by dragging or with arrow keys, add elements from the palette, and edit any label or page title in place. Switch the look with Theme and Design.</p>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"fam-divider\" data-fam=\"interactive\"><span class=\"fd-eyebrow\">interactive</span><h2 class=\"fd-name\">interactive</h2><span class=\"fd-count\">6 modules · operable widgets driven by interactions.js</span></div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"data-table\"><span class=\"mod-fam\">interactive</span><h2>data-table</h2><p>Sortable, live-filterable, paginated data table with row selection; click headers to sort, search box filters rows.</p></div>"
+    },
+    {
+      "type": "table",
+      "title": "data-table",
+      "label": "Customer accounts",
+      "paginate": 6,
+      "select": true,
+      "placeholder": "Filter accounts…",
+      "columns": [
+        "Account",
+        "Plan",
+        "MRR",
+        "Seats",
+        "Health",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Northwind Retail",
+          "Enterprise",
+          "$8,400",
+          "240",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Helios Robotics",
+          "Growth",
+          "$3,150",
+          "78",
+          {
+            "badge": "warning",
+            "text": "At risk"
+          },
+          "Active"
+        ],
+        [
+          "Marble Studios",
+          "Growth",
+          "$2,900",
+          "64",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Brightwave Media",
+          "Enterprise",
+          "$11,200",
+          "310",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Fenwick Labs",
+          "Starter",
+          "$490",
+          "12",
+          {
+            "badge": "danger",
+            "text": "Churning"
+          },
+          "Trial"
+        ],
+        [
+          "Cobalt Freight",
+          "Growth",
+          "$4,050",
+          "96",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Aster Health",
+          "Enterprise",
+          "$9,750",
+          "275",
+          {
+            "badge": "warning",
+            "text": "At risk"
+          },
+          "Active"
+        ],
+        [
+          "Quill & Co",
+          "Starter",
+          "$290",
+          "8",
+          {
+            "badge": "info",
+            "text": "Onboarding"
+          },
+          "Trial"
+        ],
+        [
+          "Vela Logistics",
+          "Growth",
+          "$3,600",
+          "84",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Drift Commerce",
+          "Enterprise",
+          "$14,600",
+          "402",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ],
+        [
+          "Pinecrest Foods",
+          "Starter",
+          "$390",
+          "10",
+          {
+            "badge": "danger",
+            "text": "Churning"
+          },
+          "Trial"
+        ],
+        [
+          "Lumen Bank",
+          "Enterprise",
+          "$18,900",
+          "560",
+          {
+            "badge": "success",
+            "text": "Healthy"
+          },
+          "Active"
+        ]
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"tabs\"><span class=\"mod-fam\">interactive</span><h2>tabs</h2><p>Tab panel that shows one content section at a time via a tablist; click toggles active tab and visible panel.</p></div>"
+    },
+    {
+      "type": "tabs",
+      "title": "tabs",
+      "label": "Account detail tabs",
+      "tabs": [
+        {
+          "label": "Overview",
+          "body": "<div class=\"stack\"><p>Brightwave Media is a top-decile <strong>Enterprise</strong> account on the Pulse Analytics platform, generating <strong>$11,200 MRR</strong> across 310 seats. The account has been live for 19 months with a renewal date of 2026-09-01.</p><p class=\"small muted\">Primary contact: Renee Okafor · Customer Success Manager: Diego Alvarez</p></div>"
+        },
+        {
+          "label": "Usage",
+          "body": "<div class=\"stack\"><p>Weekly active seats are trending up: <strong>268 → 291</strong> over the last quarter (+8.6%). Event ingestion averages <strong>4.1M events/day</strong>, with dashboard views concentrated in the Marketing and Growth workspaces.</p><ul><li>Top dashboard: <code>Funnel — Signup to Activation</code></li><li>Most-used feature: cohort retention reports</li><li>API calls: 1.2M / month (28% of plan quota)</li></ul></div>"
+        },
+        {
+          "label": "Billing",
+          "body": "<div class=\"stack\"><p>On the annual Enterprise plan billed yearly. Next invoice <strong>$134,400</strong> issues 2026-09-01. No outstanding balance; payment method is ACH on file.</p><p class=\"small muted\">Add-ons: Data Warehouse Sync ($1,800/mo), Priority Support ($600/mo).</p></div>"
+        },
+        {
+          "label": "Notes",
+          "body": "<div class=\"stack\"><p>Expansion opportunity flagged: the data team requested a Snowflake reverse-ETL connector. Renewal call scheduled for 2026-07-22 to discuss a seat upsell to 400.</p></div>"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"collapsible\"><span class=\"mod-fam\">interactive</span><h2>collapsible</h2><p>FAQ / collapsible details list built on native &lt;details&gt;&lt;summary&gt; with zero JavaScript and an animated chevron.</p></div>"
+    },
+    {
+      "type": "collapsible",
+      "title": "collapsible",
+      "label": "Onboarding FAQ",
+      "items": [
+        {
+          "summary": "How do I install the Pulse tracking SDK?",
+          "body": "<p>Add the JavaScript snippet to your site's <code>&lt;head&gt;</code>, or install via npm with <code>npm i @pulse/analytics</code>. Initialize with your project's write key from <strong>Settings → API Keys</strong>. Events appear in the Live Stream within seconds.</p>",
+          "open": true
+        },
+        {
+          "summary": "What is the difference between an event and a property?",
+          "body": "<p>An <strong>event</strong> is something a user does (e.g. <code>Order Completed</code>). A <strong>property</strong> is metadata attached to that event (e.g. <code>revenue: 49.00</code>) or to the user profile (e.g. <code>plan: Enterprise</code>). Use properties to filter and break down your charts.</p>"
+        },
+        {
+          "summary": "How long is event data retained?",
+          "body": "<p>Starter retains 6 months, Growth retains 24 months, and Enterprise retains unlimited history. Raw event export to your warehouse is available on Growth and above.</p>"
+        },
+        {
+          "summary": "Can I import historical data?",
+          "body": "<p>Yes. Use the batch import API or upload a CSV under <strong>Data → Import</strong>. Timestamps in the past are accepted, so backfilled events land in the correct cohort.</p>"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"tree\"><span class=\"mod-fam\">interactive</span><h2>tree</h2><p>Collapsible hierarchy / file tree / outline: indented rows with rotating carets on branches, dots on leaves, and optional mono meta.</p></div>"
+    },
+    {
+      "type": "tree",
+      "title": "tree",
+      "navTitle": "Workspace structure",
+      "nodes": [
+        {
+          "label": "Pulse Analytics workspace",
+          "meta": "org",
+          "children": [
+            {
+              "label": "Product Analytics",
+              "meta": "project",
+              "badge": "Live",
+              "badgeTone": "success",
+              "children": [
+                {
+                  "label": "Activation funnel",
+                  "meta": "dashboard"
+                },
+                {
+                  "label": "Feature adoption",
+                  "meta": "dashboard"
+                },
+                {
+                  "label": "Retention cohorts",
+                  "meta": "report",
+                  "badge": "Scheduled",
+                  "badgeTone": "info"
+                }
+              ]
+            },
+            {
+              "label": "Marketing",
+              "meta": "project",
+              "badge": "Live",
+              "badgeTone": "success",
+              "children": [
+                {
+                  "label": "Campaign attribution",
+                  "meta": "dashboard"
+                },
+                {
+                  "label": "Landing page A/B",
+                  "meta": "experiment",
+                  "badge": "Running",
+                  "badgeTone": "warning"
+                }
+              ]
+            },
+            {
+              "label": "Revenue",
+              "meta": "project",
+              "children": [
+                {
+                  "label": "MRR movements",
+                  "meta": "dashboard"
+                },
+                {
+                  "label": "Churn early-warning",
+                  "meta": "model",
+                  "badge": "Beta",
+                  "badgeTone": "accent"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"slider-control\"><span class=\"mod-fam\">interactive</span><h2>slider-control</h2><p>Live CSS-variable tuner: a range input drives a CSS var, a preview reflects it, and a button copies the rule as CSS.</p></div>"
+    },
+    {
+      "type": "html",
+      "cssModules": [
+        "slider-control"
+      ],
+      "title": "slider-control",
+      "navTitle": "Chart corner radius tuner",
+      "html": "<figure class=\"slider-control card-outlined\">\n  <figcaption class=\"eyebrow\">Dashboard Theme · Card Radius</figcaption>\n\n  <div class=\"slider-row\">\n    <label for=\"slider-x\">Card corner radius</label>\n    <input type=\"range\" id=\"slider-x\"\n           min=\"0\" max=\"40\" value=\"16\" step=\"1\"\n           data-slider=\"--demo-x\" data-out=\"#xval\" data-unit=\"px\"\n           aria-label=\"Card corner radius\">\n    <output class=\"slider-out\" id=\"xval\" for=\"slider-x\">16px</output>\n  </div>\n\n  <div class=\"preview-stage\">\n    <div class=\"preview-box\" role=\"img\" aria-label=\"Live preview of dashboard card radius\"></div>\n  </div>\n\n  <div class=\"cluster\">\n    <button class=\"btn btn-ghost btn-sm\" data-copy-text=\".dashboard-card { border-radius: var(--demo-x); }\">Copy as CSS</button>\n  </div>\n</figure>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"kanban-board\"><span class=\"mod-fam\">interactive</span><h2>kanban-board</h2><p>Drag-and-drop kanban triage board: columns with header counts hold cards (title, tags, assignee) draggable between columns.</p></div>"
+    },
+    {
+      "type": "html",
+      "cssModules": [
+        "kanban-board"
+      ],
+      "title": "kanban-board",
+      "navTitle": "Engineering sprint board",
+      "html": "<section aria-label=\"Engineering sprint board\">\n  <div class=\"cluster\" style=\"justify-content: space-between; margin-bottom: var(--sp-4);\">\n    <h2>Sprint 41 · Data Platform</h2>\n    <span class=\"small muted\">9 tasks total · Drag cards between columns</span>\n  </div>\n  <div class=\"kanban\" data-kanban>\n    <div class=\"kanban-col\" data-col=\"To do\">\n      <header class=\"kanban-col-head\">\n        <span class=\"kanban-col-title\">To do</span>\n        <span class=\"badge\">3</span>\n      </header>\n      <div class=\"kanban-cards\">\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Add Snowflake reverse-ETL connector</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">warehouse</span>\n            <span class=\"chip\">8pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Priya Nair</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Cut p95 query latency on cohort reports</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">perf</span>\n            <span class=\"chip\">5pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Marcus Lee</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Mobile layout for the funnel builder</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">frontend</span>\n            <span class=\"chip\">8pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Unassigned</span>\n          </div>\n        </article>\n      </div>\n    </div>\n    <div class=\"kanban-col\" data-col=\"In progress\">\n      <header class=\"kanban-col-head\">\n        <span class=\"kanban-col-title\">In progress</span>\n        <span class=\"badge badge-info\">3</span>\n      </header>\n      <div class=\"kanban-cards\">\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Ship the churn early-warning model API</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">ml</span>\n            <span class=\"chip\">api</span>\n            <span class=\"chip\">8pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Dana Cole</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Real-time event ingestion backpressure fix</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">ingestion</span>\n            <span class=\"chip\">5pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Tomás Rivera</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">SOC 2 audit log retention controls</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">security</span>\n            <span class=\"chip\">3pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Hana Kim</span>\n          </div>\n        </article>\n      </div>\n    </div>\n    <div class=\"kanban-col\" data-col=\"Done\">\n      <header class=\"kanban-col-head\">\n        <span class=\"kanban-col-title\">Done</span>\n        <span class=\"badge badge-success\">3</span>\n      </header>\n      <div class=\"kanban-cards\">\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">CSV batch import for historical events</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">data</span>\n            <span class=\"chip\">5pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Marcus Lee</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Fix SSO login error handling for Okta</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">auth</span>\n            <span class=\"chip\">2pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Hana Kim</span>\n          </div>\n        </article>\n        <article class=\"kanban-card card-outlined\" tabindex=\"0\" aria-roledescription=\"Draggable card\">\n          <p class=\"kanban-card-title\">Cohort retention export to BigQuery</p>\n          <div class=\"cluster\" style=\"gap: var(--sp-1); margin-top: var(--sp-2);\">\n            <span class=\"chip\">warehouse</span>\n            <span class=\"chip\">3pt</span>\n          </div>\n          <div class=\"kanban-card-foot\">\n            <span class=\"small muted\">Assignee: Priya Nair</span>\n          </div>\n        </article>\n      </div>\n    </div>\n  </div>\n</section>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"fam-divider\" data-fam=\"document\"><span class=\"fd-eyebrow\">document</span><h2 class=\"fd-name\">document</h2><span class=\"fd-count\">7 modules · structural reading blocks for reports/specs/reviews</span></div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"callout-box\"><span class=\"mod-fam\">document</span><h2>callout-box</h2><p>Admonition box (glyph + title + body) in 4 tones: TL;DR, note, warning, success — for highlighting one key message.</p></div>"
+    },
+    {
+      "type": "callout",
+      "title": "callout-box",
+      "variant": "warning",
+      "body": "The event-ingestion pipeline is at 82% of its monthly write budget with 9 days left in the billing cycle. At the current 4.1M events/day rate it will exhaust the budget by June 24 — enable tiered sampling on the mobile SDK before then."
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"comparison-grid\"><span class=\"mod-fam\">document</span><h2>comparison-grid</h2><p>Side-by-side option cards with pros, cons, key metrics, and a CTA; the recommended option carries an accent badge.</p></div>"
+    },
+    {
+      "type": "comparison",
+      "title": "comparison-grid",
+      "label": "comparison-grid",
+      "options": [
+        {
+          "name": "ClickHouse (managed)",
+          "recommended": true,
+          "pros": [
+            "Sub-second p95 on 2B-row funnel queries",
+            "Native materialized views for rollups",
+            "Columnar storage at $0.021 / GB-month"
+          ],
+          "cons": [
+            "Steeper ops learning curve",
+            "JOIN ergonomics weaker than Postgres"
+          ],
+          "metrics": [
+            {
+              "k": "p95 query",
+              "v": "340ms"
+            },
+            {
+              "k": "Ingest rate",
+              "v": "1.2M rows/s"
+            },
+            {
+              "k": "Monthly cost",
+              "v": "$4,180"
+            }
+          ],
+          "cta": "Promote to primary"
+        },
+        {
+          "name": "BigQuery",
+          "pros": [
+            "Zero operational overhead",
+            "Seamless GA4 export integration"
+          ],
+          "cons": [
+            "On-demand pricing spikes on ad-hoc scans",
+            "Streaming inserts add per-row cost"
+          ],
+          "metrics": [
+            {
+              "k": "p95 query",
+              "v": "1.9s"
+            },
+            {
+              "k": "Ingest rate",
+              "v": "650k rows/s"
+            },
+            {
+              "k": "Monthly cost",
+              "v": "$6,740"
+            }
+          ],
+          "cta": "Keep as cold tier"
+        },
+        {
+          "name": "Snowflake",
+          "pros": [
+            "Strong governance and data sharing",
+            "Auto-suspend warehouses control idle cost"
+          ],
+          "cons": [
+            "Credit burn on continuous loading",
+            "Higher latency for real-time dashboards"
+          ],
+          "metrics": [
+            {
+              "k": "p95 query",
+              "v": "1.4s"
+            },
+            {
+              "k": "Ingest rate",
+              "v": "480k rows/s"
+            },
+            {
+              "k": "Monthly cost",
+              "v": "$7,920"
+            }
+          ],
+          "cta": "Evaluate next quarter"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"decision-matrix\"><span class=\"mod-fam\">document</span><h2>decision-matrix</h2><p>Weighted criteria x options scoring grid with per-cell rationale, weighted totals, a tinted winner column, and a closing verdict callout.</p></div>"
+    },
+    {
+      "type": "decision",
+      "title": "decision-matrix",
+      "desc": "Choosing the streaming layer that feeds the real-time funnel dashboards.",
+      "options": [
+        "Kafka + Flink",
+        "Kinesis + Lambda",
+        "Redpanda + Materialize"
+      ],
+      "scale": 5,
+      "criteria": [
+        {
+          "name": "Throughput headroom",
+          "weight": 3,
+          "scores": [
+            5,
+            3,
+            4
+          ],
+          "notes": [
+            "Sustains 1.2M msg/s with room to spare",
+            "Soft shard limits throttle at peak",
+            "Strong throughput, newer ecosystem"
+          ]
+        },
+        {
+          "name": "Exactly-once semantics",
+          "weight": 3,
+          "scores": [
+            5,
+            3,
+            4
+          ],
+          "notes": [
+            "Flink checkpoints give true exactly-once",
+            "At-least-once; dedup logic on us",
+            "Materialize handles consistency well"
+          ]
+        },
+        {
+          "name": "Operational burden",
+          "weight": 2,
+          "scores": [
+            2,
+            5,
+            3
+          ],
+          "notes": [
+            "Self-managed clusters need a platform team",
+            "Fully managed, near-zero ops",
+            "Lighter than Kafka, still self-hosted"
+          ]
+        },
+        {
+          "name": "Cost at scale",
+          "weight": 2,
+          "scores": [
+            4,
+            3,
+            4
+          ],
+          "notes": [
+            "Predictable once reserved",
+            "Per-invocation cost climbs with volume",
+            "Competitive at current volume"
+          ]
+        }
+      ],
+      "verdict": {
+        "pick": "Kafka + Flink",
+        "rationale": "Highest weighted total. Wins the two heaviest criteria (throughput and exactly-once) decisively; the operational burden is acceptable now that the platform team owns the cluster."
+      }
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"diff-block\"><span class=\"mod-fam\">document</span><h2>diff-block</h2><p>Annotated code-review diff hunk: file header with add/remove stat badges, a numbered &lt;pre&gt; of +/- lines, and a margin severity note.</p></div>"
+    },
+    {
+      "type": "html",
+      "title": "diff-block",
+      "html": "<figure class=\"diff-block\">\n  <figcaption class=\"diff-head\">\n    <span class=\"diff-file\">src/ingest/dedupe.ts</span>\n    <span class=\"diff-stats\">\n      <span class=\"badge badge-success\">+5</span>\n      <span class=\"badge badge-danger\">-2</span>\n    </span>\n  </figcaption>\n  <pre><code><span class=\"dl\"><span class=\"ln\">41</span><span class=\"code\">export function dedupeEvents(batch: Event[]): Event[] {</span></span>\n<span class=\"dl\"><span class=\"ln\">42</span><span class=\"code\">  const seen = new Set&lt;string&gt;();</span></span>\n<span class=\"dl diff-remove\"><span class=\"ln\">43</span><span class=\"code\">-  return batch.filter(e =&gt; !seen.has(e.id) &amp;&amp; seen.add(e.id));</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">43</span><span class=\"code\">+  return batch.filter(e =&gt; {</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">44</span><span class=\"code\">+    const key = `${e.id}:${e.dedupeWindow}`;</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">45</span><span class=\"code\">+    if (seen.has(key)) return false;</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">46</span><span class=\"code\">+    seen.add(key); return true;</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">47</span><span class=\"code\">+  });</span></span>\n<span class=\"dl\"><span class=\"ln\">48</span><span class=\"code\">}</span></span></code></pre>\n  <aside class=\"callout diff-note sev-high\">\n    <div>\n      <span class=\"callout-title\">High: dedupe key ignored the time window, dropping valid re-fires</span>\n      <div class=\"callout-body\" style=\"color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)\"><p>Keying only on <code>e.id</code> collapsed legitimate repeat events (e.g. a user adding the same product to cart twice in one session) into a single row, undercounting conversions by ~3%. Scoping the key to the per-event <code>dedupeWindow</code> keeps true duplicates out while preserving distinct re-fires. Please add a regression test for two identical ids in adjacent windows.</p></div>\n    </div>\n  </aside>\n</figure>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"stat-list\"><span class=\"mod-fam\">document</span><h2>stat-list</h2><p>Bordered key-&gt;value definition/spec sheet for one subject: term on the lead edge, mono value trailing, optional note and status badge.</p></div>"
+    },
+    {
+      "type": "statlist",
+      "title": "stat-list",
+      "navTitle": "Pipeline at a glance",
+      "columns": 2,
+      "items": [
+        {
+          "k": "Pipeline status",
+          "v": "Healthy",
+          "badge": "success"
+        },
+        {
+          "k": "Ingest lag (p99)",
+          "v": "1.4s"
+        },
+        {
+          "k": "Events / day",
+          "v": "4.1M"
+        },
+        {
+          "k": "Schema version",
+          "v": "v7.2.0"
+        },
+        {
+          "k": "Active connectors",
+          "v": "23"
+        },
+        {
+          "k": "DLQ depth",
+          "v": "Watch",
+          "badge": "warning",
+          "note": "612 messages queued for replay"
+        },
+        {
+          "k": "Warehouse",
+          "v": "ClickHouse 24.3"
+        },
+        {
+          "k": "On-call owner",
+          "v": "data-platform"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"activity-feed\"><span class=\"mod-fam\">document</span><h2>activity-feed</h2><p>Chronological activity/event stream: icon-marked rows with actor, action sentence, and timestamp, threaded by a connector line.</p></div>"
+    },
+    {
+      "type": "feed",
+      "title": "activity-feed",
+      "navTitle": "Recent pipeline activity",
+      "items": [
+        {
+          "icon": "merge",
+          "actor": "priya.nair",
+          "text": "merged #2841 — tiered sampling for mobile SDK",
+          "time": "12m ago",
+          "tone": "success"
+        },
+        {
+          "icon": "alert",
+          "actor": "alertmanager",
+          "text": "DLQ depth crossed 500 on the checkout-events topic",
+          "time": "48m ago",
+          "tone": "warning"
+        },
+        {
+          "icon": "commit",
+          "actor": "marcus.lee",
+          "text": "pushed schema migration v7.2.0 to staging",
+          "time": "2h ago"
+        },
+        {
+          "icon": "comment",
+          "actor": "dana.kim",
+          "text": "flagged a JOIN regression in the retention rollup view",
+          "time": "3h ago",
+          "tone": "info"
+        },
+        {
+          "icon": "add",
+          "actor": "system",
+          "text": "provisioned a new ClickHouse replica in eu-west-1",
+          "time": "5h ago"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"empty-state\"><span class=\"mod-fam\">document</span><h2>empty-state</h2><p>Centered dashed-slot placeholder with a soft-disc glyph, title, body, and optional action button for no-data, all-clear, or error screens.</p></div>"
+    },
+    {
+      "type": "empty",
+      "title": "empty-state",
+      "icon": "check",
+      "tone": "success",
+      "body": "All dead-letter queues are drained — no failed events are waiting for replay. The last batch of 612 messages was reprocessed successfully at 09:41. New failures will appear here automatically.",
+      "action": {
+        "label": "View replay history"
+      }
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"fam-divider\" data-fam=\"content\"><span class=\"fd-eyebrow\">content</span><h2 class=\"fd-name\">content</h2><span class=\"fd-count\">1 module · feature / capability cards (capabilities, included-items, highlights) usable in reports and specs</span></div>"
+    },
+    {
+      "type": "html",
+      "html": "<div class=\"mod-head\" data-mod=\"feature-grid\"><span class=\"mod-fam\">content</span><h2>feature-grid</h2><p>Grid of icon cards (icon + title + desc) — product/spec capabilities, &quot;what's included&quot;, release highlights, or benefits.</p></div>"
+    },
+    {
+      "type": "features",
+      "title": "feature-grid",
+      "columns": 4,
+      "desc": "What's included in the Pulse Analytics platform.",
+      "items": [
+        {
+          "icon": "bolt",
+          "title": "Real-time ingestion",
+          "body": "Stream up to 2M events/sec with sub-200ms end-to-end latency from edge to dashboard.",
+          "tag": "Core"
+        },
+        {
+          "icon": "chart",
+          "title": "Funnels & retention",
+          "body": "Build conversion funnels, cohort retention grids, and path analysis without writing SQL.",
+          "tag": "Core"
+        },
+        {
+          "icon": "shield",
+          "title": "SOC 2 + GDPR",
+          "body": "SOC 2 Type II audited, GDPR-ready, with field-level encryption and EU data residency.",
+          "tag": "Security"
+        },
+        {
+          "icon": "lock",
+          "title": "SSO & SCIM",
+          "body": "SAML and OIDC single sign-on with SCIM provisioning across Okta, Entra, and Google.",
+          "tag": "Enterprise"
+        },
+        {
+          "icon": "code",
+          "title": "SDKs & REST API",
+          "body": "Typed SDKs for JavaScript, Python, Swift, and Kotlin plus a fully documented REST API.",
+          "tag": "Developer"
+        },
+        {
+          "icon": "users",
+          "title": "Team workspaces",
+          "body": "Role-based access for up to 250 seats, shared dashboards, and per-project permissions.",
+          "tag": "Collaboration"
+        },
+        {
+          "icon": "bell",
+          "title": "Anomaly alerts",
+          "body": "Automated baselines flag metric spikes and dips, routing alerts to Slack and PagerDuty.",
+          "tag": "Monitoring"
+        },
+        {
+          "icon": "globe",
+          "title": "Global edge network",
+          "body": "Collectors in 14 regions keep p95 latency under 80ms for users worldwide.",
+          "tag": "Infrastructure"
+        }
+      ]
+    }
+  ]
+}

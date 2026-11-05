@@ -1,0 +1,98 @@
+<!-- ============================================================================
+MODULE: org-chart                                           lineage: v3 diagrams expansion
+PURPOSE: Self-contained SVG organization / hierarchy chart (NO external libs). A
+         top-down tree of boxes (1 → 2 → 4 here) joined by orthogonal (elbow)
+         connectors; each box carries two lines - a name and a role. Depth is
+         encoded as a subtle color-mix density step of --accent (deeper = lighter).
+         For org structures, reporting lines, taxonomy hierarchies.
+VARIABLES: {{TITLE}}; per node {{NAME}} (line 1) and {{ROLE}} (line 2).
+GEOMETRY:  box W=150 H=54; a node centered at cx has box x=cx-75, its name at
+           y=top+22 and role at y=top+38. Levels sit at row tops 24 / 150 / 270
+           (midlines 51 / 177 / 297). A PARENT's cx is the mean of its children's
+           cx. Connectors are a single elbow path per parent: drop from the parent
+           bottom (cx, top+54) to a horizontal bus at the mid-gap y, run the bus
+           across the children's cx span, then drop into each child top:
+           "M px,pBot V busY  M leftCx,busY H rightCx  M cx_i,busY V childTop".
+           Bus y used here: 114 (L0→L1) and 237 (L1→L2). Add a level: place its
+           row top ~120px below, set each parent cx = mean(children), extend the
+           viewBox height. Tint by depth with .lvl-1 / .lvl-2 / .lvl-3.
+REQUIRES:  core/tokens.css (--bg-card, --accent, --border-default, --text-*,
+           --font-mono, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="org-chart" style block once.
+INTERACTION: none (static). role="img" + <title> a11y. Connectors carry no
+             arrowheads (hierarchy lines), so no marker/gradient ids are defined.
+USAGE: draw connector paths first, then one <g> per node (rect.oc-box.lvl-N +
+       text.oc-name + text.oc-role). Deeper level = higher lvl-N number.
+============================================================================ -->
+<style data-module="org-chart">
+  .oc { width: 100%; }
+  .oc svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  .oc-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .oc .oc-conn { fill: none; stroke: color-mix(in srgb, var(--accent) 30%, var(--border-default)); stroke-width: 1.5; stroke-linejoin: round; }
+  /* boxes: accent density steps by depth; edge warms toward the accent on hover */
+  .oc .oc-box { stroke: var(--border-default); stroke-width: 1.5; transition: stroke var(--dur-fast) var(--ease), fill var(--dur-fast) var(--ease); }
+  .oc .oc-box.lvl-1 { fill: color-mix(in srgb, var(--accent) 24%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 45%, var(--border-default)); }
+  .oc .oc-box.lvl-2 { fill: color-mix(in srgb, var(--accent) 13%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 30%, var(--border-default)); }
+  .oc .oc-box.lvl-3 { fill: color-mix(in srgb, var(--accent) 5%, var(--bg-card)); }
+  .oc g:hover .oc-box { stroke: color-mix(in srgb, var(--accent) 60%, var(--border-default)); }
+  .oc .oc-name { fill: var(--text-primary); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .oc .oc-role { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; }
+  @media (prefers-reduced-motion: reduce) { .oc .oc-box { transition: none; } }
+</style>
+
+<figure class="oc card-outlined">
+  <figcaption class="oc-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 760 344" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── CONNECTORS (elbow buses, drawn first so boxes sit on top) ───────── -->
+    <!-- L0 root (cx=380) → L1 (cx 180 / 580) via bus y=114 -->
+    <path class="oc-conn" d="M380,78 V114 M180,114 H580 M180,114 V150 M580,114 V150"/>
+    <!-- L1 left (cx=180) → L2 (cx 100 / 260) via bus y=237 -->
+    <path class="oc-conn" d="M180,204 V237 M100,237 H260 M100,237 V270 M260,237 V270"/>
+    <!-- L1 right (cx=580) → L2 (cx 500 / 660) via bus y=237 -->
+    <path class="oc-conn" d="M580,204 V237 M500,237 H660 M500,237 V270 M660,237 V270"/>
+
+    <!-- ── LEVEL 0 (root) ─────────────────────────────────────────────────── -->
+    <g>
+      <rect class="oc-box lvl-1" x="305" y="24" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="380" y="46">{{NAME}}</text>  <!-- e.g. Jordan Blake -->
+      <text class="oc-role" x="380" y="62">{{ROLE}}</text>  <!-- e.g. CEO -->
+    </g>
+
+    <!-- ── LEVEL 1 (reports to root) ──────────────────────────────────────── -->
+    <g>
+      <rect class="oc-box lvl-2" x="105" y="150" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="180" y="172">{{NAME}}</text> <!-- e.g. Priya Nair -->
+      <text class="oc-role" x="180" y="188">{{ROLE}}</text> <!-- e.g. VP Engineering -->
+    </g>
+    <g>
+      <rect class="oc-box lvl-2" x="505" y="150" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="580" y="172">{{NAME}}</text> <!-- e.g. Marco Ruiz -->
+      <text class="oc-role" x="580" y="188">{{ROLE}}</text> <!-- e.g. VP Sales -->
+    </g>
+
+    <!-- ── LEVEL 2 (leaf reports) ─────────────────────────────────────────── -->
+    <g>
+      <rect class="oc-box lvl-3" x="25" y="270" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="100" y="292">{{NAME}}</text> <!-- e.g. Dana Cho -->
+      <text class="oc-role" x="100" y="308">{{ROLE}}</text> <!-- e.g. Eng Manager -->
+    </g>
+    <g>
+      <rect class="oc-box lvl-3" x="185" y="270" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="260" y="292">{{NAME}}</text> <!-- e.g. Sam Iqbal -->
+      <text class="oc-role" x="260" y="308">{{ROLE}}</text> <!-- e.g. QA Lead -->
+    </g>
+    <g>
+      <rect class="oc-box lvl-3" x="425" y="270" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="500" y="292">{{NAME}}</text> <!-- e.g. Lea Fontaine -->
+      <text class="oc-role" x="500" y="308">{{ROLE}}</text> <!-- e.g. AE, EMEA -->
+    </g>
+    <g>
+      <rect class="oc-box lvl-3" x="585" y="270" width="150" height="54" rx="10"/>
+      <text class="oc-name" x="660" y="292">{{NAME}}</text> <!-- e.g. Tomás Silva -->
+      <text class="oc-role" x="660" y="308">{{ROLE}}</text> <!-- e.g. AE, LATAM -->
+    </g>
+    <!-- ↑ repeat one <g> per node; keep each parent's cx = mean of its children -->
+  </svg>
+</figure>

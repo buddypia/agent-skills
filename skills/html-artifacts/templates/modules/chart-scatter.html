@@ -1,0 +1,92 @@
+<!-- ============================================================================
+MODULE: chart-scatter                                       lineage: html-visual(chart/dashboard)
+PURPOSE: Self-contained SVG scatter / bubble chart (NO external libs). X & Y axes
+         with ticks + axis titles, points (fixed r) or bubbles (r ∝ a third value,
+         variant), series colored --cat-1..5, and optional median quadrant splits.
+         For correlation, distribution, effort-vs-impact, or risk maps.
+VARIABLES: {{TITLE}} {{X_AXIS}} {{Y_AXIS}} (axis titles);
+           axis ticks {{X_MIN}} {{X_MID}} {{X_MAX}} {{Y_MIN}} {{Y_MID}} {{Y_MAX}};
+           per point {{CX}} {{CY}} {{R}} {{CAT}} (cat-1..5) {{LABEL}} {{VALUE}};
+           optional split px {{MEDIAN_X}} {{MEDIAN_Y}}; legend {{SERIES}}.
+SCALING:   plot box x∈[56,700] (width 644), y∈[40,300] (height 260, baseline 300).
+           CX = 56 + (vx − X_MIN)/(X_MAX − X_MIN) * 644.
+           CY = 300 − (vy − Y_MIN)/(Y_MAX − Y_MIN) * 260.
+           point  R = 5 (fixed). bubble (variant) R = 5 + (vz / Z_MAX) * 21  → 5..26px.
+           median split px reuses the CX/CY formula on the median value.
+REQUIRES:  core/tokens.css (--cat-*, --accent, --text-*, --border-subtle, --border-default,
+           --bg-surface, --radius-pill)
+MODULE CSS: inline the data-module="chart-scatter" style block once.
+INTERACTION: CSS-only hover + [data-chart-tip] floating tooltip ([data-tip] per point,
+             behavior from interactions.js). role="img" + <title> for a11y.
+============================================================================ -->
+<style data-module="chart-scatter">
+  .scatter { width: 100%; }
+  .scatter svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  .scatter-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  /* hairline grid recedes; the two axes read firmer with a faint accent wash */
+  .scatter .grid-line { stroke: var(--border-subtle); stroke-width: 1; }
+  .scatter .axis { stroke: color-mix(in srgb, var(--accent) 28%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; }
+  .scatter .tick { fill: var(--text-muted); font-size: 10.5px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .scatter .axis-label { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
+  /* dashed median lines split the field into four quadrants */
+  .scatter .median { stroke: color-mix(in srgb, var(--text-muted) 55%, transparent); stroke-width: 1; stroke-dasharray: 5 4; }
+  /* points: categorical fill with a surface halo; transition paint only (never r) */
+  .scatter .pt { stroke: var(--bg-surface); stroke-width: 1.5; fill: var(--cat-1);
+    transition: fill var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  .scatter .pt.cat-1 { fill: var(--cat-1); }  .scatter .pt.cat-2 { fill: var(--cat-2); }
+  .scatter .pt.cat-3 { fill: var(--cat-3); }  .scatter .pt.cat-4 { fill: var(--cat-4); }
+  .scatter .pt.cat-5 { fill: var(--cat-5); }
+  .scatter .pt:hover { stroke-width: 2.5; filter: brightness(1.08) drop-shadow(0 2px 6px color-mix(in srgb, var(--accent) 34%, transparent)); }
+  /* calm cross-highlight: hovering one point fades the rest so it reads */
+  .scatter svg:hover .pt { opacity: .48; transition: opacity var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+  .scatter svg:hover .pt:hover { opacity: 1; }
+  .scatter-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin-top: var(--sp-3); }
+  .scatter-legend .lg { display: inline-flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); color: var(--text-secondary); }
+  .scatter-legend .lg-dot { width: 10px; height: 10px; border-radius: var(--radius-pill); }
+  .scatter-legend .lg-dot.cat-1 { background: var(--cat-1); }  .scatter-legend .lg-dot.cat-2 { background: var(--cat-2); }
+  .scatter-legend .lg-dot.cat-3 { background: var(--cat-3); }  .scatter-legend .lg-dot.cat-4 { background: var(--cat-4); }
+  .scatter-legend .lg-dot.cat-5 { background: var(--cat-5); }
+  @media (prefers-reduced-motion: reduce) { .scatter .pt, .scatter svg:hover .pt { transition: none; } }
+</style>
+
+<figure class="scatter card-outlined" data-chart-tip>
+  <figcaption class="scatter-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 720 340" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- gridlines (quartiles of the plot box: x 56→700, y 40→300) -->
+    <line class="grid-line" x1="56" y1="105" x2="700" y2="105"/>
+    <line class="grid-line" x1="56" y1="170" x2="700" y2="170"/>
+    <line class="grid-line" x1="56" y1="235" x2="700" y2="235"/>
+    <line class="grid-line" x1="217" y1="40" x2="217" y2="300"/>
+    <line class="grid-line" x1="378" y1="40" x2="378" y2="300"/>
+    <line class="grid-line" x1="539" y1="40" x2="539" y2="300"/>
+    <!-- median quadrant splits (optional - delete if not dividing the field) -->
+    <line class="median" x1="{{MEDIAN_X}}" y1="40" x2="{{MEDIAN_X}}" y2="300"/>  <!-- e.g. x=378 -->
+    <line class="median" x1="56" y1="{{MEDIAN_Y}}" x2="700" y2="{{MEDIAN_Y}}"/>   <!-- e.g. y=170 -->
+    <!-- axes -->
+    <line class="axis" x1="56" y1="40"  x2="56"  y2="300"/>
+    <line class="axis" x1="56" y1="300" x2="700" y2="300"/>
+    <!-- ticks -->
+    <text class="tick" x="50" y="304" text-anchor="end">{{Y_MIN}}</text>
+    <text class="tick" x="50" y="174" text-anchor="end">{{Y_MID}}</text>
+    <text class="tick" x="50" y="44"  text-anchor="end">{{Y_MAX}}</text>
+    <text class="tick" x="56"  y="316" text-anchor="middle">{{X_MIN}}</text>
+    <text class="tick" x="378" y="316" text-anchor="middle">{{X_MID}}</text>
+    <text class="tick" x="700" y="316" text-anchor="middle">{{X_MAX}}</text>
+    <!-- axis titles -->
+    <text class="axis-label" x="378" y="334">{{X_AXIS}}</text> <!-- e.g. Effort -->
+    <text class="axis-label" x="18" y="170" transform="rotate(-90 18 170)">{{Y_AXIS}}</text> <!-- e.g. Impact -->
+
+    <!-- ↓ repeat one <circle> per point (set cat-1..5 for the series, R=5 or bubble r) -->
+    <circle class="pt cat-1" cx="{{CX}}" cy="{{CY}}" r="{{R}}" data-tip="{{LABEL}}: {{VALUE}}">
+      <title>{{LABEL}}: {{VALUE}}</title>
+    </circle>
+    <!-- ↑ repeat -->
+  </svg>
+
+  <!-- ↓ repeat one .lg per series (color = the series' cat class) -->
+  <div class="scatter-legend">
+    <span class="lg"><span class="lg-dot cat-1"></span>{{SERIES}}</span> <!-- e.g. Team A -->
+    <!-- ↑ repeat -->
+  </div>
+</figure>

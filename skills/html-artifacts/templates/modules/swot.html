@@ -1,0 +1,85 @@
+<!-- ============================================================================
+MODULE: swot                                                lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A SWOT analysis board (pure CSS - no SVG). A fixed 2×2 grid of four
+         strategic cards, each with a tinted header, an S/W/O/T monogram and a
+         bullet list: Strengths (success), Weaknesses (danger), Opportunities
+         (accent), Threats (warning). For strategic reviews, competitive
+         self-assessment, project kick-off framing. Distinction: quadrant PLOTS
+         items as points on two continuous axes; risk-matrix scores each item by
+         probability × impact; swot GROUPS bullet items into four FIXED
+         internal/external × positive/negative strategic categories.
+VARIABLES: {{TITLE}}; per quadrant {{HEAD}} (name) + repeated {{ITEM}} bullets.
+SCALING:  fixed 2×2 CSS grid (repeat(2,1fr)); collapses to one column below 640px.
+          Each cell drives its own --sw-tint hue so header / monogram / marker /
+          hover stay category-agnostic; the monogram is the first letter of S/W/O/T.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent,
+          --color-success/-danger/-warning, --bg-card, --border-*, --text-*,
+          --radius-*, --sp-*, --shadow-*, --dur-fast, --ease)
+MODULE CSS: inline the data-module="swot" style block once.
+INTERACTION: paint-only hover deepens each quadrant's own tint (reduced-motion
+             guarded). aria-label on the figure; monograms are aria-hidden.
+USAGE: one .sw-cell per quadrant with its modifier (.sw-s/.sw-w/.sw-o/.sw-t);
+       one <li class="sw-item"> per bullet. Keep all four cells for a full board.
+============================================================================ -->
+<style data-module="swot">
+  .sw { margin: 0; }
+  .sw-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .sw-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+  @media (max-width: 640px) { .sw-grid { grid-template-columns: 1fr; } }
+  /* each quadrant carries its own --sw-tint so header / monogram / marker share it */
+  .sw-cell { --sw-tint: var(--accent); border: 1px solid color-mix(in srgb, var(--sw-tint) 30%, var(--border-default)); border-radius: var(--radius-md); background: var(--bg-card); overflow: hidden; box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease); }
+  .sw-cell.sw-s { --sw-tint: var(--color-success); }
+  .sw-cell.sw-w { --sw-tint: var(--color-danger); }
+  .sw-cell.sw-o { --sw-tint: var(--accent); }
+  .sw-cell.sw-t { --sw-tint: var(--color-warning); }
+  .sw-head { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); background: color-mix(in srgb, var(--sw-tint) 14%, var(--bg-card)); border-bottom: 1px solid color-mix(in srgb, var(--sw-tint) 30%, var(--border-subtle)); }
+  .sw-mono { flex: 0 0 auto; width: 26px; height: 26px; display: grid; place-items: center; border-radius: var(--radius-sm); font: var(--type-caption); font-weight: 700; color: var(--bg-card); background: color-mix(in srgb, var(--sw-tint) 80%, var(--text-primary)); }
+  .sw-name { font: var(--type-small); font-weight: 650; color: var(--text-primary); }
+  .sw-list { margin: 0; padding: var(--sp-3); display: grid; gap: var(--sp-2); list-style: none; }
+  .sw-item { position: relative; padding-left: var(--sp-4); font: var(--type-small); color: var(--text-secondary); }
+  .sw-item::before { content: ""; position: absolute; left: 0; top: .55em; width: 6px; height: 6px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--sw-tint) 70%, var(--border-default)); }
+  @media (hover: hover) {
+    .sw-cell:hover { box-shadow: var(--shadow-md); }
+    .sw-cell:hover .sw-head { background: color-mix(in srgb, var(--sw-tint) 22%, var(--bg-card)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .sw-cell { transition: none; } }
+</style>
+
+<figure class="sw card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="sw-title">{{TITLE}}</figcaption> <!-- e.g. 新規事業のSWOT分析 -->
+  <div class="sw-grid">
+
+    <!-- ── Strengths (internal / positive) ─────────────────────────────────── -->
+    <section class="sw-cell sw-s">
+      <header class="sw-head"><span class="sw-mono" aria-hidden="true">S</span><span class="sw-name">{{HEAD}}</span></header> <!-- e.g. 強み -->
+      <ul class="sw-list">
+        <li class="sw-item">{{ITEM}}</li> <!-- e.g. 独自の配送網 -->
+        <!-- ↑ repeat: one .sw-item per bullet -->
+      </ul>
+    </section>
+
+    <!-- ── Weaknesses (internal / negative) ────────────────────────────────── -->
+    <section class="sw-cell sw-w">
+      <header class="sw-head"><span class="sw-mono" aria-hidden="true">W</span><span class="sw-name">{{HEAD}}</span></header> <!-- e.g. 弱み -->
+      <ul class="sw-list">
+        <li class="sw-item">{{ITEM}}</li> <!-- e.g. 認知度が低い -->
+      </ul>
+    </section>
+
+    <!-- ── Opportunities (external / positive) ─────────────────────────────── -->
+    <section class="sw-cell sw-o">
+      <header class="sw-head"><span class="sw-mono" aria-hidden="true">O</span><span class="sw-name">{{HEAD}}</span></header> <!-- e.g. 機会 -->
+      <ul class="sw-list">
+        <li class="sw-item">{{ITEM}}</li> <!-- e.g. EC市場の拡大 -->
+      </ul>
+    </section>
+
+    <!-- ── Threats (external / negative) ───────────────────────────────────── -->
+    <section class="sw-cell sw-t">
+      <header class="sw-head"><span class="sw-mono" aria-hidden="true">T</span><span class="sw-name">{{HEAD}}</span></header> <!-- e.g. 脅威 -->
+      <ul class="sw-list">
+        <li class="sw-item">{{ITEM}}</li> <!-- e.g. 大手の市場参入 -->
+      </ul>
+    </section>
+  </div>
+</figure>

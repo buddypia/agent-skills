@@ -1,0 +1,75 @@
+{
+  "title": "Tax Calculation Refactor in the Checkout Module",
+  "theme": "nord",
+  "layout": "sidebar",
+  "header": "compact",
+  "lang": "en",
+  "target": "document",
+  "viewport": "desktop",
+  "eyebrow": "PR #482 · CODE REVIEW",
+  "subtitle": "Adds support for region-specific tax rates and fixes currency rounding. 3 files, 4 findings (1 critical, 2 medium, 1 low). The critical finding must be resolved before merging.",
+  "footer": "PR #482 · Repository payments-service · Generated 2026-06-07 · Self-contained artifact (viewable offline)",
+  "sections": [
+    {
+      "type": "html",
+      "html": "<style>\n  /* artifact-local helpers */\n  .review-meta { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; color: var(--text-secondary); font: var(--type-small); }\n  .file-nav { display: flex; flex-wrap: wrap; gap: var(--sp-2); }\n  .file-nav a { display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none; }\n  .diff-block { scroll-margin-top: var(--sp-5); }\n</style>\n<div class=\"review-meta\" aria-label=\"Review metadata\">\n  <span class=\"chip\">feature/region-tax → main</span>\n  <span class=\"badge badge-warning\">Changes Requested</span>\n  <span class=\"muted\">Author: @tanaka-y · Reviewer: @suzuki-k · 2026-06-07</span>\n</div>"
+    },
+    {
+      "type": "callout",
+      "area": "side",
+      "variant": "warning",
+      "title": "Merge blocked",
+      "body": "The critical finding in src/checkout/tax.ts (null reference when region is undefined) must be fixed and covered by boundary tests before merging. The two medium findings can land as fast follow-ups; the low finding is optional."
+    },
+    {
+      "type": "kpi",
+      "area": "side",
+      "variant": "inline",
+      "label": "Review at a glance",
+      "items": [
+        {
+          "label": "Findings",
+          "value": "4"
+        },
+        {
+          "label": "Critical",
+          "value": "1"
+        },
+        {
+          "label": "Files Changed",
+          "value": "3"
+        },
+        {
+          "label": "Lines",
+          "value": "+19 / −5"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<section aria-label=\"Review summary\" class=\"stack\">\n  <h2>Review Summary</h2>\n\n  <!-- TL;DR -->\n  <div class=\"callout callout-box callout-tldr\">\n    <svg class=\"callout-glyph\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" role=\"img\" aria-label=\"Summary\">\n      <path d=\"M5 4h14v16l-7-3-7 3z\"/>\n    </svg>\n    <div>\n      <p class=\"callout-title\">TL;DR</p>\n      <div class=\"callout-body\"><p>Replacing the hard-coded tax rate with a value pulled from regional settings is a solid improvement. However, a critical bug remains: when <code>region</code> is undefined, referencing <code>taxRate</code> throws an exception, so this cannot be merged as is. Please also address the missing rounding logic and unit tests.</p></div>\n    </div>\n  </div>\n\n  <!-- Warning -->\n  <div class=\"callout callout-box callout-warning\">\n    <svg class=\"callout-glyph\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" role=\"img\" aria-label=\"Warning\">\n      <path d=\"M12 3 2 20h20z\"/>\n      <path d=\"M12 9v5M12 17h.01\"/>\n    </svg>\n    <div>\n      <p class=\"callout-title\">Required before merge</p>\n      <div class=\"callout-body\"><p>Resolve the critical finding in <code>src/checkout/tax.ts</code> (null reference when region is undefined) and add corresponding boundary tests. The CI type check passes, but it cannot catch this runtime exception.</p></div>\n    </div>\n  </div>\n\n  <!-- Note -->\n  <div class=\"callout callout-box callout-note\">\n    <svg class=\"callout-glyph\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" role=\"img\" aria-label=\"Note\">\n      <circle cx=\"12\" cy=\"12\" r=\"9\"/>\n      <path d=\"M12 11v5M12 7.5h.01\"/>\n    </svg>\n    <div>\n      <p class=\"callout-title\">Design note</p>\n      <div class=\"callout-body\"><p>The tax rate table is currently hard-coded, but moving it out to <code>config/regions.json</code> is planned for the next phase. It's fine to keep this PR within its existing scope and leave a reference behind in a TODO comment.</p></div>\n    </div>\n  </div>\n\n  <!-- Success -->\n  <div class=\"callout callout-box callout-success\">\n    <svg class=\"callout-glyph\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" role=\"img\" aria-label=\"Strengths\">\n      <circle cx=\"12\" cy=\"12\" r=\"9\"/>\n      <path d=\"m8 12 3 3 5-6\"/>\n    </svg>\n    <div>\n      <p class=\"callout-title\">What went well</p>\n      <div class=\"callout-body\"><p>Eliminating the magic number <code>0.1</code> and splitting the function's responsibilities makes the code clearer and easier to read. Extracting <code>formatCurrency</code> is also highly reusable and likely to be picked up by other modules.</p></div>\n    </div>\n  </div>\n</section>",
+      "cssModules": [
+        "callout-box"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<section aria-label=\"File list\" class=\"stack\">\n  <h2>Changed Files</h2>\n  <nav class=\"file-nav\" aria-label=\"Jump to file\">\n    <a class=\"chip\" href=\"#file-tax\">src/checkout/tax.ts <span class=\"badge badge-danger\">Critical</span></a>\n    <a class=\"chip\" href=\"#file-cart\">src/checkout/cart.ts <span class=\"badge badge-warning\">Medium</span></a>\n    <a class=\"chip\" href=\"#file-format\">src/utils/format.ts <span class=\"badge badge-info\">Low</span></a>\n  </nav>\n</section>"
+    },
+    {
+      "type": "html",
+      "html": "<section aria-label=\"tax.ts diff\" class=\"stack\" id=\"file-tax\">\n  <figure class=\"diff-block\">\n    <figcaption class=\"diff-head\">\n      <span class=\"diff-file\">src/checkout/tax.ts</span>\n      <span class=\"diff-stats\">\n        <span class=\"badge badge-success\">+8</span>\n        <span class=\"badge badge-danger\">-3</span>\n      </span>\n    </figcaption>\n\n    <pre><code><span class=\"dl\"><span class=\"ln\">12</span><span class=\"code\">export function calcTax(subtotal: number, region: Region): number {</span></span>\n<span class=\"dl diff-remove\"><span class=\"ln\">13</span><span class=\"code\">-  const tax = subtotal * 0.1;</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">13</span><span class=\"code\">+  const tax = subtotal * region.taxRate;</span></span>\n<span class=\"dl\"><span class=\"ln\">14</span><span class=\"code\">  return Math.round(tax);</span></span>\n<span class=\"dl\"><span class=\"ln\">15</span><span class=\"code\">}</span></span>\n<span class=\"dl\"><span class=\"ln\">16</span><span class=\"code\"> </span></span>\n<span class=\"dl\"><span class=\"ln\">17</span><span class=\"code\">export function resolveRegion(code?: string): Region {</span></span>\n<span class=\"dl diff-remove\"><span class=\"ln\">18</span><span class=\"code\">-  return REGIONS[code];</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">18</span><span class=\"code\">+  return REGIONS[code] ?? REGIONS.DEFAULT;</span></span>\n<span class=\"dl\"><span class=\"ln\">19</span><span class=\"code\">}</span></span></code></pre>\n\n    <aside class=\"callout diff-note sev-high\">\n      <div>\n        <span class=\"callout-title\">Critical: null reference exception when region is undefined</span>\n        <div class=\"callout-body\" style=\"color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)\">\n          <p><code>calcTax</code> takes <code>region</code> as a required argument, but the caller at <code>cart.ts:41</code> passes the result of <code>resolveRegion</code>. When no code is supplied, <code>REGIONS[undefined]</code> evaluates to <code>undefined</code>, and accessing <code>region.taxRate</code> throws a <code>TypeError</code>. Line 18 of the fix introduces <code>?? REGIONS.DEFAULT</code>, but please also add an argument guard inside <code>calcTax</code> and be sure to include boundary tests.</p>\n        </div>\n      </div>\n    </aside>\n  </figure>\n</section>",
+      "cssModules": [
+        "diff-block"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<section aria-label=\"cart.ts diff\" class=\"stack\" id=\"file-cart\">\n  <figure class=\"diff-block\">\n    <figcaption class=\"diff-head\">\n      <span class=\"diff-file\">src/checkout/cart.ts</span>\n      <span class=\"diff-stats\">\n        <span class=\"badge badge-success\">+5</span>\n        <span class=\"badge badge-danger\">-2</span>\n      </span>\n    </figcaption>\n\n    <pre><code><span class=\"dl\"><span class=\"ln\">38</span><span class=\"code\">function getCartTotal(items: Item[], regionCode?: string): number {</span></span>\n<span class=\"dl\"><span class=\"ln\">39</span><span class=\"code\">  const subtotal = items.reduce((s, i) =&gt; s + i.price * i.qty, 0);</span></span>\n<span class=\"dl\"><span class=\"ln\">40</span><span class=\"code\">  const region = resolveRegion(regionCode);</span></span>\n<span class=\"dl diff-remove\"><span class=\"ln\">41</span><span class=\"code\">-  const tax = subtotal * 0.1;</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">41</span><span class=\"code\">+  const tax = calcTax(subtotal, region);</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">42</span><span class=\"code\">+  // TODO(#487): consolidate rounding into formatCurrency</span></span>\n<span class=\"dl\"><span class=\"ln\">43</span><span class=\"code\">  return subtotal + tax;</span></span>\n<span class=\"dl\"><span class=\"ln\">44</span><span class=\"code\">}</span></span></code></pre>\n\n    <aside class=\"callout diff-note sev-med\">\n      <div>\n        <span class=\"callout-title\">Medium: total is not rounded and leaves a trailing decimal</span>\n        <div class=\"callout-body\" style=\"color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)\">\n          <p>Returning <code>subtotal + tax</code> directly means floating-point errors such as <code>1234.56000000001</code> propagate all the way to the display when the tax rate is something like <code>0.08</code>. Either pass it through <code>round2</code> from <code>format.ts</code> before returning, or round to 2 decimal places with <code>Math.round((subtotal + tax) * 100) / 100</code>. The issue number referenced in the TODO comment is correct.</p>\n        </div>\n      </div>\n    </aside>\n  </figure>\n</section>"
+    },
+    {
+      "type": "html",
+      "html": "<section aria-label=\"format.ts diff\" class=\"stack\" id=\"file-format\">\n  <figure class=\"diff-block\">\n    <figcaption class=\"diff-head\">\n      <span class=\"diff-file\">src/utils/format.ts</span>\n      <span class=\"diff-stats\">\n        <span class=\"badge badge-success\">+6</span>\n        <span class=\"badge badge-danger\">-0</span>\n      </span>\n    </figcaption>\n\n    <pre><code><span class=\"dl\"><span class=\"ln\">1</span><span class=\"code\">const DEFAULT_LOCALE = \"ja-JP\";</span></span>\n<span class=\"dl\"><span class=\"ln\">2</span><span class=\"code\"> </span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">3</span><span class=\"code\">+export function formatCurrency(value: number, locale = DEFAULT_LOCALE): string {</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">4</span><span class=\"code\">+  return new Intl.NumberFormat(locale, {</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">5</span><span class=\"code\">+    style: \"currency\", currency: \"JPY\",</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">6</span><span class=\"code\">+  }).format(value);</span></span>\n<span class=\"dl diff-add\"><span class=\"ln\">7</span><span class=\"code\">+}</span></span></code></pre>\n\n    <aside class=\"callout diff-note sev-low\">\n      <div>\n        <span class=\"callout-title\">Low: currency code is hard-coded</span>\n        <div class=\"callout-body\" style=\"color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)\">\n          <p>Because <code>currency: \"JPY\"</code> is fixed, future multi-currency support will require rewriting <code>formatCurrency</code> again. This is acceptable within the current scope, but adding a <code>currency = \"JPY\"</code> argument would let you extend it while staying backward compatible. This is optional and not required.</p>\n        </div>\n      </div>\n    </aside>\n  </figure>\n</section>"
+    }
+  ]
+}

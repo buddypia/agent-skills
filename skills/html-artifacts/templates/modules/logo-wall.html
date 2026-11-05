@@ -1,0 +1,44 @@
+<!-- ============================================================================
+MODULE: logo-wall                                          lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: Social-proof strip for marketing and landing pages.
+         ANTI-SLOP (design-taste-frontend):
+         - Prefer logos and a clear kicker; adoption statistics are optional and need evidence.
+         - Real visual marks: pairs clean typography with simple vector monograms/marks
+           instead of plain generic text in boxes.
+         - Frameless or subtle plate options: does not force another generic card container.
+VARIABLES: {{KICKER}} (band heading, e.g. 導入企業); per item {{COMPANY}}.
+          Optional: insert a supplied inline SVG mark before .lgw-name; otherwise use text only.
+REQUIRES: core/tokens.css (--accent, --bg-surface, --bg-muted, --border-*, --text-*,
+          --radius-*, --sp-*, --tracking-eyebrow), core/elements.css
+MODULE CSS: inline the data-module="logo-wall" style block once.
+INTERACTION: hover firms a tile's contrast (paint-only, reduced-motion guarded).
+USAGE: one .lgw-item per company inside .lgw-row (let it wrap cleanly).
+       Legacy .lgw-tile / .lgw-stat remain styled for existing artifacts.
+============================================================================ -->
+<style data-module="logo-wall">
+  .lgw { margin: 0; text-align: center; padding: var(--sp-6) var(--sp-4); }
+  .lgw-kicker { font: var(--type-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); margin-bottom: var(--sp-5); }
+  .lgw-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--sp-5) var(--sp-7); }
+  /* Clean modern logo mark: vector glyph or monogram alongside brand typography */
+  .lgw-item, .lgw-tile { display: inline-flex; align-items: center; gap: var(--sp-2); transition: color var(--dur-fast) var(--ease); color: var(--text-secondary); }
+  .lgw-item svg { width: 20px; height: 20px; fill: currentColor; }
+  .lgw-item .lgw-mono { width: 24px; height: 24px; border-radius: var(--radius-xs); border: 1.5px solid currentColor; display: grid; place-items: center; font: var(--type-caption); font-family: var(--font-mono); font-weight: 800; line-height: 1; }
+  .lgw-name { font: var(--type-body); font-weight: 700; letter-spacing: var(--tracking-tight); color: inherit; }
+  .lgw-stat { margin-top: var(--sp-5); font: var(--type-small); color: var(--text-secondary); }
+  .lgw-stat b { font: var(--type-h2); color: var(--accent); }
+  @media (hover: hover) {
+    .lgw-item:hover, .lgw-tile:hover { color: var(--text-primary); }
+  }
+  @media (prefers-reduced-motion: reduce) { .lgw-item, .lgw-tile { transition: none; } }
+</style>
+
+<section class="lgw" aria-label="{{KICKER}}">
+  <p class="lgw-kicker">{{KICKER}}</p> <!-- e.g. 導入企業 -->
+  <div class="lgw-row">
+
+    <!-- Repeat for verified companies only; insert a supplied SVG mark if available. -->
+    <div class="lgw-item">
+      <span class="lgw-name">{{COMPANY}}</span>
+    </div>
+  </div>
+</section>

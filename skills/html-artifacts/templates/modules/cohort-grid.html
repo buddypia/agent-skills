@@ -1,0 +1,103 @@
+<!-- ============================================================================
+MODULE: cohort-grid                                        lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A retention cohort table (pure CSS - no SVG). Rows are signup cohorts
+         (monthly), columns are period offsets M0..M5; each cell shows a retention %
+         with a background whose intensity scales via color-mix of --accent (higher %
+         = stronger tint), and the table is STAIRCASED - newer cohorts have fewer
+         observed periods, so their trailing cells are blank.
+         Distinction: heatmap is a generic full intensity matrix; cal-heatmap tiles
+         calendar days by date; this is the triangular retention-analysis table where
+         columns are relative period offsets from each cohort's own start.
+VARIABLES: {{TITLE}}; column headers {{PERIOD}} (M0..M5); per row {{COHORT}} (label)
+           {{SIZE}} (cohort size) + per cell {{PCT}} with inline --i (0-100 intensity
+           = the retention percent). Blank future cells use .cht-na.
+SCALING:   grid columns `auto auto repeat(6, 1fr)` = cohort | size | M0..M5. Cell tint
+           = color-mix(in srgb, var(--accent) calc(var(--i)*1%), var(--bg-surface)),
+           so --i IS the retention percent (M0 = 100 → strongest). Staircase: give the
+           newest cohort's unobserved trailing cells .cht-na (no tint, em-dash).
+REQUIRES:  core/tokens.css (--accent, --bg-surface, --bg-muted, --border-*, --text-*,
+           --font-mono, --radius-*, --sp-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="cohort-grid" style block once.
+INTERACTION: hover outlines a cell (paint only, reduced-motion guarded).
+             aria-label on the figure; cohorts, periods, percents are real text.
+USAGE: one .cht-row per cohort; set --i on each .cht-cell to its retention percent and
+       give unobserved trailing cells .cht-na so the triangle staircases.
+============================================================================ -->
+<style data-module="cohort-grid">
+  .cht { margin: 0; overflow-x: auto; }
+  .cht-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cht-grid { display: grid; grid-template-columns: auto auto repeat(6, minmax(44px, 1fr)); gap: 3px; min-width: 460px; }
+  .cht-h { padding: var(--sp-2); font: var(--type-caption); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); text-align: center; border-bottom: 1.5px solid var(--border-default); }
+  .cht-h.lead { text-align: left; }
+  .cht-cohort { padding: var(--sp-2) var(--sp-3) var(--sp-2) 0; font: var(--type-caption); font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); white-space: nowrap; display: flex; align-items: center; }
+  .cht-size { padding: var(--sp-2); font: var(--type-caption); font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-muted); text-align: right; display: flex; align-items: center; justify-content: flex-end; }
+  /* retention cell - tint = accent mixed by --i% into the surface */
+  .cht-cell { --i: 0; display: grid; place-items: center; padding: var(--sp-2) var(--sp-1); border-radius: var(--radius-xs); font: var(--type-caption); font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-primary); background: color-mix(in srgb, var(--accent) calc(var(--i) * 1%), var(--bg-surface)); box-shadow: inset 0 0 0 1px var(--border-subtle); transition: box-shadow var(--dur-fast) var(--ease); }
+  .cht-cell:hover { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 60%, var(--border-default)); }
+  .cht-na { background: var(--bg-muted); color: var(--text-muted); box-shadow: none; font-weight: 400; }
+  @media (prefers-reduced-motion: reduce) { .cht-cell { transition: none; } }
+</style>
+
+<figure class="cht card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="cht-title">{{TITLE}}</figcaption>
+  <div class="cht-grid">
+    <!-- ── HEADER: corner + size + M0..M5 ─────────────────────────────────────── -->
+    <div class="cht-h lead">{{COHORT}}</div>   <!-- e.g. コホート -->
+    <div class="cht-h">{{SIZE}}</div>          <!-- e.g. 規模 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M0 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M1 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M2 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M3 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M4 -->
+    <div class="cht-h">{{PERIOD}}</div>        <!-- e.g. M5 -->
+
+    <!-- ── COHORT ROWS: oldest first (full width) → newest (staircased) ────────── -->
+    <!-- ↓ repeat this block per cohort; --i on each cell = its retention percent -->
+    <span class="cht-cohort">{{COHORT}}</span> <!-- e.g. 2026-01 -->
+    <span class="cht-size">{{SIZE}}</span>     <!-- e.g. 1,200 -->
+    <span class="cht-cell" style="--i:100">{{PCT}}</span> <!-- e.g. 100% -->
+    <span class="cht-cell" style="--i:62">{{PCT}}</span>  <!-- e.g. 62% -->
+    <span class="cht-cell" style="--i:48">{{PCT}}</span>  <!-- e.g. 48% -->
+    <span class="cht-cell" style="--i:39">{{PCT}}</span>  <!-- e.g. 39% -->
+    <span class="cht-cell" style="--i:33">{{PCT}}</span>  <!-- e.g. 33% -->
+    <span class="cht-cell" style="--i:29">{{PCT}}</span>  <!-- e.g. 29% -->
+
+    <span class="cht-cohort">{{COHORT}}</span> <!-- e.g. 2026-02 -->
+    <span class="cht-size">{{SIZE}}</span>     <!-- e.g. 1,050 -->
+    <span class="cht-cell" style="--i:100">{{PCT}}</span> <!-- e.g. 100% -->
+    <span class="cht-cell" style="--i:58">{{PCT}}</span>  <!-- e.g. 58% -->
+    <span class="cht-cell" style="--i:45">{{PCT}}</span>  <!-- e.g. 45% -->
+    <span class="cht-cell" style="--i:37">{{PCT}}</span>  <!-- e.g. 37% -->
+    <span class="cht-cell" style="--i:31">{{PCT}}</span>  <!-- e.g. 31% -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M5 -->
+
+    <span class="cht-cohort">{{COHORT}}</span> <!-- e.g. 2026-03 -->
+    <span class="cht-size">{{SIZE}}</span>     <!-- e.g. 980 -->
+    <span class="cht-cell" style="--i:100">{{PCT}}</span> <!-- e.g. 100% -->
+    <span class="cht-cell" style="--i:55">{{PCT}}</span>  <!-- e.g. 55% -->
+    <span class="cht-cell" style="--i:43">{{PCT}}</span>  <!-- e.g. 43% -->
+    <span class="cht-cell" style="--i:35">{{PCT}}</span>  <!-- e.g. 35% -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M4 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M5 -->
+
+    <span class="cht-cohort">{{COHORT}}</span> <!-- e.g. 2026-04 -->
+    <span class="cht-size">{{SIZE}}</span>     <!-- e.g. 1,140 -->
+    <span class="cht-cell" style="--i:100">{{PCT}}</span> <!-- e.g. 100% -->
+    <span class="cht-cell" style="--i:51">{{PCT}}</span>  <!-- e.g. 51% -->
+    <span class="cht-cell" style="--i:40">{{PCT}}</span>  <!-- e.g. 40% -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M3 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M4 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M5 -->
+
+    <span class="cht-cohort">{{COHORT}}</span> <!-- e.g. 2026-05 -->
+    <span class="cht-size">{{SIZE}}</span>     <!-- e.g. 1,010 -->
+    <span class="cht-cell" style="--i:100">{{PCT}}</span> <!-- e.g. 100% -->
+    <span class="cht-cell" style="--i:49">{{PCT}}</span>  <!-- e.g. 49% -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M2 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M3 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M4 -->
+    <span class="cht-cell cht-na">-</span>                <!-- 未観測: M5 -->
+    <!-- ↑ repeat: newer cohorts staircase with more .cht-na trailing cells -->
+  </div>
+</figure>

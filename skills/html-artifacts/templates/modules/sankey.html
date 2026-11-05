@@ -1,0 +1,104 @@
+<!-- ============================================================================
+MODULE: sankey                                  lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained simplified SVG Sankey / flow-quantity diagram (NO external
+         libs). A left column of source node bars and a right column of target node
+         bars; each flow is a cubic-bezier ribbon whose STROKE-WIDTH encodes its
+         quantity and whose color is the source node's --cat tint at low opacity
+         (color-mix). Node bars carry a name + value. For budget allocation, traffic
+         split, energy/material balance, conversion-by-source.
+         Distinction: flow-diagram shows sequence/logic and funnel is one shrinking
+         pipeline - sankey SPLITS and MERGES quantities across parallel branches.
+VARIABLES: {{TITLE}}; per node {{NODE}} + {{VALUE}}; ribbons are sized by width.
+GEOMETRY:  viewBox 0 0 760 420, scale 3px per unit. Source bars x=40 w=24 (right
+           edge 64); target bars x=696 w=24 (left edge 696). A node's bar height =
+           its total (Σ flows). Stack a node's flows into slices top→bottom; a
+           ribbon leaves/enters at its slice CENTER with stroke-width = slice height.
+           Ribbon path: M 64,ys C 380,ys 380,yt 696,yt (control x = mid 380). Node
+           value/name: sources end-anchored at x=34, targets start-anchored at x=726.
+           3-COLUMN: add a middle bar column (e.g. x=368) and route source→mid
+           ribbons ending at x=344, then mid→target ribbons from x=392.
+REQUIRES:  core/tokens.css (--cat-1..3, --accent, --bg-card, --border-default,
+           --text-*, --font-mono, --dur-fast, --ease), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="sankey" style block once.
+INTERACTION: none (static). Hover deepens a ribbon's opacity (paint only, reduced-
+             motion guarded). role="img" + <title> a11y; labels are real text.
+USAGE: draw ribbons first (path.sk-flow.cat-N, stroke-width inline = quantity·3),
+       then node bars (rect.sk-node.cat-N sources / .sk-target targets) + labels.
+============================================================================ -->
+<style data-module="sankey">
+  .sk { width: 100%; }
+  .sk svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .sk { overflow-x: auto; } .sk svg { min-width: 760px; } }
+  .sk-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  /* ribbons: stroke-width = quantity; color = source --cat at low opacity */
+  .sk-flow { fill: none; stroke: color-mix(in srgb, var(--fc, var(--accent)) 32%, transparent); transition: stroke var(--dur-fast) var(--ease); }
+  .sk-flow.cat-1 { --fc: var(--cat-1); }
+  .sk-flow.cat-2 { --fc: var(--cat-2); }
+  .sk-flow.cat-3 { --fc: var(--cat-3); }
+  .sk-flow:hover { stroke: color-mix(in srgb, var(--fc, var(--accent)) 62%, transparent); }
+  /* node bars: sources tinted by --cat, targets neutral accent slab */
+  .sk-node { stroke: var(--bg-card); stroke-width: 1; rx: 2; }
+  .sk-node.cat-1 { fill: color-mix(in srgb, var(--cat-1) 78%, var(--bg-card)); }
+  .sk-node.cat-2 { fill: color-mix(in srgb, var(--cat-2) 78%, var(--bg-card)); }
+  .sk-node.cat-3 { fill: color-mix(in srgb, var(--cat-3) 78%, var(--bg-card)); }
+  .sk-target { fill: color-mix(in srgb, var(--accent) 34%, var(--bg-card)); }
+  .sk-name { fill: var(--text-primary); font-size: 12px; font-weight: 600; dominant-baseline: middle; }
+  .sk-val { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); dominant-baseline: middle; }
+  .sk-col { fill: var(--text-muted); font: var(--type-caption); text-transform: uppercase; letter-spacing: .08em; }
+  @media (prefers-reduced-motion: reduce) { .sk-flow { transition: none; } }
+</style>
+
+<figure class="sk card-outlined">
+  <figcaption class="sk-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 760 420" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── column captions ─────────────────────────────────────────────────── -->
+    <text class="sk-col" x="40" y="26">{{NODE}}</text>                       <!-- e.g. 流入元 -->
+    <text class="sk-col" x="720" y="26" text-anchor="end">{{NODE}}</text>    <!-- e.g. 結果 -->
+
+    <!-- ── ribbons FIRST (stroke-width inline = quantity·3, cat = source) ────── -->
+    <path class="sk-flow cat-1" style="stroke-width:90" d="M64,85  C380,85  380,85  696,85"/>    <!-- S1→T1 30 -->
+    <path class="sk-flow cat-1" style="stroke-width:45" d="M64,152 C380,152 380,250 696,250"/>   <!-- S1→T2 15 -->
+    <path class="sk-flow cat-1" style="stroke-width:15" d="M64,182 C380,182 380,354 696,354"/>   <!-- S1→T3 5 -->
+    <path class="sk-flow cat-2" style="stroke-width:36" d="M64,228 C380,228 380,148 696,148"/>   <!-- S2→T1 12 -->
+    <path class="sk-flow cat-2" style="stroke-width:54" d="M64,273 C380,273 380,300 696,300"/>   <!-- S2→T2 18 -->
+    <path class="sk-flow cat-3" style="stroke-width:42" d="M64,341 C380,341 380,187 696,187"/>   <!-- S3→T1 14 -->
+    <path class="sk-flow cat-3" style="stroke-width:18" d="M64,371 C380,371 380,371 696,371"/>   <!-- S3→T3 6 -->
+
+    <!-- ── SOURCE node bars (left) - one rect.sk-node.cat-N + name + value ───── -->
+    <g>
+      <rect class="sk-node cat-1" x="40" y="40" width="24" height="150"/>
+      <text class="sk-name" x="34" y="109" text-anchor="end">{{NODE}}</text>  <!-- e.g. オーガニック -->
+      <text class="sk-val"  x="34" y="125" text-anchor="end">{{VALUE}}</text> <!-- e.g. 50 -->
+    </g>
+    <g>
+      <rect class="sk-node cat-2" x="40" y="210" width="24" height="90"/>
+      <text class="sk-name" x="34" y="249" text-anchor="end">{{NODE}}</text>  <!-- e.g. 広告 -->
+      <text class="sk-val"  x="34" y="265" text-anchor="end">{{VALUE}}</text> <!-- e.g. 30 -->
+    </g>
+    <g>
+      <rect class="sk-node cat-3" x="40" y="320" width="24" height="60"/>
+      <text class="sk-name" x="34" y="344" text-anchor="end">{{NODE}}</text>  <!-- e.g. 紹介 -->
+      <text class="sk-val"  x="34" y="360" text-anchor="end">{{VALUE}}</text> <!-- e.g. 20 -->
+    </g>
+
+    <!-- ── TARGET node bars (right) - rect.sk-node.sk-target + name + value ──── -->
+    <g>
+      <rect class="sk-node sk-target" x="696" y="40" width="24" height="168"/>
+      <text class="sk-name" x="726" y="118">{{NODE}}</text>  <!-- e.g. 登録 -->
+      <text class="sk-val"  x="726" y="134">{{VALUE}}</text> <!-- e.g. 56 -->
+    </g>
+    <g>
+      <rect class="sk-node sk-target" x="696" y="228" width="24" height="99"/>
+      <text class="sk-name" x="726" y="271">{{NODE}}</text>  <!-- e.g. 離脱 -->
+      <text class="sk-val"  x="726" y="287">{{VALUE}}</text> <!-- e.g. 33 -->
+    </g>
+    <g>
+      <rect class="sk-node sk-target" x="696" y="347" width="24" height="33"/>
+      <text class="sk-name" x="726" y="357">{{NODE}}</text>  <!-- e.g. 保留 -->
+      <text class="sk-val"  x="726" y="373">{{VALUE}}</text> <!-- e.g. 11 -->
+    </g>
+    <!-- ↑ repeat: keep each bar height = Σ its ribbon widths so slices stack flush -->
+  </svg>
+</figure>

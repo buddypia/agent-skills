@@ -1,0 +1,81 @@
+<!-- ============================================================================
+MODULE: persona-card                                        lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A user-persona card (pure CSS - no SVG) profiling ONE archetype for UX
+         work: an initials avatar (--cat-N tinted), name, a role/age/context meta
+         line, a one-line quote, then three tinted mini-sections - Goals (success),
+         Frustrations (danger), Behaviors (accent) - plus a row of trait/tool
+         chips. Cards are sized to sit 2-3 across in a grid. For persona walls,
+         audience framing, empathy maps. Distinction: feature-grid lists PRODUCT
+         features; stat-list shows metric facts; persona-card profiles a PERSON.
+VARIABLES: section {{TITLE}}; per card {{INITIALS}} {{NAME}} {{META}} (role · age ·
+          context) {{QUOTE}}; per mini-section {{HEAD}} + repeated {{ITEM}}; per chip {{TAG}}.
+SCALING:  .psn-grid = repeat(var(--psn-cols,2),1fr), one column below 780px. The
+          avatar hue follows the card's .cat-N (defaults to --cat-1); each
+          mini-section drives --ph-tint for its heading dot.
+REQUIRES: core/elements.css (.card-outlined, .chip), core/tokens.css (--cat-1..5,
+          --accent, --color-success/-danger, --bg-surface, --text-*, --border-*,
+          --radius-*, --sp-*, --type-*, --tracking-tight)
+MODULE CSS: inline the data-module="persona-card" style block once. Set
+            style="--psn-cols:N" (2-3) on .psn-grid.
+INTERACTION: none (static). aria-label on the section; avatar initials aria-hidden.
+USAGE: one <article class="psn card-outlined cat-N"> per persona; duplicate it
+       across the grid. Drop any mini-section or the chip row that does not apply.
+============================================================================ -->
+<style data-module="persona-card">
+  .psn-sec h2 { margin-bottom: var(--sp-5); }
+  .psn-grid { display: grid; grid-template-columns: repeat(var(--psn-cols, 2), 1fr); gap: var(--sp-4); }
+  @media (max-width: 780px) { .psn-grid { grid-template-columns: 1fr; } }
+  .psn { --psn-tint: var(--cat-1); display: grid; gap: var(--sp-3); align-content: start; }
+  .psn.cat-2 { --psn-tint: var(--cat-2); } .psn.cat-3 { --psn-tint: var(--cat-3); }
+  .psn.cat-4 { --psn-tint: var(--cat-4); } .psn.cat-5 { --psn-tint: var(--cat-5); }
+  .psn-top { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: center; }
+  .psn-avatar { width: 52px; height: 52px; border-radius: var(--radius-pill); display: grid; place-items: center; font: var(--type-h3); font-weight: 700; color: color-mix(in srgb, var(--psn-tint) 88%, var(--text-primary)); background: color-mix(in srgb, var(--psn-tint) 18%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--psn-tint) 40%, var(--border-default)); }
+  .psn-name { font: var(--type-h3); color: var(--text-primary); }
+  .psn-meta { font: var(--type-caption); color: var(--text-muted); }
+  .psn-quote { font: var(--type-small); font-style: italic; color: var(--text-secondary); padding-left: var(--sp-3); border-left: 2px solid color-mix(in srgb, var(--psn-tint) 50%, var(--border-default)); }
+  .psn-block { --ph-tint: var(--accent); display: grid; gap: var(--sp-1); }
+  .psn-block.psn-goals { --ph-tint: var(--color-success); }
+  .psn-block.psn-frus  { --ph-tint: var(--color-danger); }
+  .psn-block.psn-behav { --ph-tint: var(--accent); }
+  .psn-h { display: flex; align-items: center; gap: var(--sp-2); font: var(--type-caption); font-weight: 700; letter-spacing: var(--tracking-tight); color: var(--text-primary); }
+  .psn-h::before { content: ""; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--ph-tint); }
+  .psn-list { margin: 0; padding-left: var(--sp-5); display: grid; gap: 2px; font: var(--type-small); color: var(--text-secondary); }
+  .psn-tags { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+</style>
+
+<section class="psn-sec" aria-label="{{TITLE}}">
+  <h2>{{TITLE}}</h2> <!-- e.g. ターゲットユーザー像 -->
+  <div class="psn-grid" style="--psn-cols:2">
+
+    <!-- ── one persona per <article> (duplicate across the grid) ─────────────── -->
+    <article class="psn card-outlined cat-1">
+      <div class="psn-top">
+        <span class="psn-avatar" aria-hidden="true">{{INITIALS}}</span> <!-- e.g. TS -->
+        <div>
+          <div class="psn-name">{{NAME}}</div>   <!-- e.g. 田中 さとみ -->
+          <div class="psn-meta">{{META}}</div>   <!-- e.g. 営業マネージャー · 38歳 · 都市部在住 -->
+        </div>
+      </div>
+      <p class="psn-quote">{{QUOTE}}</p> <!-- e.g. 「移動中でも要点だけ素早く確認したい」 -->
+
+      <div class="psn-block psn-goals">
+        <span class="psn-h">{{HEAD}}</span> <!-- e.g. ゴール -->
+        <ul class="psn-list"><li>{{ITEM}}</li></ul> <!-- e.g. 商談準備を10分で終える -->
+      </div>
+      <div class="psn-block psn-frus">
+        <span class="psn-h">{{HEAD}}</span> <!-- e.g. 不満 -->
+        <ul class="psn-list"><li>{{ITEM}}</li></ul> <!-- e.g. 画面遷移が多く情報を探せない -->
+      </div>
+      <div class="psn-block psn-behav">
+        <span class="psn-h">{{HEAD}}</span> <!-- e.g. 行動特性 -->
+        <ul class="psn-list"><li>{{ITEM}}</li></ul> <!-- e.g. 通勤中にスマホで一括確認 -->
+      </div>
+
+      <div class="psn-tags">
+        <span class="chip">{{TAG}}</span> <!-- e.g. iPhone / Slack / せっかち -->
+        <!-- ↑ repeat: one .chip per tool or trait -->
+      </div>
+    </article>
+    <!-- ↑ repeat: one <article class="psn card-outlined cat-N"> per persona -->
+  </div>
+</section>

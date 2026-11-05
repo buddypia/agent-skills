@@ -1,0 +1,96 @@
+<!-- ============================================================================
+MODULE: leaderboard                                        lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A ranked standings table (pure CSS - no SVG). Each row carries a rank
+         badge (ranks 1-3 get medal-tinted badges via --cat/color tokens, the rest
+         a plain badge), a name, a horizontal value bar (width via inline %), the
+         value, and a movement indicator (▲2 / ▼1 / - in success/danger/muted).
+         For current standings, top-N lists, sales/points leaderboards.
+         Distinction: chart-bar compares categories with no ranking semantics;
+         bump-chart plots rank TRAJECTORIES over time; this is the CURRENT
+         standings snapshot with rank position and since-last movement.
+VARIABLES: {{TITLE}}; per row {{RANK}} {{NAME}} {{VALUE}} + inline bar --v (value /
+           max × 100%) + a .cat-N tint + a movement span (.up ▲ / .down ▼ / .flat -)
+           with {{MOVE}}.
+SCALING:   each row is a grid `auto minmax(96px,1fr) 2.4fr auto auto`. The bar fill
+           width is --v = value / maxValue × 100%. Top-3 badges take .is-1/.is-2/.is-3
+           for gold/silver/bronze tints; all lower ranks share the plain badge.
+REQUIRES:  core/tokens.css (--accent, --cat-1..5, --color-success, --color-danger,
+           --color-warning, --bg-surface, --bg-muted, --border-*, --text-*,
+           --font-mono, --radius-*, --sp-*, --shadow-*, --dur-fast, --ease),
+           core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="leaderboard" style block once.
+INTERACTION: hover lifts a row and brightens its bar (paint only, reduced-motion guarded).
+             aria-label on the figure; ranks, names, values are real text.
+USAGE: one .ldb-row per entrant in rank order; set the badge .is-1/.is-2/.is-3 on the
+       top three, style="--v:NN%" on the bar fill, and .up/.down/.flat on the move span.
+============================================================================ -->
+<style data-module="leaderboard">
+  .ldb { margin: 0; }
+  .ldb-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .ldb-list { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .ldb-row { display: grid; grid-template-columns: auto minmax(96px, 1fr) 2.4fr auto auto; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .ldb-row:hover { background: var(--bg-muted); box-shadow: var(--shadow-sm); }
+  /* rank badge - plain by default; medal tints for the top three */
+  .ldb-rank { display: grid; place-items: center; min-width: 1.9em; height: 1.9em; padding: 0 var(--sp-1); border-radius: var(--radius-pill); font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); background: var(--bg-muted); border: 1px solid var(--border-default); }
+  .ldb-rank.is-1 { color: var(--text-primary); background: color-mix(in srgb, var(--color-warning) 30%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-warning) 60%, var(--border-default)); }
+  .ldb-rank.is-2 { color: var(--text-primary); background: color-mix(in srgb, var(--text-muted) 22%, var(--bg-surface)); border-color: color-mix(in srgb, var(--text-muted) 48%, var(--border-default)); }
+  .ldb-rank.is-3 { color: var(--text-primary); background: color-mix(in srgb, var(--color-warning) 26%, color-mix(in srgb, var(--color-danger) 40%, var(--bg-surface))); border-color: color-mix(in srgb, var(--color-danger) 42%, var(--border-default)); }
+  .ldb-name { font: var(--type-small); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* value bar - cat-tinted track fill; --v is value/max as a percent */
+  .ldb-bar { height: 10px; border-radius: var(--radius-pill); background: var(--bg-muted); overflow: hidden; }
+  .ldb-fill { --bc: var(--accent); display: block; height: 100%; width: var(--v); border-radius: inherit; background: color-mix(in srgb, var(--bc) 72%, var(--bg-surface)); transition: filter var(--dur-fast) var(--ease); }
+  .ldb-row:hover .ldb-fill { filter: brightness(1.07); }
+  .ldb-fill.cat-1 { --bc: var(--cat-1); } .ldb-fill.cat-2 { --bc: var(--cat-2); }
+  .ldb-fill.cat-3 { --bc: var(--cat-3); } .ldb-fill.cat-4 { --bc: var(--cat-4); }
+  .ldb-fill.cat-5 { --bc: var(--cat-5); }
+  .ldb-val { font: var(--type-small); font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); text-align: right; min-width: 3.5em; }
+  /* movement indicator - colored by direction */
+  .ldb-move { display: inline-flex; align-items: center; gap: 2px; font: var(--type-caption); font-family: var(--font-mono); font-variant-numeric: tabular-nums; min-width: 2.6em; justify-content: flex-end; }
+  .ldb-move.up { color: var(--color-success); }
+  .ldb-move.down { color: var(--color-danger); }
+  .ldb-move.flat { color: var(--text-muted); }
+  @media (prefers-reduced-motion: reduce) { .ldb-row, .ldb-fill { transition: none; } }
+</style>
+
+<figure class="ldb card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="ldb-title">{{TITLE}}</figcaption>
+  <div class="ldb-list">
+    <!-- ↓ one .ldb-row per entrant, in rank order; --v = value / maxValue × 100% -->
+    <div class="ldb-row">
+      <span class="ldb-rank is-1">{{RANK}}</span>                    <!-- e.g. 1 -->
+      <span class="ldb-name">{{NAME}}</span>                          <!-- e.g. 田中チーム -->
+      <span class="ldb-bar"><span class="ldb-fill cat-1" style="--v:100%"></span></span>
+      <span class="ldb-val">{{VALUE}}</span>                          <!-- e.g. 1,280 -->
+      <span class="ldb-move up">▲{{MOVE}}</span>                      <!-- e.g. ▲2 -->
+    </div>
+    <div class="ldb-row">
+      <span class="ldb-rank is-2">{{RANK}}</span>                    <!-- e.g. 2 -->
+      <span class="ldb-name">{{NAME}}</span>                          <!-- e.g. 佐藤チーム -->
+      <span class="ldb-bar"><span class="ldb-fill cat-2" style="--v:87%"></span></span>
+      <span class="ldb-val">{{VALUE}}</span>                          <!-- e.g. 1,114 -->
+      <span class="ldb-move down">▼{{MOVE}}</span>                    <!-- e.g. ▼1 -->
+    </div>
+    <div class="ldb-row">
+      <span class="ldb-rank is-3">{{RANK}}</span>                    <!-- e.g. 3 -->
+      <span class="ldb-name">{{NAME}}</span>                          <!-- e.g. 鈴木チーム -->
+      <span class="ldb-bar"><span class="ldb-fill cat-3" style="--v:71%"></span></span>
+      <span class="ldb-val">{{VALUE}}</span>                          <!-- e.g. 908 -->
+      <span class="ldb-move flat">-</span>                            <!-- e.g. - (変動なし) -->
+    </div>
+    <div class="ldb-row">
+      <span class="ldb-rank">{{RANK}}</span>                         <!-- e.g. 4 -->
+      <span class="ldb-name">{{NAME}}</span>                          <!-- e.g. 山本チーム -->
+      <span class="ldb-bar"><span class="ldb-fill cat-4" style="--v:58%"></span></span>
+      <span class="ldb-val">{{VALUE}}</span>                          <!-- e.g. 742 -->
+      <span class="ldb-move up">▲{{MOVE}}</span>                      <!-- e.g. ▲3 -->
+    </div>
+    <div class="ldb-row">
+      <span class="ldb-rank">{{RANK}}</span>                         <!-- e.g. 5 -->
+      <span class="ldb-name">{{NAME}}</span>                          <!-- e.g. 中村チーム -->
+      <span class="ldb-bar"><span class="ldb-fill cat-5" style="--v:44%"></span></span>
+      <span class="ldb-val">{{VALUE}}</span>                          <!-- e.g. 563 -->
+      <span class="ldb-move down">▼{{MOVE}}</span>                    <!-- e.g. ▼2 -->
+    </div>
+    <!-- ↑ repeat: one .ldb-row per entrant; .is-1/.is-2/.is-3 only on the top three -->
+  </div>
+</figure>

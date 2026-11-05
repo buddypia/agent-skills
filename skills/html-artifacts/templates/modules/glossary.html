@@ -1,0 +1,59 @@
+<!-- ============================================================================
+MODULE: glossary                                            lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: A term-definition list (pure CSS - no SVG) in definition-list styling. Each
+         entry: a bold term with an optional abbreviation badge and a mono reading /
+         pronunciation, an optional trailing category chip, then an indented
+         definition paragraph. Rows alternate a subtle tint for scanability. For
+         spec glossaries, domain onboarding, acronym keys, 用語集. Distinction:
+         data-table is tabular multi-column data; checklist tracks completion;
+         collapsible hides long content behind a toggle; glossary presents flat
+         TERM → DEFINITION reference pairs.
+VARIABLES: {{TITLE}}; per entry {{TERM}} + optional {{ABBR}} + optional {{READING}}
+          + optional {{CATEGORY}} chip + {{DEFINITION}}.
+SCALING:  single-column <dl>; each entry is a .gl-item wrapping <dt>/<dd>. Even
+          rows take a faint --accent tint; the definition sits under a soft accent
+          rail. The category chip is pushed to the trailing edge (margin-left:auto).
+REQUIRES: core/elements.css (.card-outlined, .chip), core/tokens.css (--accent,
+          --bg-card, --bg-surface, --text-*, --border-*, --font-mono, --radius-*,
+          --sp-*, --type-*)
+MODULE CSS: inline the data-module="glossary" style block once.
+INTERACTION: none (static). Semantic <dl>/<dt>/<dd>; the abbreviation badge is a
+             real inline element so it is read alongside the term.
+USAGE: one <div class="gl-item"> per entry inside the <dl>, each holding one <dt
+       class="gl-term"> and one <dd class="gl-def">. Drop the .gl-abbr, .gl-reading
+       or .gl-cat spans that do not apply.
+============================================================================ -->
+<style data-module="glossary">
+  .gl { margin: 0; }
+  .gl-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .gl-list { margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+  .gl-item { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  .gl-item:nth-child(even) { background: color-mix(in srgb, var(--accent) 3%, var(--bg-surface)); }
+  .gl-item:last-child { border-bottom: none; }
+  .gl-term { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); margin: 0; }
+  .gl-word { font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .gl-abbr { font: var(--type-caption); font-weight: 700; padding: 1px var(--sp-2); border-radius: var(--radius-xs); color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-subtle)); }
+  .gl-reading { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  .gl-cat { margin-left: auto; }               /* category chip pushed to trailing edge */
+  .gl-def { margin: var(--sp-1) 0 0; padding-left: var(--sp-3); font: var(--type-small); color: var(--text-secondary); border-left: 2px solid color-mix(in srgb, var(--accent) 22%, var(--border-subtle)); }
+</style>
+
+<figure class="gl card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="gl-title">{{TITLE}}</figcaption> <!-- e.g. 用語集 -->
+  <dl class="gl-list">
+
+    <!-- ── one .gl-item per term (drop the badge / reading / chip you don't need) -->
+    <div class="gl-item">
+      <dt class="gl-term">
+        <span class="gl-word">{{TERM}}</span>       <!-- e.g. サービスレベル目標 -->
+        <span class="gl-abbr">{{ABBR}}</span>       <!-- e.g. SLO（省略可） -->
+        <span class="gl-reading">{{READING}}</span> <!-- e.g. sloʊ（読み・省略可） -->
+        <span class="chip gl-cat">{{CATEGORY}}</span> <!-- e.g. 運用（省略可） -->
+      </dt>
+      <dd class="gl-def">{{DEFINITION}}</dd>
+      <!-- e.g. 一定期間内に満たすべきサービス品質の目標値。SLA より内部向けで厳しく設定する。 -->
+    </div>
+    <!-- ↑ repeat: one .gl-item per term -->
+
+  </dl>
+</figure>

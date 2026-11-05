@@ -1,0 +1,87 @@
+<!-- ============================================================================
+MODULE: pipeline-flow                                      lineage: unified-system v7 architecture pipeline
+PURPOSE: Horizontal multi-stage data or event processing pipeline. Renders
+         sequential phases (e.g. Ingress → Validate → Queue → Transform → Dispatch)
+         with step cards, protocol badges, data transformation previews, and
+         conditional branching (go / skip / retry / dead-letter).
+BUILDER: flow:"line" (one row + arrows) · stage emphasis:"hero"|"quiet" · badge kind go|warn|stop
+VARIABLES: {{TITLE}} {{DESC}} {{N_COLS}} (stages per row: n ≤ 5 → n, 6 or 9 → 3, else 4) {{N_COLS_MD}} (≤900px: 3 if n%3==0 or n==5, else 2)
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="pipeline-flow" style block once.
+INTERACTION: none (pure responsive CSS, hover lifts, print safe).
+============================================================================ -->
+<style data-module="pipeline-flow">
+  .pipe { width: 100%; display: grid; gap: var(--sp-4); }
+  .pipe-head { display: grid; gap: var(--sp-1); }
+  .pipe-title { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .pipe-desc { font: var(--type-small); color: var(--text-secondary); max-width: 75ch; }
+
+  /* balanced columns (5 stages → 5 across, not 4 + an orphan); --pipe-cols / --pipe-cols-md are
+     set by the builder - hand-pasted markup sets them inline, e.g. style="--pipe-cols:5;--pipe-cols-md:3" */
+  .pipe { container-type: inline-size; }
+  .pipe-track { display: grid; grid-template-columns: repeat(var(--pipe-cols, 4), minmax(0, 1fr)); gap: var(--sp-3); align-items: stretch; }
+  @container (max-width: 900px) { .pipe-track { grid-template-columns: repeat(var(--pipe-cols-md, 2), minmax(0, 1fr)); } }
+  @container (max-width: 560px) { .pipe-track { grid-template-columns: minmax(0, 1fr); } }
+  .pipe-stage { min-width: 0; display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-surface); overflow: hidden; position: relative; }
+
+  .pipe-stage-head { padding: var(--sp-3) var(--sp-3); background: var(--bg-muted); border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+  .pipe-stage-num { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; color: var(--accent); width: 20px; height: 20px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); display: grid; place-items: center; flex: none; }
+  .pipe-stage-name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+  .pipe-stage-proto { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); font-size: 10px; }
+
+  .pipe-stage-body { padding: var(--sp-3); display: grid; gap: var(--sp-2); align-content: start; font: var(--type-small); }
+  .pipe-card { padding: var(--sp-3); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-muted); display: grid; gap: var(--sp-2); }
+  .pipe-card-title { font-weight: 600; font-size: 12.5px; color: var(--text-primary); display: flex; align-items: center; gap: var(--sp-2); }
+  .pipe-card-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+
+  .pipe-io { display: grid; gap: 4px; font-family: var(--font-mono); font-size: 10.5px; padding-top: var(--sp-2); border-top: 1px dashed var(--border-subtle); }
+  .pipe-io-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+  .pipe-io-lbl { color: var(--text-muted); flex: none; }
+  .pipe-io-val { color: var(--text-primary); font-weight: 600; text-align: right; word-break: break-word; }
+
+  .pipe-branch { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--sp-1); }
+  .pipe-badge { font-size: 10px; font-family: var(--font-mono); font-weight: 600; padding: 2px 6px; border-radius: var(--radius-xs); }
+  .pipe-badge-go { background: color-mix(in srgb, var(--color-success) 14%, transparent); color: var(--color-success); }
+  .pipe-badge-warn { background: color-mix(in srgb, var(--color-warning) 14%, transparent); color: var(--color-warning); }
+  .pipe-badge-stop { background: color-mix(in srgb, var(--color-danger) 14%, transparent); color: var(--color-danger); }
+  /* flow:"line" - one row, arrows between stages; stacks with down arrows below 720px */
+  .pipe-line { display: flex; align-items: stretch; gap: var(--sp-2); }
+  .pipe-line > .pipe-stage { flex: 1 1 0; }
+  .pipe-arrow { flex: none; align-self: center; color: var(--text-muted); font-size: 18px; line-height: 1; }
+  @container (max-width: 720px) { .pipe-line { flex-direction: column; } .pipe-line > .pipe-stage { flex: none; } .pipe-arrow { transform: rotate(90deg); } }
+  /* stage emphasis: hero = the step that matters (differs, decides), quiet = same as the baseline */
+  .pipe-stage-hero { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .pipe-stage-hero .pipe-stage-head { background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); }
+  .pipe-stage-quiet { border-style: dashed; background: transparent; }
+  .pipe-stage-quiet .pipe-stage-head, .pipe-stage-quiet .pipe-card { background: transparent; }
+</style>
+
+<section class="pipe" aria-label="{{TITLE}}">
+  <header class="pipe-head">
+    <h2 class="pipe-title">{{TITLE}}</h2>
+    <p class="pipe-desc">{{DESC}}</p>
+  </header>
+  <div class="pipe-track" style="--pipe-cols:{{N_COLS}};--pipe-cols-md:{{N_COLS_MD}}">
+    <!-- Stage 1 -->
+    <article class="pipe-stage">
+      <header class="pipe-stage-head">
+        <div style="display:flex;align-items:center;gap:var(--sp-2)">
+          <span class="pipe-stage-num">1</span>
+          <span class="pipe-stage-name">Ingress &amp; Ingestion</span>
+        </div>
+        <span class="pipe-stage-proto">REST / ACI</span>
+      </header>
+      <div class="pipe-stage-body">
+        <div class="pipe-card">
+          <div class="pipe-card-title">{{CARD_TITLE}}</div>
+          <p class="pipe-card-desc">{{CARD_DESC}}</p>
+          <div class="pipe-io">
+            <div class="pipe-io-row"><span class="pipe-io-lbl">IN:</span><span class="pipe-io-val">{{INPUT}}</span></div>
+            <div class="pipe-io-row"><span class="pipe-io-lbl">OUT:</span><span class="pipe-io-val">{{OUTPUT}}</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <!-- Stages repeat... -->
+  </div>
+</section>

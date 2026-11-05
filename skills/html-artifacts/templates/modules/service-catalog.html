@@ -1,0 +1,67 @@
+<!-- ============================================================================
+MODULE: service-catalog                                    lineage: unified-system v7 architecture catalog
+PURPOSE: Structured system service / component directory. Cards display
+         component category, repository path, technologies, protocols, inbound/
+         outbound dependencies, scaling characteristics, and key responsibilities.
+VARIABLES: {{TITLE}} {{DESC}}
+REQUIRES: core/tokens.css, core/elements.css
+MODULE CSS: inline the data-module="service-catalog" style block once.
+INTERACTION: none (pure responsive CSS, hover lifts, print safe).
+============================================================================ -->
+<style data-module="service-catalog">
+  .scat { width: 100%; display: grid; gap: var(--sp-4); }
+  .scat-head { display: grid; gap: var(--sp-1); }
+  .scat-title { font: var(--type-h2); color: var(--text-primary); margin: 0; }
+  .scat-desc { font: var(--type-small); color: var(--text-secondary); max-width: 75ch; }
+
+  .scat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--sp-4); }
+  .scat-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-surface); box-shadow: var(--shadow-sm); overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .scat-card:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle)); box-shadow: var(--shadow-md); }
+
+  .scat-card-head { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); background: var(--bg-muted); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+  .scat-name { font-weight: 700; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: var(--sp-2); }
+  .scat-path { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .scat-role { font: var(--type-caption); font-family: var(--font-mono); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface)); color: var(--accent); }
+
+  .scat-card-body { padding: var(--sp-4); display: grid; gap: var(--sp-3); align-content: start; font: var(--type-small); }
+  .scat-summary { color: var(--text-secondary); font-size: 12.5px; line-height: 1.55; }
+
+  .scat-kv { display: grid; gap: var(--sp-1); font-size: 11.5px; border-top: 1px solid var(--border-subtle); padding-top: var(--sp-2); }
+  .scat-row { display: grid; grid-template-columns: 80px 1fr; gap: var(--sp-2); padding: 2px 0; }
+  .scat-k { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 10.5px; }
+  .scat-v { color: var(--text-primary); font-family: var(--font-mono); }
+
+  .scat-card-foot { padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border-subtle); background: color-mix(in srgb, var(--bg-muted) 50%, var(--bg-surface)); display: flex; flex-wrap: wrap; gap: 4px; }
+  .scat-tag { font-size: 10px; font-family: var(--font-mono); color: var(--text-secondary); background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 2px 6px; border-radius: var(--radius-xs); }
+</style>
+
+<section class="scat" aria-label="{{TITLE}}">
+  <header class="scat-head">
+    <h2 class="scat-title">{{TITLE}}</h2>
+    <p class="scat-desc">{{DESC}}</p>
+  </header>
+  <div class="scat-grid">
+    <!-- Component card example -->
+    <article class="scat-card">
+      <header class="scat-card-head">
+        <div>
+          <div class="scat-name">API Service</div>
+          <span class="scat-path">apps/api</span>
+        </div>
+        <span class="scat-role">Gateway</span>
+      </header>
+      <div class="scat-card-body">
+        <p class="scat-summary">{{SUMMARY}}</p>
+        <div class="scat-kv">
+          <div class="scat-row"><span class="scat-k">Tech</span><span class="scat-v">NestJS / Express / Node 20</span></div>
+          <div class="scat-row"><span class="scat-k">Port</span><span class="scat-v">HTTP :3000</span></div>
+          <div class="scat-row"><span class="scat-k">Storage</span><span class="scat-v">MongoDB, Redis</span></div>
+        </div>
+      </div>
+      <footer class="scat-card-foot">
+        <span class="scat-tag">Stateless</span>
+        <span class="scat-tag">Auto-scaling</span>
+      </footer>
+    </article>
+  </div>
+</section>

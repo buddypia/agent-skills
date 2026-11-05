@@ -1,0 +1,65 @@
+<!-- ============================================================================
+MODULE: venn                                                lineage: unified-system original (concept/overlap)
+PURPOSE: Self-contained SVG Venn diagram (NO external libs, NO mix-blend). Two or
+         three translucent circles (fill = --cat-N mixed with transparent, so the
+         overlaps darken by plain alpha compositing) with a set label per circle and
+         a label in each intersection. For overlapping concepts, shared
+         responsibility (RACI-ish), skill-set / role overlap, scope intersections.
+VARIABLES: {{TITLE}} + per set {{SET_LABEL}} + per overlap {{OVERLAP_LABEL}}.
+GEOMETRY:  3-set arrangement - cx=200,cy=175; circle r=100; centers at the apex/
+           lower-left/lower-right: A=(200,115) B=(150,205) C=(250,205). Set labels
+           sit outside the shared core; pairwise labels at the lens midpoints
+           (~A∩B (155,178), A∩C (245,178), B∩C (200,232)), triple at (200,182).
+           For a 2-set diagram delete circle C: keep A=(160,175) B=(240,175).
+REQUIRES: core/tokens.css (--cat-1..5, --bg-surface, --border-default, --text-*, --font-mono, --sp-*)
+MODULE CSS: inline the data-module="venn" style block once.
+INTERACTION: none (static). role="img" + <title> a11y.
+USAGE: one <circle class="venn-set cat-N"> per set (draw them before the labels so
+       text stays on top); one <text class="venn-label"> per set and one
+       <text class="venn-cross"> per intersection you want named.
+============================================================================ -->
+<style data-module="venn">
+  .venn { margin: 0; }
+  .venn-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .venn svg { width: 100%; height: auto; max-width: 440px; margin-inline: auto; display: block; overflow: visible; }
+  @media (max-width: 640px) { .venn { overflow-x: auto; } .venn svg { min-width: 440px; } }
+  /* sets: translucent cat fills; overlaps deepen via alpha compositing (no blend) */
+  .venn-set { stroke-width: 1.5; transition: fill-opacity var(--dur-fast) var(--ease); }
+  .venn-set.cat-1 { fill: color-mix(in srgb, var(--cat-1) 26%, transparent); stroke: color-mix(in srgb, var(--cat-1) 70%, var(--border-default)); }
+  .venn-set.cat-2 { fill: color-mix(in srgb, var(--cat-2) 26%, transparent); stroke: color-mix(in srgb, var(--cat-2) 70%, var(--border-default)); }
+  .venn-set.cat-3 { fill: color-mix(in srgb, var(--cat-3) 26%, transparent); stroke: color-mix(in srgb, var(--cat-3) 70%, var(--border-default)); }
+  .venn-set.cat-4 { fill: color-mix(in srgb, var(--cat-4) 26%, transparent); stroke: color-mix(in srgb, var(--cat-4) 70%, var(--border-default)); }
+  .venn-set.cat-5 { fill: color-mix(in srgb, var(--cat-5) 26%, transparent); stroke: color-mix(in srgb, var(--cat-5) 70%, var(--border-default)); }
+  @media (hover: hover) {
+    .venn svg:hover .venn-set { fill-opacity: .75; }
+    .venn .venn-set:hover { fill-opacity: 1.15; }
+  }
+  .venn-label { fill: var(--text-primary); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--bg-surface); stroke-width: 3px; stroke-linejoin: round; }
+  .venn-cross { fill: var(--text-secondary); font: var(--type-caption); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--bg-surface); stroke-width: 3px; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: reduce) { .venn-set { transition: none; } }
+</style>
+
+<figure class="venn card-outlined">
+  <figcaption class="venn-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 440 350" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+
+    <!-- ── sets (drawn first, one <circle class="venn-set cat-N"> each) ─────── -->
+    <circle class="venn-set cat-1" cx="220" cy="118" r="108"/>
+    <circle class="venn-set cat-2" cx="162" cy="215" r="108"/>
+    <circle class="venn-set cat-3" cx="278" cy="215" r="108"/>
+    <!-- ↑ repeat: delete the third circle for a 2-set diagram -->
+
+    <!-- ── set labels (outside the shared core) ────────────────────────────── -->
+    <text class="venn-label" x="220" y="56">{{SET_LABEL}}</text>  <!-- e.g. デザイン -->
+    <text class="venn-label" x="128" y="256">{{SET_LABEL}}</text> <!-- e.g. エンジニアリング -->
+    <text class="venn-label" x="312" y="256">{{SET_LABEL}}</text> <!-- e.g. ビジネス -->
+
+    <!-- ── intersection labels (name only the overlaps that matter) ────────── -->
+    <text class="venn-cross" x="220" y="186">{{OVERLAP_LABEL}}</text> <!-- e.g. プロダクト -->
+    <text class="venn-cross" x="165" y="146">{{OVERLAP_LABEL}}</text> <!-- e.g. 体験 (A∩B) -->
+    <text class="venn-cross" x="275" y="146">{{OVERLAP_LABEL}}</text> <!-- e.g. ブランド (A∩C) -->
+    <text class="venn-cross" x="220" y="248">{{OVERLAP_LABEL}}</text> <!-- e.g. 実現性 (B∩C) -->
+    <!-- ↑ repeat / delete per overlap you name -->
+  </svg>
+</figure>

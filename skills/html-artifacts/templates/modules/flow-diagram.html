@@ -1,0 +1,127 @@
+<!-- ============================================================================
+MODULE: flow-diagram                                         lineage: html-visual(diagram) + html-flowchart-anthropic
+PURPOSE: Self-contained SVG flowchart (NO external libs, no Mermaid/D3). Shape
+         vocabulary: Start/End ellipse, Process rounded-rect, Decision diamond.
+         Orthogonal connectors with a shared arrowhead marker + Yes/No labels.
+VARIABLES: per node {{LABEL}} {{X}} {{Y}}  (X,Y = top-left of the node's box, fed
+           to transform="translate(X,Y)"; shapes drawn relative to that origin.
+           node W=160 H=64, so center = X+80, Y+32. Diamond uses W=176 H=88.)
+           per edge: {{FROM}} {{TO}} node ids + optional {{EDGE_LABEL}} (Yes/No).
+GEOMETRY:  each node is a <g data-node="ID" transform="translate(X,Y)"> so shape
+           coords are LOCAL to the node origin. Edges are <line data-edge
+           data-from="ID" data-to="ID"> - interactions.js re-routes them to the
+           live node centers (getBBox + translate) on load and on every drag, so
+           no manual waypoints are needed. Arrowhead via marker-end="url(#flow-arrow)".
+REQUIRES:  core/tokens.css (--bg-card, --accent, --border-default, --text-*, --radius-md)
+MODULE CSS: inline the data-module="flow-diagram" style block once.
+INTERACTION: draggable nodes (svg[data-draggable] + g[data-node]); edges auto-track
+           via [data-edge][data-from][data-to]; [data-drag-reset] restores layout.
+           Nodes are focusable + keyboard-movable (arrow keys). role="img" + <title> a11y.
+USAGE: duplicate a node <g data-node> per box + a <line data-edge> per edge; give
+       each node a unique data-node id and reference those ids in data-from/data-to.
+       Example below wires 5 nodes (Start→Process→Decision→{Yes→Process, No→End}→End).
+============================================================================ -->
+<style data-module="flow-diagram">
+  .flow { width: 100%; }
+  .flow svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  .flow [data-node] { cursor: grab; }
+  .flow [data-node]:active { cursor: grabbing; }
+  .flow [data-node]:focus-visible { outline: none; }
+  .flow [data-node]:focus-visible .node-shape { stroke: var(--accent); stroke-width: 2.5; }
+  /* shapes settle to their resting fill/stroke; hover/active firm the edge toward
+     the accent. transition only touches paint props (never geometry). */
+  .flow .node-start  { fill: color-mix(in srgb, var(--accent) 14%, var(--bg-card)); }
+  .flow .node-proc   { fill: var(--bg-card); }
+  .flow .node-dec    { fill: color-mix(in srgb, var(--color-warning) 16%, var(--bg-card)); }
+  .flow .node-shape  { stroke: var(--border-default); stroke-width: 1.5; stroke-linejoin: round; transition: stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease), fill var(--dur-fast) var(--ease); }
+  /* accent-tied hover: hairline edge warms toward the accent, fill picks up a faint
+     tint - calm enough for a dense diagram, confident on the active node. */
+  .flow [data-node]:hover .node-shape,
+  .flow [data-node].dragging .node-shape { stroke: color-mix(in srgb, var(--accent) 55%, var(--border-default)); stroke-width: 1.75; }
+  .flow [data-node]:hover .node-proc { fill: color-mix(in srgb, var(--accent) 6%, var(--bg-card)); }
+  .flow [data-node].dragging .node-shape { stroke: var(--accent); stroke-width: 2; }
+  .flow .node-label  { fill: var(--text-primary); font-size: 14px; font-weight: 500; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  /* connectors: rounded caps + a faint accent warmth on the hairline so the
+     orthogonal routing reads as a deliberate rail rather than a plain line. */
+  .flow .edge        { fill: none; stroke: color-mix(in srgb, var(--accent) 12%, var(--border-default)); stroke-width: 1.5; stroke-linecap: round; transition: stroke var(--dur-fast) var(--ease); }
+  .flow .edge-arrow  { fill: color-mix(in srgb, var(--accent) 12%, var(--border-default)); }
+  .flow .edge-label  { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); text-anchor: middle; dominant-baseline: middle; }
+  .flow-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .flow-reset { margin-top: var(--sp-3); }
+</style>
+
+<figure class="flow card-outlined">
+  <figcaption class="flow-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 520 560" data-draggable role="img" aria-label="{{TITLE}} (nodes can be dragged to reposition)">
+    <defs>
+      <!-- shared arrowhead - referenced by every connector via marker-end -->
+      <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="edge-arrow" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+    </defs>
+
+    <!-- ── CONNECTORS (drawn first so nodes sit on top) ───────────────────────
+         interactions.js routes each <line data-edge> from the data-from node
+         center to the data-to node center; coords here are just initial hints. -->
+    <!-- Start → Process -->
+    <line class="edge" data-edge data-from="start" data-to="process"
+          x1="260" y1="52" x2="260" y2="152" marker-end="url(#flow-arrow)"/>
+    <!-- Process → Decision -->
+    <line class="edge" data-edge data-from="process" data-to="decision"
+          x1="260" y1="152" x2="260" y2="264" marker-end="url(#flow-arrow)"/>
+    <!-- Decision -Yes→ Process (yes branch) -->
+    <line class="edge" data-edge data-from="decision" data-to="process-yes"
+          x1="260" y1="264" x2="260" y2="376" marker-end="url(#flow-arrow)"/>
+    <!-- Decision -No→ End (curved right-hand bypass so it clears Process-yes) -->
+    <path class="edge" data-edge data-from="decision" data-to="end"
+          d="M 348 264 C 420 264, 420 480, 340 480" marker-end="url(#flow-arrow)"/>
+    <!-- Process(yes branch) → End -->
+    <line class="edge" data-edge data-from="process-yes" data-to="end"
+          x1="260" y1="376" x2="260" y2="480" marker-end="url(#flow-arrow)"/>
+
+    <!-- edge labels (Yes/No) - interactions.js re-centers each on its FROM-TO edge -->
+    <text class="edge-label" data-edge-label="decision-process-yes" x="260" y="327">{{EDGE_LABEL}}</text> <!-- e.g. Yes -->
+    <text class="edge-label" data-edge-label="decision-end" x="394" y="372">{{EDGE_LABEL}}</text> <!-- e.g. No -->
+
+    <!-- ── NODES (each is g[data-node] transform="translate(X,Y)"; shapes LOCAL) ─ -->
+
+    <!-- ↓ Start/End node - ellipse (local center cx=80, cy=32, rx=80, ry=32) -->
+    <g data-node="start" transform="translate(180,20)" role="group" aria-label="{{LABEL}} draggable" tabindex="0">
+      <ellipse class="node-shape node-start" cx="80" cy="32" rx="80" ry="32"/>
+      <text class="node-label" x="80" y="32">{{LABEL}}</text> <!-- e.g. Start -->
+      <title>{{LABEL}}</title>
+    </g>
+
+    <!-- ↓ Process node - rounded rect (local x=0, y=0, w=160, h=64, rx=10) -->
+    <g data-node="process" transform="translate(180,120)" role="group" aria-label="{{LABEL}} draggable" tabindex="0">
+      <rect class="node-shape node-proc" x="0" y="0" width="160" height="64" rx="10"/>
+      <text class="node-label" x="80" y="32">{{LABEL}}</text> <!-- e.g. Validate input -->
+      <title>{{LABEL}}</title>
+    </g>
+
+    <!-- ↓ Decision node - diamond polygon (local W=176 H=88: top,right,bottom,left) -->
+    <g data-node="decision" transform="translate(172,220)" role="group" aria-label="{{LABEL}} draggable" tabindex="0">
+      <polygon class="node-shape node-dec" points="88,0 176,44 88,88 0,44"/>
+      <text class="node-label" x="88" y="44">{{LABEL}}</text> <!-- e.g. Valid? -->
+      <title>{{LABEL}}</title>
+    </g>
+
+    <!-- ↓ Process node (Yes branch) -->
+    <g data-node="process-yes" transform="translate(180,344)" role="group" aria-label="{{LABEL}} draggable" tabindex="0">
+      <rect class="node-shape node-proc" x="0" y="0" width="160" height="64" rx="10"/>
+      <text class="node-label" x="80" y="32">{{LABEL}}</text> <!-- e.g. Save record -->
+      <title>{{LABEL}}</title>
+    </g>
+
+    <!-- ↓ End node - ellipse -->
+    <g data-node="end" transform="translate(180,448)" role="group" aria-label="{{LABEL}} draggable" tabindex="0">
+      <ellipse class="node-shape node-start" cx="80" cy="32" rx="80" ry="32"/>
+      <text class="node-label" x="80" y="32">{{LABEL}}</text> <!-- e.g. End -->
+      <title>{{LABEL}}</title>
+    </g>
+    <!-- ↑ repeat node <g data-node> per box; repeat <line data-edge> per edge -->
+
+  </svg>
+  <button class="btn btn-ghost btn-sm no-print flow-reset" data-drag-reset>Reset layout</button>
+</figure>

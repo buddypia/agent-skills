@@ -1,0 +1,75 @@
+<!-- ============================================================================
+MODULE: slider-control                                       lineage: html-visual(prototype) + html-artifacts(editor)
+PURPOSE: Prototype tuner - a range input live-binds a CSS var (var(--demo-x)),
+         a readout echoes the value+unit, a preview box reads the var, and a
+         "Copy as CSS" button copies the rule. Dependency-free; theme-aware track.
+VARIABLES: {{LABEL}} (control name) {{MIN}} {{MAX}} {{VALUE}} (range) {{VAR}} (CSS var, e.g. --demo-x)
+           {{UNIT}} (e.g. px) {{STEP}} {{PROP}} (CSS prop the preview drives, e.g. border-radius)
+REQUIRES: core/tokens.css + core/elements.css (.card-outlined .btn .btn-ghost .btn-sm .eyebrow)
+          core/interactions.js (HA.slider wires [data-slider]; HA.copy wires [data-copy-text])
+MODULE CSS: inline the data-module="slider-control" style block once - styles the
+            theme-aware range track + thumb. Everything else leans on primitives.
+INTERACTION: input[type=range][data-slider="{{VAR}}"][data-out="#xval"][data-unit] +
+             button[data-copy-text] (Clipboard API, flips label to "Copied ✓").
+USAGE: drop one .slider-control per tunable. The range writes {{VAR}} on :root,
+       so the .preview-stage (and any element reading var({{VAR}})) updates live.
+============================================================================ -->
+<style data-module="slider-control">
+  .slider-control { display: grid; gap: var(--sp-4); }
+  .slider-row { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .slider-row label { min-width: 110px; font: var(--type-small); color: var(--text-secondary); }
+  /* readout reads as a tuned mono chip; accent-tints while the thumb is engaged */
+  .slider-out { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); user-select: all; min-width: 56px; text-align: right; padding: 2px var(--sp-2); border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); background: color-mix(in srgb, var(--bg-muted) 70%, transparent); font-variant-numeric: tabular-nums; transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+
+  /* theme-aware range (track + thumb), reset native chrome --------------- */
+  .slider-control input[type="range"] { flex: 1; min-width: 160px; height: 24px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; accent-color: var(--accent); }
+  /* track: hairline-bordered rail with a faint accent wash so it reads as "live" */
+  .slider-control input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: var(--radius-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 16%, var(--bg-muted)), var(--bg-muted)); border: 1px solid var(--border-subtle); transition: background var(--dur-fast) var(--ease); }
+  .slider-control input[type="range"]::-moz-range-track { height: 4px; border-radius: var(--radius-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 16%, var(--bg-muted)), var(--bg-muted)); border: 1px solid var(--border-subtle); }
+  /* thumb: accent disc on a surface ring; lifts/firms on hover & active */
+  .slider-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: var(--radius-pill); background: var(--accent); border: 2px solid var(--bg-surface); box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  .slider-control input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: var(--radius-pill); background: var(--accent); border: 2px solid var(--bg-surface); box-shadow: var(--shadow-sm); transition: box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease-out); }
+  .slider-control input[type="range"]:hover::-webkit-slider-thumb { box-shadow: var(--shadow-sm), 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); }
+  .slider-control input[type="range"]:hover::-moz-range-thumb { box-shadow: var(--shadow-sm), 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); }
+  .slider-control input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.08); box-shadow: var(--shadow-md), 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .slider-control input[type="range"]:active::-moz-range-thumb { transform: scale(1.08); box-shadow: var(--shadow-md), 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent); }
+  /* keyboard focus: accent ring on the thumb (mirrors the system focus language) */
+  .slider-control input[type="range"]:focus-visible { outline: none; }
+  .slider-control input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: var(--shadow-sm), 0 0 0 3px var(--bg-surface), 0 0 0 5px color-mix(in srgb, var(--accent) 55%, transparent); }
+  .slider-control input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: var(--shadow-sm), 0 0 0 3px var(--bg-surface), 0 0 0 5px color-mix(in srgb, var(--accent) 55%, transparent); }
+  /* while dragging, the readout chip warms to the accent */
+  .slider-control input[type="range"]:active + .slider-out,
+  .slider-control input[type="range"]:focus-visible + .slider-out { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border-subtle)); background: color-mix(in srgb, var(--accent) 8%, var(--bg-muted)); }
+
+  /* live preview reads the bound CSS var -------------------------------- */
+  /* atmospheric inset: faint accent wash + hairline, gentle inner depth */
+  .preview-stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 160px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--bg-muted)), var(--bg-muted)); border: 1px dashed var(--border-default); border-radius: var(--radius-md); padding: var(--sp-5); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary) 5%, transparent); }
+  .preview-box { width: 96px; height: 96px; background: var(--accent); /* the tuned property, driven by the bound var */ border-radius: var(--demo-x, 12px); box-shadow: var(--shadow-sm), 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); transition: border-radius var(--dur-fast) var(--ease), box-shadow var(--dur-mid) var(--ease-out); }
+  @media (hover: hover) {
+    .preview-stage:hover .preview-box { box-shadow: var(--shadow-md), 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+  }
+</style>
+
+<figure class="slider-control card-outlined">
+  <figcaption class="eyebrow">{{LABEL}}</figcaption>
+
+  <!-- ↓ repeat one .slider-row per tunable variable -->
+  <div class="slider-row">
+    <label for="slider-x">{{LABEL}}</label>
+    <input type="range" id="slider-x"
+           min="{{MIN}}" max="{{MAX}}" value="{{VALUE}}" step="{{STEP}}"
+           data-slider="{{VAR}}" data-out="#xval" data-unit="{{UNIT}}"
+           aria-label="{{LABEL}}">
+    <output class="slider-out" id="xval" for="slider-x">{{VALUE}}{{UNIT}}</output>
+  </div>
+  <!-- ↑ repeat -->
+
+  <!-- live preview: any element reading var({{VAR}}) updates as the slider moves -->
+  <div class="preview-stage">
+    <div class="preview-box" role="img" aria-label="Live preview of {{LABEL}}"></div>
+  </div>
+
+  <div class="cluster">
+    <button class="btn btn-ghost btn-sm" data-copy-text=".preview { {{PROP}}: var({{VAR}}); }">Copy as CSS</button>
+  </div>
+</figure>

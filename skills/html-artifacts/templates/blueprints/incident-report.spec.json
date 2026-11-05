@@ -1,0 +1,288 @@
+{
+  "title": "はなまるマーケット 決済障害 ポストモーテム",
+  "theme": "slate",
+  "layout": "stack",
+  "header": "split",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "POSTMORTEM",
+  "subtitle": "2026-06-14 決済確定障害の経緯・原因・再発防止",
+  "footer": "はなまるマーケット SREチーム / 2026-06-18",
+  "meta": [
+    {
+      "k": "発生日時",
+      "v": "2026-06-14 20:12"
+    },
+    {
+      "k": "影響時間",
+      "v": "1時間47分"
+    },
+    {
+      "k": "重大度",
+      "v": "SEV-1"
+    },
+    {
+      "k": "対応者",
+      "v": "SRE 高橋"
+    }
+  ],
+  "sections": [
+    {
+      "type": "html",
+      "html": "<figure class=\"ktw card-outlined\" aria-label=\"要点（3行サマリー）\"><figcaption class=\"ktw-title\">要点（3行サマリー）</figcaption><ol class=\"ktw-list\"><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">決済APIのコネクションプール枯渇により、20:12〜21:59の1時間47分、注文確定が最大68%失敗した。</span><span class=\"ktw-elab\">直接原因はDBフェイルオーバー後の接続リーク。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">影響ユーザーは約12,400名、機会損失は推定¥3.8M。</span><span class=\"ktw-elab\">夕食前のピーク時間帯と重なり被害が拡大した。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">恒久対策は接続プールの上限設定とヘルスチェック改善で、7月中に完了予定。</span><span class=\"ktw-elab\">暫定対策（ローリング再起動の自動化）は適用済み。</span></div></li></ol></figure>",
+      "cssModules": [
+        "key-takeaways"
+      ]
+    },
+    {
+      "type": "kpi",
+      "label": "影響指標",
+      "items": [
+        {
+          "label": "影響ユーザー数",
+          "value": "12,400名"
+        },
+        {
+          "label": "実質停止時間",
+          "value": "107分",
+          "valueNum": 107,
+          "suffix": "分"
+        },
+        {
+          "label": "注文失敗率（ピーク）",
+          "value": "68%",
+          "delta": "基準0%",
+          "dir": "down"
+        },
+        {
+          "label": "月間可用性",
+          "value": "99.76%",
+          "delta": "0.19pt",
+          "dir": "down"
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "障害タイムライン",
+      "events": [
+        {
+          "date": "20:08",
+          "title": "RDSフェイルオーバー発生",
+          "body": "マネージドDBで計画外のフェイルオーバーが発生。",
+          "status": "done"
+        },
+        {
+          "date": "20:12",
+          "title": "決済API応答遅延を検知",
+          "body": "合成監視が注文確定の遅延を検知しアラート発報。",
+          "status": "done"
+        },
+        {
+          "date": "20:25",
+          "title": "インシデント宣言（SEV-1）",
+          "body": "オンコールがSEV-1を宣言し対策チームを招集。",
+          "status": "done"
+        },
+        {
+          "date": "21:03",
+          "title": "原因特定：接続リーク",
+          "body": "接続プールが枯渇し新規接続を確立できない状態を特定。",
+          "status": "done"
+        },
+        {
+          "date": "21:40",
+          "title": "暫定対応：ローリング再起動",
+          "body": "決済サービスを順次再起動し接続を回復。",
+          "status": "done"
+        },
+        {
+          "date": "21:59",
+          "title": "全機能復旧を確認",
+          "body": "注文確定の成功率が通常値へ回復、監視を継続。",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"fb card-outlined\"><figcaption class=\"fb-title\">原因分析（なぜ枯渇したか）</figcaption><svg viewBox=\"0 0 760 420\" role=\"img\" aria-label=\"原因分析（なぜ枯渇したか）\"><title>原因分析（なぜ枯渇したか）</title><line class=\"fb-spine\" x1=\"40\" y1=\"210\" x2=\"606\" y2=\"210\"/><rect class=\"fb-head\" x=\"606\" y=\"174\" width=\"150\" height=\"72\"/><text class=\"fb-head-label\" x=\"681\" y=\"210\">決済確定の大規模失敗</text><g class=\"fb-bone cat-1\"><line class=\"fb-major\" x1=\"240\" y1=\"210\" x2=\"170\" y2=\"70\"/><text class=\"fb-cat\" x=\"170\" y=\"58\">アプリ実装</text><line class=\"fb-rib\" x1=\"210\" y1=\"150\" x2=\"154\" y2=\"150\"/><text class=\"fb-cause\" x=\"150\" y=\"153\">接続を閉じない経路</text><line class=\"fb-rib\" x1=\"190\" y1=\"110\" x2=\"134\" y2=\"110\"/><text class=\"fb-cause\" x=\"130\" y=\"113\">タイムアウト未設定</text></g><g class=\"fb-bone cat-2\"><line class=\"fb-major\" x1=\"470\" y1=\"210\" x2=\"400\" y2=\"70\"/><text class=\"fb-cat\" x=\"400\" y=\"58\">基盤・DB</text><line class=\"fb-rib\" x1=\"440\" y1=\"150\" x2=\"384\" y2=\"150\"/><text class=\"fb-cause\" x=\"380\" y=\"153\">計画外フェイルオーバー</text><line class=\"fb-rib\" x1=\"420\" y1=\"110\" x2=\"364\" y2=\"110\"/><text class=\"fb-cause\" x=\"360\" y=\"113\">プール上限が既定値</text></g><g class=\"fb-bone cat-3\"><line class=\"fb-major\" x1=\"355\" y1=\"210\" x2=\"285\" y2=\"350\"/><text class=\"fb-cat\" x=\"285\" y=\"368\">監視・検知</text><line class=\"fb-rib\" x1=\"325\" y1=\"270\" x2=\"269\" y2=\"270\"/><text class=\"fb-cause\" x=\"265\" y=\"273\">接続数メトリクス欠如</text><line class=\"fb-rib\" x1=\"305\" y1=\"310\" x2=\"249\" y2=\"310\"/><text class=\"fb-cause\" x=\"245\" y=\"313\">復旧が手動</text></g><g class=\"fb-bone cat-4\"><line class=\"fb-major\" x1=\"585\" y1=\"210\" x2=\"515\" y2=\"350\"/><text class=\"fb-cat\" x=\"515\" y=\"368\">プロセス</text><line class=\"fb-rib\" x1=\"555\" y1=\"270\" x2=\"499\" y2=\"270\"/><text class=\"fb-cause\" x=\"495\" y=\"273\">再接続試験の欠如</text><line class=\"fb-rib\" x1=\"535\" y1=\"310\" x2=\"479\" y2=\"310\"/><text class=\"fb-cause\" x=\"475\" y=\"313\">Runbook未整備</text></g></svg></figure>",
+      "cssModules": [
+        "fishbone"
+      ]
+    },
+    {
+      "type": "html",
+      "html": "<figure class=\"gap card-outlined\" aria-label=\"再発防止（現状 → あるべき姿）\"><figcaption class=\"gap-title\">再発防止（現状 → あるべき姿）</figcaption><div class=\"gap-cols\"><div class=\"gap-col gap-as-is\"><span class=\"gap-head\">現状</span><div class=\"gap-list\"><div class=\"gap-item\">接続プール上限が既定値のまま</div><div class=\"gap-item\">接続リークを検知できない</div><div class=\"gap-item\">復旧はオンコールの手動再起動</div></div></div><div class=\"gap-arrow\" aria-hidden=\"true\">→</div><div class=\"gap-col gap-mid\"><span class=\"gap-head\">ギャップ・施策</span><div class=\"gap-list\"><div class=\"gap-row\"><span class=\"gap-name\">フェイルオーバー後に接続が枯渇</span><span class=\"gap-action\">プール上限と最大生存時間を設定</span></div><div class=\"gap-row\"><span class=\"gap-name\">異常検知が遅く手動対応</span><span class=\"gap-action\">接続数アラートと自動再起動</span></div></div></div><div class=\"gap-arrow\" aria-hidden=\"true\">→</div><div class=\"gap-col gap-to-be\"><span class=\"gap-head\">あるべき姿</span><div class=\"gap-list\"><div class=\"gap-item\">接続数が上限内で自動回収</div><div class=\"gap-item\">枯渇の兆候を5分以内に検知</div><div class=\"gap-item\">異常時に自動フェイルセーフ</div></div></div></div></figure>",
+      "cssModules": [
+        "gap-analysis"
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "アクションアイテムと期限",
+      "control": "checkbox",
+      "items": [
+        {
+          "label": "決済サービスの接続プール上限を設定",
+          "state": "done",
+          "desc": "完了 6/16 / 担当: 高橋"
+        },
+        {
+          "label": "接続の最大生存時間（maxLifetime）を導入",
+          "state": "pending",
+          "desc": "期限 7/10 / 担当: 井上"
+        },
+        {
+          "label": "接続数メトリクスとアラートを追加",
+          "state": "pending",
+          "desc": "期限 7/15 / 担当: 監視班"
+        },
+        {
+          "label": "負荷試験に再接続シナリオを追加",
+          "state": "todo",
+          "desc": "期限 7/31 / 担当: QA"
+        },
+        {
+          "label": "サーキットブレーカによる自動フェイルセーフを実装",
+          "state": "blocked",
+          "desc": "設計レビュー待ち / 担当: SRE"
+        },
+        {
+          "label": "Runbookを更新し復旧訓練を実施",
+          "state": "todo",
+          "desc": "期限 8/8"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "学びと共有事項",
+      "body": "マネージドDBのフェイルオーバーは「いつか起きる」前提で接続の生存管理を設計する。今回の教訓は全サービス共通のDBクライアントライブラリへ反映し、7月のSRE勉強会で共有する。"
+    }
+  ],
+  "_recipe": {
+    "id": "incident-report",
+    "name": "障害報告書 / ポストモーテム",
+    "genre": "インシデント報告",
+    "purpose": "障害の影響・時系列・根本原因・再発防止策を非難なしで記録し、同じ障害を二度と起こさないための合意可能なアクションに落とす。",
+    "audience": "開発・運用チーム / マネジメント / 関係部署",
+    "triggers": {
+      "ja": [
+        "障害報告書を作って",
+        "ポストモーテムをまとめて",
+        "インシデントレポート",
+        "根本原因分析の資料",
+        "再発防止策を整理",
+        "障害の振り返り資料"
+      ],
+      "en": [
+        "postmortem",
+        "incident report",
+        "root cause analysis",
+        "outage writeup"
+      ],
+      "ko": [
+        "장애 보고서",
+        "포스트모템",
+        "인시던트 리포트"
+      ]
+    },
+    "axes": {
+      "theme": "slate",
+      "layout": "stack",
+      "header": "split",
+      "density": "comfortable",
+      "rationale": "slateは落ち着いた報告書向けの中立トーン。splitヘッダで発生日時・影響時間・重大度・対応者の出自を右に一覧。stackで時系列に読み下す。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "html:key-takeaways",
+        "role": "結論先出し（3行サマリー）",
+        "required": true,
+        "guide": "原因・影響・恒久対策の3点をleadで断定し、elabに補足。読まなくても要点が伝わる形にする。",
+        "volume": "3項目"
+      },
+      {
+        "n": 2,
+        "type": "kpi",
+        "role": "影響指標",
+        "required": true,
+        "guide": "影響ユーザー数・停止時間・失敗率・SLA達成率など被害の大きさを数値で。悪化はdir:downで表示。",
+        "volume": "4指標"
+      },
+      {
+        "n": 3,
+        "type": "timeline",
+        "role": "障害タイムライン",
+        "required": true,
+        "guide": "検知→宣言→原因特定→暫定対応→復旧を時刻付きで。全て解決済みならstatus:done。",
+        "volume": "5〜7イベント"
+      },
+      {
+        "n": 4,
+        "type": "html:fishbone",
+        "role": "原因分析",
+        "required": true,
+        "guide": "4カテゴリ（実装/基盤/監視/プロセス）に原因を分類。各骨に2つの要因。effectは起きた事象。",
+        "volume": "4カテゴリ×2要因"
+      },
+      {
+        "n": 5,
+        "type": "html:gap-analysis",
+        "role": "再発防止",
+        "required": true,
+        "guide": "現状→ギャップ・施策→あるべき姿の3列。中央のgap-rowに施策チップを紐付ける。",
+        "volume": "現状3 / 施策2 / 目標3"
+      },
+      {
+        "n": 6,
+        "type": "checklist",
+        "role": "アクションアイテムと期限",
+        "required": true,
+        "guide": "stateで進捗、descに期限と担当を明記。オーナーのない項目を残さない。",
+        "volume": "5〜7項目"
+      },
+      {
+        "n": 7,
+        "type": "callout",
+        "role": "学びと共有事項",
+        "required": false,
+        "guide": "successバリアントで組織横断の学びを1段落。どこへ共有するかまで書く。",
+        "volume": "2〜3文"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 4,
+        "default": "html:fishbone",
+        "alternative": "diagram（原因の因果図）",
+        "when": "原因が分類ではなく連鎖（因果ツリー）で説明したいとき"
+      },
+      {
+        "slot": 2,
+        "default": "kpi",
+        "alternative": "stattrend",
+        "when": "影響指標を時系列スパークライン付きで見せたいとき"
+      },
+      {
+        "slot": 5,
+        "default": "html:gap-analysis",
+        "alternative": "html:before-after",
+        "when": "施策の橋渡しより対策前後の状態対比を強調したいとき"
+      }
+    ],
+    "modules": [
+      "key-takeaways",
+      "kpi",
+      "timeline",
+      "fishbone",
+      "gap-analysis",
+      "checklist",
+      "callout"
+    ]
+  }
+}

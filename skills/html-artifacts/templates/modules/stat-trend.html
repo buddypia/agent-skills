@@ -1,0 +1,75 @@
+<!-- ============================================================================
+MODULE: stat-trend                                          lineage: unified-system original (dashboard/report) - extends kpi-grid
+PURPOSE: KPI cards that show a headline value + delta AND an inline sparkline of the
+         recent trajectory - so one card answers "what is it now?" and "where is it
+         heading?". The trend upgrade kpi-grid lacks. Reuses the .metric primitives.
+VARIABLES (per card): {{LABEL}} {{VALUE}} {{VALUE_NUMBER}} {{SUFFIX}} {{DELTA}}
+                      {{POINTS}} (sparkline polyline) {{AREA}} (sparkline area path)
+REQUIRES: core/elements.css (.card-outlined, .metric*), core/tokens.css (--accent,
+          --color-success/-danger, --sp-*), core/interactions.js (HA.counter)
+MODULE CSS: inline the data-module="stat-trend" style block once.
+INTERACTION: HA.counter (count-up on the value via [data-counter][data-to]).
+USAGE: SPARKLINE - viewBox 0 0 120 36, pad 4. x = pad + i/(n−1)·(120−2pad);
+       y = (36−pad) − (v−min)/(max−min)·(36−2pad). Tone the line via .-up / .-down.
+============================================================================ -->
+<style data-module="stat-trend">
+  .st-sec h2 { margin-bottom: var(--sp-5); }
+  .st-grid { display: grid; grid-template-columns: repeat(var(--st-cols, 3), 1fr); gap: var(--sp-4); }
+  @media (max-width: 900px) { .st-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .st-grid { grid-template-columns: 1fr; } }
+
+  /* card frame - hairline accent rail + gentle depth anchors each KPI card */
+  .stat-trend { position: relative; display: grid; gap: var(--sp-1); align-content: start; overflow: hidden; }
+  .stat-trend.card-outlined { box-shadow: var(--shadow-sm); }
+  .stat-trend::before {
+    content: ""; position: absolute; inset-block: var(--sp-4); inset-inline-start: 0; width: 2px;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--accent) 32%, transparent);
+    opacity: .55; transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .stat-trend .spark { width: 100%; height: 36px; margin-top: var(--sp-2); overflow: visible; }
+  .spark-line { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; transition: stroke-width var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease); }
+  /* layered area: soft accent wash for atmospheric depth */
+  .spark-area { fill: var(--accent); opacity: .12; stroke: none; transition: opacity var(--dur-fast) var(--ease); }
+  .spark-dot { fill: var(--accent); transition: filter var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease); }
+  .spark.-up .spark-line { stroke: var(--color-success); }
+  .spark.-up .spark-dot { fill: var(--color-success); }
+  .spark.-up .spark-area { fill: var(--color-success); }
+  .spark.-down .spark-line { stroke: var(--color-danger); }
+  .spark.-down .spark-dot { fill: var(--color-danger); }
+  .spark.-down .spark-area { fill: var(--color-danger); }
+
+  /* hover - accent-tied: rail brightens, trend firms up, end dot gains a soft halo
+     tinted to its own tone. Only opacity/stroke-width/filter transition (never the
+     computed geometry). Tone source of truth is the .spark class, so halo tints key
+     off .spark.-up / .spark.-down to match the real markup. */
+  @media (hover: hover) {
+    .stat-trend:hover::before { opacity: 1; }
+    .stat-trend:hover .spark-line { stroke-width: 2.4; }
+    .stat-trend:hover .spark-area { opacity: .2; }
+    .stat-trend:hover .spark-dot {
+      filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 65%, transparent));
+    }
+    .stat-trend:hover .spark.-up .spark-dot   { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-success) 65%, transparent)); }
+    .stat-trend:hover .spark.-down .spark-dot { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-danger) 65%, transparent)); }
+  }
+</style>
+
+<section class="st-sec" aria-label="{{TITLE}}">
+  <h2>{{TITLE}}</h2>
+  <div class="st-grid" style="--st-cols:3">
+
+    <!-- ── one card per metric ────────────────────────────────────────────── -->
+    <article class="card-outlined metric stat-trend">
+      <span class="metric-label">{{LABEL}}</span>
+      <span class="metric-value" data-counter data-to="{{VALUE_NUMBER}}" data-suffix="{{SUFFIX}}">{{VALUE}}</span>
+      <span class="metric-delta-up">▲ {{DELTA}}</span>
+      <svg class="spark -up" viewBox="0 0 120 36" preserveAspectRatio="none" role="img" aria-label="{{LABEL}} trend">
+        <path class="spark-area" d="{{AREA}}"/>
+        <polyline class="spark-line" points="{{POINTS}}"/>
+        <circle class="spark-dot" cx="116" cy="10" r="2.4"/>
+      </svg>
+    </article>
+  </div>
+</section>

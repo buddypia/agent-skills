@@ -1,0 +1,78 @@
+<!-- ============================================================================
+MODULE: quadrant                                            lineage: unified-system original (decision/strategy)
+PURPOSE: A 2×2 matrix / positioning map (pure CSS - no SVG). A square canvas is
+         split by a center cross into four quadrants, each faintly named; items are
+         plotted as chips at an X/Y position (percent). Both axes carry a dimension
+         name plus a low/high end label. For priority matrices (importance ×
+         urgency / Eisenhower), competitive positioning, effort × impact.
+VARIABLES: {{TITLE}}; axis {{X_AXIS}} {{X_LOW}} {{X_HIGH}} {{Y_AXIS}} {{Y_LOW}}
+           {{Y_HIGH}}; quadrant names {{QUADRANT_TL/TR/BL/BR}}; per item {{ITEM}}
+           with inline left%/top% (0% = left/top, 100% = right/bottom) and .cat-N.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--cat-1..5, --accent,
+          --bg-surface, --border-*, --text-*, --radius-*, --sp-*, --shadow-*, --font-mono)
+MODULE CSS: inline the data-module="quadrant" style block once.
+INTERACTION: none (static). aria-label on the figure; labels are real text.
+USAGE: place one <span class="qd-item cat-N" style="left:X%;top:Y%"> per item - X is
+       the X-axis value (0→100 = X_LOW→X_HIGH), Y is 100−(Y-axis value) so higher Y
+       sits nearer the top. translate(-50%,-50%) centers the chip on its point.
+============================================================================ -->
+<style data-module="quadrant">
+  .qd { margin: 0; }
+  .qd-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .qd-frame { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap: var(--sp-2); max-width: 680px; margin-inline: auto; }
+  /* Y axis rail: high end top, dimension name (vertical) middle, low end bottom */
+  .qd-ax-y { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding-block: var(--sp-1); }
+  .qd-ax-x { grid-column: 2; grid-row: 2; display: flex; align-items: center; justify-content: space-between; padding-top: var(--sp-1); }
+  .qd-dim { font: var(--type-caption); color: var(--text-secondary); font-weight: 600; letter-spacing: var(--tracking-tight); }
+  .qd-ax-y .qd-dim { writing-mode: vertical-rl; }
+  .qd-end { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); }
+  /* canvas: 4:3 field with a dashed center cross */
+  .qd-canvas { grid-column: 2; grid-row: 1; position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 440px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
+  .qd-canvas::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed color-mix(in srgb, var(--accent) 32%, var(--border-default)); }
+  .qd-canvas::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed color-mix(in srgb, var(--accent) 32%, var(--border-default)); }
+  .qd-quad { position: absolute; max-width: 44%; font: var(--type-caption); text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); opacity: .8; }
+  .qd-tl { top: var(--sp-3); left: var(--sp-3); }
+  .qd-tr { top: var(--sp-3); right: var(--sp-3); text-align: right; }
+  .qd-bl { bottom: var(--sp-3); left: var(--sp-3); }
+  .qd-br { bottom: var(--sp-3); right: var(--sp-3); text-align: right; }
+  /* plotted item: accent/cat-tinted pill centered on its (x,y) point */
+  .qd-item { --qc: var(--accent); position: absolute; transform: translate(-50%, -50%); padding: 3px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 600; white-space: nowrap; color: var(--text-primary); background: color-mix(in srgb, var(--qc) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--qc) 45%, var(--border-default)); transition: background var(--dur-fast) var(--ease); }
+  .qd-item:hover { background: color-mix(in srgb, var(--qc) 24%, var(--bg-surface)); z-index: 2; }
+  .qd-item.cat-1 { --qc: var(--cat-1); }
+  .qd-item.cat-2 { --qc: var(--cat-2); }
+  .qd-item.cat-3 { --qc: var(--cat-3); }
+  .qd-item.cat-4 { --qc: var(--cat-4); }
+  .qd-item.cat-5 { --qc: var(--cat-5); }
+  @media (prefers-reduced-motion: reduce) { .qd-item { transition: none; } }
+</style>
+
+<figure class="qd card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="qd-title">{{TITLE}}</figcaption>
+  <div class="qd-frame">
+    <div class="qd-ax-y">
+      <span class="qd-end">{{Y_HIGH}}</span>   <!-- e.g. 高 -->
+      <span class="qd-dim">{{Y_AXIS}}</span>    <!-- e.g. 重要度 -->
+      <span class="qd-end">{{Y_LOW}}</span>     <!-- e.g. 低 -->
+    </div>
+
+    <div class="qd-canvas">
+      <!-- ── quadrant names (faint, one per corner) ─────────────────────── -->
+      <span class="qd-quad qd-tl">{{QUADRANT_TL}}</span> <!-- e.g. 重要・緊急でない -->
+      <span class="qd-quad qd-tr">{{QUADRANT_TR}}</span> <!-- e.g. 重要かつ緊急 -->
+      <span class="qd-quad qd-bl">{{QUADRANT_BL}}</span> <!-- e.g. 些末 -->
+      <span class="qd-quad qd-br">{{QUADRANT_BR}}</span> <!-- e.g. 緊急だが重要でない -->
+
+      <!-- ── plotted items (one per point; set left%=X, top%=100−Y) ───────── -->
+      <span class="qd-item cat-1" style="left:76%;top:22%">{{ITEM}}</span> <!-- e.g. 障害対応 -->
+      <span class="qd-item cat-2" style="left:30%;top:34%">{{ITEM}}</span> <!-- e.g. 戦略立案 -->
+      <span class="qd-item cat-4" style="left:68%;top:74%">{{ITEM}}</span> <!-- e.g. 定例会議 -->
+      <!-- ↑ repeat: one .qd-item per plotted item -->
+    </div>
+
+    <div class="qd-ax-x">
+      <span class="qd-end">{{X_LOW}}</span>     <!-- e.g. 低 -->
+      <span class="qd-dim">{{X_AXIS}}</span>    <!-- e.g. 緊急度 -->
+      <span class="qd-end">{{X_HIGH}}</span>    <!-- e.g. 高 -->
+    </div>
+  </div>
+</figure>

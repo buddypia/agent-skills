@@ -1,0 +1,108 @@
+<!-- ============================================================================
+MODULE: sequence-diagram                                    lineage: v3 expressiveness pass
+PURPOSE: Self-contained SVG UML-style sequence diagram (NO external libs, no
+         Mermaid). Participants across the top, dashed lifelines, activation
+         bars, solid sync messages, dashed return messages, and a note box.
+         For API call flows, auth handshakes, service interactions.
+VARIABLES: {{TITLE}}; per participant {{ACTOR}}; per message {{MESSAGE}};
+           note text {{NOTE}}.
+GEOMETRY:  participant centers are evenly spaced (example: x=120, 380, 640 with
+           head rect W=150 H=40 at y=8 → rect x = center-75). Lifeline runs from
+           y=48 to the bottom. Activation bar = 8px-wide rect at x=center-4.
+           A message at time t is a horizontal line y=t from source lifeline
+           edge (center±4) to target edge, label centered above (y=t-8).
+           Stack messages top→bottom in chronological order, ~52-60px apart.
+           Self-message: path M(cx+4,t) h36 v24 h-36 with the same marker.
+REQUIRES:  core/tokens.css (--bg-card, --accent, --border-default, --text-*,
+           --color-warning, --font-mono, --radius-sm), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="sequence-diagram" style block once.
+INTERACTION: none (static). role="img" + <title> a11y.
+USAGE: duplicate one head <g> + one lifeline <line> per participant; one
+       message <line> + <text> per call (class seq-msg = sync solid,
+       seq-msg-return = dashed reply with the open marker). Keep connectors
+       drawn before activation bars so bars sit on top. Extend viewBox height
+       for longer flows (+56 per extra message).
+============================================================================ -->
+<style data-module="sequence-diagram">
+  .seq { width: 100%; }
+  .seq svg { width: 100%; height: auto; font-family: var(--font-sans); }
+  @media (max-width: 640px) { .seq { overflow-x: auto; } .seq svg { min-width: 760px; } }
+  .seq-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  /* participant heads: card-toned slabs with a hairline that warms on hover */
+  .seq .actor-box { fill: color-mix(in srgb, var(--accent) 10%, var(--bg-card)); stroke: var(--border-default); stroke-width: 1.5; transition: stroke var(--dur-fast) var(--ease); }
+  .seq g:hover .actor-box { stroke: color-mix(in srgb, var(--accent) 55%, var(--border-default)); }
+  .seq .actor-label { fill: var(--text-primary); font-size: 14px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+  .seq .lifeline { stroke: var(--border-default); stroke-width: 1; stroke-dasharray: 4 5; }
+  /* activation bars: slim accent-tinted rails marking "this participant is busy" */
+  .seq .activation { fill: color-mix(in srgb, var(--accent) 26%, var(--bg-card)); stroke: color-mix(in srgb, var(--accent) 55%, var(--border-default)); stroke-width: 1; rx: 2; }
+  .seq .seq-msg { stroke: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); stroke-width: 1.5; }
+  .seq .seq-msg-return { stroke: var(--text-muted); stroke-width: 1.25; stroke-dasharray: 5 4; }
+  .seq .msg-label { fill: var(--text-secondary); font-size: 11.5px; font-family: var(--font-mono); text-anchor: middle; }
+  .seq .msg-arrow { fill: color-mix(in srgb, var(--accent) 45%, var(--text-secondary)); }
+  .seq .msg-arrow-open { fill: none; stroke: var(--text-muted); stroke-width: 1.25; }
+  /* note: warning-tinted slip with a caption voice */
+  .seq .seq-note { fill: color-mix(in srgb, var(--color-warning) 14%, var(--bg-card)); stroke: color-mix(in srgb, var(--color-warning) 45%, var(--border-default)); stroke-width: 1; rx: 4; }
+  .seq .note-label { fill: var(--text-secondary); font-size: 11px; text-anchor: middle; dominant-baseline: middle; }
+  @media (prefers-reduced-motion: reduce) { .seq .actor-box { transition: none; } }
+</style>
+
+<figure class="seq card-outlined">
+  <figcaption class="seq-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 760 440" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <defs>
+      <marker id="seq-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="msg-arrow" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+      <marker id="seq-arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path class="msg-arrow-open" d="M1,1 L9,5 L1,9"/>
+      </marker>
+    </defs>
+
+    <!-- ── LIFELINES (one per participant, under everything) ─────────────── -->
+    <line class="lifeline" x1="120" y1="48" x2="120" y2="420"/>
+    <line class="lifeline" x1="380" y1="48" x2="380" y2="420"/>
+    <line class="lifeline" x1="640" y1="48" x2="640" y2="420"/>
+
+    <!-- ── MESSAGES (chronological, top → bottom) ────────────────────────── -->
+    <!-- sync call: source activation edge → target lifeline -->
+    <text class="msg-label" x="250" y="112">{{MESSAGE}}</text> <!-- e.g. POST /login -->
+    <line class="seq-msg" x1="124" y1="120" x2="376" y2="120" marker-end="url(#seq-arrow)"/>
+
+    <text class="msg-label" x="510" y="172">{{MESSAGE}}</text> <!-- e.g. verify(token) -->
+    <line class="seq-msg" x1="384" y1="180" x2="636" y2="180" marker-end="url(#seq-arrow)"/>
+
+    <!-- dashed return -->
+    <text class="msg-label" x="510" y="224">{{MESSAGE}}</text> <!-- e.g. claims -->
+    <line class="seq-msg-return" x1="636" y1="232" x2="384" y2="232" marker-end="url(#seq-arrow-open)"/>
+
+    <text class="msg-label" x="250" y="292">{{MESSAGE}}</text> <!-- e.g. 200 OK + session -->
+    <line class="seq-msg-return" x1="376" y1="300" x2="124" y2="300" marker-end="url(#seq-arrow-open)"/>
+
+    <!-- ── ACTIVATION BARS (drawn after messages so they sit on top) ─────── -->
+    <rect class="activation" x="116" y="96"  width="8" height="228"/>
+    <rect class="activation" x="376" y="120" width="8" height="180"/>
+    <rect class="activation" x="636" y="180" width="8" height="52"/>
+
+    <!-- ── NOTE (optional) ────────────────────────────────────────────────── -->
+    <g>
+      <rect class="seq-note" x="480" y="348" width="220" height="44"/>
+      <text class="note-label" x="590" y="370">{{NOTE}}</text> <!-- e.g. token cached 15 min -->
+    </g>
+
+    <!-- ── PARTICIPANT HEADS (last, on top of lifelines) ──────────────────── -->
+    <g>
+      <rect class="actor-box" x="45" y="8" width="150" height="40" rx="8"/>
+      <text class="actor-label" x="120" y="28">{{ACTOR}}</text> <!-- e.g. Client -->
+    </g>
+    <g>
+      <rect class="actor-box" x="305" y="8" width="150" height="40" rx="8"/>
+      <text class="actor-label" x="380" y="28">{{ACTOR}}</text> <!-- e.g. API Gateway -->
+    </g>
+    <g>
+      <rect class="actor-box" x="565" y="8" width="150" height="40" rx="8"/>
+      <text class="actor-label" x="640" y="28">{{ACTOR}}</text> <!-- e.g. Auth Service -->
+    </g>
+    <!-- ↑ repeat: one head <g> + one lifeline per participant; one line+label per message -->
+  </svg>
+</figure>

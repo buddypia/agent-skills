@@ -1,0 +1,169 @@
+<!-- ============================================================================
+MODULE: arch-diagram                                         lineage: html-visual(diagram/architecture) + demo2(interactive)
+PURPOSE: Self-contained layered-architecture SVG (NO external libs). Horizontal
+         zones (Frontend / Backend / Data / External) as translucent dashed
+         grouping rects; service nodes = rounded rects you can DRAG; connectors
+         auto-track the nodes and carry a protocol label + arrow. Theme-tinted.
+VARIABLES: {{TITLE}}
+           per zone: {{ZONE}} {{ZX}} {{ZY}} {{ZW}} {{ZH}}   (+ zone color class .z-1..z-4)
+           per node: {{ID}} {{SERVICE}} {{X}} {{Y}}          (node = 150x52; {{X}},{{Y}} = <g> translate)
+           per edge: {{FROM}} {{TO}} {{PROTO}}               (PROTO: HTTP/gRPC/pub-sub)
+LAYOUT:    viewBox 0 0 760 460. Zones stack top→bottom (STATIC background). Each
+           service node is a <g data-node="ID" transform="translate(X,Y)"> with a
+           150x52 box at local 0,0 - interactions.js makes it draggable and routes
+           every connector to the node-box BORDER (so arrowheads stay visible).
+PROTOCOLS: HTTP → #arrow-http ; gRPC → #arrow-grpc ; pub-sub → dashed + #arrow-pubsub.
+REQUIRES:  core/tokens.css (--accent, --cat-*, --text-*, --border-*, --bg-*)
+           core/interactions.js ([data-zoompan] [data-draggable])
+MODULE CSS: inline the data-module="arch-diagram" style block once.
+INTERACTION:
+   * Drag : svg[data-draggable]; drag any g[data-node] (mouse + keyboard arrows);
+            connectors line[data-edge][data-from][data-to] re-route to box borders;
+            edge labels text[data-edge-label="FROM-TO"] follow the midpoint;
+            [data-drag-reset] restores the layout. Zones do NOT move.
+   * Zoom : .stage[data-zoompan] (wheel / +,−,0 / buttons), panning skips [data-node].
+   EDGES ARE DRAWN BEFORE NODES so connectors sit behind the boxes. role="img"+aria-label.
+USAGE: repeat one <rect.zone>+<text.zone-label> per zone (static); one <line.edge-line
+       data-edge>+<text.proto-label data-edge-label> per connector (before nodes);
+       one <g.node.n-1..4 data-node transform=translate> per service (after). Give each
+       node a UNIQUE id; data-from/data-to must match those ids.
+============================================================================ -->
+<style data-module="arch-diagram">
+  .arch { width: 100%; }
+  .arch-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+
+  /* zoom + pan stage - width capped so a 760-unit viewBox renders near 1:1.
+     Hairline border + inset shadow seat the field into the page (atmospheric depth). */
+  .arch .stage { position: relative; max-width: 820px; margin-inline: auto; overflow: hidden;
+                 border: 1px solid var(--border-subtle);
+                 border-radius: var(--radius-md); background: var(--bg-muted); cursor: grab; touch-action: none;
+                 box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 4%, transparent), var(--shadow-sm); }
+  .arch .stage.panning, .arch .stage:active { cursor: grabbing; }
+  .arch .stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .arch svg { width: 100%; height: auto; display: block; font-family: var(--font-sans); }
+  .arch .zoom-controls { position: absolute; top: var(--sp-2); right: var(--sp-2);
+                         display: flex; align-items: center; gap: var(--sp-1); z-index: 1; }
+  .arch .zoom-readout { font: var(--type-caption); font-family: var(--font-mono);
+                        color: var(--text-secondary); min-width: 3.5ch; text-align: right; }
+  .arch [data-node] { cursor: grab; }
+  .arch [data-node].dragging { cursor: grabbing; }
+  .arch [data-node]:focus { outline: none; }
+  .arch [data-node]:focus-visible .node-box { stroke: var(--accent); stroke-width: 2.4; }
+  /* accent-tied node hover/active: firm the border + lift the fill tint. Transition
+     only paint props (fill/stroke/filter) - never geometry. Reduced-motion-safe:
+     transitions degrade to instant, content is never left hidden. */
+  @media (prefers-reduced-motion: no-preference) {
+    .arch .node-box { transition: fill var(--dur-fast) var(--ease), stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+    .arch [data-node] { transition: filter var(--dur-fast) var(--ease-out); }
+  }
+  .arch [data-node]:hover { filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--nc, var(--accent)) 28%, transparent)); }
+  .arch [data-node]:hover .node-box { fill: color-mix(in srgb, var(--nc, var(--accent)) 15%, var(--bg-surface)); stroke-width: 2.2; }
+  .arch [data-node].dragging .node-box { stroke: var(--accent); stroke-width: 2.4; fill: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); }
+
+  /* zone grouping rects - translucent, dashed, tinted per .z-* (STATIC) */
+  .arch .zone { fill: var(--zc, var(--accent)); fill-opacity: .07; stroke: var(--zc, var(--accent));
+                stroke-width: 1.5; stroke-dasharray: 2 6; rx: 16; }
+  .arch .zone-label { fill: var(--zc, var(--text-secondary)); font: var(--type-caption);
+                      font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .arch .z-1 { --zc: var(--cat-1); } .arch .z-2 { --zc: var(--cat-2); }
+  .arch .z-3 { --zc: var(--cat-3); } .arch .z-4 { --zc: var(--cat-4); }
+
+  /* service nodes - rounded rect at local 0,0; zone identity via border + subtle fill tint.
+     Soft drop-shadow seats each box above the zone field (gentle atmospheric depth). */
+  .arch .node-box { fill: color-mix(in srgb, var(--nc, var(--border-default)) 8%, var(--bg-surface));
+                    stroke: var(--nc, var(--border-default)); stroke-width: 1.6;
+                    filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--text-primary) 12%, transparent)); }
+  .arch .node-label { fill: var(--text-primary); font: var(--type-small); font-weight: 600;
+                      letter-spacing: var(--tracking-tight); }
+  .arch .n-1 { --nc: var(--cat-1); } .arch .n-2 { --nc: var(--cat-2); }
+  .arch .n-3 { --nc: var(--cat-3); } .arch .n-4 { --nc: var(--cat-4); }
+
+  /* connectors + protocol labels (auto-routed to node borders).
+     Rounded caps soften the line ends; a paint-only transition keeps state changes smooth. */
+  .arch .edge-line { stroke: var(--text-muted); stroke-width: 2; fill: none; stroke-linecap: round;
+                     transition: stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  .arch .edge-async { stroke-dasharray: 7 5; }
+  .arch .proto-label { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono);
+                       text-anchor: middle; paint-order: stroke; stroke: var(--bg-muted); stroke-width: 4px;
+                       letter-spacing: .02em; }
+</style>
+
+<figure class="arch card-outlined">
+  <figcaption class="arch-title">{{TITLE}}</figcaption>
+  <div class="stage" data-zoompan data-zoom-min="0.5" data-zoom-max="3" tabindex="0">
+    <div class="zoom-controls no-print">
+      <button class="btn btn-ghost btn-sm" data-zoom-in aria-label="Zoom in">+</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-out aria-label="Zoom out">−</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-reset aria-label="Reset">⤢</button>
+      <span class="zoom-readout" data-zoom-readout>100%</span>
+    </div>
+    <svg viewBox="0 0 760 460" data-draggable role="img" aria-label="{{TITLE}} (service nodes can be dragged to reposition)">
+    <defs>
+      <marker id="arrow-http" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--cat-1)"/>
+      </marker>
+      <marker id="arrow-grpc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--cat-3)"/>
+      </marker>
+      <marker id="arrow-pubsub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--cat-4)"/>
+      </marker>
+    </defs>
+
+    <g data-viewport>
+
+      <!-- ═══ ZONES (static background; do not drag) ═══ -->
+      <!-- ↓ repeat one zone per layer (.z-1..z-4 tint) -->
+      <rect class="zone z-1" x="{{ZX}}" y="{{ZY}}" width="{{ZW}}" height="{{ZH}}" rx="16"/>
+      <text class="zone-label" x="{{ZX+16}}" y="{{ZY+22}}">{{ZONE}}</text>
+      <!-- ↑ repeat zone -->
+
+      <!-- worked example: 4 stacked zones -->
+      <rect class="zone z-1" x="24" y="20"  width="712" height="92" rx="16"/><text class="zone-label" x="40" y="42">Frontend</text>
+      <rect class="zone z-2" x="24" y="130" width="712" height="92" rx="16"/><text class="zone-label" x="40" y="152">Backend</text>
+      <rect class="zone z-3" x="24" y="240" width="712" height="92" rx="16"/><text class="zone-label" x="40" y="262">Data</text>
+      <rect class="zone z-4" x="24" y="350" width="712" height="92" rx="16"/><text class="zone-label" x="40" y="372">External</text>
+
+      <!-- ═══ EDGES FIRST (data-edge → auto-routed to node borders) ═══ -->
+      <!-- ↓ repeat one connector per edge. data-from/data-to = node ids; pick the marker per protocol -->
+      <line class="edge-line" data-edge data-from="{{FROM}}" data-to="{{TO}}" marker-end="url(#arrow-http)"/>
+      <text class="proto-label" data-edge-label="{{FROM}}-{{TO}}">{{PROTO}}</text>
+      <!-- ↑ repeat edge -->
+
+      <!-- worked example edges -->
+      <line class="edge-line" data-edge data-from="web-app" data-to="api-gateway" marker-end="url(#arrow-http)"/>
+      <text class="proto-label" data-edge-label="web-app-api-gateway">HTTP</text>
+
+      <line class="edge-line" data-edge data-from="api-gateway" data-to="postgres" marker-end="url(#arrow-grpc)"/>
+      <text class="proto-label" data-edge-label="api-gateway-postgres">gRPC</text>
+
+      <line class="edge-line edge-async" data-edge data-from="api-gateway" data-to="payments-api" marker-end="url(#arrow-pubsub)"/>
+      <text class="proto-label" data-edge-label="api-gateway-payments-api">pub-sub</text>
+
+      <!-- ═══ NODES AFTER (draggable; box at local 0,0, label at local 20,31) ═══ -->
+      <!-- ↓ repeat one node per service. .n-1..n-4 tints border+fill; transform=translate(X,Y) -->
+      <g class="node n-1" data-node="{{ID}}" transform="translate({{X}},{{Y}})" role="group" aria-label="{{SERVICE}} (draggable)" tabindex="0">
+        <rect class="node-box" width="150" height="52" rx="11"/>
+        <text class="node-label" x="20" y="31">{{SERVICE}}</text>
+      </g>
+      <!-- ↑ repeat node -->
+
+      <!-- worked example nodes (one per zone) -->
+      <g class="node n-1" data-node="web-app" transform="translate(80,50)" role="group" aria-label="Web App (draggable)" tabindex="0">
+        <rect class="node-box" width="150" height="52" rx="11"/><text class="node-label" x="20" y="31">Web App</text>
+      </g>
+      <g class="node n-2" data-node="api-gateway" transform="translate(305,160)" role="group" aria-label="API Gateway (draggable)" tabindex="0">
+        <rect class="node-box" width="150" height="52" rx="11"/><text class="node-label" x="20" y="31">API Gateway</text>
+      </g>
+      <g class="node n-3" data-node="postgres" transform="translate(80,270)" role="group" aria-label="Postgres (draggable)" tabindex="0">
+        <rect class="node-box" width="150" height="52" rx="11"/><text class="node-label" x="20" y="31">Postgres</text>
+      </g>
+      <g class="node n-4" data-node="payments-api" transform="translate(305,380)" role="group" aria-label="Payments API (draggable)" tabindex="0">
+        <rect class="node-box" width="150" height="52" rx="11"/><text class="node-label" x="20" y="31">Payments API</text>
+      </g>
+
+    </g>
+    </svg>
+  </div>
+  <button class="btn btn-ghost btn-sm no-print" data-drag-reset>Reset layout</button>
+</figure>

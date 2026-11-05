@@ -1,0 +1,59 @@
+<!-- ============================================================================
+MODULE: checklist                                          lineage: html-artifacts v2 (form-controls)
+PURPOSE: Themed list of REAL interactive controls - checkbox / radio / switch rows
+         for settings, acceptance criteria, requirements, launch readiness, or a
+         filter panel. The control atoms (the accent-tinted checkbox/radio/switch,
+         the option-row, option-label, option-desc) live in core/elements.css; this
+         module only adds the list container (boxed card, row separators, header
+         count). Controls are genuinely operable (not lo-fi placeholders) and are
+         keyboard- and screen-reader-accessible via the wrapping <label for>.
+VARIABLES (builder section type "checklist"):
+  { type:"checklist", title?, control?:"checkbox"|"radio"|"switch", name?,
+    variant?:"boxed"(default)|"plain", count?:false,
+    items:[{ label, desc?, checked?, disabled?, state?:"done"|"pending"|"blocked"|"todo" }] }
+  state drives a status badge (done→success, pending→warning, blocked→danger) and,
+  for "done", pre-checks the control. control:"radio" groups by a shared name;
+  control:"switch" renders the pill toggle.
+REQUIRES: core/elements.css (form-control primitives: input[type=checkbox|radio],
+          .switch, .option-row, .option-label, .option-desc, .badge*) - no JS.
+MODULE CSS: inline the data-module="checklist" style block once.
+============================================================================ -->
+<style data-module="checklist">
+  .checklist-sec .ck-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+  .checklist-sec .ck-count { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .checklist { display: grid; }
+  .checklist.is-boxed { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding-inline: var(--sp-4); }
+  .checklist.is-boxed .option-row { padding-block: var(--sp-3); }
+  .checklist.is-boxed .option-row + .option-row { border-block-start: 1px solid var(--border-subtle); }
+  .checklist .ck-text { display: grid; gap: 0; flex: 1 1 auto; min-width: 0; }
+  .checklist .ck-state { align-self: center; flex: none; }
+</style>
+
+<section class="checklist-sec" aria-label="Launch readiness">
+  <div class="ck-head"><h2>Launch readiness</h2><span class="ck-count">2/4</span></div>
+
+  <div class="checklist is-boxed" role="group" aria-label="Launch readiness">
+    <!-- ↓ repeat one .option-row per item -->
+    <div class="option-row">
+      <input type="checkbox" id="ck-group-0" checked>
+      <label class="ck-text" for="ck-group-0"><span class="option-label">DNS cutover verified</span></label>
+      <span class="badge badge-success ck-state">Done</span>
+    </div>
+    <div class="option-row">
+      <input type="checkbox" id="ck-group-1" checked>
+      <label class="ck-text" for="ck-group-1"><span class="option-label">Rollback plan signed off</span><span class="option-desc">owner: SRE</span></label>
+      <span class="badge badge-success ck-state">Done</span>
+    </div>
+    <div class="option-row">
+      <input type="checkbox" id="ck-group-2">
+      <label class="ck-text" for="ck-group-2"><span class="option-label">Load test at 2× peak</span></label>
+      <span class="badge badge-warning ck-state">Pending</span>
+    </div>
+    <div class="option-row">
+      <input type="checkbox" id="ck-group-3">
+      <label class="ck-text" for="ck-group-3"><span class="option-label">Comms drafted</span><span class="option-desc">waiting on env</span></label>
+      <span class="badge badge-danger ck-state">Blocked</span>
+    </div>
+    <!-- ↑ repeat -->
+  </div>
+</section>

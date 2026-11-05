@@ -1,0 +1,189 @@
+<!-- ============================================================================
+MODULE: erd                                                  lineage: html-visual(diagram) + html-artifacts(spec)
+PURPOSE: Entity-relationship diagram. Each entity is a card (header bar on an
+         accent tint + column rows w/ type and a PK/FK .chip) rendered inside a
+         draggable SVG node. Relationship connectors (1:1 / 1:N / N:M) auto-track
+         the node centres and carry a cardinality label. NO external libs.
+VARIABLES: per entity {{ID}} {{NAME}}  +  per column row {{COL}} {{TYPE}} {{KEY}}
+           per relation {{FROM}} {{TO}} {{CARD}} (CARD = "1:1" | "1:N" | "N:M")
+           node placement: {{X}} {{Y}} = SVG translate of each entity group.
+           {{ID}} is the stable node id used by data-node / data-from / data-to.
+           viewBox is 0 0 720 360.
+REQUIRES:  core/elements.css (.card-outlined .chip .cluster .badge*)
+           core/tokens.css   (--accent --on-accent --bg-* --text-* --border-* --cat-*)
+MODULE CSS: inline the data-module="erd" style block once.
+INTERACTION: draggable nodes - svg[data-draggable] + g[data-node] with edges
+           line[data-edge][data-from][data-to] auto-tracking node centres
+           (+ text[data-edge-label="FROM-TO"] cardinality). Wrapped in
+           [data-zoompan] g[data-viewport] for wheel-zoom + drag-pan; focus a
+           node + arrow keys to nudge; [data-drag-reset] restores the layout.
+           role="img" + aria-label on the SVG.
+SIZING: set each <foreignObject> (and its <rect class="erd-hit">) height ≈ 46 + rows×38.
+       interactions.js AUTO-FITS the foreignObject to the card's real height at load
+       (so rows never clip), then re-routes edges - but give a sane initial height so
+       the pre-JS layout is close. SPACE entities ≥ 48px apart (both axes) and enlarge
+       the viewBox so nothing overlaps; for 4+ tables use a viewBox like 0 0 800 520.
+USAGE: repeat one edge group (<line>+<text>) per relation BEFORE the nodes, and
+       one .erd node <g> per table; give each node a unique {{ID}} + {{X}} {{Y}}.
+============================================================================ -->
+<style data-module="erd">
+  .erd { position: relative; }
+  /* cap width so the 720-unit viewBox renders near 1:1 instead of upscaling to the
+     full container (which made entities look oversized at "100%"). */
+  .erd-stage { position: relative; max-width: 780px; margin-inline: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-muted); overflow: hidden; box-shadow: var(--shadow-sm), inset 0 1px 0 color-mix(in srgb, var(--bg-surface) 60%, transparent); }
+  .erd-stage svg { display: block; width: 100%; height: auto; touch-action: none; }
+  /* entity card lives inside a <foreignObject>; markup is unchanged */
+  .erd-entity { padding: 0; overflow: hidden; }
+  /* header carries a hairline accent rail along its top edge for a touch of structure */
+  .erd-head { position: relative; background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); color: var(--text-primary); border-bottom: 1px solid var(--border-default); padding: var(--sp-3) var(--sp-4); font: var(--type-h3); font-family: var(--font-mono); box-shadow: inset 0 2px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  .erd-rows { list-style: none; margin: 0; padding: 0; }
+  .erd-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--border-subtle); font: var(--type-small); transition: background var(--dur-fast) var(--ease); }
+  .erd-row:last-child { border-bottom: none; }
+  /* accent-tinted row hover for scanning a table's columns */
+  .erd-row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .erd-col { font-family: var(--font-mono); color: var(--text-primary); font-weight: 600; }
+  .erd-type { font-family: var(--font-mono); color: var(--text-muted); margin-left: auto; }
+  .erd-row .chip { transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+  .erd-row .chip.pk { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 60%, var(--border-default)); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .erd-row .chip.fk { color: var(--color-info); border-color: color-mix(in srgb, var(--color-info) 55%, var(--border-default)); background: color-mix(in srgb, var(--color-info) 10%, transparent); }
+  /* draggable node group: the card is visual-only; a transparent <rect class="erd-hit">
+     (first child of each node) receives the pointer so the <g> reliably gets the drag
+     - an SVG <g> is not hit-tested directly, and a foreignObject whose content is
+     pointer-events:none would let pointerdown fall through to the pan/canvas. */
+  .erd-node { cursor: grab; }
+  .erd-node.dragging { cursor: grabbing; }
+  .erd-node foreignObject { pointer-events: none; }
+  .erd-hit { fill: transparent; }
+  /* the card lives in a pointer-events:none foreignObject, so hover is detected on the
+     node group (via the .erd-hit handle) and the accent treatment is applied to the
+     visual card from there - entity firms up its edge + gains gentle depth on hover */
+  .erd-entity.card-outlined { transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+  .erd-node:hover .erd-entity.card-outlined { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-default)); box-shadow: var(--shadow-sm); }
+  .erd-node.dragging .erd-entity.card-outlined { border-color: color-mix(in srgb, var(--accent) 60%, var(--border-default)); box-shadow: var(--shadow-md); }
+  /* relationship connectors - rounded caps; lift to accent on hover for tracing a join */
+  .erd-link { stroke: var(--text-muted); stroke-width: 1.5; fill: none; stroke-linecap: round; transition: stroke var(--dur-fast) var(--ease), stroke-width var(--dur-fast) var(--ease); }
+  .erd-link:hover { stroke: var(--accent); stroke-width: 2; }
+  .erd-link.nm { stroke-dasharray: 6 4; }
+  .erd-link-label { font-family: var(--font-mono); font-size: 11px; fill: var(--text-secondary); text-anchor: middle; dominant-baseline: middle; }
+  .erd-legend { font: var(--type-small); color: var(--text-muted); }
+  .erd-legend .chip { font-family: var(--font-mono); }
+</style>
+
+<section class="erd stack" aria-label="Entity relationship diagram">
+
+  <!-- draggable + zoom/pan stage: drag nodes, drag canvas to pan, wheel to zoom -->
+  <div class="erd-stage" data-zoompan data-zoom-min="0.5" data-zoom-max="2.4" tabindex="0">
+    <div class="zoom-controls no-print">
+      <button class="btn btn-ghost btn-sm" data-zoom-in aria-label="Zoom in">+</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-out aria-label="Zoom out">&minus;</button>
+      <button class="btn btn-ghost btn-sm" data-zoom-reset aria-label="Reset zoom">&#x2922;</button>
+      <span class="zoom-readout" data-zoom-readout>100%</span>
+    </div>
+
+    <svg viewBox="0 0 720 360" data-draggable role="img" aria-label="Entity relationship diagram (drag entities to rearrange)">
+      <defs>
+        <marker id="erd-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/>
+        </marker>
+      </defs>
+
+      <g data-viewport>
+
+        <!-- ───── edges FIRST (drawn behind the node cards) ───── -->
+
+        <!-- ↓ repeat one edge group per relation ({{FROM}} → {{TO}}, {{CARD}}) -->
+        <line class="erd-link" data-edge data-from="{{FROM}}" data-to="{{TO}}" marker-end="url(#erd-arrow)"/>
+        <text class="erd-link-label cat" data-edge-label="{{FROM}}-{{TO}}">{{CARD}}</text>
+        <!-- ↑ repeat -->
+
+        <!-- sample wiring for the 3 entities below (1:N users→posts, N:M posts↔tags) -->
+        <line class="erd-link" data-edge data-from="users" data-to="posts" marker-end="url(#erd-arrow)"/>
+        <text class="erd-link-label cat" data-edge-label="users-posts">1:N</text>
+
+        <line class="erd-link nm" data-edge data-from="posts" data-to="tags" marker-end="url(#erd-arrow)" marker-start="url(#erd-arrow)"/>
+        <text class="erd-link-label cat" data-edge-label="posts-tags">N:M</text>
+
+        <!-- ───── nodes AFTER (on top of the connectors) ───── -->
+
+        <!-- ↓ repeat one node <g> per table - unique {{ID}} + {{X}} {{Y}} placement -->
+        <g class="erd-node" data-node="{{ID}}" transform="translate({{X}},{{Y}})" role="group" aria-label="{{NAME}} entity (draggable)">
+          <rect class="erd-hit" x="0" y="0" width="200" height="160" rx="12"/>   <!-- drag handle; match foreignObject size -->
+          <foreignObject x="0" y="0" width="200" height="160">
+            <article class="erd-entity card-outlined" xmlns="http://www.w3.org/1999/xhtml">
+              <header class="erd-head">{{NAME}}</header>
+              <ul class="erd-rows">
+
+                <!-- ↓ repeat one row per column -->
+                <li class="erd-row">
+                  <span class="erd-col">{{COL}}</span>
+                  <span class="chip pk">{{KEY}}</span>   <!-- PK → .chip.pk · FK → .chip.fk · drop chip if plain column -->
+                  <span class="erd-type">{{TYPE}}</span>
+                </li>
+                <!-- ↑ repeat -->
+
+              </ul>
+            </article>
+          </foreignObject>
+        </g>
+        <!-- ↑ repeat -->
+
+        <!-- sample: 3 entities -->
+        <g class="erd-node" data-node="users" transform="translate(40,40)" role="group" aria-label="users entity (draggable)">
+          <rect class="erd-hit" x="0" y="0" width="200" height="150" rx="12"/>
+          <foreignObject x="0" y="0" width="200" height="150">
+            <article class="erd-entity card-outlined" xmlns="http://www.w3.org/1999/xhtml">
+              <header class="erd-head">users</header>
+              <ul class="erd-rows">
+                <li class="erd-row"><span class="erd-col">id</span><span class="chip pk">PK</span><span class="erd-type">uuid</span></li>
+                <li class="erd-row"><span class="erd-col">email</span><span class="erd-type">varchar</span></li>
+                <li class="erd-row"><span class="erd-col">created_at</span><span class="erd-type">timestamp</span></li>
+              </ul>
+            </article>
+          </foreignObject>
+        </g>
+
+        <g class="erd-node" data-node="posts" transform="translate(300,30)" role="group" aria-label="posts entity (draggable)">
+          <rect class="erd-hit" x="0" y="0" width="200" height="180" rx="12"/>
+          <foreignObject x="0" y="0" width="200" height="180">
+            <article class="erd-entity card-outlined" xmlns="http://www.w3.org/1999/xhtml">
+              <header class="erd-head">posts</header>
+              <ul class="erd-rows">
+                <li class="erd-row"><span class="erd-col">id</span><span class="chip pk">PK</span><span class="erd-type">uuid</span></li>
+                <li class="erd-row"><span class="erd-col">author_id</span><span class="chip fk">FK</span><span class="erd-type">uuid</span></li>
+                <li class="erd-row"><span class="erd-col">title</span><span class="erd-type">varchar</span></li>
+                <li class="erd-row"><span class="erd-col">body</span><span class="erd-type">text</span></li>
+              </ul>
+            </article>
+          </foreignObject>
+        </g>
+
+        <g class="erd-node" data-node="tags" transform="translate(540,60)" role="group" aria-label="tags entity (draggable)">
+          <rect class="erd-hit" x="0" y="0" width="160" height="110" rx="12"/>
+          <foreignObject x="0" y="0" width="160" height="110">
+            <article class="erd-entity card-outlined" xmlns="http://www.w3.org/1999/xhtml">
+              <header class="erd-head">tags</header>
+              <ul class="erd-rows">
+                <li class="erd-row"><span class="erd-col">id</span><span class="chip pk">PK</span><span class="erd-type">uuid</span></li>
+                <li class="erd-row"><span class="erd-col">slug</span><span class="erd-type">varchar</span></li>
+              </ul>
+            </article>
+          </foreignObject>
+        </g>
+
+      </g>
+    </svg>
+  </div>
+
+  <!-- drag/zoom controls -->
+  <div class="cluster no-print">
+    <button class="btn btn-ghost btn-sm" data-drag-reset>Reset layout</button>
+  </div>
+
+  <!-- cardinality legend -->
+  <div class="cluster erd-legend" aria-label="Cardinality legend">
+    <span><span class="chip">1:1</span> one-to-one</span>
+    <span><span class="chip">1:N</span> one-to-many</span>
+    <span><span class="chip">N:M</span> many-to-many (dashed)</span>
+  </div>
+
+</section>

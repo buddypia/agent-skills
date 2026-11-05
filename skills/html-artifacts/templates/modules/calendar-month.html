@@ -1,0 +1,107 @@
+<!-- ============================================================================
+MODULE: calendar-month                                     lineage: unified-system original (v6 high-frequency pass 2)
+PURPOSE: A month-at-a-glance calendar (pure CSS grid, NO SVG, no JS). A weekday
+         header row over a 5-week × 7-day grid; each day cell shows its day number
+         and any event chips (cat-tinted). Today is highlighted; days outside the
+         current month are dimmed. For schedules, editorial / release calendars,
+         and "what's happening this month" views.
+         Distinction: cal-heatmap encodes an intensity value per day (GitHub-style
+         contribution grid); agenda lists time slots for a SINGLE day; gantt spans
+         task bars across dates; calendar-month is the familiar month grid with
+         discrete events per day.
+VARIABLES: {{TITLE}} (month label); per weekday {{WD}}; per event chip {{EVENT}}
+           (with a .cat-N tint). Day numbers are literal (edit them to your month);
+           out-of-month cells get .is-out, and the current day gets .is-today.
+SCALING:  .cml-grid is 7 equal columns; row 1 = weekday heads, rows 2-6 = the five
+          week rows (35 cells). Cells use a fixed min-height so weeks stay even; add
+          more .cml-ev chips inside a cell and it grows. First/last columns (Sun/Sat)
+          carry a faint weekend tint. For a 6-week month add 7 more .cml-day cells.
+REQUIRES: core/elements.css (.card-outlined), core/tokens.css (--accent, --cat-1..5,
+          --bg-surface, --bg-muted, --border-*, --text-*, --font-mono, --radius-*,
+          --sp-*, --type-*, --shadow-sm, --dur-fast, --ease, --tracking-eyebrow)
+MODULE CSS: inline the data-module="calendar-month" style block once.
+INTERACTION: hover raises a day cell (paint-only, reduced-motion guarded).
+USAGE: fill 7 .cml-wd heads, then 35 .cml-day cells row by row. Mark leading/
+       trailing days .is-out, the current day .is-today, and drop .cml-ev.cat-N
+       event chips into the days that have events.
+============================================================================ -->
+<style data-module="calendar-month">
+  .cml { margin: 0; }
+  .cml-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .cml-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border-subtle); border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; }
+  /* weekday header: mono kickers on a faint strip */
+  .cml-wd { padding: var(--sp-2); text-align: center; font: var(--type-caption); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--text-muted); background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); }
+  .cml-wd:first-child, .cml-wd:last-child { color: var(--text-secondary); }
+  /* day cell: number top-left, event chips stacked under it */
+  .cml-day { min-height: 82px; display: grid; grid-template-rows: auto 1fr; gap: var(--sp-1); padding: var(--sp-2); background: var(--bg-surface); transition: background var(--dur-fast) var(--ease); }
+  .cml-day:hover { background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface)); }
+  .cml-day:nth-child(7n+1), .cml-day:nth-child(7n) { background: var(--bg-muted); }
+  .cml-num { font-family: var(--font-mono); font-size: 12px; font-weight: 650; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .cml-events { display: grid; gap: 2px; align-content: start; }
+  /* event chip: cat-tinted, one per event on the day */
+  .cml-ev { --cc: var(--accent); padding: 1px var(--sp-1); border-radius: var(--radius-xs); font: var(--type-caption); font-weight: 600; line-height: 1.3; color: var(--text-primary); background: color-mix(in srgb, var(--cc) 16%, var(--bg-surface)); border-left: 2px solid var(--cc); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cml-ev.cat-1 { --cc: var(--cat-1); } .cml-ev.cat-2 { --cc: var(--cat-2); } .cml-ev.cat-3 { --cc: var(--cat-3); }
+  .cml-ev.cat-4 { --cc: var(--cat-4); } .cml-ev.cat-5 { --cc: var(--cat-5); }
+  /* out-of-month days fade back; today gets an accent ring + filled number */
+  .cml-day.is-out { background: var(--bg-muted); }
+  .cml-day.is-out .cml-num { color: var(--text-muted); opacity: .55; }
+  .cml-day.is-today { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent); }
+  .cml-day.is-today .cml-num { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: var(--radius-pill); color: var(--bg-surface); background: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { .cml-day { transition: none; } }
+</style>
+
+<figure class="cml card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="cml-title">{{TITLE}}</figcaption> <!-- e.g. 2026年 7月 -->
+  <div class="cml-grid">
+
+    <!-- ── WEEKDAY HEADER (7 cells) ────────────────────────────────────────── -->
+    <span class="cml-wd">{{WD}}</span><!-- e.g. 日 --><span class="cml-wd">{{WD}}</span><!-- 月 --><span class="cml-wd">{{WD}}</span><!-- 火 --><span class="cml-wd">{{WD}}</span><!-- 水 --><span class="cml-wd">{{WD}}</span><!-- 木 --><span class="cml-wd">{{WD}}</span><!-- 金 --><span class="cml-wd">{{WD}}</span><!-- 土 -->
+
+    <!-- ── WEEK 1 (leading .is-out days from the previous month) ────────────── -->
+    <div class="cml-day is-out"><span class="cml-num">28</span></div>
+    <div class="cml-day is-out"><span class="cml-num">29</span></div>
+    <div class="cml-day is-out"><span class="cml-num">30</span></div>
+    <div class="cml-day"><span class="cml-num">1</span><div class="cml-events"><span class="cml-ev cat-1">{{EVENT}}</span></div></div> <!-- e.g. 全社キックオフ -->
+    <div class="cml-day"><span class="cml-num">2</span></div>
+    <div class="cml-day"><span class="cml-num">3</span><div class="cml-events"><span class="cml-ev cat-4">{{EVENT}}</span></div></div> <!-- e.g. 締め切り -->
+    <div class="cml-day"><span class="cml-num">4</span></div>
+
+    <!-- ── WEEK 2 ──────────────────────────────────────────────────────────── -->
+    <div class="cml-day"><span class="cml-num">5</span></div>
+    <div class="cml-day"><span class="cml-num">6</span><div class="cml-events"><span class="cml-ev cat-2">{{EVENT}}</span></div></div> <!-- e.g. スプリント開始 -->
+    <div class="cml-day"><span class="cml-num">7</span></div>
+    <div class="cml-day is-today"><span class="cml-num">8</span><div class="cml-events"><span class="cml-ev cat-1">{{EVENT}}</span><span class="cml-ev cat-3">{{EVENT}}</span></div></div> <!-- e.g. リリース / レビュー -->
+    <div class="cml-day"><span class="cml-num">9</span></div>
+    <div class="cml-day"><span class="cml-num">10</span></div>
+    <div class="cml-day"><span class="cml-num">11</span></div>
+
+    <!-- ── WEEK 3 ──────────────────────────────────────────────────────────── -->
+    <div class="cml-day"><span class="cml-num">12</span></div>
+    <div class="cml-day"><span class="cml-num">13</span></div>
+    <div class="cml-day"><span class="cml-num">14</span><div class="cml-events"><span class="cml-ev cat-5">{{EVENT}}</span></div></div> <!-- e.g. 定例MTG -->
+    <div class="cml-day"><span class="cml-num">15</span></div>
+    <div class="cml-day"><span class="cml-num">16</span></div>
+    <div class="cml-day"><span class="cml-num">17</span><div class="cml-events"><span class="cml-ev cat-2">{{EVENT}}</span></div></div> <!-- e.g. デモデー -->
+    <div class="cml-day"><span class="cml-num">18</span></div>
+
+    <!-- ── WEEK 4 ──────────────────────────────────────────────────────────── -->
+    <div class="cml-day"><span class="cml-num">19</span></div>
+    <div class="cml-day"><span class="cml-num">20</span></div>
+    <div class="cml-day"><span class="cml-num">21</span></div>
+    <div class="cml-day"><span class="cml-num">22</span><div class="cml-events"><span class="cml-ev cat-3">{{EVENT}}</span></div></div> <!-- e.g. 中間レビュー -->
+    <div class="cml-day"><span class="cml-num">23</span></div>
+    <div class="cml-day"><span class="cml-num">24</span></div>
+    <div class="cml-day"><span class="cml-num">25</span></div>
+
+    <!-- ── WEEK 5 (trailing .is-out days from the next month) ───────────────── -->
+    <div class="cml-day"><span class="cml-num">26</span></div>
+    <div class="cml-day"><span class="cml-num">27</span></div>
+    <div class="cml-day"><span class="cml-num">28</span></div>
+    <div class="cml-day"><span class="cml-num">29</span></div>
+    <div class="cml-day"><span class="cml-num">30</span><div class="cml-events"><span class="cml-ev cat-4">{{EVENT}}</span></div></div> <!-- e.g. 月次締め -->
+    <div class="cml-day"><span class="cml-num">31</span></div>
+    <div class="cml-day is-out"><span class="cml-num">1</span></div>
+    <!-- ↑ repeat rows for a 6-week month: add one more 7-cell week -->
+
+  </div>
+</figure>

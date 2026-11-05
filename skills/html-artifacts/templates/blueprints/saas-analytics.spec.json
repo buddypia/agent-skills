@@ -1,0 +1,364 @@
+{
+  "title": "ミナモ人事労務 - 月次事業レポート（2026年6月度）",
+  "theme": "midnight",
+  "layout": "bento",
+  "header": "split",
+  "density": "compact",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "MONTHLY BUSINESS REVIEW",
+  "subtitle": "MRR・リテンション・獲得効率の2026年6月度スナップショット",
+  "footer": "出典: 社内BI（Minamo BI） / 発行 2026-07-08 / 経営企画室",
+  "meta": [
+    {
+      "k": "対象月",
+      "v": "2026年6月"
+    },
+    {
+      "k": "提供",
+      "v": "株式会社ミナモワークス"
+    },
+    {
+      "k": "承認",
+      "v": "CFO 大森 直樹"
+    },
+    {
+      "k": "ステータス",
+      "v": "確定値"
+    }
+  ],
+  "sections": [
+    {
+      "type": "kpi",
+      "label": "主要KPI",
+      "items": [
+        {
+          "label": "MRR",
+          "value": "¥58.4M",
+          "delta": "6.2%",
+          "dir": "up"
+        },
+        {
+          "label": "月次解約率",
+          "value": "1.8%"
+        },
+        {
+          "label": "NRR",
+          "value": "112%",
+          "valueNum": 112,
+          "suffix": "%",
+          "delta": "4pt",
+          "dir": "up"
+        },
+        {
+          "label": "CAC",
+          "value": "¥18.5万"
+        },
+        {
+          "label": "有料企業数",
+          "value": "1,240社",
+          "valueNum": 1240,
+          "suffix": "社",
+          "delta": "58",
+          "dir": "up"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "line",
+      "span": 6,
+      "title": "MRR推移（百万円）",
+      "points": [
+        {
+          "label": "1月",
+          "value": 44.2,
+          "display": "¥44.2M"
+        },
+        {
+          "label": "2月",
+          "value": 47.1,
+          "display": "¥47.1M"
+        },
+        {
+          "label": "3月",
+          "value": 49.8,
+          "display": "¥49.8M"
+        },
+        {
+          "label": "4月",
+          "value": 52.6,
+          "display": "¥52.6M"
+        },
+        {
+          "label": "5月",
+          "value": 55,
+          "display": "¥55.0M"
+        },
+        {
+          "label": "6月",
+          "value": 58.4,
+          "display": "¥58.4M"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "donut",
+      "span": 6,
+      "title": "プラン別MRR構成",
+      "total": "¥58.4M",
+      "totalLabel": "MRR",
+      "segments": [
+        {
+          "label": "ライト",
+          "value": 117,
+          "cat": 1
+        },
+        {
+          "label": "スタンダード",
+          "value": 298,
+          "cat": 2
+        },
+        {
+          "label": "エンタープライズ",
+          "value": 169,
+          "cat": 3
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "span": 12,
+      "html": "<figure class=\"cht card-outlined\" aria-label=\"月次リテンションコホート（企業単位）\">\n  <figcaption class=\"cht-title\">月次リテンションコホート（企業単位）</figcaption>\n  <div class=\"cht-grid\">\n    <div class=\"cht-h lead\">コホート</div>\n    <div class=\"cht-h\">企業数</div>\n    <div class=\"cht-h\">M0</div>\n    <div class=\"cht-h\">M1</div>\n    <div class=\"cht-h\">M2</div>\n    <div class=\"cht-h\">M3</div>\n    <div class=\"cht-h\">M4</div>\n    <div class=\"cht-h\">M5</div>\n\n    <span class=\"cht-cohort\">2026-01</span>\n    <span class=\"cht-size\">128社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:62\">62%</span>\n    <span class=\"cht-cell\" style=\"--i:48\">48%</span>\n    <span class=\"cht-cell\" style=\"--i:39\">39%</span>\n    <span class=\"cht-cell\" style=\"--i:33\">33%</span>\n    <span class=\"cht-cell\" style=\"--i:29\">29%</span>\n\n    <span class=\"cht-cohort\">2026-02</span>\n    <span class=\"cht-size\">141社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:58\">58%</span>\n    <span class=\"cht-cell\" style=\"--i:45\">45%</span>\n    <span class=\"cht-cell\" style=\"--i:37\">37%</span>\n    <span class=\"cht-cell\" style=\"--i:31\">31%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-03</span>\n    <span class=\"cht-size\">156社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:55\">55%</span>\n    <span class=\"cht-cell\" style=\"--i:43\">43%</span>\n    <span class=\"cht-cell\" style=\"--i:35\">35%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-04</span>\n    <span class=\"cht-size\">149社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:51\">51%</span>\n    <span class=\"cht-cell\" style=\"--i:40\">40%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-05</span>\n    <span class=\"cht-size\">163社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:49\">49%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n  </div>\n</figure>",
+      "cssModules": [
+        "cohort-grid"
+      ]
+    },
+    {
+      "type": "funnel",
+      "span": 12,
+      "title": "獲得ファネル（2026年6月）",
+      "stages": [
+        {
+          "label": "サイト訪問",
+          "value": 24800,
+          "display": "24,800"
+        },
+        {
+          "label": "無料トライアル登録",
+          "value": 2180,
+          "display": "2,180"
+        },
+        {
+          "label": "有効化（初期設定完了）",
+          "value": 1290,
+          "display": "1,290"
+        },
+        {
+          "label": "有料転換",
+          "value": 163,
+          "display": "163"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "span": 12,
+      "html": "<figure class=\"cmb card-outlined\" aria-label=\"獲得チャネル構成（今月 vs 前月）\">\n  <figcaption class=\"cmb-title\">獲得チャネル構成（今月 vs 前月）</figcaption>\n  <div class=\"cmb-rows\">\n    <div class=\"cmb-row\">\n      <span class=\"cmb-row-label\">今月</span>\n      <div class=\"cmb-bar\">\n        <span class=\"cmb-seg cat-1\" style=\"width:42%\">オーガニック 42%</span>\n        <span class=\"cmb-seg cat-2\" style=\"width:28%\">広告 28%</span>\n        <span class=\"cmb-seg cat-3\" style=\"width:18%\">紹介 18%</span>\n        <span class=\"cmb-seg cat-4\" style=\"width:12%\">パートナー 12%</span>\n      </div>\n    </div>\n    <div class=\"cmb-row\">\n      <span class=\"cmb-row-label\">前月</span>\n      <div class=\"cmb-bar\">\n        <span class=\"cmb-seg cat-1\" style=\"width:38%\">オーガニック 38%</span>\n        <span class=\"cmb-seg cat-2\" style=\"width:33%\">広告 33%</span>\n        <span class=\"cmb-seg cat-3\" style=\"width:17%\">紹介 17%</span>\n        <span class=\"cmb-seg cat-4\" style=\"width:12%\">パートナー 12%</span>\n      </div>\n    </div>\n  </div>\n  <div class=\"cmb-legend\">\n    <span class=\"cmb-key\"><i class=\"cat-1\"></i>オーガニック検索 <span class=\"cmb-v\">42%</span></span>\n    <span class=\"cmb-key\"><i class=\"cat-2\"></i>リスティング広告 <span class=\"cmb-v\">28%</span></span>\n    <span class=\"cmb-key\"><i class=\"cat-3\"></i>紹介・リファラル <span class=\"cmb-v\">18%</span></span>\n    <span class=\"cmb-key\"><i class=\"cat-4\"></i>パートナー経由 <span class=\"cmb-v\">12%</span></span>\n  </div>\n</figure>",
+      "cssModules": [
+        "composition-bar"
+      ]
+    },
+    {
+      "type": "table",
+      "span": 12,
+      "label": "セグメント別数値",
+      "density": "compact",
+      "search": false,
+      "columns": [
+        "従業員規模",
+        "有料企業数",
+        "MRR",
+        "NRR",
+        "月次解約率"
+      ],
+      "rows": [
+        [
+          "〜50名（SMB）",
+          "742社",
+          "¥14.2M",
+          {
+            "badge": "warning",
+            "text": "104%"
+          },
+          {
+            "badge": "danger",
+            "text": "2.6%"
+          }
+        ],
+        [
+          "51〜300名（ミッド）",
+          "398社",
+          "¥26.1M",
+          {
+            "badge": "success",
+            "text": "113%"
+          },
+          {
+            "badge": "success",
+            "text": "1.5%"
+          }
+        ],
+        [
+          "301名〜（エンタープライズ）",
+          "100社",
+          "¥18.1M",
+          {
+            "badge": "success",
+            "text": "121%"
+          },
+          {
+            "badge": "success",
+            "text": "0.7%"
+          }
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "span": 12,
+      "variant": "note",
+      "title": "示唆と次アクション",
+      "body": "SMBセグメントの月次解約率2.6%が全体を押し下げている。獲得ファネルの有効化率（59%）改善を最優先施策とし、初期設定オンボーディングの導線を7月中に刷新する。担当: CS部・目標は有効化率70%。NRR112%は好調で、ミッド〜エンタープライズのアップセルが純増を牽引している。"
+    }
+  ],
+  "_recipe": {
+    "id": "saas-analytics",
+    "name": "SaaS事業分析レポート（月次）",
+    "genre": "SaaS分析",
+    "purpose": "国内SaaS事業のMRR・リテンション・獲得効率を月次で経営層に報告し、次アクションの意思決定を促す。",
+    "audience": "経営層・事業責任者・事業企画",
+    "triggers": {
+      "ja": [
+        "SaaSの月次事業レポートを作って",
+        "MRRと解約率をまとめて",
+        "月次のSaaS KPIダッシュボード",
+        "リテンションコホートを可視化して",
+        "事業レビュー資料を作りたい"
+      ],
+      "en": [
+        "monthly SaaS report",
+        "MRR churn NRR dashboard",
+        "retention cohort report"
+      ],
+      "ko": [
+        "월간 SaaS 리포트",
+        "MRR 이탈률 요약",
+        "리텐션 코호트 시각화"
+      ]
+    },
+    "axes": {
+      "theme": "midnight",
+      "layout": "bento",
+      "header": "split",
+      "density": "compact",
+      "rationale": "KPI+複数チャート主体のダッシュボードは§1.1 rule3のmidnight/bentoが最適。header=splitは対象月/承認者などprovenanceを右カラムに描画するため採用（compactはmeta非表示のため不可）。density=compactで情報密度を確保。"
+    },
+    "outline": [
+      {
+        "n": 1,
+        "type": "kpi",
+        "role": "結論先出し（主要KPI）",
+        "required": true,
+        "guide": "MRR/解約率/NRR/CAC/有料企業数を1行で。増加が良い指標のみdirを付け、解約率・CACはarrow誤読を避け値のみ。",
+        "volume": "4〜5枚"
+      },
+      {
+        "n": 2,
+        "type": "chart",
+        "role": "MRR推移",
+        "required": true,
+        "guide": "直近6ヶ月のMRRをlineで。displayに¥表記を入れる。",
+        "volume": "span6・6点"
+      },
+      {
+        "n": 3,
+        "type": "chart",
+        "role": "プラン別MRR構成",
+        "required": false,
+        "guide": "donutでプラン別内訳。valueの合計がMRRと一致するように。",
+        "volume": "span6・3〜4区分"
+      },
+      {
+        "n": 4,
+        "type": "html:cohort-grid",
+        "role": "月次リテンションコホート",
+        "required": true,
+        "guide": "直近5コホートのM0〜M5継続率。新しいコホートほど末尾を.cht-naで階段状に空欄化。",
+        "volume": "5行"
+      },
+      {
+        "n": 5,
+        "type": "funnel",
+        "role": "獲得ファネル",
+        "required": true,
+        "guide": "訪問→登録→有効化→有料転換。転換率は上段比で自動算出される。",
+        "volume": "4段"
+      },
+      {
+        "n": 6,
+        "type": "html:composition-bar",
+        "role": "獲得チャネル構成",
+        "required": false,
+        "guide": "今月vs前月の100%構成。各バーのwidth合計は100。",
+        "volume": "2バー・4区分"
+      },
+      {
+        "n": 7,
+        "type": "table",
+        "role": "セグメント別数値",
+        "required": true,
+        "guide": "従業員規模別に企業数/MRR/NRR/解約率。数値はKPI・合計と整合させる。",
+        "volume": "3〜5行"
+      },
+      {
+        "n": 8,
+        "type": "callout",
+        "role": "示唆と次アクション",
+        "required": true,
+        "guide": "最も効くレバー1つに絞り、担当と目標値・期限を書く。",
+        "volume": "1段落"
+      }
+    ],
+    "swaps": [
+      {
+        "slot": 3,
+        "default": "chart(donut) プラン別MRR構成",
+        "alternative": "html:composition-bar プラン構成比",
+        "when": "内訳を前年比較で見せたいとき"
+      },
+      {
+        "slot": 5,
+        "default": "funnel 獲得ファネル",
+        "alternative": "chart(bar) 新規/解約MRRブリッジ",
+        "when": "獲得より純増要因を分解したいとき"
+      },
+      {
+        "slot": 7,
+        "default": "従業員規模セグメント",
+        "alternative": "業種別/プラン別セグメント",
+        "when": "読者の関心が業種構成にあるとき"
+      }
+    ],
+    "modules": [
+      "kpi",
+      "chart",
+      "cohort-grid",
+      "funnel",
+      "composition-bar",
+      "table",
+      "callout"
+    ]
+  }
+}

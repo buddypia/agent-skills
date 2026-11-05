@@ -1,0 +1,91 @@
+<!-- ============================================================================
+MODULE: slope-chart                                lineage: unified-system original (v4 expressiveness pass)
+PURPOSE: Self-contained SVG slope chart (NO external libs). Two vertical axes - a
+         "before" column and an "after" column (e.g. 2025 vs 2026) - with one
+         straight line per item connecting its two values. Rising lines are
+         success-tinted, falling danger-tinted, flat muted; each end carries the
+         item label and its value. For ranking/level shifts across exactly TWO
+         points. Distinction: chart-line traces a full time series along one axis;
+         before-after contrasts two qualitative states with chips; slope-chart
+         compares MANY items across two moments so slope = direction of change.
+VARIABLES: {{TITLE}}; column headers {{PERIOD_LEFT}} {{PERIOD_RIGHT}};
+           per item {{ITEM}} {{VALUE_L}} {{VALUE_R}} + inline LY/RY (px on each axis)
+           + trend class slope-up | slope-down | slope-flat.
+GEOMETRY:  left axis x=200, right axis x=520; plot y 48(top)→312(bottom). Map a
+           value to y with y = 312 − (v − MIN)/(MAX − MIN) * 264 (pick MIN/MAX to
+           span the data). Line runs (200,LY)→(520,RY); dots sit at each end. Left
+           label = name(x=150,end) + value(x=192,end); right = value(x=528,start)
+           + name(x=562,start), all vertically centered on the dot's y.
+REQUIRES:  core/tokens.css (--color-success, --color-danger, --text-*, --accent,
+           --border-default, --font-mono), core/elements.css (.card-outlined)
+MODULE CSS: inline the data-module="slope-chart" style block once.
+INTERACTION: none required. On svg:hover sibling items fade so one slope reads
+           (paint only, reduced-motion guarded). role="img" + <title> a11y.
+USAGE: duplicate one <g class="slope-item slope-{up|down|flat}"> per item; set the
+       trend class from sign(VALUE_R − VALUE_L). Widen viewBox height for more items.
+============================================================================ -->
+<style data-module="slope-chart">
+  .slope { margin: 0; }
+  .slope-title { font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .slope svg { width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+  @media (max-width: 640px) { .slope { overflow-x: auto; } .slope svg { min-width: 720px; } }
+  .slope .slope-axis { stroke: var(--border-default); stroke-width: 1.25; }
+  .slope .slope-head { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; letter-spacing: var(--tracking-tight); }
+  /* one item = a line + two dots; trend class tints the line & value */
+  .slope .slope-line { stroke-width: 2; stroke-linecap: round; fill: none; }
+  .slope .slope-dot { stroke: var(--bg-surface); stroke-width: 1.5; }
+  .slope .slope-name { fill: var(--text-primary); font-size: 12.5px; dominant-baseline: middle; }
+  .slope .slope-val { font-size: 11.5px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; dominant-baseline: middle; }
+  .slope .slope-up   .slope-line { stroke: color-mix(in srgb, var(--color-success) 78%, var(--text-secondary)); }
+  .slope .slope-up   .slope-dot, .slope .slope-up   .slope-val { fill: color-mix(in srgb, var(--color-success) 78%, var(--text-secondary)); }
+  .slope .slope-down .slope-line { stroke: color-mix(in srgb, var(--color-danger) 78%, var(--text-secondary)); }
+  .slope .slope-down .slope-dot, .slope .slope-down .slope-val { fill: color-mix(in srgb, var(--color-danger) 78%, var(--text-secondary)); }
+  .slope .slope-flat .slope-line { stroke: var(--text-muted); stroke-dasharray: 4 4; }
+  .slope .slope-flat .slope-dot, .slope .slope-flat .slope-val { fill: var(--text-muted); }
+  /* calm cross-highlight: hovering one slope fades the rest */
+  .slope svg:hover .slope-item { opacity: .32; transition: opacity var(--dur-fast) var(--ease); }
+  .slope svg:hover .slope-item:hover { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .slope svg:hover .slope-item { transition: none; } }
+</style>
+
+<figure class="slope card-outlined" aria-label="{{TITLE}}">
+  <figcaption class="slope-title">{{TITLE}}</figcaption>
+  <svg viewBox="0 0 720 360" role="img" aria-label="{{TITLE}}">
+    <title>{{TITLE}}</title>
+    <!-- two vertical axes + their period headers -->
+    <text class="slope-head" x="200" y="32">{{PERIOD_LEFT}}</text>  <!-- e.g. 2025年 -->
+    <text class="slope-head" x="520" y="32">{{PERIOD_RIGHT}}</text> <!-- e.g. 2026年 -->
+    <line class="slope-axis" x1="200" y1="44" x2="200" y2="316"/>
+    <line class="slope-axis" x1="520" y1="44" x2="520" y2="316"/>
+
+    <!-- ↓ repeat one <g> per item; LY/RY from the y = 312 − (v−MIN)/(MAX−MIN)*264 map -->
+    <g class="slope-item slope-up">
+      <line class="slope-line" x1="200" y1="249" x2="520" y2="111"/>
+      <circle class="slope-dot" cx="200" cy="249" r="4"/>
+      <circle class="slope-dot" cx="520" cy="111" r="4"/>
+      <text class="slope-name" x="150" y="249" text-anchor="end">{{ITEM}}</text>   <!-- e.g. 東京支社 -->
+      <text class="slope-val"  x="192" y="249" text-anchor="end">{{VALUE_L}}</text> <!-- e.g. 32 -->
+      <text class="slope-val"  x="528" y="111" text-anchor="start">{{VALUE_R}}</text><!-- e.g. 58 -->
+      <text class="slope-name" x="562" y="111" text-anchor="start">{{ITEM}}</text>  <!-- e.g. 東京支社 -->
+    </g>
+    <g class="slope-item slope-down">
+      <line class="slope-line" x1="200" y1="127" x2="520" y2="206"/>
+      <circle class="slope-dot" cx="200" cy="127" r="4"/>
+      <circle class="slope-dot" cx="520" cy="206" r="4"/>
+      <text class="slope-name" x="150" y="127" text-anchor="end">{{ITEM}}</text>   <!-- e.g. 大阪支社 -->
+      <text class="slope-val"  x="192" y="127" text-anchor="end">{{VALUE_L}}</text> <!-- e.g. 55 -->
+      <text class="slope-val"  x="528" y="206" text-anchor="start">{{VALUE_R}}</text><!-- e.g. 40 -->
+      <text class="slope-name" x="562" y="206" text-anchor="start">{{ITEM}}</text>  <!-- e.g. 大阪支社 -->
+    </g>
+    <g class="slope-item slope-flat">
+      <line class="slope-line" x1="200" y1="180" x2="520" y2="180"/>
+      <circle class="slope-dot" cx="200" cy="180" r="4"/>
+      <circle class="slope-dot" cx="520" cy="180" r="4"/>
+      <text class="slope-name" x="150" y="180" text-anchor="end">{{ITEM}}</text>   <!-- e.g. 名古屋支社 -->
+      <text class="slope-val"  x="192" y="180" text-anchor="end">{{VALUE_L}}</text> <!-- e.g. 45 -->
+      <text class="slope-val"  x="528" y="180" text-anchor="start">{{VALUE_R}}</text><!-- e.g. 45 -->
+      <text class="slope-name" x="562" y="180" text-anchor="start">{{ITEM}}</text>  <!-- e.g. 名古屋支社 -->
+    </g>
+    <!-- ↑ repeat -->
+  </svg>
+</figure>

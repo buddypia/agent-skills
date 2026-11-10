@@ -9,7 +9,7 @@ CDN・外部ライブラリ・ビルドステップは一切不要（Vanilla HTM
 
 `buddypia/agent-skills` の `skills/html-artifacts/` を、利用するエージェントのスキルディレクトリへコピーする。リポジトリのインストール方法は [agent-skills](https://github.com/buddypia/agent-skills#install) を参照。
 
-生成・検査ツールは Node.js 18 以降の標準機能のみを使用する。生成した HTML の閲覧には Node.js もネットワーク接続も不要。ブラウザ自動検査（`tools/render-check.mjs`）は Node.js 22 以降と、ローカルにインストール済みの Chromium 系ブラウザ（Chrome / Chromium / Edge / Brave）を使う。npm パッケージは不要で、ブラウザは自動検出される（任意の実行ファイルを使う場合は `HTML_ARTIFACTS_BROWSER=/path/to/chrome`）。見つからない場合は SKIPPED となり、未検証として報告する。
+生成・検査ツールは Node.js 18 以降の標準機能のみを使用する。生成した HTML の閲覧には Node.js もネットワーク接続も不要。ブラウザ自動検査（`tools/render-check.mjs`）は、PATH に `chrome-cli`（旧名 `pw-agent`）があればその共有 headless プールを使い、なければ Node.js 22 以降とローカルにインストール済みの Chromium 系ブラウザ（Chrome / Chromium / Edge / Brave）を使う。npm パッケージは不要で、ブラウザは自動検出される（任意の実行ファイルを使う場合は `HTML_ARTIFACTS_BROWSER=/path/to/chrome`）。見つからない場合は SKIPPED となり、未検証として報告する。
 
 ---
 

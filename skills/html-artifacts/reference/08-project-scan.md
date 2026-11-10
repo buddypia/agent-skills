@@ -27,7 +27,8 @@ repo when a single page is enough.
 
 ## 2. Repo Scan
 
-**Step 0 - reuse the spec-preview UI cache before reading any source.** If
+**Step 0 - reuse the spec-preview UI cache before reading any source** (only when the
+`spec-preview` skill is installed; otherwise skip to the repo scan below). If
 `<project>/.tmp/spec-preview/ui-cache/ui-cache.json` exists, run
 `node <spec-preview skill>/assets/ui-scan.mjs check --project <root>`:
 

@@ -84,4 +84,4 @@ Korean prompt / Trip Jarvis では `lang="ko"` と Korean labels を使い、日
 - [ ] `mobile-app` target では iframe が phone-first で、Web hero が最初に出ない
 - [ ] index の iframe がフィットし、hover でフル画面に飛べる
 - [ ] 残存プレースホルダ 0 件（`grep -RnoE '__[A-Z0-9_]+__' .tmp/<slug>/`）
-- [ ] 生成後に `open index.html` 実行
+- [ ] 生成後に `index.html` を開く（OS 別コマンドは SKILL.md 参照）

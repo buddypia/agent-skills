@@ -597,9 +597,10 @@ When warnings exist the result line reads `PASS (N warnings)` (still exit `0`).
 
 `validate.mjs` reads text; overflow, unreadable labels and orphaned grid rows only exist after
 layout. `node tools/render-check.mjs <out.html> [--widths=1280,390] [--shots=<dir>]` opens the
-page headless (`chrome-cli`, else `playwright-cli`), runs `tools/lib/render-audit.js` at each width,
+page in a locally installed Chromium-based browser (headless, driven over CDP; Node 22+, no npm
+packages; override the binary with `HTML_ARTIFACTS_BROWSER`), runs `tools/lib/render-audit.js` at each width,
 saves full-page screenshots and collects console errors. Exit `0` PASS / `1` FAIL / `3` SKIPPED
-(no browser driver - then review the page by eye and say so when delivering).
+(no browser found - then review the page by eye and say so when delivering).
 
 | FAIL | WARN |
 | --- | --- |

@@ -48,7 +48,8 @@ DECIDE → BRIEF → TARGET → (SCAN if current UI) → DETECT → THEME+LAYOUT
 ```
 
 The optional SCAN gate (phase 2b) fires when the request references the current/existing
-UI: check the spec-preview UI cache first and reuse it when fresh, otherwise follow
+UI: if the `spec-preview` skill is installed, check its UI cache first and reuse it when
+fresh; otherwise follow
 `reference/08-project-scan.md` - the owner document for the scan protocol.
 
 | # | Phase | What it does | Assets referenced |

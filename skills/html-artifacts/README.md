@@ -2,7 +2,6 @@
 
 任意の入力（レポート / 仕様 / コードレビュー / ダッシュボード / 図解 / プロトタイプ / ワイヤーフレーム など）を、**単一の自己完結 `.html`** に変換する Agent Skills 対応スキル。Claude Code、Codex などで利用できる。
 CDN・外部ライブラリ・ビルドステップは一切不要（Vanilla HTML/CSS/JS のみ）。CSS は `<style>`、JS は `<script>` にすべてインラインされ、生成物は**オフラインのままどのブラウザでも開ける**。
-スキル本体は `~/.agents/skills/html-artifacts/` にあり、`~/.claude/skills/html-artifacts` はそこへの symlink。
 
 > まず **[`index.html`](./index.html)** を開くこと - ライブテーマ切替つきのマスターギャラリー（このファイル自体がシステムの一例）。
 
@@ -10,7 +9,7 @@ CDN・外部ライブラリ・ビルドステップは一切不要（Vanilla HTM
 
 `buddypia/agent-skills` の `skills/html-artifacts/` を、利用するエージェントのスキルディレクトリへコピーする。リポジトリのインストール方法は [agent-skills](https://github.com/buddypia/agent-skills#install) を参照。
 
-生成・検査ツールは Node.js 18 以降の標準機能のみを使用する。生成した HTML の閲覧には Node.js もネットワーク接続も不要。ブラウザ自動検査には別途 `chrome-cli`（旧名 `pw-agent`）が必要で、未導入の場合は未検証として報告する。
+生成・検査ツールは Node.js 18 以降の標準機能のみを使用する。生成した HTML の閲覧には Node.js もネットワーク接続も不要。ブラウザ自動検査（`tools/render-check.mjs`）は Node.js 22 以降と、ローカルにインストール済みの Chromium 系ブラウザ（Chrome / Chromium / Edge / Brave）を使う。npm パッケージは不要で、ブラウザは自動検出される（任意の実行ファイルを使う場合は `HTML_ARTIFACTS_BROWSER=/path/to/chrome`）。見つからない場合は SKIPPED となり、未検証として報告する。
 
 ---
 
@@ -237,4 +236,4 @@ node tools/contrast-audit.mjs
 
 ## ライセンス
 
-MIT © 2026 buddypia。[LICENSE](./LICENSE) を参照。旧ローカルスキルの統合経緯は [`reference/01-overview-and-flow.md`](./reference/01-overview-and-flow.md) に記載。
+MIT © 2026 buddypia。[LICENSE](./LICENSE) を参照。統合前のスキル群からの経緯は [`reference/01-overview-and-flow.md`](./reference/01-overview-and-flow.md) に記載。

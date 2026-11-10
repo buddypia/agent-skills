@@ -47,20 +47,21 @@ recurrence_of: none
 - [x] exec-briefing sec1/5/7, project-report sec1/5, meeting-pack sec1/2 の7箇所 — 2段階regex修復（prose除去→重複タグ除去）を適用し、全10 blueprint × 28埋め込みをブラウザの `sheet.cssRules[0]` 照合で全数検証（git管理外ディレクトリのためPRなし。修復後スクリーンショットで exec-briefing / proposal の完全レンダリングを確認）
 
 ## Prevent (prevention mechanism)
-- `tools/validate.mjs` チェック 2b「embedded module <style> integrity」を追加（変更前バックアップ: /tmp/validate.mjs.bak。git管理外のためPR不可 — バックアップでrevert保護を代替）
-- negative test (a) prose混入型: `node tools/validate.mjs /tmp/neg-prose.html` →
+- `tools/validate.mjs` チェック 2b「embedded module <style> integrity」を追加（当時は git 管理外だったため PR を作れず、変更前のバックアップで revert 保護を代替）
+- negative test (a) prose混入型: `node tools/validate.mjs <tmp>/neg-prose.html` →
   `FAIL  neg-prose.html` / `✗ corrupted module style "roadmap": stray "INTERACTION:" inside <style> — …first CSS rule is silently dropped` / exit=1
-- negative test (b) 二重タグ型（1次修復の中間状態）: `node tools/validate.mjs /tmp/neg-dup.html` →
+- negative test (b) 二重タグ型（1次修復の中間状態）: `node tools/validate.mjs <tmp>/neg-dup.html` →
   `FAIL  neg-dup.html` / `✗ corrupted module style "roadmap": stray "<style" inside <style> — …` / exit=1
 - positive test: 全10 blueprint 再ビルド + examples/ 全17成果物（v3–v6ギャラリー含む）→ 27/27 PASS、false-blocks = 0
 
 ## Verify cmd
 ```bash
-cd "$HOME/.agents/skills/html-artifacts"
-printf '<!DOCTYPE html><html lang="ja" data-target="document"><head><meta charset="utf-8"><meta name="viewport" content="w"><title>t</title></head><body><style data-module="x">USAGE: prose --> .x{}</style></body></html>' > /tmp/neg-esc.html
-node tools/validate.mjs /tmp/neg-esc.html; test $? -eq 1 && echo "GATE OK (violating input fails)"
+# run from the html-artifacts skill directory
+neg=$(mktemp -d)/neg-esc.html
+printf '<!DOCTYPE html><html lang="ja" data-target="document"><head><meta charset="utf-8"><meta name="viewport" content="w"><title>t</title></head><body><style data-module="x">USAGE: prose --> .x{}</style></body></html>' > "$neg"
+node tools/validate.mjs "$neg"; test $? -eq 1 && echo "GATE OK (violating input fails)"
 node tools/validate.mjs examples/example-v6-gallery.html | head -1   # 正当成果物はPASSのまま
 ```
 
 ## Next
-- [x] html-artifacts を git 管理下に置くか判断する — 2026-07-09 リポジトリ化を実施（`git init` + 初期コミット 6c26d91、ユーザー指示「直して」による。以後 tools/reference のガバナンス変更はブランチ分離+revert保護が可能）
+- [x] html-artifacts を git 管理下に置くか判断する — 2026-07-09 リポジトリ化を実施（`git init` と初期コミットを実施。以後 tools/reference のガバナンス変更はブランチ分離+revert保護が可能）

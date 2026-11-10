@@ -62,7 +62,7 @@ if (target === 'tablet-app' && viewport !== 'tablet') {
   issues.push('tablet-app target must default to data-viewport="tablet"');
 }
 
-// 4. no protruding accent bar or AI-slop regressions (design-taste-frontend)
+// 4. no protruding accent bar or AI-slop regressions
 const barRects = [...s.matchAll(/<rect[^>]*class="(?:ng-bar|node-bar)"/g)].length;
 const barHidden = /\.(?:ng-bar|node-bar)\s*\{[^}]*display:\s*none/.test(s);
 if (barRects && !barHidden) issues.push(`protruding accent-bar rects: ${barRects} (AI slop)`);
@@ -82,7 +82,7 @@ if (dashes) {
 }
 // AI-slop tells: radial mesh glow in hero (Section 4.2 / 9.A)
 if (/radial-gradient\([^)]*color-mix\([^)]*var\(--accent\)/i.test(s)) {
-  warns.push('radial accent gradient detected in hero/surface (AI slop tell - prefer crisp solid surface per design-taste-frontend §4.2)');
+  warns.push('radial accent gradient detected in hero/surface (AI slop tell - prefer a crisp solid surface)');
 }
 // AI-slop tells: hero tagline / trust micro-strip inside hero (Section 4.7)
 if (/<section class="hro"[^>]*>[\s\S]*?<p class="hro-trust"/i.test(s)) {

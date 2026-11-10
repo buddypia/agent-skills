@@ -13,7 +13,7 @@
   "viewport": "desktop",
   "eyebrow": "ADR-014 · PLATFORM",
   "subtitle": "As we split the order domain into microservices, we compare three options for an asynchronous event delivery platform between services. We evaluate them on throughput, operational burden, and cost, then present our recommendation and the rationale behind it.",
-  "footer": "Source: Platform Architecture Guild · Decision date 2026-06-07 · Proposed by shoridevel@gmail.com · Status: Pending approval",
+  "footer": "Source: Platform Architecture Guild · Decision date 2026-06-07 · Proposed by platform-arch@example.com · Status: Pending approval",
   "sections": [
     {
       "type": "html",

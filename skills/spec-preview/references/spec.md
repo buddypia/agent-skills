@@ -57,7 +57,7 @@ User/project language も同時に決める。Korean prompt / Trip Jarvis では
 
 ## 仕上げ
 
-`open index.html` 後、`AskUserQuestion`:
+`index.html` を開いた後、`AskUserQuestion`:
 - Korean prompt / Trip Jarvis: 「이 사양으로 진행해도 될까요?」 選択肢 = 「OK, 진행」 / 「수정할 점이 있음」 / （未決があれば）その決定。
 - Japanese prompt: 「この仕様で合っていますか？」 選択肢 = 「OK、進めて」 / 「直したい点がある」 / （未決があれば）その決定。
 
@@ -69,4 +69,4 @@ User/project language も同時に決める。Korean prompt / Trip Jarvis では
 - [ ] 1 枚でスクロール俯瞰できる
 - [ ] `mobile-app` target では主要画面プレビューが phone-first
 - [ ] 残存プレースホルダ 0 件（`grep -RnoE '__[A-Z0-9_]+__' .tmp/<slug>/`）
-- [ ] 生成後に `open index.html` 実行
+- [ ] 生成後に `index.html` を開く（OS 別コマンドは SKILL.md 参照）

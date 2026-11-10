@@ -68,7 +68,7 @@ index に 2 つの `.frame` を**横並び**で iframe 表示する（`fitFrames
 
 ## 仕上げ
 
-`open index.html` 後、`AskUserQuestion`（レビューチェックリストがある場合はそれを踏まえる — 正本は `references/review-checklist.md` の「仕上げ」節）を使用して次の確認を行います:
+`index.html` を開いた後、`AskUserQuestion`（レビューチェックリストがある場合はそれを踏まえる — 正本は `references/review-checklist.md` の「仕上げ」節）を使用して次の確認を行います:
 - Korean prompt / Trip Jarvis: 「체크리스트를 확인하고 진행해도 될까요?」 選択肢 = 「전 항목 OK, 진행」 / 「지적 있음」 / 「보류」。
 - Japanese prompt: 「チェックリストを確認して進めてよいですか？」 選択肢 = 「全項目 OK、進めて」 / 「指摘あり」 / 「保留」。
 - 回答後、「結果をコピー」の貼り付けを受け取るか、どの項目（slug）かを聞いて修正タスクに渡します。
@@ -83,4 +83,4 @@ index に 2 つの `.frame` を**横並び**で iframe 表示する（`fitFrames
 - [ ] 差分（追加/削除/変更）が視覚的に分かる
 - [ ] ロールバック手段を明記
 - [ ] 残存プレースホルダ 0 件（`grep -RnoE '__[A-Z0-9_]+__' .tmp/<slug>/`）
-- [ ] 生成後に `open index.html` 実行
+- [ ] 生成後に `index.html` を開く（OS 別コマンドは SKILL.md 参照）

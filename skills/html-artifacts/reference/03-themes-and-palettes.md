@@ -205,14 +205,14 @@ At the end of `tokens.css`, the category colors are derived from the accent + st
 
 When you want to swap multiple series colors at once, `--cat-2..--cat-5` can be inline-overridden the same way.
 
-### Integration with the color-palette skill
+### Custom brand palettes
 
-When raising a full-fledged palette from a single brand hex, use the `color-palette` skill to generate an 11-step scale (50–950) + WCAG-checked semantic tokens. There are 2 ways to apply the generated result:
+When raising a full-fledged palette from a single brand hex, generate an 11-step scale (50–950) + WCAG-checked semantic tokens. There are 2 ways to apply the generated result:
 
 1. **Light swap** - assign the generated scale's base color (e.g., the 500 / 600 step) to `--accent` and the color that sits on the text to `--on-accent`, and override via the inline `style` above. Derivatives including `--cat-*` follow automatically.
 2. **Settle it as a theme** - add a new `[data-theme="brand"] { … }` block to `themes.css` and swap wholesale in the order generated raw (`--color-primary` / `--color-*`) → semantic (`--bg-*` / `--text-*` / `--accent` / `--cat-*`). If you follow the same "raw → semantic" two-layer structure as the existing themes, it stays consistent with other behaviors such as the dark toggle.
 
-In either case, run it through `color-palette`'s WCAG contrast check and follow this system's policy (§2): body × background at AA or above, and muted captions at 4.5:1 or above for normal-sized text.
+In either case, verify WCAG contrast (for example with `node tools/contrast-audit.mjs`) and follow this system's policy (§2): body × background at AA or above, and muted captions at 4.5:1 or above for normal-sized text.
 
 ---
 
@@ -224,7 +224,7 @@ In either case, run it through `color-palette`'s WCAG contrast check and follow 
 | Go dark live | Click the `[data-theme-toggle]` button (⇄ `dark-focus`) |
 | Change only the accent | `<html style="--accent:#…;--on-accent:#…">` |
 | Change chart colors in tandem too | Change the accent (`--cat-1` follows) / individually override `--cat-2..5` |
-| Generate a palette from a brand color | `color-palette` skill → swap `--accent` or add a new `[data-theme]` |
+| Generate a palette from a brand color | 11-step WCAG-checked scale → swap `--accent` or add a new `[data-theme]` |
 | Change the overall whitespace (density) | Set `<html data-density="comfortable\|compact\|spacious">` - rescales `--sp-unit` (§1); themes never touch spacing |
 | Change corners / typesetting per theme | The theme's structural personality (`--type-*` / `--radius-*` overrides in `themes.css`, §2 table) |
 | Change structure globally (all themes at once) | Edit the raw scales in `tokens.css` (applies commonly to all themes) |

@@ -30,7 +30,7 @@ find . ~/.claude \( -name 'CLAUDE.md' -o -name 'CLAUDE.local.md' \) 2>/dev/null 
 Each signature is a "symptom grep pattern" + the "right mechanism". On a hit, add it to the findings table. **The patterns are a starting point** — make the final call by reading the content (don't put false positives in the table).
 
 ### S1. Bloated CLAUDE.md → split
-- **Detect**: `wc -l` is **> 200 lines** (this blog's bar). `claude-code-best-practices` recommends ~100.
+- **Detect**: `wc -l` is **> 200 lines** (this blog's bar; ~100 lines is a stricter target).
 - **Decide**: ask each section "is this a fact or a procedure?", "is it needed for every task?".
 - **Fix**: procedures → skill; domain-specific conventions → path-scoped rule; useless lines → delete. Keep only build/layout/immutable conventions.
 

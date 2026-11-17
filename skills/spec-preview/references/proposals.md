@@ -1,8 +1,7 @@
 # proposals モード — 複数案を並べて比較
 
 方向性が複数あり、その中から人間に選んでほしいときに使う。
-（原型は slide-studio のトップ画面UI改善3案。一時成果物のため現存しないが、
-作法は本ファイルと `assets/` に取り込み済み。）
+（複数案比較の作法とテンプレート契約は本ファイルと `assets/` に集約されている。）
 
 ## 構成
 
@@ -44,7 +43,7 @@
 
 `__*__` 形式のプレースホルダは、user/project language に合わせて**すべて**置換する
 （一覧と ja/ko/en の対訳は `assets-contract.md` が正本）。
-Korean prompt / Trip Jarvis では `lang="ko"` と Korean labels を使い、日本語テンプレート文を残さない。
+Korean prompt / 韓国語プロダクトでは `lang="ko"` と Korean labels を使い、日本語テンプレート文を残さない。
 
 ## view-x.html の作り方
 
@@ -71,7 +70,7 @@ Korean prompt / Trip Jarvis では `lang="ko"` と Korean labels を使い、日
 ## 仕上げ
 
 ブラウザで index を開いたら `AskUserQuestion`:
-- Korean prompt / Trip Jarvis: 「어떤 안을 채택할까요?」 選択肢 = 各案 + 「아직 결정하지 않음/조정하고 싶음」
+- Korean prompt / 韓国語プロダクト: 「어떤 안을 채택할까요?」 選択肢 = 各案 + 「아직 결정하지 않음/조정하고 싶음」
 - Japanese prompt: 「どの案を採用しますか？」 選択肢 = 各案 + 「まだ決めない/調整したい」
 - 選ばれた案を、次の実装・修正にそのまま渡す。
 

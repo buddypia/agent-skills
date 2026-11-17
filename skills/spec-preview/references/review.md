@@ -6,7 +6,7 @@
 生成前に `references/target-surface.md` を読み、対象 surface を決める。
 `mobile-app` target の before/after は基本的に phone viewport を並べる。
 説明用の差分表は別領域に置き、iframe/embed preview はアプリ画面だけを見せる。
-User/project language も同時に決める。Korean prompt / Trip Jarvis では差分見出し・
+User/project language も同時に決める。Korean prompt / 韓国語プロダクトでは差分見出し・
 ラベル・説明文を Korean にし、英語や日本語の固定文を残さない。
 
 **UI 変更のレビューでは `references/ui-cache.md` と `references/review-checklist.md` を必ず読む** —
@@ -69,7 +69,7 @@ index に 2 つの `.frame` を**横並び**で iframe 表示する（`fitFrames
 ## 仕上げ
 
 `index.html` を開いた後、`AskUserQuestion`（レビューチェックリストがある場合はそれを踏まえる — 正本は `references/review-checklist.md` の「仕上げ」節）を使用して次の確認を行います:
-- Korean prompt / Trip Jarvis: 「체크리스트를 확인하고 진행해도 될까요?」 選択肢 = 「전 항목 OK, 진행」 / 「지적 있음」 / 「보류」。
+- Korean prompt / 韓国語プロダクト: 「체크리스트를 확인하고 진행해도 될까요?」 選択肢 = 「전 항목 OK, 진행」 / 「지적 있음」 / 「보류」。
 - Japanese prompt: 「チェックリストを確認して進めてよいですか？」 選択肢 = 「全項目 OK、進めて」 / 「指摘あり」 / 「保留」。
 - 回答後、「結果をコピー」の貼り付けを受け取るか、どの項目（slug）かを聞いて修正タスクに渡します。
 

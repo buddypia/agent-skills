@@ -17,7 +17,7 @@
                      theme to/from "dark-focus" and restores on click.
    CUSTOM PALETTE:   override the accent (and optionally raws) inline, e.g.
                      <html data-theme="birchline" style="--accent:#2563EB;--on-accent:#fff">
-                     or generate an 11-step scale with the color-palette skill
+                     or generate an 11-step scale from a brand color
                      and remap --color-primary / --accent / --cat-* here.
 
    Each theme provides: raw colors -> semantic aliases (--bg-*, --text-*,

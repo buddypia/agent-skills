@@ -94,7 +94,7 @@ All pass → **APPROVE** → Steps 5/6/8.
 
 **Critic independence (the core of both source patterns = separating generation from evaluation)**:
 - **Adversarial default (always)**: the Critic assumes "this proposal is wrong" and tries to refute it via C1–C6; only when refutation fails does it APPROVE — so the Generator doesn't defend its own answer. A hunch is not a refutation: a REVISE is valid only if it names (1) the violated C-item, (2) the exact part of the proposal that violates it, and (3) a concrete violating scenario or counter-example. Adversarial framing biases toward manufacturing objections — a correct ⑥ (do-nothing) proposal must not be upgraded without such a located refutation. The Critic begins by restating the proposal as externally submitted material ("A proposal was submitted: …"), not as a continuation of the Generator's narrative.
-- **High-risk placements or classes (① schema redesign · ② new hook · Step 3 class = irreversible/externally visible)**: run the Critic in an **independent context** to reduce context anchoring (same-model self-preference persists even in a separate context — the evidence rules above carry that weight). Run it as a Task-tool subagent (strongest available reasoning model, e.g. opus) and require the full C1–C6 refutation reasoning BEFORE stating APPROVE/REVISE. Still no convergence after 3 → human approval (collaboration Phase 4).
+- **High-risk placements or classes (① schema redesign · ② new hook · Step 3 class = irreversible/externally visible)**: run the Critic in an **independent context** to reduce context anchoring (same-model self-preference persists even in a separate context — the evidence rules above carry that weight). Run it as a Task-tool subagent (using the host agent's default or strongest available reasoning model) and require the full C1–C6 refutation reasoning BEFORE stating APPROVE/REVISE. Still no convergence after 3 → human approval (collaboration Phase 4).
 
 > **Lightweight path (avoid over-engineering)**: for a genuine one-off / low-risk case (Step 3 anticipates ⑥), shorten the inner loop to **one pass** — the Critic only needs to clear C2 (over-engineered?), then record and proceed. The loop itself must not become the over-engineering.
 
@@ -139,7 +139,7 @@ If arguments name an incident, take it as the trigger candidate; otherwise ident
 - Lay out the timeline + evidence (PR/diff/log/command output) in **system language**.
 - Not "who" but "what / how". No sentences that blame a person as the subject. Also no counterfactual or judgment phrasing in **any** sentence, system-subject included ("should have", "failed to", "forgot to", "obviously", "careless") — state what happened, and phrase causes as "what made X possible".
 
-### Step 2 — 5 Whys → root cause (opus)
+### Step 2 — 5 Whys → root cause
 - Start at the proximate cause and go down to "the point that blocks this **class**".
 - Run a second short chain for **detection**: "what made this go uncaught until now?" — that chain is where tier-③ candidates surface. Multiple root causes are normal (SRE's field is "Root Causes", plural); mark every class-blocking point. For a ⑥-bound one-off, one line suffices ("no gate exists; none warranted").
 - Ground each Why link in Step 1 evidence where possible; a link with no artifact behind it is a **hypothesis** — verify it or label it as such before it drives the Step 4 tier.
@@ -152,7 +152,7 @@ If arguments name an incident, take it as the trigger candidate; otherwise ident
 - Reversibility of the failure action: read-only / reversible write / **irreversible write or externally visible effect**. (This one field is consumed by ②'s "high severity", the independent-Critic trigger, and the Phase-4 "high-risk" gate.)
 - If one-off / low-risk, anticipate landing on ⑥ (do nothing structural) at Step 4.
 
-### Step 4 — Placement decision tree (opus) — the heart of the skill
+### Step 4 — Placement decision tree — the heart of the skill
 
 > **Runs inside the inner loop**: the **Generator** proposes a tier with the tree below; the **Critic checklist (C1–C6)** above interrogates it as the approval gate. REVISE → re-propose with the critique; APPROVE → Step 5. (max 3 → human approval)
 
@@ -172,7 +172,7 @@ Evaluate top-down, take the **highest applicable tier** (prevention > detection)
      ②-warn: warn-mode PreToolUse/PostToolUse feedback — immediate in-session signal, zero false-block
 ③ Blocking at CI/test/gate time (not tool time) is enough? → check script / test gate (Detection)
 ④ Needs a context-dependent multi-step procedure / judgment? → Skill
-     e.g.: this /reflect, a final-review skill
+     e.g.: this /reflect, a release-checklist skill
 ⑤ A standing advisory policy every session must know + not machine-checkable? → a Rule, or one line in the agent memory file (keep it light!)
 ⑥ One-off, low recurrence risk, a better prompt is enough? → no structural mechanism, record only (anti over-engineering)
 ```

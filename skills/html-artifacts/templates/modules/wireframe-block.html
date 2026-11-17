@@ -1,8 +1,8 @@
 <!-- ============================================================================
-MODULE: wireframe-block                          lineage: html-visual(wireframe) + demo2/wireframe-dashboard.html
+MODULE: wireframe-block                          lineage: html-visual(wireframe) + demo2(wireframe)
 PURPOSE: Low-fi, hand-drawn SCREEN-FLOW wireframe - multiple pages connected by
-         arrows. Grayscale ONLY - no color, no lorem. The default (sketch) skin is faithful to
-         demo2/html-visual/wireframe-dashboard.html: a sketch FONT for in-page content, a faint
+         arrows. Grayscale ONLY - no color, no lorem. The default (sketch) skin reproduces
+         a hand-drawn wireframe look: a sketch FONT for in-page content, a faint
          PAPER grain on the canvas, and a feTurbulence/feDisplacementMap WOBBLE on each page frame
          (#wf-roughpaper), over dashed/irregular borders + slight rotation. Flat skins (clean/
          blueprint/mono) switch the three sketch cues off. Image box has an SVG X-cross; text is gray bars.
@@ -151,7 +151,7 @@ USAGE: keep the data-wf-* / data-reorder hooks for the interactive editor; strip
   .wf-add-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ===== screen-flow: pages connected by arrows (HA.wfflow) ===== */
-  /* hand-drawn (sketch) is the DEFAULT skin - faithful to demo2/html-visual/wireframe-dashboard.html.
+  /* hand-drawn (sketch) is the DEFAULT skin - reproduces a hand-drawn wireframe look.
      Three cues layer over the grayscale lo-fi: (a) a sketch FONT for in-page content
      (--wf-content-font), (b) a faint PAPER grain on the canvas, (c) a feTurbulence WOBBLE on each
      page frame (.wf-page + #wf-roughpaper). The flat skins (clean/blueprint/mono carry
@@ -393,7 +393,7 @@ USAGE: keep the data-wf-* / data-reorder hooks for the interactive editor; strip
 <div class="sr-only" data-reorder-live aria-live="polite" aria-atomic="true"></div>
 
 <div class="wf-flow" data-wf-flow>
-  <!-- hand-drawn wobble filter (lineage: demo2/html-visual/wireframe-dashboard.html #roughpaper).
+  <!-- hand-drawn wobble filter (lineage: demo2 wireframe #roughpaper).
        Paint-only (feDisplacementMap): hit-testing/layout are untouched, so drag math stays exact.
        Applied to .wf-page under the sketch skin; off under flat skins, reduced-motion, and while editing. -->
   <svg class="wf-filter-defs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">

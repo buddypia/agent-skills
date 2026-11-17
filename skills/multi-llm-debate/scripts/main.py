@@ -17,11 +17,11 @@ Usage:
     # Use a config file (auto-discovers config.yaml; explicit path also supported)
     python main.py --config config.yaml "debate topic"
 
-    # Specify custom models
+    # Specify custom models (defaults: agy-default / claude-default / codex-default)
     python main.py "debate topic" \\
-        --proponent-model gemini-3.7-flash \\
-        --opponent-model claude-opus-5 \\
-        --moderator-model codex-default
+        --proponent-model <gemini-model-id> \\
+        --opponent-model <claude-model-id> \\
+        --moderator-model <openai-model-id>
 
 Configuration precedence:
     CLI arguments > environment variables > config file > default values

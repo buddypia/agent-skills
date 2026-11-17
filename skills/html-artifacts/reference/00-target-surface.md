@@ -23,8 +23,7 @@ multiple visual modes:
 
 - Mirror the user's prompt language for assistant-facing explanations.
 - If the repository guidance declares a product language, use that language for generated UI labels and preview copy.
-- Trip Jarvis is the name of a user project where this skill is frequently used; its product language is Korean, so generated UI labels default to Korean there.
-- For Trip Jarvis, `CLAUDE.md` declares Korean as the MVP language, so generated app previews default to `lang=ko` and Korean UI text.
+- For example, if `CLAUDE.md` declares Korean as the product language, generated app previews default to `lang=ko` and Korean UI text.
 - Keep canonical flags, file names, query params, and internal target values in English.
 - Treat Korean and Japanese trigger phrases as first-class input, not as weaker hints.
 

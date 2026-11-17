@@ -37,7 +37,13 @@ async def _check_skill(skill: str) -> None:
     try:
         providers = importlib.import_module("workflow.providers")
         models = importlib.import_module("workflow.models")
+        assert models.AGY_DEFAULT_SENTINEL == "agy-default"
+        assert models.CLAUDE_DEFAULT_SENTINEL == "claude-default"
         assert models.CODEX_DEFAULT_SENTINEL == "codex-default"
+        assert models.uses_agy_cli_default(models.AGY_DEFAULT_SENTINEL)
+        assert not models.uses_agy_cli_default("a-future-concrete-default")
+        assert models.uses_claude_cli_default(models.CLAUDE_DEFAULT_SENTINEL)
+        assert not models.uses_claude_cli_default("a-future-concrete-default")
         assert models.uses_codex_cli_default(models.CODEX_DEFAULT_SENTINEL)
         assert not models.uses_codex_cli_default("a-future-concrete-default")
 
@@ -95,13 +101,137 @@ async def _check_skill(skill: str) -> None:
         assert concrete_cmd[concrete_cmd.index("-m") + 1] == "concrete-model"
         assert concrete_response.response_meta["actual_model"] == "gpt-test-resolved"
 
+        claude_calls: list[list[str]] = []
+
+        async def fake_claude_ok(cmd, **_kwargs):
+            claude_calls.append(cmd)
+            if "--version" in cmd:
+                return 0, "claude-code test-version", ""
+            return 0, json.dumps({
+                "is_error": False,
+                "structured_output": {"answer": "ok"},
+                "modelUsage": {"claude-test-resolved": {"canonicalModel": "claude-test-resolved"}},
+            }), ""
+
+        providers._run_cli = fake_claude_ok
+        claude_default_response = await providers.ClaudeCliAdapter().generate_structured(
+            model=models.CLAUDE_DEFAULT_SENTINEL,
+            api_key=None,
+            base_url=None,
+            system_prompt="system",
+            user_prompt="user",
+            temperature=0,
+            schema={"type": "object"},
+            schema_name="test",
+            output_model=None,
+        )
+        claude_default_cmd = claude_calls[0]
+        assert "--model" not in claude_default_cmd
+        assert "--effort" in claude_default_cmd
+        assert claude_default_response.model == "claude-test-resolved"
+        assert claude_default_response.response_meta["actual_model"] == "claude-test-resolved"
+        assert claude_default_response.response_meta["actual_model_resolution"] == "reported_by_cli"
+        assert claude_default_response.response_meta["cli_version"]
+
+        await providers.ClaudeCliAdapter().generate_structured(
+            model="concrete-claude-model",
+            api_key=None,
+            base_url=None,
+            system_prompt="system",
+            user_prompt="user",
+            temperature=0,
+            schema={"type": "object"},
+            schema_name="test",
+            output_model=None,
+        )
+        claude_concrete_cmd = next(c for c in reversed(claude_calls) if "--version" not in c)
+        assert claude_concrete_cmd[claude_concrete_cmd.index("--model") + 1] == "concrete-claude-model"
+
+        agy_calls: list[list[str]] = []
+
+        async def fake_agy_ok(cmd, **_kwargs):
+            agy_calls.append(cmd)
+            if "--version" in cmd:
+                return 0, "agy test-version", ""
+            return 0, json.dumps({
+                "status": "SUCCESS",
+                "model": "agy-test-resolved",
+                "structured_output": {"answer": "ok"},
+            }), ""
+
+        providers._run_cli = fake_agy_ok
+        agy_default_response = await providers.AntigravityCliAdapter().generate_structured(
+            model=models.AGY_DEFAULT_SENTINEL,
+            api_key=None,
+            base_url=None,
+            system_prompt="system",
+            user_prompt="user",
+            temperature=0,
+            schema={"type": "object"},
+            schema_name="test",
+            output_model=None,
+        )
+        agy_default_cmd = agy_calls[0]
+        assert "--model" not in agy_default_cmd
+        assert "--effort" not in agy_default_cmd
+        assert agy_default_response.model == "agy-test-resolved"
+        assert agy_default_response.response_meta["actual_model"] == "agy-test-resolved"
+        assert agy_default_response.response_meta["actual_model_resolution"] == "reported_by_cli"
+        assert agy_default_response.response_meta["reasoning_effort"] == "cli-default"
+        assert agy_default_response.response_meta["cli_version"]
+
+        await providers.AntigravityCliAdapter().generate_structured(
+            model="concrete-gemini-model",
+            api_key=None,
+            base_url=None,
+            system_prompt="system",
+            user_prompt="user",
+            temperature=0,
+            schema={"type": "object"},
+            schema_name="test",
+            output_model=None,
+        )
+        agy_concrete_cmd = next(c for c in reversed(agy_calls) if "--version" not in c)
+        assert agy_concrete_cmd[agy_concrete_cmd.index("--model") + 1] == "concrete-gemini-model"
+        assert "--effort" in agy_concrete_cmd
+
+        api_models_seen: list[str] = []
+        original_call_gemini_api = providers._call_gemini_api
+
+        async def fake_agy_fail(*_args, **_kwargs):
+            return 1, "", "agy unavailable"
+
+        def fake_gemini_api(model_arg, *_args, **_kwargs):
+            api_models_seen.append(model_arg)
+            return '{"answer":"ok"}'
+
+        providers._run_cli = fake_agy_fail
+        providers._call_gemini_api = fake_gemini_api
+        try:
+            fallback_response = await providers.AntigravityCliAdapter().generate_structured(
+                model=models.AGY_DEFAULT_SENTINEL,
+                api_key="test-key",
+                base_url=None,
+                system_prompt="system",
+                user_prompt="user",
+                temperature=0,
+                schema={"type": "object"},
+                schema_name="test",
+                output_model=None,
+            )
+            assert api_models_seen == [models.GEMINI_API_DEFAULT_MODEL]
+            assert fallback_response.model == models.GEMINI_API_DEFAULT_MODEL
+            assert fallback_response.response_meta["actual_model"] == models.GEMINI_API_DEFAULT_MODEL
+        finally:
+            providers._call_gemini_api = original_call_gemini_api
+
         async def fake_claude(*_args, **_kwargs):
             return 0, structured_error, ""
 
         providers._run_cli = fake_claude
         try:
             await providers.ClaudeCliAdapter().generate_structured(
-                model="claude-opus-5",
+                model=models.CLAUDE_DEFAULT_SENTINEL,
                 api_key=None,
                 base_url=None,
                 system_prompt="system",
@@ -123,7 +253,7 @@ async def _check_skill(skill: str) -> None:
         providers._run_cli = fake_malformed_claude
         try:
             await providers.ClaudeCliAdapter().generate_structured(
-                model="claude-opus-5",
+                model=models.CLAUDE_DEFAULT_SENTINEL,
                 api_key=None,
                 base_url=None,
                 system_prompt="system",

@@ -1,13 +1,14 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseThemeBlocks, auditTheme } from './contrast.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const scratch = execFileSync('mktemp', ['-d'], { encoding: 'utf8' }).trim();
+const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'html-artifacts-test-'));
 after(() => fs.rmSync(scratch, { recursive: true }));
 const run = (tool, ...args) => spawnSync(process.execPath, [path.join(root, 'tools', tool), ...args], { encoding: 'utf8' });
 let seq = 0;

@@ -7,7 +7,7 @@
 `mobile-app` target の仕様可視化では、要件ダッシュボードだけでなく主要画面/flow preview を
 phone-first で含める。ブラウザ表示は配布手段にすぎず、製品の surface を Web dashboard と
 取り違えない。
-User/project language も同時に決める。Korean prompt / Trip Jarvis では見出し・ラベル・
+User/project language も同時に決める。Korean prompt / 韓国語プロダクトでは見出し・ラベル・
 説明文を Korean にし、英語や日本語の固定文を残さない（ラベル対訳は `assets-contract.md`）。
 デザイントークンは `references/ui-cache.md` の UI キャッシュ（fresh なら再調査省略、
 `skin.css` を link）を使う。
@@ -58,7 +58,7 @@ User/project language も同時に決める。Korean prompt / Trip Jarvis では
 ## 仕上げ
 
 `index.html` を開いた後、`AskUserQuestion`:
-- Korean prompt / Trip Jarvis: 「이 사양으로 진행해도 될까요?」 選択肢 = 「OK, 진행」 / 「수정할 점이 있음」 / （未決があれば）その決定。
+- Korean prompt / 韓国語プロダクト: 「이 사양으로 진행해도 될까요?」 選択肢 = 「OK, 진행」 / 「수정할 점이 있음」 / （未決があれば）その決定。
 - Japanese prompt: 「この仕様で合っていますか？」 選択肢 = 「OK、進めて」 / 「直したい点がある」 / （未決があれば）その決定。
 
 ## チェックリスト

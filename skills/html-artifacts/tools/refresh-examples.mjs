@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Keep the checked-in demos on the canonical CSS/JS and deterministic build specs.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -14,7 +15,7 @@ if (process.argv.slice(2).some((x) => x !== '--check')) {
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const core = ['reset', 'tokens', 'themes', 'elements'].map((id) => read(`templates/core/${id}.css`).trim()).join('\n\n');
 const js = read('templates/core/interactions.js').trim();
-const scratch = execFileSync('mktemp', ['-d'], { encoding: 'utf8' }).trim();
+const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'html-artifacts-refresh-'));
 let changed = 0, total = 0;
 function sync(file, content) {
   total++;

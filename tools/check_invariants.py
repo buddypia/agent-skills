@@ -60,12 +60,43 @@ SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".tmp", ".worktrees",
              ".pytest_cache", ".ruff_cache", "node_modules", ".idea", ".vscode"}
 
 TEXT_SUFFIXES = {".py", ".md", ".example", ".yaml", ".yml", ".json", ".txt", ".sh", ".toml",
-                 ".ps1", ".cmd"}
+                 ".ps1", ".cmd", ".mjs", ".js", ".css", ".html"}
 
 # models.py owns the deny-list, so it is the one file allowed to name retired IDs.
 LEGACY_ID_EXEMPT = {"tools/check_invariants.py"} | {
     f"skills/{skill}/scripts/workflow/models.py" for skill in MULTI_LLM_SKILLS
 }
+
+# Files that document forbidden non-portable identifiers (or gitignore local paths).
+PORTABILITY_EXEMPT = {"tools/check_invariants.py", ".gitignore", "CLAUDE.md"}
+
+# Patterns for personal/machine-specific tools, skills, projects, and paths that must not be
+# published inside standalone skills.
+MACHINE_SPECIFIC_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (
+        re.compile(
+            r"\b(?:chrome-cli|pw-agent|CHROME_CLI_SESSION_ID|PW_AGENT_SESSION_ID"
+            r"|agy-cli|cdx-cli|jev-cli|clef-cli|eg2-cli|s1-browser"
+            r"|skill-bridge|skill_usage)\b"
+        ),
+        "local/personal CLI or env var not bundled in this repo",
+    ),
+    (
+        re.compile(
+            r"\b(?:claude-code-best-practices|color-palette|design-taste-frontend"
+            r"|ui-improvement-proposals|secret-ops|agent-search)\b"
+        ),
+        "non-bundled local skill reference",
+    ),
+    (
+        re.compile(r"\b(?:trip\s+jarvis|slide-studio|slide\s+studio)\b", re.IGNORECASE),
+        "personal project name",
+    ),
+    (
+        re.compile(r"(?:/Users/[A-Za-z0-9._-]+|~/\.(?:local|gemini)/|demo2/(?:html-visual|wireframe-dashboard))"),
+        "machine-specific or local source path",
+    ),
+)
 
 # A token that looks like a vendor model ID. Anchored on the family word so unrelated
 # hyphenated names (claude-code-steering, @anthropic-ai/claude-code) are not swept up.
@@ -99,8 +130,9 @@ MUST_REJECT = (
 # than one that misses yesterday's, so these are the more important half of the fixture.
 MUST_ACCEPT = (
     "claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-haiku-4-5",
-    "claude-opus-4-8", "claude-sonnet-4-6", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash",
-    "codex-default", "mock-v1",
+    "claude-opus-4-8", "claude-sonnet-4-6", "gemini-3.8-flash", "gemini-3.7-flash",
+    "gemini-3.6-flash", "gemini-3.5-flash", "claude-opus-5-5",
+    "agy-default", "claude-default", "codex-default", "mock-v1",
     "claude-opus-6", "claude-sonnet-6-1", "gemini-4-flash", "gemini-3.7-pro",
     "gpt-3.7-nova", "o5-turbo",
 )
@@ -245,14 +277,14 @@ def check_templates_match_defaults(policy, paths: list[Path] | None = None) -> l
             # Placeholders and env-var indirection are fine.
             if value.startswith(("$", "<", "{", "your")) or value in {"null", "PATH", "MODEL"}:
                 continue
-            # codex-default is a deliberate routing sentinel, not a vendor model ID. It must
-            # still match DEFAULT_MODELS so a config template cannot silently re-pin Codex to an
-            # account-incompatible model.
-            if value == "codex-default":
+            # CLI default sentinels are deliberate routing sentinels, not vendor model IDs.
+            # They must still match DEFAULT_MODELS so a config template cannot silently re-pin
+            # a role to an explicit concrete model ID.
+            if value in policy.CLI_DEFAULT_SENTINELS:
                 if value not in current:
                     failures.append(
-                        f"{relpath}:{lineno} configures {value!r}, but it is not the current "
-                        "OpenAI default in DEFAULT_MODELS."
+                        f"{relpath}:{lineno} configures {value!r}, but it is not a current "
+                        "default in DEFAULT_MODELS."
                     )
                 continue
             if not MODEL_TOKEN.fullmatch(value):
@@ -286,12 +318,49 @@ def check_policy_fixtures(policy) -> list[str]:
         failures.append("resolve_default_model() accepted an unknown provider instead of raising")
     except policy.ModelPolicyError:
         pass
+    if policy.DEFAULT_MODELS["gemini"] != policy.AGY_DEFAULT_SENTINEL:
+        failures.append("the Gemini default no longer equals AGY_DEFAULT_SENTINEL")
+    if not policy.uses_agy_cli_default(policy.AGY_DEFAULT_SENTINEL):
+        failures.append("the Gemini default no longer selects the authenticated agy CLI default")
+    if policy.uses_agy_cli_default("some-concrete-model"):
+        failures.append("uses_agy_cli_default() accepts a concrete model override")
+    if policy.DEFAULT_MODELS["anthropic"] != policy.CLAUDE_DEFAULT_SENTINEL:
+        failures.append("the Anthropic default no longer equals CLAUDE_DEFAULT_SENTINEL")
+    if policy.DEFAULT_MODELS["claude"] != policy.CLAUDE_DEFAULT_SENTINEL:
+        failures.append("the Claude alias default no longer equals CLAUDE_DEFAULT_SENTINEL")
+    if not policy.uses_claude_cli_default(policy.CLAUDE_DEFAULT_SENTINEL):
+        failures.append("the Anthropic default no longer selects the authenticated Claude CLI default")
+    if policy.uses_claude_cli_default("some-concrete-model"):
+        failures.append("uses_claude_cli_default() accepts a concrete model override")
     if policy.DEFAULT_MODELS["openai"] != policy.CODEX_DEFAULT_SENTINEL:
         failures.append("the OpenAI default no longer equals CODEX_DEFAULT_SENTINEL")
     if not policy.uses_codex_cli_default(policy.CODEX_DEFAULT_SENTINEL):
         failures.append("the OpenAI default no longer selects the authenticated Codex CLI default")
     if policy.uses_codex_cli_default("some-concrete-model"):
         failures.append("uses_codex_cli_default() accepts a concrete model override")
+    return failures
+
+
+def check_no_machine_specific_refs(paths: list[Path] | None = None) -> list[str]:
+    """Ensure standalone skills do not reference machine-specific tools, skills, or paths."""
+    failures = []
+    for path in paths if paths is not None else walk_text_files():
+        relpath = rel(path)
+        if relpath in PORTABILITY_EXEMPT:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for pattern, kind in MACHINE_SPECIFIC_PATTERNS:
+                match = pattern.search(line)
+                if match:
+                    failures.append(
+                        f"{relpath}:{lineno} references {match.group(0)!r} ({kind}). "
+                        f"Remove machine-specific dependencies so skills remain portable."
+                    )
+                    break
     return failures
 
 
@@ -318,21 +387,23 @@ def check_python_compiles(paths: list[Path] | None = None) -> list[str]:
 # Which checks an edited path can break. Used by --hook to stay cheap.
 def relevant_checks(changed: str | None) -> list[str]:
     if changed is None:
-        return ["shared", "legacy", "templates", "fixtures", "compile"]
+        return ["shared", "legacy", "templates", "fixtures", "portability", "compile"]
     changed = changed.replace("\\", "/")
     if not changed.startswith("skills/") and "/skills/" not in changed:
         if changed.endswith(("README.md", "README.ja.md", "README.ko.md", "README.zh.md")):
-            return ["legacy", "templates"]
+            return ["legacy", "templates", "portability"]
         return []
     names = []
     if changed.endswith(tuple(f"/{module}" for module in SHARED_MODULES)):
         names.append("shared")
     if changed.endswith(".py"):
-        names += ["compile", "legacy"]
+        names += ["compile", "legacy", "portability"]
         if changed.endswith("/models.py"):
             names.append("fixtures")
     if changed.endswith((".md", ".example", ".yaml", ".yml", ".json", ".txt")):
-        names += ["legacy", "templates"]
+        names += ["legacy", "templates", "portability"]
+    elif changed.endswith((".mjs", ".js", ".css", ".html", ".sh", ".ps1", ".cmd", ".toml")):
+        names.append("portability")
     return names
 
 
@@ -389,6 +460,7 @@ def main() -> int:
                 "legacy": lambda: check_no_legacy_ids(policy, scope),
                 "templates": lambda: check_templates_match_defaults(policy, scope),
                 "fixtures": lambda: check_policy_fixtures(policy),
+                "portability": lambda: check_no_machine_specific_refs(scope),
             }
             for name in wanted:
                 if name in runners:

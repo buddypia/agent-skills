@@ -34,7 +34,7 @@ permanent"), wants to **tidy up / audit a `.claude` config** ("CLAUDE.md has blo
 ignores a rule", "review my config against the docs"), or hits a symptom of a misplaced
 instruction ("make X run every time", "never let Claude do X", "context feels heavy"). Do **not**
 fire for ordinary code implementation, bug fixing, or general session workflow (explore → plan →
-implement, `/clear` strategy) — that belongs to the sibling `claude-code-best-practices`.
+implement, `/clear` strategy) — this skill covers only *where an instruction lives* and config audits.
 
 ## Usage
 

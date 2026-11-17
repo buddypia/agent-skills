@@ -61,7 +61,7 @@ These skills orchestrate official CLIs that you install yourself; they do **not*
 
 "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is **not affiliated with, endorsed by, or sponsored by** Anthropic, OpenAI, or Google.
 
-Gemini and Claude defaults (for example `gemini-3.7-flash` and `claude-opus-5`) are defined once per skill in `scripts/workflow/models.py`. Codex uses `codex-default` by default, deliberately delegating to the authenticated CLI's supported model rather than pinning an account-incompatible ID. Concrete retired or superseded model IDs are refused before a run starts. Multi-model orchestration is a design choice and **does not guarantee better results**. Treat model outputs as untrusted and review them, and be mindful of prompt-injection when feeding in third-party content.
+All three providers (`agy-default` for Gemini via `agy`, `claude-default` for Anthropic via `claude`, and `codex-default` for OpenAI via `codex`, defined in `scripts/workflow/models.py`) delegate to each authenticated CLI's default model rather than pinning concrete model IDs. Concrete retired or superseded model IDs are refused before a run starts when explicit overrides are supplied. Multi-model orchestration is a design choice and **does not guarantee better results**. Treat model outputs as untrusted and review them, and be mindful of prompt-injection when feeding in third-party content.
 
 ## License
 

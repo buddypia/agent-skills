@@ -48,7 +48,13 @@ import time
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from .models import ensure_current_model, uses_codex_cli_default
+from .models import (
+    GEMINI_API_DEFAULT_MODEL,
+    ensure_current_model,
+    uses_agy_cli_default,
+    uses_claude_cli_default,
+    uses_codex_cli_default,
+)
 from .raw import to_jsonable
 
 
@@ -224,7 +230,7 @@ def _strip_unsupported_schema_fields(schema: Any) -> Any:
 
 
 _CLAUDE_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
-_AGY_EFFORTS = {"low", "medium", "high"}
+_AGY_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 
 
 def _claude_effort(effort: str) -> str:
@@ -238,15 +244,15 @@ def _claude_effort(effort: str) -> str:
 
 
 def _agy_model_and_effort(model: str, effort: str) -> tuple[str, str]:
-    """Translate the shared effort setting to agy's three supported levels.
+    """Translate the shared effort setting to agy's supported levels.
 
-    agy 1.1.x requires ``--effort`` for base Gemini model aliases such as
-    ``gemini-3.7-flash``. Its model picker also displays the aliases with a trailing
-    ``-low`` / ``-medium`` / ``-high`` suffix, so accept either spelling while ensuring
-    that a caller's explicit model tier wins over the common effort environment variable.
+    When an explicit Gemini model ID is passed, agy supports ``--effort`` alongside base
+    model aliases; its model picker also displays aliases with a trailing ``-low`` /
+    ``-medium`` / ``-high`` / ``-xhigh`` / ``-max`` suffix, so accept either spelling while
+    ensuring that a caller's explicit model tier wins over the common effort env var.
     """
     normalized_model = model.strip()
-    for tier in _AGY_EFFORTS:
+    for tier in sorted(_AGY_EFFORTS, key=len, reverse=True):
         suffix = f"-{tier}"
         if normalized_model.lower().endswith(suffix):
             return normalized_model[: -len(suffix)], tier
@@ -327,6 +333,37 @@ def _codex_actual_model(event_output: str) -> str | None:
             model = container.get("model")
             if isinstance(model, str) and model.strip():
                 return model.strip()
+    return None
+
+
+def _claude_actual_model(data: dict[str, Any]) -> str | None:
+    """Read Claude CLI's resolved model from its JSON result envelope, if present."""
+    model = data.get("model")
+    if isinstance(model, str) and model.strip():
+        return model.strip()
+    usage = data.get("modelUsage")
+    if isinstance(usage, dict):
+        for key, info in usage.items():
+            if isinstance(info, dict):
+                canonical = info.get("canonicalModel")
+                if isinstance(canonical, str) and canonical.strip():
+                    return canonical.strip()
+            if isinstance(key, str) and key.strip():
+                return key.strip()
+    return None
+
+
+def _agy_actual_model(event_output: str) -> str | None:
+    """Read agy's resolved model from its JSON result envelope, if exposed."""
+    try:
+        envelope = json.loads(event_output)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(envelope, dict):
+        return None
+    model = envelope.get("model")
+    if isinstance(model, str) and model.strip():
+        return model.strip()
     return None
 
 
@@ -526,6 +563,7 @@ class ClaudeCliAdapter:
         model_id = _backend_model("MULTILLM_CLAUDE_MODEL", model, "anthropic")
         effort = _reasoning_effort()
         timeout = _cli_timeout()
+        model_args = [] if uses_claude_cli_default(model_id) else ["--model", model_id]
         with tempfile.TemporaryDirectory(prefix="mll_claude_") as tmp:
             sys_file = os.path.join(tmp, "system.txt")
             with open(sys_file, "w", encoding="utf-8") as fh:
@@ -537,7 +575,7 @@ class ClaudeCliAdapter:
                 "--append-system-prompt-file", sys_file,
                 "--allowed-tools", "",
                 "--permission-mode", "dontAsk",
-                "--model", model_id,
+                *model_args,
                 "--effort", _claude_effort(effort),
             ]
             # cwd=tmp → avoids loading the project's CLAUDE.md/hooks. Does not use --bare so subscription auth still applies.
@@ -555,6 +593,8 @@ class ClaudeCliAdapter:
             ) from exc
         if data.get("is_error"):
             raise RuntimeError(f"claude -p error: {_cli_failure_detail(out, err)}")
+        cli_version = await _cli_version(binary, cwd=None, timeout=timeout)
+        actual_model = _claude_actual_model(data)
         structured = data.get("structured_output")
         if structured is not None:
             response_text = json.dumps(structured, ensure_ascii=False)
@@ -563,6 +603,7 @@ class ClaudeCliAdapter:
         request = {
             "backend": "claude-cli",
             "model": model_id,
+            "actual_model": actual_model or "unknown",
             "argv": cmd,
             "system_prompt_chars": len(system_prompt),
             "user_prompt_chars": len(user_prompt),
@@ -570,6 +611,9 @@ class ClaudeCliAdapter:
         meta = {
             "backend": "claude-cli",
             "model": model_id,
+            "actual_model": actual_model or "unknown",
+            "actual_model_resolution": "reported_by_cli" if actual_model else "not_exposed_by_cli",
+            "cli_version": cli_version,
             "reasoning_effort": effort,
             "usage": data.get("modelUsage") or data.get("usage"),
             "session_id": data.get("session_id"),
@@ -583,7 +627,7 @@ class ClaudeCliAdapter:
                 print(f"[claude] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
         return ProviderResponse(
             provider=self.name,
-            model=model_id,
+            model=actual_model or model_id,
             request=to_jsonable(request),
             response_text=response_text,
             response_meta=meta,
@@ -687,9 +731,11 @@ class CodexAdapter:
 
 
 # =============================================================================
-# Antigravity CLI  (gemini)  — successor to the Gemini CLI. The model comes from the role
-#   config (default in models.py) and is passed to agy explicitly.
-#   agy 1.1.x supports --model, --json-schema, and --output-format json, so it can return
+# Antigravity CLI  (gemini)  — successor to the Gemini CLI. By default (`agy-default`)
+#   both `--model` and `--effort` are omitted so agy uses its configured default model
+#   (passing `--effort` without `--model` fails on orchestrator / fixed-effort defaults).
+#   When a concrete model ID is supplied, `--model` and `--effort` are passed explicitly.
+#   agy 1.1.x+ supports `--json-schema` and `--output-format json`, so it can return
 #   schema-native structured output just like the Claude and Codex adapters.
 #
 #   Auth priority is agy CLI (subscription OAuth) first, GEMINI_API_KEY second (fallback only).
@@ -717,6 +763,7 @@ class AntigravityCliAdapter:
         effective_api_key = api_key or os.getenv("GEMINI_API_KEY")
 
         async def call_api() -> ProviderResponse:
+            api_model = GEMINI_API_DEFAULT_MODEL if uses_agy_cli_default(model) else model
             loop = asyncio.get_running_loop()
             timeout = _cli_timeout()
             remaining = _deadline_remaining()
@@ -724,7 +771,7 @@ class AntigravityCliAdapter:
             response_text = await loop.run_in_executor(
                 None,
                 _call_gemini_api,
-                model,
+                api_model,
                 effective_api_key,
                 system_prompt,
                 user_prompt,
@@ -736,10 +783,11 @@ class AntigravityCliAdapter:
             request = {
                 "backend": "gemini-api",
                 "model": model,
+                "actual_model": api_model,
                 "directive_chars": len(system_prompt),
                 "user_prompt_chars": len(user_prompt),
             }
-            meta = {"backend": "gemini-api", "model": model}
+            meta = {"backend": "gemini-api", "model": model, "actual_model": api_model}
             parsed_output = None
             if output_model is not None:
                 try:
@@ -748,7 +796,7 @@ class AntigravityCliAdapter:
                     pass
             return ProviderResponse(
                 provider=self.name,
-                model=model,
+                model=api_model,
                 request=to_jsonable(request),
                 response_text=text,
                 response_meta=meta,
@@ -759,15 +807,20 @@ class AntigravityCliAdapter:
             binary = shutil.which("agy") or "agy"
             timeout = _cli_timeout()
             effort = _reasoning_effort()
-            model_id, agy_effort = _agy_model_and_effort(model, effort)
+            if uses_agy_cli_default(model):
+                model_id = model
+                agy_effort = "cli-default"
+                model_args: list[str] = []
+            else:
+                model_id, agy_effort = _agy_model_and_effort(model, effort)
+                model_args = ["--model", model_id, "--effort", agy_effort]
             # agy does not read stdin as print-mode task content: it starts a request from the
             # -p argument only. Passing user_prompt through stdin therefore yields a successful
             # but empty/unrelated answer. Keep the complete task in the prompt argument instead.
             directive = f"{system_prompt}\n\n=== Task content ===\n{user_prompt}"
             cmd = [
                 binary, "-p", directive,
-                "--model", model_id,
-                "--effort", agy_effort,
+                *model_args,
                 "--json-schema", json.dumps(schema, ensure_ascii=False),
                 "--output-format", "json",
                 "--disable-slash-commands",
@@ -790,9 +843,12 @@ class AntigravityCliAdapter:
                     failure_detail = _agy_failure_detail(out)
                     text = _extract_agy_response(out)
                     if rc == 0 and not failure_detail and text:
+                        actual_model = _agy_actual_model(out)
+                        cli_version = await _cli_version(binary, cwd=tmp, timeout=timeout)
                         request = {
                             "backend": "antigravity-cli",
                             "model": model_id,
+                            "actual_model": actual_model or "unknown",
                             "directive_chars": len(directive),
                             "user_prompt_chars": len(user_prompt),
                             "attempt": attempt + 1,
@@ -800,6 +856,9 @@ class AntigravityCliAdapter:
                         meta = {
                             "backend": "antigravity-cli",
                             "model": model_id,
+                            "actual_model": actual_model or "unknown",
+                            "actual_model_resolution": "reported_by_cli" if actual_model else "not_exposed_by_cli",
+                            "cli_version": cli_version,
                             "reasoning_effort": agy_effort,
                             "attempt": attempt + 1,
                         }
@@ -812,13 +871,21 @@ class AntigravityCliAdapter:
                                 print(f"[gemini-cli] warning: schema validation failed for {schema_name}: {exc}", file=sys.stderr)
                         return ProviderResponse(
                             provider=self.name,
-                            model=model_id,
+                            model=actual_model or model_id,
                             request=to_jsonable(request),
                             response_text=text,
                             response_meta=meta,
                             parsed_output=parsed_output,
                         )
                     last_err = err.strip()[:500] or failure_detail or f"exit {rc}"
+                    if (
+                        rc != 0
+                        and "--effort is not supported" in (err + " " + failure_detail)
+                        and "--effort" in cmd
+                    ):
+                        idx = cmd.index("--effort")
+                        cmd = cmd[:idx] + cmd[idx + 2 :]
+                        agy_effort = "cli-default"
                     # Retry a soft failure once, with bounded jittered backoff, only if the budget allows.
                     if attempt + 1 < max_attempts and _deadline_remaining() > _MIN_CALL_FLOOR_SEC + 5:
                         await asyncio.sleep(1.0 + random.random())

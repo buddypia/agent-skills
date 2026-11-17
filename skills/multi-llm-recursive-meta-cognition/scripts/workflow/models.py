@@ -13,13 +13,14 @@ longer exists".
 
 Policy enforced here:
 
-* The current default per provider lives in ``DEFAULT_MODELS`` — the single place to edit when
-  a new model ships. Role defaults and ``--help`` text derive from it instead of repeating IDs.
+* The built-in default per provider lives in ``DEFAULT_MODELS`` — routing sentinels
+  (``agy-default``, ``claude-default``, ``codex-default``) delegate to each authenticated
+  CLI's default model so routine vendor releases require no repo-wide model bumps.
 * Every resolved model passes :func:`ensure_current_model` **before** a subprocess is spawned,
   whichever channel it came from.
 * Retired and superseded-generation IDs are rejected with the offending channel named, so the
   fix is obvious. Only generations that no longer exist are rejected — a *supported but older*
-  choice (say ``claude-sonnet-5`` to fit a tight wall-clock budget) stays the caller's call.
+  or faster concrete model override stays the caller's call.
 * Escape hatch: ``MULTILLM_ALLOW_LEGACY_MODELS=1`` downgrades the rejection to a stderr
   warning, for a gateway that remaps old names or an account pinned to an old snapshot.
 
@@ -35,21 +36,32 @@ import sys
 
 
 # =============================================================================
-# Current defaults (2026-08) — the ONLY place in the code that names a model ID
+# Current defaults — the ONLY place in the code that names default model IDs
 # =============================================================================
 
+AGY_DEFAULT_SENTINEL = "agy-default"
+CLAUDE_DEFAULT_SENTINEL = "claude-default"
 CODEX_DEFAULT_SENTINEL = "codex-default"
+
+CLI_DEFAULT_SENTINELS: frozenset[str] = frozenset({
+    AGY_DEFAULT_SENTINEL,
+    CLAUDE_DEFAULT_SENTINEL,
+    CODEX_DEFAULT_SENTINEL,
+})
+
+# Evergreen Gemini REST API alias used ONLY when the agy CLI fails and GEMINI_API_KEY
+# fallback runs without an explicit model override.
+GEMINI_API_DEFAULT_MODEL = "gemini-flash-latest"
 
 
 DEFAULT_MODELS: dict[str, str] = {
-    # Google Gemini via the agy (Antigravity) CLI.
-    "gemini": "gemini-3.7-flash",
-    # Anthropic via the claude CLI.
-    "anthropic": "claude-opus-5",
-    "claude": "claude-opus-5",
-    # OpenAI via the codex CLI. This sentinel intentionally omits ``codex exec -m`` so
-    # the authenticated account's supported Codex default is selected. Hard-coding a
-    # model here made the skill fail for ChatGPT accounts whose CLI did not expose it.
+    # Google Gemini via the agy (Antigravity) CLI — omits --model/--effort so agy's
+    # configured default model is used without routine model-bump maintenance.
+    "gemini": AGY_DEFAULT_SENTINEL,
+    # Anthropic via the claude CLI — omits --model so Claude Code's default model is used.
+    "anthropic": CLAUDE_DEFAULT_SENTINEL,
+    "claude": CLAUDE_DEFAULT_SENTINEL,
+    # OpenAI via the codex CLI — omits -m so the authenticated account's default is used.
     "openai": CODEX_DEFAULT_SENTINEL,
     # Offline contract tests; never reaches a vendor.
     "mock": "mock-v1",
@@ -150,6 +162,16 @@ def resolve_default_model(provider: str) -> str:
             f"{', '.join(sorted(DEFAULT_MODELS))}"
         )
     return model
+
+
+def uses_agy_cli_default(model: str) -> bool:
+    """Whether the Gemini role should omit ``agy --model`` / ``--effort``."""
+    return (model or "").strip() == AGY_DEFAULT_SENTINEL
+
+
+def uses_claude_cli_default(model: str) -> bool:
+    """Whether the Anthropic role should omit ``claude --model``."""
+    return (model or "").strip() == CLAUDE_DEFAULT_SENTINEL
 
 
 def uses_codex_cli_default(model: str) -> bool:

@@ -1421,7 +1421,7 @@
       "type": "device",
       "span": 12,
       "title": "device (app-frame preview)",
-      "appTitle": "Trip Jarvis",
+      "appTitle": "Travel Companion",
       "icon": "T",
       "desc": "The builder device section renders a phone-shaped preview from raw HTML.",
       "badge": "Beta",

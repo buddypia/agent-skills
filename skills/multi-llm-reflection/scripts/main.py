@@ -17,11 +17,11 @@ Usage:
     # Use a configuration file (config.yaml is auto-discovered; explicit path also allowed)
     python main.py --config config.yaml "prompt"  # explicit path
 
-    # Custom model specification
+    # Custom model specification (defaults: agy-default / claude-default / codex-default)
     python main.py "Your prompt" \\
-        --generator-model gemini-3.7-flash \\
-        --critic-model claude-opus-5 \\
-        --refiner-model codex-default
+        --generator-model <gemini-model-id> \\
+        --critic-model <claude-model-id> \\
+        --refiner-model <openai-model-id>
 
 Configuration precedence:
     CLI arguments > environment variables > configuration file > default values

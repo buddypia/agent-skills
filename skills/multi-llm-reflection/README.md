@@ -7,7 +7,7 @@ For the skill definition (invocation summary), see [SKILL.md](./SKILL.md)
 
 ```
 [Task] → Generator(generate) → Critic(critique) → Refiner(refine) → Final output
-          agy/gemini-3.7     claude/opus-5    codex/account-default
+          agy/cli-default    claude/cli-default codex/cli-default
 ```
 Each stage outputs structured JSON in an independent context, and the refine stage incorporates the critique results.
 
@@ -58,10 +58,11 @@ On Windows, use `run.ps1` (PowerShell) or `run.cmd` (cmd) with the same argument
 ### Direct execution / model override
 ```bash
 # uv recommended (cwd set to scripts)
+# Defaults are agy-default / claude-default / codex-default (each CLI's configured default).
 uv run --directory scripts main.py "task" \
-    --generator-model gemini-3.7-flash \
-    --critic-model    claude-opus-5 \
-    --refiner-model   codex-default
+    --generator-model <gemini-model-id> \
+    --critic-model    <claude-model-id> \
+    --refiner-model   <openai-model-id>
 # without uv: source scripts/.venv/bin/activate && python scripts/main.py ...
 # swap provider: --generator-provider {gemini|anthropic|openai|mock}
 ```
@@ -70,7 +71,7 @@ uv run --directory scripts main.py "task" \
 
 | Variable | Default | Purpose |
 |------|------|------|
-| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude, Codex, and agy. agy supports low/medium/high; higher-only Codex values are clamped to `high` for agy. `xhigh` is the slowest and often exceeds the wall-clock budget — raise it only when you have the time |
+| `MULTILLM_REASONING_EFFORT` | `high` | Reasoning effort for Claude and Codex, and for agy when an explicit `--*-model` is set (default `agy-default` omits `--model` and `--effort` so agy uses its configured defaults). `xhigh` is the slowest and often exceeds the wall-clock budget — raise it only when you have the time |
 | `MULTILLM_CLI_TIMEOUT` | `360` | Per-CLI-call timeout (seconds); each call is additionally capped at the time left in `MULTILLM_TOTAL_DEADLINE` |
 | `MULTILLM_TOTAL_DEADLINE` | `540` | Whole-run wall-clock budget (seconds). Keeps the run under a typical 600s agent/Bash-tool ceiling; once spent, remaining stages return clearly-labeled **partial** output (`"degraded": true`) instead of the process being killed |
 | `MULTILLM_AGY_PRINT_TIMEOUT` | `5m` | agy `--print-timeout` |
@@ -80,7 +81,7 @@ uv run --directory scripts main.py "task" \
 | `MULTILLM_SHARD_MAX` | `16` | Maximum number of shards. When the input needs more than this many shards of `MULTILLM_SHARD_CHARS` to cover, the run warns and reports `context_relay.oversized_shards` — raise this, or curate the input into a brief |
 | `MULTILLM_SHARD_CONCURRENCY` | `8` | Maximum **simultaneous** distillation calls. Independent of the shard count: excess shards queue and run in later batches, so a large input never spawns a matching number of CLI processes |
 | `MULTILLM_DISTILL_EFFORT` | `low` | Reasoning effort for the shard-distillation calls only (the work is mechanical; stages keep `MULTILLM_REASONING_EFFORT`) |
-| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override. OpenAI defaults to `codex-default`, using the authenticated Codex CLI's supported default. |
+| `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL` | — | per-backend model override. All three backends default to their CLI's default (`agy-default`, `claude-default`, `codex-default`), omitting model flags unless overridden. |
 | `MULTILLM_ALLOW_LEGACY_MODELS` | unset | Allow an out-of-date model ID instead of refusing it. By default a retired snapshot or a superseded generation (`claude-3-*`, `gpt-4*`, `gemini-2.*`, …) is rejected **before the run starts**, naming the flag / env var / config key it came from — otherwise it only surfaces later as an opaque vendor 404 that a stage swallows into placeholder text. Set to `1` only when a gateway remaps the old name |
 | `REFLECTION_{GENERATOR,CRITIC,REFINER}_{PROVIDER,MODEL}` | — | per-role override |
 
@@ -97,7 +98,7 @@ REFLECTION_GENERATOR_PROVIDER=mock REFLECTION_CRITIC_PROVIDER=mock REFLECTION_RE
 | `agy/claude/codex: command not found` | install above + check PATH |
 | `Error: model '...' is out of date` (exit 1, nothing ran) | The model ID is a retired snapshot or a superseded generation. The message names the flag / env var / config key that supplied it — point that at a current ID (`--show-config` lists the defaults). Only set `MULTILLM_ALLOW_LEGACY_MODELS=1` if a gateway remaps the old name |
 | `Error: unknown provider '...'` (exit 1) | Typo in a `provider:` value. Valid: `gemini`, `anthropic` (alias `claude`), `openai`, `mock`. This used to silently pair the typo with an OpenAI model ID and fail much later, inside a stage |
-| Codex says a configured model is unsupported | Remove the model override or set it to `codex-default` to let the authenticated Codex CLI select a supported model; use a concrete ID only when your account exposes it |
+| CLI says a configured model is unsupported | Remove the model override or set it to `agy-default` / `claude-default` / `codex-default` to let the authenticated CLI select its default model; use a concrete ID only when your account exposes it |
 | `... failed (exit ...)` / authentication error | run the relevant CLI interactively once to log in |
 | Run is killed at ~10 min when launched by an agent | The run is bounded by `MULTILLM_TOTAL_DEADLINE` (540s) to finish before a typical **600s agent/Bash-tool ceiling**. If your harness still kills it, run as a **background** task, lower `MULTILLM_REASONING_EFFORT` (e.g. `medium`), or shorten the prompt. Do **not** simply raise `MULTILLM_CLI_TIMEOUT` — that makes a run longer, not safer |
 | `WARNING: ... DEGRADED mode` / `"degraded": true` | A stage timed out or errored and returned placeholder text, so the result is **partial**. Raise `MULTILLM_TOTAL_DEADLINE` / `MULTILLM_CLI_TIMEOUT`, lower `MULTILLM_REASONING_EFFORT`, or simplify the prompt |
@@ -134,6 +135,6 @@ This repository bundles only its own source. The runtime Python dependencies (`p
 
 - **Third-party CLIs & terms of service.** This project orchestrates the official CLIs you install yourself (`agy` / Antigravity, `claude` / Claude Code, `codex` / Codex). It does not circumvent authentication or billing. You are responsible for complying with each provider's and CLI's terms of service; automating subscription-authenticated CLIs may be subject to usage restrictions, and any account or usage consequences are your own. API keys are supported as an alternative.
 - **No affiliation.** "Claude" / "Claude Code" (Anthropic), "GPT" / "ChatGPT" / "Codex" (OpenAI), and "Gemini" / "Antigravity" (Google) are trademarks of their respective owners. This is an independent project and is not affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, or Google.
-- **Model names.** Gemini and Claude have explicit defaults (`gemini-3.7-flash`, `claude-opus-5`). OpenAI defaults to `codex-default`, deliberately letting the authenticated Codex CLI choose a model it supports instead of pinning an account-incompatible ID. Defaults live in one place (`scripts/workflow/models.py`); use `--*-model` flags to select a concrete model when needed. Retired or superseded concrete model IDs are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if a gateway remaps one.
+- **Model names.** All three providers default to routing sentinels (`agy-default`, `claude-default`, `codex-default`) defined in `scripts/workflow/models.py` that delegate to each authenticated CLI's default model rather than pinning concrete IDs (the `GEMINI_API_KEY` direct-API fallback uses `gemini-flash-latest` when `agy` fails). Use `--*-model` flags to select a concrete model when needed. Retired or superseded concrete model IDs are refused before the run starts — see `MULTILLM_ALLOW_LEGACY_MODELS` if a gateway remaps one.
 - **No quality guarantee.** Multi-model reflection is a design choice intended to surface more perspectives; it does not guarantee better results, which depend on your task and the models used.
 - **Untrusted output & prompt injection.** Prompts are passed to multiple external models. Treat the outputs as untrusted, review them, and be mindful of prompt-injection risk when feeding in third-party content.

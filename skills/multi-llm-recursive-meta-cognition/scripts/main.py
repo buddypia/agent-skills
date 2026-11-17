@@ -19,13 +19,13 @@ Usage:
     # Use a config file (config.yaml is auto-detected; explicit path also supported)
     python main.py --config config.yaml "prompt"  # explicit path
 
-    # Custom model selection
+    # Custom model selection (defaults: agy-default / claude-default / codex-default)
     python main.py "Your prompt" \
-        --decomposer-model gemini-3.7-flash \
-        --solver-model gemini-3.7-flash \
-        --verifier-model claude-opus-5 \
-        --integrator-model codex-default \
-        --reflector-model codex-default
+        --decomposer-model <gemini-model-id> \
+        --solver-model <gemini-model-id> \
+        --verifier-model <claude-model-id> \
+        --integrator-model <openai-model-id> \
+        --reflector-model <openai-model-id>
 
 Configuration precedence:
     CLI arguments > environment variables > config file > default values

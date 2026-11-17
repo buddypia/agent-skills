@@ -111,7 +111,6 @@ Reference each supporting file from SKILL.md, stating **what it contains and whe
 name: security-reviewer
 description: Reviews code for security vulnerabilities
 tools: Read, Grep, Glob, Bash
-model: opus
 ---
 You are a senior security engineer. Review code for:
 - Injection vulnerabilities (SQL, XSS, command injection)

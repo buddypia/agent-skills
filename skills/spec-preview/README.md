@@ -35,7 +35,7 @@ phone-first app-screen preview instead of a web hero/dashboard.
   kitchen-sink list) chosen to match the kind of change, with OK / needs-fix toggles and progress
   saved to `localStorage`. Required in `review` mode.
 - **Language-aware** — Korean/Japanese prompt phrasing feeds the `target` / `language` detection; UI
-  labels follow the user/product language (e.g. Korean UI text by default on Trip Jarvis).
+  labels follow the user/product language (e.g. Korean UI text when the project declares Korean as its product language).
 
 ## When to use
 
@@ -72,7 +72,7 @@ standalone — double-click `index.html` (`file://`) and it opens, no CDN requir
 ## References & Attribution
 
 This skill is an original implementation. Its shape traces back to a three-option UI-improvement
-comparison first built for the *slide-studio* project (that temporary artifact no longer exists); the
+comparison first built for a presentation-editor web app (that temporary artifact no longer exists); the
 structure and conventions were folded into the `assets/` templates and `references/proposals.md`, so
 there is no external directory to hunt for.
 

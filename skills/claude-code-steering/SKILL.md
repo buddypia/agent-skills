@@ -19,7 +19,7 @@ Fire proactively in the following situations, even when not invoked explicitly.
 | **ROUTE** | "Where should this instruction / rule / procedure go?", "Should this be in CLAUDE.md or a hook?", or any request to make a behavior permanent | Pick the single right mechanism via the 4 axes + anti-pattern checks, and give the location and a minimal implementation |
 | **AUDIT** | "Tidy up my `.claude`", "CLAUDE.md is long / gets ignored", "review it against the official docs" — any request to inspect existing config | SCAN the project, detect misplacements → present a refactor plan as a table (see `references/audit-playbook.md`) |
 
-**Do NOT fire when**: the task is ordinary code implementation, bug fixing, or investigation itself — those are not about steering mechanisms. General *work-flow* questions (explore→plan→implement, `/clear` strategy, session operation) belong to the sibling skill `claude-code-best-practices`. This skill specializes in *where an instruction lives*; mechanism selection/placement is this skill's domain, and when it overlaps with `claude-code-best-practices` "Mode C", route lightweight selection to the sibling skill, and **keep the 4-axis routing and config audits here**.
+**Do NOT fire when**: the task is ordinary code implementation, bug fixing, or investigation itself — those are not about steering mechanisms. General *work-flow* questions (explore→plan→implement, `/clear` strategy, session operation) are out of scope — this skill specializes in *where an instruction lives* (4-axis routing and config audits).
 
 ---
 
@@ -90,7 +90,7 @@ When asked to "tidy up `.claude`" or "review it against the official docs", do n
 3. **Findings table**: present as `location | current mechanism | issue | recommended mechanism | why | concrete action`, grounded in real file quotes, not guesses.
 4. **Apply fixes**: after the user approves, move misplaced items to the right mechanism. For CLAUDE.md, **deleting beats adding** by default. Ask each line "would removing this cause Claude to make mistakes?" — NO = delete / YES but rare = move to a skill / YES and always-needed = keep.
 
-> AUDIT rule of thumb: **CLAUDE.md under 200 lines** (this blog's bar; `claude-code-best-practices` is stricter at ~100), give it an owner, review it like code. Treat it as the index to the codebase and push detail into other files.
+> AUDIT rule of thumb: **CLAUDE.md under 200 lines** (this blog's bar; ~100 lines is a stricter target), give it an owner, review it like code. Treat it as the index to the codebase and push detail into other files.
 
 ---
 
@@ -106,4 +106,4 @@ When asked to "tidy up `.claude`" or "review it against the official docs", do n
 - **Reciting the source**: pasting the blog table back → the value is *translating* it to the user's concrete files and rules. In ROUTE, always cite one concrete example of "the instruction in question" when showing the verdict.
 - **Guesswork diagnosis**: in AUDIT, saying "it's probably bloated" without reading real files → always SCAN first, then report (with quotes).
 - **Mechanism proliferation**: "just append to CLAUDE.md", "hook everything" → both appending and hooking carry cost. Run the ROUTE flow, and always keep "don't write it / delete it" on the table.
-- **Overreach**: ordinary code implementation and general session operation (explore→plan→implement, `/clear` strategy, etc.) belong to `claude-code-best-practices`. Stay focused on *where an instruction lives*, and hand off to the sibling skill when needed.
+- **Overreach**: ordinary code implementation and general session operation (explore→plan→implement, `/clear` strategy, etc.) are out of scope for this skill. Stay focused on *where an instruction lives*.

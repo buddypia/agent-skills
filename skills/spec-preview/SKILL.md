@@ -56,8 +56,8 @@ description: >-
    （生成 HTML の URL クエリも同じ語彙を使う）。
    韓国語/日本語の prompt phrases も target 判定の一次情報として扱う。ブラウザで開くことと
    Web UI を作ることを混同しない。Flutter / iOS / Android / React Native なら
-   既定は `target=mobile-app`, `viewport=phone`。Trip Jarvis のように
-   `CLAUDE.md` が韓国語 MVP を宣言する場合は `lang=ko`。
+   既定は `target=mobile-app`, `viewport=phone`。たとえば
+   `CLAUDE.md` が韓国語プロダクトを宣言する場合は `lang=ko`。
 3. **Scope把握** — 対象（コード・要件・変更）を読み、現状と課題を 1〜2 段落に整理する。
    コードが対象なら関連箇所を Grep/Read（広いときは Explore サブエージェント）で特定する。
    推測で書かない。実際のコード・ファイルに基づく。
@@ -99,7 +99,7 @@ description: >-
 - **自己完結**。1フォルダをそのまま渡せば誰でもブラウザで開ける。
 - **言語は user/project に追従**。会話・説明・生成UIラベルはユーザーの言語を基本にし、
   project guidance が product language を宣言している場合はそれを優先する。
-  Trip Jarvis では韓国語 UI を既定にする。デザイントークンは対象プロダクト準拠。
+  たとえば韓国語プロダクトでは韓国語 UI を既定にする。デザイントークンは対象プロダクト準拠。
 - **Target-aware UI**。ブラウザは配布手段であり、UI の既定形は target surface に従う。
   `mobile-app` なら index の iframe は `?viewport=phone&embed=1` を既定にし、
   view には viewport 切替（`phone / tablet / desktop`）と mode 切替（`app / explainer`）を置く。

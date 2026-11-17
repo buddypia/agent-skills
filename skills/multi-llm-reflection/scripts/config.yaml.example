@@ -19,7 +19,7 @@
 # -------------------------------------------
 generator:
   provider: gemini              # gemini, anthropic, openai, or random
-  model: gemini-3.7-flash   # Model ID
+  model: agy-default            # authenticated agy CLI default (or set a concrete model ID)
   # api_key: your_key_here      # Or use the GEMINI_API_KEY environment variable
   # base_url: null              # Custom base URL (optional)
   temperature: 0.7              # Generation diversity (0.0 - 1.0)
@@ -30,7 +30,7 @@ generator:
 # -------------------------------------------
 critic:
   provider: anthropic           # gemini, anthropic, openai, or random
-  model: claude-opus-5  # Model ID
+  model: claude-default         # authenticated Claude Code CLI default (or set a concrete model ID)
   # api_key: your_key_here      # Or use the ANTHROPIC_API_KEY environment variable
   temperature: 0.7
 
@@ -40,7 +40,7 @@ critic:
 # -------------------------------------------
 refiner:
   provider: openai              # gemini, anthropic, openai, or random
-  model: codex-default               # authenticated Codex CLI default (or set a concrete model ID)
+  model: codex-default          # authenticated Codex CLI default (or set a concrete model ID)
   # api_key: your_key_here      # Or use the OPENAI_API_KEY environment variable
   # base_url: null              # Custom endpoint such as Azure OpenAI
   temperature: 0.7
@@ -67,15 +67,15 @@ devui:
 #    - Or set them directly in each agent's api_key field
 #
 # 2. Changing the model:
-#    - Change the model field in this file
-#    - Or via an environment variable: REFLECTION_GENERATOR_MODEL=gemini-3.7-flash
-#    - Or via the CLI: --generator-model gemini-3.7-flash
+#    - Change the model field in this file (or leave as agy-default / claude-default / codex-default)
+#    - Or via an environment variable: REFLECTION_GENERATOR_MODEL=<model-id>
+#    - Or via the CLI: --generator-model <model-id>
 #
 # 3. Changing the provider:
 #    - Example: to use Claude for all agents
 #      generator:
 #        provider: anthropic
-#        model: claude-opus-5
+#        model: claude-default
 #
 # 4. Checking configuration details:
 #    python main.py --show-config

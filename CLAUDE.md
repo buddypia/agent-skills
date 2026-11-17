@@ -17,9 +17,10 @@ hook runs the relevant subset automatically after each edit; set
 
 ## Invariants
 
-1. **Model IDs live in exactly one place per skill.**
-   `skills/<skill>/scripts/workflow/models.py` → `DEFAULT_MODELS`. Role defaults, `--help` text
-   and `--show-config` all derive from it. Never hardcode a model ID anywhere else in code.
+1. **Model defaults live in exactly one place per skill and delegate to CLI defaults.**
+   `skills/<skill>/scripts/workflow/models.py` → `DEFAULT_MODELS` (`agy-default`,
+   `claude-default`, `codex-default`). Role defaults, `--help` text and `--show-config`
+   all derive from it. Never hardcode a concrete model ID anywhere else in code or templates.
 2. **No file may name a retired or superseded model ID.** `models.py` refuses them at startup
    (every channel: `--<role>-model`, `<SKILL>_<ROLE>_MODEL`, `<PROVIDER>_MODEL_ID`,
    `config.yaml`, `MULTILLM_CLAUDE_MODEL` / `MULTILLM_CODEX_MODEL`, built-in default). Docs may
@@ -28,12 +29,17 @@ hook runs the relevant subset automatically after each edit; set
    skills.** Edit one, then copy it to the other two. (`providers.py` is *not* in this set:
    debate's mock payload legitimately carries an extra `context_digest` field.)
 4. **Config templates come in two parallel sets per skill** — `skills/<skill>/config.example`
-   + `env.example` and `skills/<skill>/scripts/config.yaml.example` + `.env.example`. A model
-   bump or a new env var has to land in **both**. Their prose differs on purpose (the
-   `scripts/` copies say "in this scripts/ directory"); only the configured values must agree.
+   + `env.example` and `skills/<skill>/scripts/config.yaml.example` + `.env.example`. Both sets
+   must stay aligned with `DEFAULT_MODELS` (`agy-default` / `claude-default` / `codex-default`).
+   Their prose differs on purpose (the `scripts/` copies say "in this scripts/ directory"); only
+   the configured values must agree.
 5. **The deny-list must not block a future model.** A pattern that rejects tomorrow's ID is
    worse than one that misses yesterday's. `tools/check_invariants.py` asserts both directions
    against a fixture list.
+6. **Skills must be portable across machines.** Do not reference personal/local CLIs
+   (`chrome-cli`, `pw-agent`, etc.), non-bundled local skills, personal project names, or
+   machine-specific home/user paths. `tools/check_invariants.py` enforces this via the
+   `portability` check.
 
 ## Layout
 

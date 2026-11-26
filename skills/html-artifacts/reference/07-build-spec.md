@@ -151,7 +151,7 @@ interaction, a scoped custom inline script, or a real destination/action. Use no
 markup for decorative chips and static affordances. Do not ship `href="#"` CTAs or inert
 mock buttons.
 
-The section types - **39 total**: **15 core** (`kpi` / `chart` / `table` / `diagram` / `device` / `screenflow` / `stepper` / `timeline` / `comparison` / `decision` / `tabs` / `collapsible` / `callout` / `prose` / `html`) + **17 added in v2** (§3a: `stattrend` / `barstacked` / `areastacked` / `gauge` / `radar` / `funnel` / `progress` / `bullet` / `heatmap` / `calendar` / `tree` / `statlist` / `feed` / `empty` / `features` / `checklist` / `form`) + **7 added in v7 architecture pass** (`arch-explorer` / `pipeline-flow` / `service-catalog` / `request-trace` / `event-catalog` / `deployment-topology` / `failure-modes` - see `04-module-catalog.md`). Pick the right one via `index/COMPONENTS.md` (the discovery index); see also `04-module-catalog.md` for full module contracts.
+The section types - **63 canonical types**: **15 core** (`kpi` / `chart` / `table` / `diagram` / `device` / `screenflow` / `stepper` / `timeline` / `comparison` / `decision` / `tabs` / `collapsible` / `callout` / `prose` / `html`) + **17 added in v2** (`stattrend` / `barstacked` / `areastacked` / `gauge` / `radar` / `funnel` / `progress` / `bullet` / `heatmap` / `calendar` / `tree` / `statlist` / `feed` / `empty` / `features` / `checklist` / `form`) + **7 added in v7 architecture pass** (`arch-explorer` / `pipeline-flow` / `service-catalog` / `request-trace` / `event-catalog` / `deployment-topology` / `failure-modes`) + **24 added in v8 AI-review / data / explainer / infographic pass** (`review` / `verification` / `walkthrough` / `diff` / `code` / `beforeafter` / `filetree` / `apiendpoint` / `changelog` / `takeaways` / `waterfall` / `scatter` / `pareto` / `diverging` / `cohort` / `leaderboard` / `quadrant` / `riskmatrix` / `sequence` / `statediagram` / `erd` / `sankey` / `fishbone` / `kpitree`, each also accepting its hyphenated alias such as `diff-block` or `review-signoff`). Pick the right one via `index/COMPONENTS.md`; see also `04-module-catalog.md` for full module contracts.
 
 **Layout keys every section accepts** (all optional, on the section object alongside `type`):
 
@@ -242,7 +242,11 @@ All charts emit hover tooltips (`data-chart-tip` / `data-tip`) wired by `interac
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `columns` | yes | Array of header strings. Sorting (`data-sortable`) is always wired. |
+| key | values | default | behavior |
+| --- | --- | --- | --- |
+| `columns` | array of strings | required | Column headings (`<th scope="col">`). |
+| `rows` | 2D array | required | Cell text/numbers or `{ badge, text }` pills. |
+| `sortable` | boolean | `true` | Emits `<button type="button" class="dt-sort-btn">` inside each `<th scope="col">` wired by `HA.sortable` (`aria-sort`, `Intl.Collator`, `role="status"`). Set `false` to emit static headers. |
 | `rows` | yes | Array of rows (arrays). Each cell is a string, or `{ "badge": "success\|warning\|danger\|info\|accent", "text": "…" }` to render a badge. |
 | `paginate` | no | Page size (number) - adds `data-paginate` + a pager. |
 | `select` | no | `true` adds row selection (`data-row-select`). |
@@ -545,6 +549,39 @@ for a ≥3:1 boundary on every theme. Every control gets an explicit `<label for
   { "label": "I agree to the policy", "kind": "checkbox", "required": true } ],
   "submit": { "label": "Send request" } }
 ```
+
+---
+
+### v8 AI-review, verification, explainer, data-viz & diagram sections (`tools/build.mjs`)
+
+All 24 typed sections accept optional `title`, `id`, `span`, `area`, `emphasis`, `chapter`, `navTitle`, and `covers` keys; hyphenated module IDs (`diff-block`, `review-signoff`, etc.) are also accepted as aliases.
+
+| canonical `type` | alias | key fields | notes |
+| --- | --- | --- | --- |
+| `review` | `review-signoff` | `items:[{id,title,scope?,desc?,evidence?,status?,note?}]`, `subtitle?`, `filters?`, `exportTitle?` | Interactive OK/Needs Fix/Hold signoff with `localStorage` persistence & Markdown copy export. Header shows `#review-signoff` jump badge. |
+| `verification` | `verification-run` | `items:[{name,cmd?,status?,counts?,duration?,note?,log?,open?}]`, `verdict?`, `duration?`, `meta?`, `subtitle?` | PASS/FAIL/WARN test & build log panel; failing checks expand by default. |
+| `walkthrough` | `annotated-walkthrough` | `steps:[{id?,title,label?,code?,desc?,meta?,target?}]`, `svg?`, `subtitle?` | Synchronized step cards and visual target highlights (`HA.walkthrough`). |
+| `diff` | `diff-block` | `files:[{file,kind?,added?,removed?,patch|lines[],note?,open?}]` or single-file shorthand | Parses unified `patch` or `{type,ln,text}` lines; adds collapsible diffs & jump chips when multiple files exist. |
+| `code` | `code-snippet` | `code` or `lines[]`, `file?`, `lang?`, `highlight?`, `startLine?`, `copyable?` | Syntax-highlighted listing with line-number gutter, line highlights, and copy button. |
+| `beforeafter` | `before-after` | `before[]`, `after[]`, `beforeTag?`, `beforeTitle?`, `transformLabel?`, `afterTag?`, `afterTitle?` | Before → Transform → After delta card. |
+| `filetree` | `file-tree` | `entries:[{path\|name,dir?,note?,children?}]` (or `items[]`) | Static box-drawing directory listing with folder highlights and aligned notes. |
+| `apiendpoint` | `api-endpoint` | `endpoints:[{method,path,desc?,params?,status?,responseTone?,responseDesc?}]` (or single shorthand) | REST method badge, `:param` highlighting, params table, and status line. |
+| `changelog` | - | `versions:[{version,date?,latest?,groups:[{tag,tone?,entries[]}]}]` (or `releases[]`) | Versioned Added / Changed / Fixed release log. |
+| `takeaways` | `key-takeaways` | `items:[string \| {lead,elab?}]` | Numbered executive TL;DR panel. |
+| `waterfall` | `chart-waterfall` | `items:[{label,value,kind?:'start'\|'delta'\|'total',display?}]`, `yPrefix?`, `ySuffix?`, `yMin?`, `yMax?` | Cumulative SVG bridge chart with start/up/down/total coloring & tooltips. |
+| `scatter` | `chart-scatter` | `points:[{x,y,r?,label?,series?,cat?,value?}]`, `xLabel?`, `yLabel?`, `showMedian?`, `xMin?`/`xMax?`/`yMin?`/`yMax?` | SVG scatter / bubble plot with optional median quadrant crosshairs. |
+| `pareto` | - | `items:[{label,value,display?}]`, `yAxis?`, `preserveOrder?` | Auto-sorted descending bars + cumulative % line + 80% rule line. |
+| `diverging` | `diverging-bar` | `items:[{label,a,b,aDisplay?,bDisplay?}]`, `seriesA?`, `seriesB?`, `max?` | Symmetric tornado / butterfly comparison bars. |
+| `cohort` | `cohort-grid` | `periods[]`, `cohorts:[{label,size?,values[]}]` (or `rows[]`), `cohortLabel?`, `sizeLabel?` | Retention triangular matrix; `null` renders `.cht-na`. |
+| `leaderboard` | - | `items:[{rank?,name,value,display?,move?,dir?,cat?}]` | Ranked standings with bar fill & movement arrows. |
+| `quadrant` | - | `items:[{label,x,y,cat?}]`, `quadrants?:{tl,tr,bl,br}`, `xAxis?`, `yAxis?`, `xLow?`/`xHigh?`/`yLow?`/`yHigh?` | 2×2 positioning matrix with percent coordinates `0..100`. |
+| `riskmatrix` | `risk-matrix` | `items:[{label,prob,impact}]`, `xAxis?`, `yAxis?`, `xLabels?`, `yLabels?` | 5×5 severity heatmap grid (`prob` 1..5, `impact` 1..5). |
+| `sequence` | `sequence-diagram` | `actors:[string\|{id,label}]`, `messages:[{from,to,label,type?}]`, `notes?:[{actor,text}]` | SVG UML sequence lifelines with sync/return/self arrows. |
+| `statediagram` | `state-diagram` | `states:[{id,label?,tone?,initial?,final?,x?,y?}]`, `transitions:[{from,to,label?}]` | SVG finite state machine with initial/final markers & guarded edges. |
+| `erd` | - | `entities:[{id,name?,columns:[{name,type?,key?}]}]`, `relations:[{from,to,cardinality?,label?}]` | Draggable + zoomable SVG ERD with `PK`/`FK` chips. |
+| `sankey` | - | `flows:[{from,to,value,cat?}]`, `sources?`, `targets?`, `leftTitle?`, `rightTitle?` | Width-proportional SVG flow ribbons. |
+| `fishbone` | - | `effect?`, `categories:[{label,cat?,causes[]}]` | Ishikawa cause-and-effect spine & angled bones. |
+| `kpitree` | `kpi-tree` | `root:{name,value,op?,children[]}` | 2–3 level metric driver tree with operator badges. |
 
 ---
 

@@ -1,0 +1,132 @@
+{
+  "title": "KiriPay 決済リトライ制御 リファクタリングレビュー",
+  "theme": "slate",
+  "layout": "stack",
+  "header": "compact",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "AI CHANGE REVIEW",
+  "subtitle": "固定間隔リトライからジッター付き指数バックオフ + Idempotency-Key 付与へ移行した変更点と検証エビデンス",
+  "footer": "KiriPay Payments Core · Change Review Blueprint",
+  "sections": [
+    {
+      "type": "takeaways",
+      "title": "変更の要点（AIサマリー）",
+      "items": [
+        { "lead": "外部決済ゲートウェイへの一斉再試行スパイクを抑止するため、指数バックオフ + Full Jitter を導入", "elab": "src/retry/backoff.ts の固定 500ms 待機を置き換え、429/503 復旧時間を計測基準で短縮。" },
+        { "lead": "リトライ要求に決定的な Idempotency-Key ヘッダーを必ず添付し二重課金を防止", "elab": "リクエスト単位の attemptCount ではなくトランザクションUUIDベースに固定。" },
+        { "lead": "単体テスト 18 件・負荷シミュレーションともに全通過（手動ロールバック確認のみレビュー待ち）" }
+      ]
+    },
+    {
+      "type": "kpi",
+      "variant": "inline",
+      "label": "変更スコープと検証指標",
+      "items": [
+        { "label": "変更ファイル数", "value": "3件" },
+        { "label": "差分行数", "value": "+42 / -15" },
+        { "label": "p99 回復レイテンシ", "value": "1.8s", "delta": "-62%", "dir": "down", "tone": "good" },
+        { "label": "自動テスト", "value": "18 / 18 PASS" }
+      ]
+    },
+    {
+      "type": "beforeafter",
+      "title": "挙動の変化（変更前 vs 変更後）",
+      "beforeTag": "Before",
+      "beforeTitle": "固定 500ms リトライ",
+      "before": [
+        "障害復旧直後に全ワーカーが同時刻に再接続し自己DoS化",
+        "リトライ毎に新しいリクエストIDを生成し二重決済リスク"
+      ],
+      "transformLabel": "Refactored",
+      "afterTag": "After",
+      "afterTitle": "Full Jitter バックオフ + 冪等キー固定",
+      "after": [
+        "0〜cap ms のジッター分散によりリトライ衝突を分散",
+        "txId 単位で Idempotency-Key を固定し再実行しても安全"
+      ]
+    },
+    {
+      "type": "diff",
+      "title": "ファイル別コード差分（Unified Diff）",
+      "files": [
+        {
+          "file": "src/retry/backoff.ts",
+          "kind": "modified",
+          "note": "Math.random による非決定性を避けたいテスト向けに rng 引数を注入可能にしました。",
+          "patch": "@@ -8,8 +8,11 @@\n-export function nextDelayMs(attempt: number): number {\n-  return 500;\n+export function nextDelayMs(attempt: number, rng = Math.random): number {\n+  const base = Math.min(8000, 200 * (2 ** Math.min(attempt, 5)));\n+  return Math.floor(rng() * base);\n }"
+        },
+        {
+          "file": "src/gateway/chargeClient.ts",
+          "kind": "modified",
+          "patch": "@@ -22,6 +22,8 @@\n async function sendCharge(req: ChargeRequest) {\n-  const reqId = crypto.randomUUID();\n   return fetchWithRetry(req.url, {\n-    headers: { 'X-Request-Id': reqId }\n+    headers: {\n+      'Idempotency-Key': req.transactionId,\n+    }\n   });\n }"
+        }
+      ]
+    },
+    {
+      "type": "walkthrough",
+      "title": "処理フロー解説ウォークスルー",
+      "subtitle": "ステップを切り替えて各モジュールの変更意図を確認できます。",
+      "steps": [
+        { "id": "1", "title": "取引単位の冪等キー確定", "label": "ChargeClient", "code": "headers['Idempotency-Key'] = req.transactionId", "desc": "初回・再試行を問わず同一のトランザクションIDを送信し、決済側で重複実行を弾きます。", "meta": "src/gateway/chargeClient.ts:24" },
+        { "id": "2", "title": "ジッター付き待機時間の計算", "label": "BackoffPolicy", "code": "Math.floor(rng() * Math.min(8000, 200 * 2^attempt))", "desc": "試行回数に応じて上限を広げつつ、rng() で各ワーカーの送信時刻を分散します。", "meta": "src/retry/backoff.ts:10" },
+        { "id": "3", "title": "テスト用決定性シード注入", "label": "RetryTest", "code": "nextDelayMs(attempt, fixedRng)", "desc": "本番では既定の乱数、テストでは固定関数を渡してアサーション可能にしました。", "meta": "test/retry.test.ts:14" }
+      ]
+    },
+    {
+      "type": "verification",
+      "title": "実行済み検証ログ",
+      "subtitle": "変更後のテスト・型検査・静的解析の実測結果です。",
+      "duration": "4.2s",
+      "items": [
+        { "name": "単体テスト (retry & chargeClient)", "cmd": "npm test -- test/retry.test.ts test/chargeClient.test.ts", "status": "pass", "counts": "18 / 18 passed", "duration": "1.5s", "log": "PASS test/retry.test.ts (10 passed)\nPASS test/chargeClient.test.ts (8 passed)" },
+        { "name": "型チェック & ESLint", "cmd": "npm run typecheck && npm run lint", "status": "pass", "counts": "0 errors", "duration": "2.7s" }
+      ]
+    },
+    {
+      "type": "review",
+      "id": "review-signoff",
+      "title": "人間レビュー判定・フィードバック出力",
+      "items": [
+        { "id": "backoff-cap", "scope": "src/retry/backoff.ts:9", "title": "上限 8,000ms・初期 200ms の設定値", "desc": "ゲートウェイ側 SLA（15秒タイムアウト）に収まる最大遅延として適切かご確認ください。", "evidence": "最大5回で累計最大 ~12s（3回平均 ~1.8s）" },
+        { "id": "idempotency-header", "scope": "src/gateway/chargeClient.ts:25", "title": "Idempotency-Key ヘッダー名とスコープ", "desc": "旧 X-Request-Id を置換しています。下流監査ログが旧ヘッダーを参照していないか確認要。", "evidence": "全18テスト通過・重複請求0件" },
+        { "id": "rng-injection", "scope": "src/retry/backoff.ts:8", "title": "テスト容易性のための rng 引数", "desc": "既存呼び出し元と完全後方互換です。" }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "ai-change-review",
+    "name": "AI変更レビュー（コード・UI変更の人間査読パッケージ）",
+    "genre": "開発レビュー",
+    "purpose": "AIが実施したコード変更・リファクタリング・バグ修正に対して、差分・設計意図・検証エビデンス・判定チェックを一体提示し、人間が即座に査読・承認または差し戻し指示を出せるようにする。",
+    "audience": "コード変更をレビューする開発者・テックリード",
+    "triggers": {
+      "ja": ["AIの変更をレビューしたい", "diffを視覚化して", "変更箇所を確認させて", "PRレビュー資料", "変更点の報告を作って"],
+      "en": ["review AI changes", "code change review", "diff and test evidence", "PR walkthrough"],
+      "ko": ["AI 변경사항 리뷰", "코드 diff 확인", "PR 리뷰 보고서"]
+    },
+    "axes": {
+      "theme": "slate",
+      "layout": "stack",
+      "header": "compact",
+      "density": "comfortable",
+      "rationale": "コード差分・テストログの判読性が高い slate を採用。compact ヘッダと stack 構成で「要約→変更前後→差分→ウォークスルー→テストログ→人間判定」を一本道で査読できる。"
+    },
+    "outline": [
+      { "n": 1, "type": "takeaways", "role": "変更サマリー", "required": true, "guide": "AIが何を変えたか・なぜ変えたか・確認事項を3点以内で結論先出し。", "volume": "3項目" },
+      { "n": 2, "type": "kpi", "role": "影響範囲・計測値", "required": false, "guide": "変更ファイル数・行数・改善指標・テスト通過数を inline KPI で一覧。", "volume": "3〜4指標" },
+      { "n": 3, "type": "beforeafter", "role": "挙動の Before / After", "required": false, "guide": "変更前後でシステム挙動や制約がどう変わったかを対比。", "volume": "各2〜4項目" },
+      { "n": 4, "type": "diff", "role": "コード差分", "required": true, "guide": "patch または structured lines で実差分とレビュー注記を表示。", "volume": "1〜5ファイル" },
+      { "n": 5, "type": "walkthrough", "role": "処理フロー解説", "required": false, "guide": "変更の影響を追うステップ別解説（クリックで該当箇所ハイライト）。", "volume": "3〜5ステップ" },
+      { "n": 6, "type": "verification", "role": "検証エビデンス", "required": true, "guide": "実実行したテスト・Lint・ブラウザ確認コマンドと結果を展開可能なログ付きで提示。", "volume": "2〜5チェック" },
+      { "n": 7, "type": "review", "role": "人間レビュー判定・Markdown出力", "required": true, "guide": "OK / 要修正 / 保留のクリック判定とコメントからAIへ返却するMarkdownを生成。", "volume": "2〜6判定項目" }
+    ],
+    "swaps": [
+      { "slot": 4, "default": "diff（Unified diff）", "alternative": "code（highlight 行指定）", "when": "差分よりも完成後の関数全体を読ませたいとき" },
+      { "slot": 5, "default": "walkthrough", "alternative": "sequence（呼び出しシーケンス）", "when": "複数サービス間の呼び出し順変化が主役のとき" }
+    ],
+    "modules": ["takeaways", "kpi", "beforeafter", "diff", "walkthrough", "verification", "review"],
+    "sampleMarkers": ["KiriPay 決済リトライ制御", "Idempotency-Key 付与", "nextDelayMs"]
+  }
+}

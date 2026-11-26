@@ -1,0 +1,187 @@
+{
+  "title": "MiraiLogistics 2026年 配送網最適化・経営サマリー",
+  "theme": "interactive-warm",
+  "layout": "bento",
+  "header": "banner",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "VISUAL INFOGRAPHIC",
+  "subtitle": "全国ハブ別荷量フロー・1配送あたり単価分解・重点施策の優先度とリスクマップを一枚で鳥瞰するインフォグラフィック",
+  "footer": "MiraiLogistics 戦略企画部 · Visual Infographic Blueprint",
+  "meta": [
+    { "k": "対象期間", "v": "2026年度 上期" },
+    { "k": "拠点数", "v": "全国4ハブ・38デポ" }
+  ],
+  "sections": [
+    {
+      "type": "kpi",
+      "variant": "hero",
+      "span": 12,
+      "label": "重点サマリー指標",
+      "items": [
+        { "label": "当日配送達成率", "value": "96.4%", "delta": "+2.8pt", "dir": "up" },
+        { "label": "1配送あたり単価", "value": "¥412", "delta": "-6.4%", "dir": "down", "tone": "good" },
+        { "label": "積載効率", "value": "82.5%", "delta": "+5.1pt", "dir": "up" },
+        { "label": "月間配送荷量", "value": "1.84M個", "delta": "+11%", "dir": "up" }
+      ]
+    },
+    {
+      "type": "takeaways",
+      "span": 12,
+      "title": "インフォグラフィック要点",
+      "items": [
+        { "lead": "自動仕分けコンベア刷新により、ハブ滞留時間を42%短縮して配送単価を¥28削減" },
+        { "lead": "関東・関西の基幹ルートが全体荷量の76%を占有、AI配車導入の投資効率が最も高い領域" }
+      ]
+    },
+    {
+      "type": "sankey",
+      "span": 12,
+      "title": "主要出荷エリア → 配送チャネル別荷量フロー（万個/月）",
+      "leftTitle": "出荷ハブ",
+      "rightTitle": "配送ルート",
+      "sources": [
+        { "id": "east", "label": "関東ハブ", "cat": 1 },
+        { "id": "west", "label": "関西ハブ", "cat": 2 },
+        { "id": "central", "label": "中部ハブ", "cat": 3 }
+      ],
+      "targets": [
+        { "id": "express", "label": "当日便" },
+        { "id": "nextday", "label": "翌日便" },
+        { "id": "locker", "label": "ロッカー受取" }
+      ],
+      "flows": [
+        { "from": "east", "to": "express", "value": 46, "cat": 1 },
+        { "from": "east", "to": "nextday", "value": 34, "cat": 1 },
+        { "from": "east", "to": "locker", "value": 16, "cat": 1 },
+        { "from": "west", "to": "express", "value": 24, "cat": 2 },
+        { "from": "west", "to": "nextday", "value": 26, "cat": 2 },
+        { "from": "central", "to": "nextday", "value": 22, "cat": 3 },
+        { "from": "central", "to": "locker", "value": 16, "cat": 3 }
+      ]
+    },
+    {
+      "type": "kpitree",
+      "span": 6,
+      "title": "1配送単価の要因分解ツリー",
+      "root": {
+        "name": "配送単価 ¥412",
+        "value": "前年比 ▲6.4%",
+        "op": "+",
+        "children": [
+          {
+            "name": "幹線輸送 ¥168",
+            "value": "積載率 82.5%",
+            "op": "+",
+            "children": [
+              { "name": "車両チャーター", "value": "¥112" },
+              { "name": "燃料・高速", "value": "¥56" }
+            ]
+          },
+          { "name": "仕分け ¥94", "value": "自動機 72%" },
+          {
+            "name": "ラストマイル ¥150",
+            "value": "再配達率 6.2%",
+            "op": "+",
+            "children": [
+              { "name": "宅配ドライバー", "value": "¥128" },
+              { "name": "ロッカー連携", "value": "¥22" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "quadrant",
+      "span": 6,
+      "title": "改善施策 効果 vs 実装容易性",
+      "xAxis": "実装の容易さ",
+      "yAxis": "コスト削減インパクト",
+      "xLow": "難易度高",
+      "xHigh": "すぐ着手",
+      "yLow": "小",
+      "yHigh": "大",
+      "quadrants": { "tl": "大型投資案件", "tr": "最優先 Quick Wins", "bl": "見送り候補", "br": "補完改善" },
+      "items": [
+        { "label": "AI動的配車", "x": 76, "y": 84, "cat": 1 },
+        { "label": "ロッカー誘導UI", "x": 82, "y": 64, "cat": 2 },
+        { "label": "自律走行フォーク", "x": 28, "y": 74, "cat": 3 },
+        { "label": "伝票OCR自動化", "x": 66, "y": 32, "cat": 4 }
+      ]
+    },
+    {
+      "type": "diverging",
+      "span": 6,
+      "title": "顧客評価（高い評価 vs 遅延不満 %）",
+      "seriesA": "高評価 (%)",
+      "seriesB": "遅延不満 (%)",
+      "max": 90,
+      "items": [
+        { "label": "当日便", "a": 84, "aDisplay": "84%", "b": 7, "bDisplay": "7%" },
+        { "label": "ロッカー受取", "a": 88, "aDisplay": "88%", "b": 4, "bDisplay": "4%" },
+        { "label": "翌日便", "a": 72, "aDisplay": "72%", "b": 15, "bDisplay": "15%" }
+      ]
+    },
+    {
+      "type": "leaderboard",
+      "span": 6,
+      "title": "デポ別 当日達成スコア順位",
+      "items": [
+        { "rank": 1, "name": "川崎ベイサイド", "value": 98.4, "display": "98.4%", "move": "+2.1pt", "dir": "up", "cat": 1 },
+        { "rank": 2, "name": "大阪南港", "value": 97.1, "display": "97.1%", "move": "+1.4pt", "dir": "up", "cat": 2 },
+        { "rank": 3, "name": "名古屋みなと", "value": 95.8, "display": "95.8%", "move": "0.0pt", "dir": "flat", "cat": 3 },
+        { "rank": 4, "name": "札幌石狩", "value": 92.6, "display": "92.6%", "move": "-0.8pt", "dir": "down", "cat": 4 }
+      ]
+    },
+    {
+      "type": "riskmatrix",
+      "span": 12,
+      "title": "下期 事業リスク評価マトリクス (5×5)",
+      "xAxis": "事業影響度",
+      "yAxis": "発生確率",
+      "xLabels": ["軽微", "小", "中", "大", "甚大"],
+      "yLabels": ["極高", "高", "中", "低", "極低"],
+      "items": [
+        { "label": "繁忙期人手不足", "prob": 4, "impact": 5 },
+        { "label": "台風・積雪迂回", "prob": 3, "impact": 4 },
+        { "label": "配車API障害", "prob": 2, "impact": 5 },
+        { "label": "車両EV遅延", "prob": 3, "impact": 2 }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "visual-infographic",
+    "name": "ビジュアル・インフォグラフィック要約",
+    "genre": "インフォグラフィック",
+    "purpose": "複雑な全体像・フロー・構造・優先度・ランキングを一枚の図解キャンバス（Bento）に凝縮し、文章を読まずにパッと状況を理解できるようにする。",
+    "audience": "経営層・顧客・チーム全体（俯瞰共有向け）",
+    "triggers": {
+      "ja": ["インフォグラフィックにして", "一枚の図解でまとめて", "ビジュアル多めで分かりやすく", "全体像を俯瞰して見せて", "図解レポートを作成"],
+      "en": ["visual infographic", "visual summary one-pager", "executive diagram summary"],
+      "ko": ["인포그래픽 요약", "한눈에 보는 시각화 리포트"]
+    },
+    "axes": {
+      "theme": "interactive-warm",
+      "layout": "bento",
+      "header": "banner",
+      "density": "comfortable",
+      "rationale": "親しみやすくコントラストに優れた interactive-warm + banner ヘッダ + bento グリッドで、Sankey/KPIツリー/四象限/ランキング/リスクマトリクスなど多彩な図解カードを組み合わせる。"
+    },
+    "outline": [
+      { "n": 1, "type": "kpi", "role": "ヒーロー数字", "required": true, "guide": "variant: hero で最大の注目指標を大きく見せる。", "volume": "3〜4指標" },
+      { "n": 2, "type": "takeaways", "role": "キーメッセージ", "required": false, "guide": "図解の読み方を2〜3行で補う。", "volume": "2〜3項目" },
+      { "n": 3, "type": "sankey", "role": "構造・流量フロー", "required": false, "guide": "出発点→到達点の分配関係を幅付きリボンで可視化。", "volume": "3〜6ノード" },
+      { "n": 4, "type": "kpitree", "role": "指標分解ツリー", "required": false, "guide": "トップKPIがどの下位要素の和/積で決まるかを図解。", "volume": "2〜3階層" },
+      { "n": 5, "type": "quadrant", "role": "2軸ポジショニング", "required": false, "guide": "優先度や特性を4象限で直感配置。", "volume": "4〜10要素" },
+      { "n": 6, "type": "leaderboard", "role": "ランキング対比", "required": false, "guide": "上位項目をプログレスバーと変動矢印で比較。", "volume": "4〜8項目" },
+      { "n": 7, "type": "riskmatrix", "role": "リスクヒートマップ", "required": false, "guide": "発生確率×影響度の5×5セルで要警戒項目を明示。", "volume": "3〜8リスク" }
+    ],
+    "swaps": [
+      { "slot": 3, "default": "sankey", "alternative": "fishbone", "when": "フロー量ではなく要因因果の構造を図解したいとき" },
+      { "slot": 5, "default": "quadrant", "alternative": "scatter", "when": "概念配置ではなく正確な実測座標でプロットしたいとき" }
+    ],
+    "modules": ["kpi", "takeaways", "sankey", "kpitree", "quadrant", "diverging", "leaderboard", "riskmatrix"],
+    "sampleMarkers": ["MiraiLogistics", "川崎ベイサイド", "大阪南港"]
+  }
+}

@@ -12,10 +12,7 @@ INTERACTION: none (the action is a static button placeholder).
 USAGE: one <section class="empty-state"> centered in its column or device screen.
 ============================================================================ -->
 <style data-module="empty-state">
-  .empty-state { position: relative; display: grid; justify-items: center; text-align: center; gap: var(--sp-3); padding: var(--sp-8) var(--sp-5); border: 1px dashed var(--border-default); border-radius: var(--radius-lg); background: linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box, color-mix(in srgb, var(--accent) 4%, var(--bg-surface)); box-shadow: var(--shadow-sm); transition: border-color var(--dur-mid) var(--ease), box-shadow var(--dur-mid) var(--ease); }
-  /* a faint accent glow pooled behind the glyph adds quiet atmospheric depth */
-  .empty-state::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(60% 42% at 50% 26%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%); }
-  .empty-state > * { position: relative; }
+  .empty-state { position: relative; display: grid; justify-items: center; text-align: center; gap: var(--sp-3); padding: var(--sp-8) var(--sp-5); border: 1px dashed var(--border-default); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--accent) 2%, var(--bg-surface)); box-shadow: var(--shadow-sm); transition: border-color var(--dur-mid) var(--ease), box-shadow var(--dur-mid) var(--ease); }
   .es-ic { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-muted); color: var(--text-muted); border: 1px solid var(--border-subtle); box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--bg-surface) 70%, transparent); transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
   .es-ic svg { width: 28px; height: 28px; }
   .es-title { font: var(--type-h3); letter-spacing: var(--tracking-tight); }

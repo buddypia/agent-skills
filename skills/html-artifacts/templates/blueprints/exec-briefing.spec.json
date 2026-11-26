@@ -25,11 +25,13 @@
   "footer": "出典: 社内KPI集計 / 2026-07-06 作成 - セイワ精機株式会社",
   "sections": [
     {
-      "type": "html",
+      "type": "takeaways",
       "span": 12,
-      "html": "<!-- module: key-takeaways (hand-pasted, filled) -->\n<figure class=\"ktw card-outlined\" aria-label=\"経営サマリー\">\n  <figcaption class=\"ktw-title\">経営サマリー</figcaption> <!-- e.g. 要点 -->\n  <ol class=\"ktw-list\">\n\n    <!-- ── one .ktw-row per takeaway (3-5 total; badge numbers auto) ───────── -->\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">DX投資回収は計画を上回り、Q1で年間目標の34%を達成</span>          <!-- e.g. 導入により問い合わせ対応時間が42%短縮 -->\n        <span class=\"ktw-elab\">自動化ラインの本格稼働で年換算1.2億円のコスト削減効果。</span>          <!-- e.g. 主因はテンプレート返信の自動提案。3か月の実測値。 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">受注リードタイムを前年同期比▲22%短縮し上期目標を前倒し</span>          <!-- e.g. 初期費用ゼロで既存フローに追加可能 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">次の意思決定は第2工場へのMES横展開の可否</span>          <!-- e.g. 次の意思決定はPoC対象部署の選定 -->\n        <span class=\"ktw-elab\">投資額2.4億円、8月の役員会で最終判断。</span>          <!-- e.g. 候補はサポート部とCS部。7月中に決定。 -->\n      </div>\n    </li>\n    <!-- ↑ repeat: one .ktw-row per takeaway -->\n  </ol>\n</figure>",
-      "cssModules": [
-        "key-takeaways"
+      "title": "経営サマリー",
+      "items": [
+        { "lead": "DX投資回収は計画を上回り、Q1で年間目標の34%を達成", "elab": "自動化ラインの本格稼働で年換算1.2億円のコスト削減効果。" },
+        { "lead": "受注リードタイムを前年同期比▲22%短縮し上期目標を前倒し" },
+        { "lead": "次の意思決定は第2工場へのMES横展開の可否", "elab": "投資額2.4億円、8月の役員会で最終判断。" }
       ]
     },
     {

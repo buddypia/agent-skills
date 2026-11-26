@@ -105,9 +105,10 @@ if (/class="[^"]*\b(?:dg-node|archexp-node|node-card|sd-state|sw-node|oc-box|kt-
 
 // 5b. obvious dead controls in prototype/artifact mocks.
 // Warn only: static validation cannot know every custom class-bound handler.
-const noopAnchors = [...s.matchAll(/<a\b(?=[^>]*\bhref\s*=\s*"#")[^>]*>/gi)].length;
+const markup = s.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+const noopAnchors = [...markup.matchAll(/<a\b(?=[^>]*\bhref\s*=\s*"#")[^>]*>/gi)].length;
 if (noopAnchors) warns.push(`no-op anchors href="#": ${noopAnchors}`);
-const inertButtons = [...s.matchAll(/<button\b([^>]*)>/gi)].filter((m) => {
+const inertButtons = [...markup.matchAll(/<button\b([^>]*)>/gi)].filter((m) => {
   const attrs = m[1] || '';
   return !/\b(?:data-[\w-]+|onclick|aria-controls|form=|type\s*=\s*"(?:submit|reset)")/i.test(attrs);
 }).length;
@@ -120,7 +121,6 @@ if (inertButtons) {
 //     title renders an unlabeled control. Warn only - a static check can't see a wrapping
 //     <label> or a programmatic name; the builder's checklist/form sections always pair every
 //     control with an explicit <label for>, so generated output never trips this.
-const markup = s.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
 const namelessControls = [...markup.matchAll(/<(input|select|textarea)\b([^>]*)>/gi)].filter((m) => {
   const tag = m[1].toLowerCase(), attrs = m[2] || '';
   if (tag === 'input') {

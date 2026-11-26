@@ -29,10 +29,12 @@
   ],
   "sections": [
     {
-      "type": "html",
-      "html": "<figure class=\"ktw card-outlined\" aria-label=\"要点（3行サマリー）\"><figcaption class=\"ktw-title\">要点（3行サマリー）</figcaption><ol class=\"ktw-list\"><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">決済APIのコネクションプール枯渇により、20:12〜21:59の1時間47分、注文確定が最大68%失敗した。</span><span class=\"ktw-elab\">直接原因はDBフェイルオーバー後の接続リーク。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">影響ユーザーは約12,400名、機会損失は推定¥3.8M。</span><span class=\"ktw-elab\">夕食前のピーク時間帯と重なり被害が拡大した。</span></div></li><li class=\"ktw-row\"><span class=\"ktw-num\" aria-hidden=\"true\"></span><div class=\"ktw-body\"><span class=\"ktw-lead\">恒久対策は接続プールの上限設定とヘルスチェック改善で、7月中に完了予定。</span><span class=\"ktw-elab\">暫定対策（ローリング再起動の自動化）は適用済み。</span></div></li></ol></figure>",
-      "cssModules": [
-        "key-takeaways"
+      "type": "takeaways",
+      "title": "要点（3行サマリー）",
+      "items": [
+        { "lead": "決済APIのコネクションプール枯渇により、20:12〜21:59の1時間47分、注文確定が最大68%失敗した。", "elab": "直接原因はDBフェイルオーバー後の接続リーク。" },
+        { "lead": "影響ユーザーは約12,400名、機会損失は推定¥3.8M。", "elab": "夕食前のピーク時間帯と重なり被害が拡大した。" },
+        { "lead": "恒久対策は接続プールの上限設定とヘルスチェック改善で、7月中に完了予定。", "elab": "暫定対策（ローリング再起動の自動化）は適用済み。" }
       ]
     },
     {
@@ -106,10 +108,14 @@
       ]
     },
     {
-      "type": "html",
-      "html": "<figure class=\"fb card-outlined\"><figcaption class=\"fb-title\">原因分析（なぜ枯渇したか）</figcaption><svg viewBox=\"0 0 760 420\" role=\"img\" aria-label=\"原因分析（なぜ枯渇したか）\"><title>原因分析（なぜ枯渇したか）</title><line class=\"fb-spine\" x1=\"40\" y1=\"210\" x2=\"606\" y2=\"210\"/><rect class=\"fb-head\" x=\"606\" y=\"174\" width=\"150\" height=\"72\"/><text class=\"fb-head-label\" x=\"681\" y=\"210\">決済確定の大規模失敗</text><g class=\"fb-bone cat-1\"><line class=\"fb-major\" x1=\"240\" y1=\"210\" x2=\"170\" y2=\"70\"/><text class=\"fb-cat\" x=\"170\" y=\"58\">アプリ実装</text><line class=\"fb-rib\" x1=\"210\" y1=\"150\" x2=\"154\" y2=\"150\"/><text class=\"fb-cause\" x=\"150\" y=\"153\">接続を閉じない経路</text><line class=\"fb-rib\" x1=\"190\" y1=\"110\" x2=\"134\" y2=\"110\"/><text class=\"fb-cause\" x=\"130\" y=\"113\">タイムアウト未設定</text></g><g class=\"fb-bone cat-2\"><line class=\"fb-major\" x1=\"470\" y1=\"210\" x2=\"400\" y2=\"70\"/><text class=\"fb-cat\" x=\"400\" y=\"58\">基盤・DB</text><line class=\"fb-rib\" x1=\"440\" y1=\"150\" x2=\"384\" y2=\"150\"/><text class=\"fb-cause\" x=\"380\" y=\"153\">計画外フェイルオーバー</text><line class=\"fb-rib\" x1=\"420\" y1=\"110\" x2=\"364\" y2=\"110\"/><text class=\"fb-cause\" x=\"360\" y=\"113\">プール上限が既定値</text></g><g class=\"fb-bone cat-3\"><line class=\"fb-major\" x1=\"355\" y1=\"210\" x2=\"285\" y2=\"350\"/><text class=\"fb-cat\" x=\"285\" y=\"368\">監視・検知</text><line class=\"fb-rib\" x1=\"325\" y1=\"270\" x2=\"269\" y2=\"270\"/><text class=\"fb-cause\" x=\"265\" y=\"273\">接続数メトリクス欠如</text><line class=\"fb-rib\" x1=\"305\" y1=\"310\" x2=\"249\" y2=\"310\"/><text class=\"fb-cause\" x=\"245\" y=\"313\">復旧が手動</text></g><g class=\"fb-bone cat-4\"><line class=\"fb-major\" x1=\"585\" y1=\"210\" x2=\"515\" y2=\"350\"/><text class=\"fb-cat\" x=\"515\" y=\"368\">プロセス</text><line class=\"fb-rib\" x1=\"555\" y1=\"270\" x2=\"499\" y2=\"270\"/><text class=\"fb-cause\" x=\"495\" y=\"273\">再接続試験の欠如</text><line class=\"fb-rib\" x1=\"535\" y1=\"310\" x2=\"479\" y2=\"310\"/><text class=\"fb-cause\" x=\"475\" y=\"313\">Runbook未整備</text></g></svg></figure>",
-      "cssModules": [
-        "fishbone"
+      "type": "fishbone",
+      "title": "原因分析（なぜ枯渇したか）",
+      "effect": "決済確定の大規模失敗",
+      "categories": [
+        { "label": "アプリ実装", "cat": 1, "causes": ["接続を閉じない経路", "タイムアウト未設定"] },
+        { "label": "基盤・DB", "cat": 2, "causes": ["計画外フェイルオーバー", "プール上限が既定値"] },
+        { "label": "監視・検知", "cat": 3, "causes": ["接続数メトリクス欠如", "復旧が手動"] },
+        { "label": "プロセス", "cat": 4, "causes": ["再接続試験の欠如", "Runbook未整備"] }
       ]
     },
     {

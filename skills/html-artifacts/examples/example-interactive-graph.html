@@ -409,7 +409,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* ----- Header variants (data `header` key; standard = .page-header alone) --
    compact  one baseline row    banner  full-bleed surface band
    split    title left / meta right    none  floating .page-controls strip   */
-.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 120px; }
+.header-actions { position: absolute; top: var(--sp-4); right: var(--sp-5); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-2); }
+.header-actions .ha-viewport-controls { position: static; margin: 0; }
+.review-jump { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-default)); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface)); text-decoration: none; }
+.review-jump:hover { background: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); color: var(--accent); }
+.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 260px; }
 .header-compact .eyebrow { width: 100%; margin-bottom: -4px; }
 .header-compact h1 { font: var(--type-h1); }
 .header-compact .lede { font: var(--type-small); color: var(--text-secondary); max-width: none; margin-top: 0; }
@@ -424,7 +428,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* standard / banner: a compact property strip (label over value) instead of a full-width two-column table */
 .page-header:not(.header-split) .header-meta { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6); width: fit-content; max-width: 100%; margin-top: var(--sp-4); }
 .page-header:not(.header-split) .header-meta .hm-item { display: grid; gap: 2px; }
-@media (max-width: 720px) { .header-split { grid-template-columns: 1fr; } .header-compact { padding-right: var(--sp-5); } }
+@media (max-width: 720px) {
+  .header-split { grid-template-columns: 1fr; }
+  .header-compact { padding-right: var(--sp-5); }
+  .header-actions { position: static; justify-content: flex-start; margin-bottom: var(--sp-3); }
+}
 .page-controls { position: absolute; top: var(--sp-4); right: var(--sp-4); z-index: 5; display: flex; gap: var(--sp-2); align-items: center; }
 .page-controls .ha-viewport-controls { position: static; }
 
@@ -887,7 +895,7 @@ table[data-row-select] tbody tr { cursor: pointer; }
 </style>
 </head>
 <body>
-<header class="page-header header-banner"><div class="container header-banner-inner"><button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="Toggle theme" style="position:absolute;top:var(--sp-5);right:var(--sp-5)">◐ Theme</button><p class="eyebrow">EC PLATFORM · CHECKOUT DOMAIN</p><h1>Checkout Platform Service Architecture</h1><p class="lede">An interactive diagram of the inter-service communication (HTTP / gRPC / pub-sub) in the checkout domain, spanning the frontend, backend, and data zones. Explore it by dragging, zooming, and filtering.</p></div></header>
+<header class="page-header header-banner"><div class="container header-banner-inner"><div class="header-actions no-print"><button type="button" class="btn-ghost btn-sm" data-theme-toggle aria-label="Toggle theme">◐ Theme</button></div><p class="eyebrow">EC PLATFORM · CHECKOUT DOMAIN</p><h1>Checkout Platform Service Architecture</h1><p class="lede">An interactive diagram of the inter-service communication (HTTP / gRPC / pub-sub) in the checkout domain, spanning the frontend, backend, and data zones. Explore it by dragging, zooming, and filtering.</p></div></header>
 <main class="container layout-stack">
 <!-- section 1: html -->
 <div id="s1" class="callout callout-box callout-note" data-reveal>
@@ -1016,9 +1024,12 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
    ── Markup contract (add the attribute, the behaviour attaches itself) ──
    BASIC
-     [data-theme-toggle]                 swap to the theme's light/dark counterpart and back
+     [data-theme-toggle]                 swap to the theme's light/dark counterpart and sync aria-pressed + color-scheme meta
      [data-toc-spy] a[href="#id"]        scrollspy: aria-current on the section in view
-     table[data-sortable]                click <th> to sort (asc/desc, num-aware)
+     table[data-sortable]                sort rows via button.dt-sort-btn inside th (aria-sort + live status)
+     [data-details-toggle]               expand/collapse all <details> elements on the page
+     [data-walkthrough] + [data-walk-step] + [data-walk-target]   synchronized step & diagram highlight
+     [data-review] + [data-review-item] + [data-review-status]    human OK/Fix/Hold review + Markdown export
      [data-filter] + [data-filter-in]    live text filter (toggles .hidden; scoped to its own
                                          [data-filter-scope] / .data-table when the selector matches there)
      [data-kanban] + [data-col] + .kanban-card     drag cards across columns
@@ -1061,17 +1072,30 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
   /* Light ↔ dark counterpart of the page's own theme (same structural family where one
      exists), so a dark theme toggles to LIGHT instead of to another dark theme. */
+  var DARK_THEMES = { midnight: true, nord: true, sunset: true, "dark-focus": true };
   var THEME_PAIR = { birchline: "sunset", rose: "sunset", forest: "dark-focus", minimal: "dark-focus", slate: "midnight",
     "interactive-warm": "nord", midnight: "slate", nord: "interactive-warm", sunset: "birchline", "dark-focus": "birchline" };
+  function syncThemeMeta(themeName, btn) {
+    var isDark = !!DARK_THEMES[themeName];
+    if (btn) btn.setAttribute("aria-pressed", isDark ? "true" : "false");
+    var meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta && document.documentElement.dataset.themeExplicit === "1") {
+      meta.setAttribute("content", isDark ? "dark" : "light");
+    }
+  }
   HA.themeToggle = function (root) {
     $all("[data-theme-toggle]", root).forEach(function (btn) {
       if (btn._ha) return; btn._ha = true;
+      var curInit = document.documentElement.getAttribute("data-theme") || "birchline";
+      syncThemeMeta(curInit, btn);
       btn.addEventListener("click", function () {
         var html = document.documentElement;
         var cur = html.getAttribute("data-theme") || "birchline";
         var next = html.dataset.prevTheme || THEME_PAIR[cur] || "dark-focus";
         html.dataset.prevTheme = cur;
+        html.dataset.themeExplicit = "1";
         html.setAttribute("data-theme", next);
+        $all("[data-theme-toggle]").forEach(function (b) { syncThemeMeta(next, b); });
       });
     });
   };
@@ -1105,26 +1129,76 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  function parseSortCell(cell) {
+    if (!cell) return { num: NaN, str: "" };
+    var raw = (cell.getAttribute("data-sort-value") || cell.textContent || "").trim();
+    var cleaned = raw.replace(/[\s,+$¥€£₩%]/g, "");
+    var isNum = /^[+\-]?(\d+(\.\d+)?|\.\d+)$/.test(cleaned);
+    return { num: isNum ? parseFloat(cleaned) : NaN, str: raw };
+  }
+
   HA.sortable = function (root) {
     $all("table[data-sortable]", root).forEach(function (table) {
-      var ths = table.tHead ? table.tHead.rows[0].cells : [];
+      if (table._haSort) return; table._haSort = true;
+      if (!table.tHead || !table.tHead.rows.length || !table.tBodies.length) return;
+      var ths = table.tHead.rows[0].cells;
+      var docLang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var collator = (typeof Intl !== "undefined" && Intl.Collator)
+        ? new Intl.Collator(docLang || undefined, { numeric: true, sensitivity: "base" })
+        : null;
+      var host = table.parentNode || table;
+      var statusEl = host.querySelector("[data-sort-status]");
+      if (!statusEl) {
+        statusEl = document.createElement("div");
+        statusEl.setAttribute("role", "status");
+        statusEl.setAttribute("aria-live", "polite");
+        statusEl.setAttribute("data-sort-status", "");
+        statusEl.style.cssText = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;";
+        host.appendChild(statusEl);
+      }
       Array.prototype.forEach.call(ths, function (th, idx) {
-        th.style.cursor = "pointer"; th.setAttribute("role", "button");
-        th.addEventListener("click", function () {
+        if (th.hasAttribute("data-nosort")) return;
+        th.removeAttribute("role");
+        th.style.cursor = "";
+        var btn = th.querySelector("button.dt-sort-btn");
+        if (!btn) {
+          btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "dt-sort-btn";
+          while (th.firstChild) btn.appendChild(th.firstChild);
+          th.appendChild(btn);
+        }
+        btn.addEventListener("click", function () {
           var tbody = table.tBodies[0];
           var rows = Array.prototype.slice.call(tbody.rows);
-          var asc = th.dataset.sort !== "asc";
-          Array.prototype.forEach.call(ths, function (h) { h.removeAttribute("data-sort"); });
+          var asc = th.getAttribute("aria-sort") !== "ascending" && th.dataset.sort !== "asc";
+          Array.prototype.forEach.call(ths, function (h) {
+            h.removeAttribute("aria-sort");
+            h.removeAttribute("data-sort");
+          });
+          th.setAttribute("aria-sort", asc ? "ascending" : "descending");
           th.dataset.sort = asc ? "asc" : "desc";
-          rows.sort(function (a, b) {
-            var x = a.cells[idx].textContent.trim(), y = b.cells[idx].textContent.trim();
-            var nx = parseFloat(x.replace(/[^0-9.\-]/g, "")), ny = parseFloat(y.replace(/[^0-9.\-]/g, ""));
-            var both = !isNaN(nx) && !isNaN(ny);
-            var cmp = both ? nx - ny : x.localeCompare(y);
+          var keyed = rows.map(function (r, orig) {
+            return { row: r, orig: orig, val: parseSortCell(r.cells[idx]) };
+          });
+          keyed.sort(function (a, b) {
+            var both = !isNaN(a.val.num) && !isNaN(b.val.num);
+            var cmp = both
+              ? a.val.num - b.val.num
+              : (collator ? collator.compare(a.val.str, b.val.str) : a.val.str.localeCompare(b.val.str));
+            if (cmp === 0) return a.orig - b.orig;
             return asc ? cmp : -cmp;
           });
-          rows.forEach(function (r) { tbody.appendChild(r); });
+          keyed.forEach(function (item) { tbody.appendChild(item.row); });
           if (table._repage) table._repage();
+          var colLabel = btn.textContent.trim() || ("column " + (idx + 1));
+          if (docLang.indexOf("ja") === 0) {
+            statusEl.textContent = colLabel + "を" + (asc ? "昇順" : "降順") + "で並べ替えました";
+          } else if (docLang.indexOf("ko") === 0) {
+            statusEl.textContent = colLabel + " " + (asc ? "오름차순" : "내림차순") + " 정렬됨";
+          } else {
+            statusEl.textContent = "Sorted by " + colLabel + ", " + (asc ? "ascending" : "descending");
+          }
         });
       });
     });
@@ -1165,53 +1239,58 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  function haFallbackCopy(text) {
+    var ta, focused = document.activeElement;
+    try {
+      ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      return document.execCommand("copy") === true;
+    } catch (e) { return false; }
+    finally {
+      if (ta && ta.parentNode) ta.parentNode.removeChild(ta);
+      if (focused && focused.focus) focused.focus({ preventScroll: true });
+    }
+  }
+
+  function haCopyWithFeedback(btn, getText) {
+    var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    var doneMsg = btn.getAttribute("data-copy-done") || (lang.indexOf("ja") === 0 ? "✓ コピーしました！" : lang.indexOf("ko") === 0 ? "✓ 복사되었습니다!" : "Copied ✓");
+    var failMsg = btn.getAttribute("data-copy-failed") || (lang.indexOf("ja") === 0 ? "コピーできませんでした" : lang.indexOf("ko") === 0 ? "복사하지 못했습니다" : "Copy failed");
+    function flash(message, ok) {
+      var old = btn.dataset.origLabel || btn.textContent;
+      btn.dataset.origLabel = old;
+      btn.textContent = message;
+      btn.classList.toggle("copied", ok);
+      clearTimeout(btn._copyTimer);
+      btn._copyTimer = setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+    }
+    var text;
+    try { text = getText(); } catch (e) { flash(failMsg, false); return; }
+    if (text === null || text === undefined) { flash(failMsg, false); return; }
+    text = String(text);
+    function fallback() { if (haFallbackCopy(text)) flash(doneMsg, true); else flash(failMsg, false); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash(doneMsg, true); }, fallback);
+      } else fallback();
+    } catch (e) { fallback(); }
+  }
+
   HA.copy = function (root) {
     $all("[data-copy],[data-copy-text]", root).forEach(function (btn) {
       if (btn._haCopy) return; btn._haCopy = true;
       btn.addEventListener("click", function () {
-        var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
-        var doneMsg = btn.getAttribute("data-copy-done") || (lang.indexOf("ja") === 0 ? "✓ コピーしました！" : lang.indexOf("ko") === 0 ? "✓ 복사되었습니다!" : "Copied ✓");
-        var failMsg = btn.getAttribute("data-copy-failed") || (lang.indexOf("ja") === 0 ? "コピーできませんでした" : lang.indexOf("ko") === 0 ? "복사하지 못했습니다" : "Copy failed");
-        function flash(message, ok) {
-          var old = btn.dataset.origLabel || btn.textContent;
-          btn.dataset.origLabel = old;
-          btn.textContent = message;
-          btn.classList.toggle("copied", ok);
-          clearTimeout(btn._copyTimer);
-          btn._copyTimer = setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
-        }
-        function done() { flash(doneMsg, true); }
-        function failed() { flash(failMsg, false); }
-        var text = btn.getAttribute("data-copy-text");
-        if (text === null) {
-          try {
-            var selector = btn.getAttribute("data-copy");
-            var target = selector ? document.querySelector(selector) : null;
-            if (!target) { failed(); return; }
-            text = "value" in target ? target.value : target.textContent;
-          } catch (e) { failed(); return; }
-        }
-        function fallback() { if (fallbackCopy(text)) done(); else failed(); }
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, fallback);
-          } else fallback();
-        } catch (e) { fallback(); }
+        haCopyWithFeedback(btn, function () {
+          var literal = btn.getAttribute("data-copy-text");
+          if (literal !== null) return literal;
+          var selector = btn.getAttribute("data-copy");
+          var target = selector ? document.querySelector(selector) : null;
+          if (!target) return null;
+          return "value" in target ? target.value : target.textContent;
+        });
       });
     });
-    function fallbackCopy(text) {
-      var ta, focused = document.activeElement;
-      try {
-        ta = document.createElement("textarea");
-        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-        document.body.appendChild(ta); ta.select();
-        return document.execCommand("copy") === true;
-      } catch (e) { return false; }
-      finally {
-        if (ta && ta.parentNode) ta.parentNode.removeChild(ta);
-        if (focused && focused.focus) focused.focus({ preventScroll: true });
-      }
-    }
   };
 
   HA.switcher = function (root) {
@@ -1253,14 +1332,64 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
   HA.tabs = function (root) {
     $all("[data-tabs]", root).forEach(function (group) {
+      if (group._haTabs) return; group._haTabs = true;
       var tabs = $all(".tab", group);
-      tabs.forEach(function (tab) {
-        tab.addEventListener("click", function () {
-          tabs.forEach(function (t) { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
-          $all("[data-panel]", group).forEach(function (p) { p.classList.add("hidden"); });
-          tab.classList.add("active"); tab.setAttribute("aria-selected", "true");
-          var panel = group.querySelector('[data-panel="' + tab.getAttribute("data-tab") + '"]');
-          if (panel) { panel.classList.remove("hidden"); if (HA.fitSvgText) HA.fitSvgText(panel); }
+      var panels = $all("[data-panel]", group);
+      if (!tabs.length) return;
+      var tablist = group.querySelector('[role="tablist"]') || tabs[0].parentElement;
+      if (tablist && !tablist.getAttribute("role")) tablist.setAttribute("role", "tablist");
+
+      function activateTab(tab, focusTab) {
+        var key = tab.getAttribute("data-tab");
+        tabs.forEach(function (t) {
+          var sel = t === tab;
+          t.classList.toggle("active", sel);
+          t.setAttribute("aria-selected", sel ? "true" : "false");
+          t.setAttribute("tabindex", sel ? "0" : "-1");
+        });
+        panels.forEach(function (p) {
+          var show = p.getAttribute("data-panel") === key;
+          if (p.classList.contains("tab-panel") || p.hasAttribute("data-until-found")) {
+            if (show) { p.removeAttribute("hidden"); p.classList.remove("hidden"); }
+            else { p.setAttribute("hidden", "until-found"); p.classList.remove("hidden"); }
+          } else {
+            p.classList.toggle("hidden", !show);
+          }
+          if (show && HA.fitSvgText) HA.fitSvgText(p);
+        });
+        if (focusTab && tab.focus) tab.focus();
+      }
+
+      var initial = tabs.filter(function (t) {
+        return t.getAttribute("aria-selected") === "true" || t.classList.contains("active");
+      })[0] || tabs[0];
+      tabs.forEach(function (t) {
+        if (!t.getAttribute("role")) t.setAttribute("role", "tab");
+        t.setAttribute("tabindex", t === initial ? "0" : "-1");
+        t.addEventListener("click", function () { activateTab(t, false); });
+      });
+
+      if (tablist) {
+        tablist.addEventListener("keydown", function (e) {
+          var curIdx = tabs.indexOf(document.activeElement);
+          if (curIdx === -1) return;
+          var nextIdx = -1;
+          if (e.key === "ArrowRight") nextIdx = (curIdx + 1) % tabs.length;
+          else if (e.key === "ArrowLeft") nextIdx = (curIdx - 1 + tabs.length) % tabs.length;
+          else if (e.key === "Home") nextIdx = 0;
+          else if (e.key === "End") nextIdx = tabs.length - 1;
+          if (nextIdx !== -1) {
+            e.preventDefault();
+            activateTab(tabs[nextIdx], true);
+          }
+        });
+      }
+
+      panels.forEach(function (panel) {
+        panel.addEventListener("beforematch", function () {
+          var key = panel.getAttribute("data-panel");
+          var targetTab = tabs.filter(function (t) { return t.getAttribute("data-tab") === key; })[0];
+          if (targetTab) activateTab(targetTab, false);
         });
       });
     });
@@ -2638,11 +2767,267 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  /* ===================== DETAILS / WALKTHROUGH / REVIEW ===================== */
+
+  HA.detailsToggle = function (root) {
+    $all("[data-details-toggle]", root).forEach(function (btn) {
+      if (btn._haDetails) return; btn._haDetails = true;
+      var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var openLbl = btn.getAttribute("data-open-label") || (lang.indexOf("ja") === 0 ? "すべて展開" : lang.indexOf("ko") === 0 ? "모두 펼치기" : "Expand all");
+      var closeLbl = btn.getAttribute("data-close-label") || (lang.indexOf("ja") === 0 ? "すべて折りたたむ" : lang.indexOf("ko") === 0 ? "모두 접기" : "Collapse all");
+      function getTargets() {
+        var sel = btn.getAttribute("data-details-target") || "main details";
+        var list = $all(sel, document);
+        return list.length ? list : $all("details", document);
+      }
+      function syncLabel() {
+        var list = getTargets();
+        var anyClosed = list.some(function (d) { return !d.open; });
+        btn.setAttribute("aria-pressed", anyClosed ? "false" : "true");
+        btn.textContent = anyClosed ? openLbl : closeLbl;
+        return anyClosed;
+      }
+      syncLabel();
+      btn.addEventListener("click", function () {
+        var shouldOpen = syncLabel();
+        getTargets().forEach(function (d) { d.open = shouldOpen; });
+        syncLabel();
+      });
+    });
+  };
+
+  HA.walkthrough = function (root) {
+    $all("[data-walkthrough]", root).forEach(function (wk) {
+      if (wk._haWalk) return; wk._haWalk = true;
+      var steps = $all("[data-walk-step]", wk);
+      var targets = $all("[data-walk-target]", wk);
+      if (!steps.length) return;
+      var readout = wk.querySelector("[data-walk-readout]");
+      var prevBtn = wk.querySelector("[data-walk-prev]");
+      var nextBtn = wk.querySelector("[data-walk-next]");
+      var activeIdx = 0;
+      steps.forEach(function (s, i) { if (s.classList.contains("is-active") || s.getAttribute("aria-current") === "step") activeIdx = i; });
+
+      function activate(idx, focusStep) {
+        if (idx < 0) idx = 0;
+        if (idx >= steps.length) idx = steps.length - 1;
+        activeIdx = idx;
+        var activeId = steps[idx].getAttribute("data-walk-step");
+        steps.forEach(function (s, i) {
+          var on = i === idx;
+          s.classList.toggle("is-active", on);
+          if (on) s.setAttribute("aria-current", "step");
+          else s.removeAttribute("aria-current");
+        });
+        targets.forEach(function (t) {
+          var match = t.getAttribute("data-walk-target") === activeId;
+          t.classList.toggle("is-active", match);
+          t.classList.toggle("is-dimmed", !match);
+        });
+        if (readout) readout.textContent = (idx + 1) + " / " + steps.length;
+        if (prevBtn) prevBtn.disabled = idx === 0;
+        if (nextBtn) nextBtn.disabled = idx === steps.length - 1;
+        if (focusStep && steps[idx].focus) steps[idx].focus();
+      }
+
+      steps.forEach(function (step, i) {
+        step.addEventListener("click", function () { activate(i, false); });
+        step.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); activate((i + 1) % steps.length, true); }
+          else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); activate((i - 1 + steps.length) % steps.length, true); }
+        });
+      });
+      targets.forEach(function (t) {
+        t.addEventListener("click", function () {
+          var tid = t.getAttribute("data-walk-target");
+          for (var i = 0; i < steps.length; i++) {
+            if (steps[i].getAttribute("data-walk-step") === tid) { activate(i, false); break; }
+          }
+        });
+      });
+      if (prevBtn) prevBtn.addEventListener("click", function () { activate(activeIdx - 1, false); });
+      if (nextBtn) nextBtn.addEventListener("click", function () { activate(activeIdx + 1, false); });
+      activate(activeIdx, false);
+    });
+  };
+
+  HA.review = function (root) {
+    $all("[data-review]", root).forEach(function (rv) {
+      if (rv._haReview) return; rv._haReview = true;
+      var items = $all("[data-review-item]", rv);
+      var filterBtns = $all("[data-review-filter]", rv);
+      var progressEl = rv.querySelector("[data-review-progress]");
+      var outputEl = rv.querySelector("[data-review-output]");
+      var copyBtn = rv.querySelector("[data-review-copy]");
+      var resetBtn = rv.querySelector("[data-review-reset]");
+      var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var isJa = lang.indexOf("ja") === 0;
+      var isKo = lang.indexOf("ko") === 0;
+      var rvId = rv.getAttribute("data-review-id") || (location.pathname + ":" + (document.title || "review"));
+      var storeKey = "ha-review:" + rvId;
+      var state = { statuses: {}, notes: {} };
+      var activeFilter = "all";
+
+      try {
+        var raw = window.localStorage && window.localStorage.getItem(storeKey);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.statuses) state.statuses = parsed.statuses;
+            if (parsed.notes) state.notes = parsed.notes;
+          }
+        }
+      } catch (e) { /* storage optional */ }
+
+      function save() {
+        try {
+          if (window.localStorage) window.localStorage.setItem(storeKey, JSON.stringify(state));
+        } catch (e) { /* ignore quota / file:// restriction */ }
+      }
+
+      function labelMap() {
+        if (isJa) return { title: "レビュー結果", reviewed: "確認済", fix: "要修正", hold: "保留", ok: "OK", pending: "未確認" };
+        if (isKo) return { title: "리뷰 결과", reviewed: "확인됨", fix: "수정 필요", hold: "보류", ok: "OK", pending: "미확인" };
+        return { title: "Review Feedback", reviewed: "reviewed", fix: "Needs Fix", hold: "Hold", ok: "OK", pending: "Pending" };
+      }
+
+      function buildMarkdown() {
+        var L = labelMap();
+        var docTitle = document.title || rvId;
+        var groups = { fix: [], hold: [], ok: [], pending: [] };
+        items.forEach(function (it) {
+          var id = it.getAttribute("data-review-item") || "";
+          var st = state.statuses[id] || "";
+          var title = it.getAttribute("data-review-title") || (it.querySelector(".rv-item-title") ? it.querySelector(".rv-item-title").textContent.trim() : id);
+          var scopeEl = it.querySelector(".rv-scope");
+          var scope = scopeEl ? scopeEl.textContent.trim() : "";
+          var note = (state.notes[id] || "").trim();
+          (groups[st] || groups.pending).push({ id: id, title: title, scope: scope, note: note });
+        });
+        var lines = [
+          "## " + L.title + ": " + docTitle,
+          "- Summary: OK " + groups.ok.length + " / " + L.fix + " " + groups.fix.length + " / " + L.hold + " " + groups.hold.length + " / " + L.pending + " " + groups.pending.length
+        ];
+        [["fix", L.fix], ["hold", L.hold], ["ok", L.ok]].forEach(function (pair) {
+          var key = pair[0], heading = pair[1];
+          if (!groups[key].length) return;
+          lines.push("", "### " + heading);
+          groups[key].forEach(function (entry) {
+            var head = "- [" + key.toUpperCase() + "] " + entry.title + (entry.scope ? " (`" + entry.scope + "`)" : "");
+            if (entry.note) head += ": " + entry.note.replace(/\r?\n/g, " ");
+            lines.push(head);
+          });
+        });
+        return lines.join("\n");
+      }
+
+      function syncAll() {
+        var counts = { ok: 0, fix: 0, hold: 0, pending: 0 };
+        items.forEach(function (it) {
+          var id = it.getAttribute("data-review-item") || "";
+          var st = state.statuses[id] || "";
+          if (st === "ok" || st === "fix" || st === "hold") {
+            it.setAttribute("data-status", st);
+            counts[st]++;
+          } else {
+            it.removeAttribute("data-status");
+            counts.pending++;
+          }
+          $all("[data-review-status]", it).forEach(function (btn) {
+            btn.setAttribute("aria-pressed", btn.getAttribute("data-review-status") === st ? "true" : "false");
+          });
+          var noteEl = it.querySelector("[data-review-note]");
+          if (noteEl && noteEl.value !== (state.notes[id] || "")) noteEl.value = state.notes[id] || "";
+          var show = activeFilter === "all" || (activeFilter === "pending" ? !st : st === activeFilter);
+          it.classList.toggle("hidden", !show);
+        });
+        var done = counts.ok + counts.fix + counts.hold;
+        var L = labelMap();
+        if (progressEl) {
+          progressEl.textContent = done + " / " + items.length + " " + L.reviewed + (counts.fix ? " (" + L.fix + " " + counts.fix + ")" : "");
+        }
+        $all("[data-review-jump]").forEach(function (jump) {
+          var badge = jump.querySelector("[data-review-badge]");
+          if (badge) {
+            badge.textContent = counts.fix ? String(counts.fix) : (done + "/" + items.length);
+            badge.setAttribute("data-state", counts.fix ? "fix" : (done === items.length && items.length > 0 ? "ok" : "pending"));
+          }
+        });
+        if (outputEl) {
+          var md = buildMarkdown();
+          if ("value" in outputEl) outputEl.value = md;
+          else outputEl.textContent = md;
+        }
+      }
+
+      items.forEach(function (it) {
+        var id = it.getAttribute("data-review-item") || "";
+        var initSt = it.getAttribute("data-status");
+        if (!state.statuses[id] && (initSt === "ok" || initSt === "fix" || initSt === "hold")) {
+          state.statuses[id] = initSt;
+        }
+        $all("[data-review-status]", it).forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var next = btn.getAttribute("data-review-status");
+            state.statuses[id] = state.statuses[id] === next ? "" : next;
+            save();
+            syncAll();
+          });
+        });
+        var noteEl = it.querySelector("[data-review-note]");
+        if (noteEl) {
+          noteEl.addEventListener("input", function () {
+            state.notes[id] = noteEl.value;
+            save();
+            syncAll();
+          });
+        }
+      });
+
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeFilter = btn.getAttribute("data-review-filter") || "all";
+          filterBtns.forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+          syncAll();
+        });
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+          state = { statuses: {}, notes: {} };
+          activeFilter = "all";
+          filterBtns.forEach(function (b) {
+            var on = (b.getAttribute("data-review-filter") || "all") === "all";
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+          try { if (window.localStorage) window.localStorage.removeItem(storeKey); } catch (e) { /* ignore */ }
+          syncAll();
+        });
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener("click", function () {
+          haCopyWithFeedback(copyBtn, function () {
+            return outputEl ? ("value" in outputEl ? outputEl.value : outputEl.textContent) : buildMarkdown();
+          });
+        });
+      }
+
+      syncAll();
+    });
+  };
+
   /* ===================== BOOT ===================== */
   HA.init = function (root) {
     root = root || document;
     ["themeToggle", "sortable", "filter", "kanban", "copy", "switcher", "slider", "tabs",
-     "zoompan", "fitSvgText", "dragNode", "tree", "crossfilter", "paginate", "tooltip", "counter", "reveal", "reorder", "wfedit", "wfflow", "designpick", "formMock", "archExplorer", "tocSpy"
+     "zoompan", "fitSvgText", "dragNode", "tree", "crossfilter", "paginate", "tooltip", "counter", "reveal", "reorder", "wfedit", "wfflow", "designpick", "formMock", "archExplorer", "tocSpy",
+     "detailsToggle", "walkthrough", "review"
     ].forEach(function (fn) { try { HA[fn](root); } catch (e) { /* isolate */ } });
     $all("details", root).forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open && HA.fitSvgText) HA.fitSvgText(d); });

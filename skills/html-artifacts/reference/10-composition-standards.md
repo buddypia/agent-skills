@@ -40,12 +40,16 @@ matches, fall back to §1.2.
 
 | blueprint id | genre | pick when the request sounds like | axes (theme · layout · header · density) |
 | --- | --- | --- | --- |
+| `ai-change-review` | AI変更レビュー | AI変更レビュー / diffを視覚化して / PRレビュー資料 / review AI changes / AI 변경사항 리뷰 | slate · stack · compact · comfortable |
+| `data-analysis` | データ分析 | データ分析結果を可視化 / 要因分解 / 相関・パレート・コホート / data analysis / 데이터 분석 리포트 | nord · bento · compact · comfortable |
+| `concept-explainer` | 仕組み・コード解説 | 仕組みを図解して / コードの動きを説明して / ウォークスルー解説 / concept explainer / 동작 원리 설명 | dark-focus · stack · compact · comfortable |
+| `visual-infographic` | インフォグラフィック | インフォグラフィックにして / 一枚の図解でまとめて / ビジュアル要約 / visual infographic / 인포그래픽 | interactive-warm · bento · banner · comfortable |
 | `exec-briefing` | 経営資料 | 役員会資料 / 経営会議レポート / executive briefing / 経営サマリー / 이사회 보고 | slate · bento · split · comfortable |
 | `project-report` | プロジェクト報告 | 進捗報告 / 週次報告 / project status report / プロジェクトレビュー / 프로젝트 현황 | slate · stack · split · comfortable |
 | `meeting-pack` | 会議資料 | 会議アジェンダ / 意思決定会議の資料 / meeting pack / 論点整理 / 회의 자료 | birchline · stack · split · comfortable |
 | `saas-analytics` | SaaS分析 | SaaS KPIレポート / MRR分析 / チャーン分析 / SaaS metrics report / 코호트 분석 | midnight · bento · split · compact |
 | `research-summary` | 調査報告 | 市場調査レポート / ユーザー調査結果 / survey results / アンケート集計 / 리서치 요약 | birchline · stack · banner · comfortable |
-| `product-launch` | リリース資料 | 新機能発表 / リリースノートページ / product launch / アップデート案内 / 출시 안내 | sunset · stack · none · comfortable |
+| `product-launch` | リリース資料 | 新機能発表 / リリースノートページ / product launch / アップデート案内 / 출시 안내 | sunset · stack · banner · comfortable |
 | `tech-spec` | 技術仕様書 | 設計書 / API仕様 / technical spec / 内部仕様書 / 기술 명세 | dark-focus · stack · split · comfortable |
 | `system-architecture` | アーキテクチャ仕様書 | システム構成図 / アーキテクチャ解説 / 分散システム設計 / OSSアーキテクチャ / 시스템 아키텍처 | dark-focus · stack · split · comfortable |
 | `incident-report` | 障害報告書 | ポストモーテム / 障害報告 / incident postmortem / 振り返り(障害) / 장애 보고서 | slate · stack · split · comfortable |
@@ -107,8 +111,8 @@ Always end with the verification gate (§6) regardless of the path taken.
   Chart titles name the measure, unit and period; numeric table columns are right-aligned
   (the builder detects them).
 - **C6 · No dead interactions.** No `href="#"`, no inert buttons (validate warns).
-  CTA-bearing modules (hero-cta, pricing-table) link to real in-page anchors or are
-  converted to non-interactive chips.
+  Any interactive button or link must either target a real in-page anchor or wire
+  to an `interactions.js` handler (`[data-review]`, `[data-walkthrough]`, `[data-copy]`, etc.); static chips use non-interactive markup.
 - **C7 · Density is an axis, not an override.** If the page feels loose/tight, switch
   `density` (`compact` / `comfortable` / `spacious`) - never hand-shrink individual
   sections. Per-table `density: "compact"` is the single sanctioned local exception.
@@ -128,7 +132,7 @@ never by overriding a size.
 
 | token | resolved (default density) | role - use for | per-document budget |
 | --- | --- | --- | --- |
-| `--type-display` | `650 clamp(2.25rem, 1.8rem + 1.8vw, 3.125rem)/1.08` | hero/banner headline only (`hero-cta`, `header: banner`) | 0–1 uses |
+| `--type-display` | `650 clamp(2.25rem, 1.8rem + 1.8vw, 3.125rem)/1.08` | hero/banner headline only (`header: banner`, hero display strips) | 0–1 uses |
 | `--type-h1` | `650 clamp(1.625rem, 1.4rem + 0.9vw, 2.125rem)/1.18` | the document title (header) | exactly 1 |
 | `--type-h2` | `620 clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem)/1.28` | section headings (builder emits these) | 1 per section |
 | `--type-h3` | `600 1.0625rem/1.38` | module titles (figcaption), card titles | 1 per module/card |
@@ -220,17 +224,22 @@ importance. If no browser driver exists, say the page was not visually checked.
 The per-blueprint truth is each spec's `_recipe` (outline with roles/guides/volumes,
 swaps, modules). This table is the quick index:
 
-| id | 節数 | embedded manual modules | builder sections (main) |
-| --- | --- | --- | --- |
-| `exec-briefing` | 7 | key-takeaways, okr-board, roadmap | callout, chart, kpi |
-| `project-report` | 8 | project-status, raci-matrix | callout, chart, checklist, kpi, table, timeline |
-| `meeting-pack` | 6 | agenda, key-takeaways | callout, checklist, comparison, decision |
-| `saas-analytics` | 8 | cohort-grid, composition-bar | callout, chart, funnel, kpi, table |
-| `research-summary` | 7 | key-takeaways, diverging-bar, persona-card | callout, chart, comparison, statlist |
-| `product-launch` | 6 | hero-cta, changelog, faq | callout, features, stepper |
-| `tech-spec` | 8 | toc, api-endpoint, file-tree | callout, checklist, collapsible, diagram, table |
-| `incident-report` | 7 | key-takeaways, fishbone, gap-analysis | callout, checklist, kpi, timeline |
-| `onboarding-guide` | 7 | code-snippet, file-tree, faq | callout, checklist, collapsible, stepper |
-| `proposal` | 9 | key-takeaways, gap-analysis, pricing-table, logo-wall (+ CTA anchor html section) | callout, comparison, features, timeline |
+| id | 節数 | typed sections & embedded modules |
+| --- | --- | --- |
+| `ai-change-review` | 7 | `takeaways`, `kpi`, `beforeafter`, `diff`, `walkthrough`, `verification`, `review` |
+| `data-analysis` | 8 | `takeaways`, `kpi`, `waterfall`, `pareto`, `scatter`, `diverging`, `cohort`, `table` |
+| `concept-explainer` | 7 | `callout`, `walkthrough`, `sequence`, `statediagram`, `code`, `filetree`, `collapsible` |
+| `visual-infographic` | 8 | `kpi` (`hero`), `takeaways`, `sankey`, `kpitree`, `quadrant`, `diverging`, `leaderboard`, `riskmatrix` |
+| `exec-briefing` | 7 | `takeaways`, `kpi`, `chart`, `callout` + embedded `okr-board`, `roadmap` |
+| `project-report` | 8 | `kpi`, `chart`, `table`, `callout`, `timeline`, `checklist` + embedded `project-status`, `raci-matrix` |
+| `meeting-pack` | 6 | `takeaways`, `decision`, `comparison`, `callout`, `checklist` + embedded `agenda` |
+| `saas-analytics` | 8 | `kpi`, `chart`, `cohort`, `funnel`, `table`, `callout` + embedded `composition-bar` |
+| `research-summary` | 7 | `takeaways`, `statlist`, `chart`, `diverging`, `comparison`, `callout` + embedded `persona-card` |
+| `product-launch` | 6 | `takeaways`, `features`, `changelog`, `stepper`, `collapsible`, `callout` |
+| `tech-spec` | 7 | `callout`, `diagram`, `apiendpoint`, `filetree`, `table`, `collapsible`, `checklist` (`nav: "toc"`) |
+| `system-architecture` | 10 | `callout`, `kpi`, `arch-explorer`, `pipeline-flow`, `service-catalog`, `request-trace`, `event-catalog`, `deployment-topology`, `failure-modes`, `comparison` |
+| `incident-report` | 7 | `takeaways`, `kpi`, `timeline`, `fishbone`, `checklist`, `callout` + embedded `gap-analysis` |
+| `onboarding-guide` | 7 | `callout`, `stepper`, `code`, `filetree`, `collapsible`, `checklist` |
+| `proposal` | 9 | `takeaways`, `callout`, `features`, `table`, `timeline`, `comparison`, `statlist` + embedded `gap-analysis` |
 
 (If a row and a spec's `_recipe` ever disagree, the spec wins - regenerate this table.)

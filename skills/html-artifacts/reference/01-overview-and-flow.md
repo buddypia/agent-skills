@@ -166,7 +166,7 @@ Main primitive classes:
 
 ### Layer 2 - Modules (modules/*)
 
-Composable parts. The header comment of each file carries `MODULE` / `lineage` / `PURPOSE` / `VARIABLES` / `REQUIRES` / `MODULE CSS` / `INTERACTION` / `USAGE` (exemplars: `kpi-grid.html`, `chart-bar.html`). 39 modules in total.
+Composable parts (`templates/modules/`). See `reference/04-module-catalog.md` and `index/INDEX.md` for the complete list of **112 modules** across 5 families (`charts` / `diagrams` / `interactive` / `document` / `content`). The representative core modules include:
 
 Directory: `templates/modules/`
 
@@ -206,17 +206,20 @@ A single, dependency-free interaction library. It unifies the 9 separate JS file
 
 File: `templates/core/interactions.js`
 
-> This table shows 7 representative behaviors. `interactions.js` wires **23 behaviors** in total (the `HA.*` handlers) - the complete data-attribute contract is owned by `05-components-interactions.md`.
+> This table shows key representative behaviors. `interactions.js` wires **27 behaviors** in total (the `HA.*` handlers) - the complete data-attribute contract is owned by `05-components-interactions.md`.
 
 | data-attribute contract | Behavior |
 | --- | --- |
-| `[data-theme-toggle]` | Toggle the theme back and forth between `dark-focus` and the previous theme |
-| `table[data-sortable]` | Column sort on `<th>` click (asc/desc toggle, automatic numeric/string detection) |
+| `[data-theme-toggle]` | Swap to light/dark counterpart and sync `aria-pressed` + `<meta name="color-scheme">` |
+| `table[data-sortable]` | Sort via `<button class="dt-sort-btn">` inside `<th>` (`aria-sort`, `Intl.Collator`, live `role="status"`) |
 | `[data-filter]` + `[data-filter-in]` | Live-filter by toggling `.hidden` on target elements as you type |
 | `[data-kanban]` + `[data-col]` + `.kanban-card` | Drag and drop cards between columns (states `.dragging` / `.drop-target`, the destination is `.kanban-cards`) |
 | `[data-copy]` / `[data-copy-text]` | Copy the target's text / literal to the clipboard |
 | `[data-slider]` (`input[type=range]`) + `[data-out]` | Reflect the value live into a CSS var and update the readout (`data-unit` supported) |
-| `[data-tabs]` | A `.tab` button shows the corresponding `[data-panel]` |
+| `[data-tabs]` | WAI-ARIA tab switching with arrow keys, `hidden="until-found"`, and `beforematch` reveal |
+| `[data-details-toggle]` | Expand or collapse all `<details>` sections on the page |
+| `[data-walkthrough]` | Synchronized step cards (`[data-walk-step]`) and stage target highlights (`[data-walk-target]`) |
+| `[data-review]` | Human OK / Needs Fix / Hold checklist with `localStorage` persistence and Markdown feedback export |
 
 > `[data-collapsible] > summary` works via native `<details>`, so no JS is needed (the contract is left only as an a11y hook).
 

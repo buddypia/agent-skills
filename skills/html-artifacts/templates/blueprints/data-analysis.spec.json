@@ -1,0 +1,152 @@
+{
+  "title": "AetherSaaS 月次ARR変動・解約要因データ分析 (2026 Q2)",
+  "theme": "nord",
+  "layout": "bento",
+  "header": "compact",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "EXPLORATORY DATA ANALYSIS",
+  "subtitle": "ARR増減ブリッジ・解約要因のパレート集中・利用状況と解約リスクの相関およびコホート定着率",
+  "footer": "AetherSaaS Analytics · Data Analysis Blueprint",
+  "sections": [
+    {
+      "type": "takeaways",
+      "span": 12,
+      "title": "データ分析の主要インサイト",
+      "items": [
+        { "lead": "Q2純増ARR +¥19.4M はアップセル(+¥16.2M)が牽引した一方、解約(-¥11.3M)の78%が上位3要因に集中", "elab": "SSO/権限管理不足・オンボード未完了・CSV一括処理遅延の3点にリソースを集中すべき段階。" },
+        { "lead": "シート利用率 35% 未満かつ月間アクティブ日数が 6 日未満のアカウントで解約リスクが急増", "elab": "散布図上で右上に孤立している低活性・大型契約 4 社へのCSM介入が最優先。" },
+        { "lead": "オンボード開始 60 日以降の M2→M5 定着率が直近コホートで +4pt 改善傾向" }
+      ]
+    },
+    {
+      "type": "kpi",
+      "span": 12,
+      "label": "分析サマリー指標",
+      "items": [
+        { "label": "期末 ARR", "value": "¥161.4M", "delta": "+13.7%", "dir": "up" },
+        { "label": "Net Dollar Retention", "value": "114%", "delta": "+3pt", "dir": "up" },
+        { "label": "解約ARR", "value": "¥11.3M", "delta": "+1.8M", "dir": "up", "tone": "bad" },
+        { "label": "分析対象契約数", "value": "890社" }
+      ]
+    },
+    {
+      "type": "waterfall",
+      "span": 6,
+      "title": "ARR増減ブリッジ（百万円）",
+      "yPrefix": "¥",
+      "ySuffix": "M",
+      "items": [
+        { "label": "期首ARR", "value": 142.0, "kind": "start" },
+        { "label": "新規獲得", "value": 14.5, "kind": "delta" },
+        { "label": "アップセル", "value": 16.2, "kind": "delta" },
+        { "label": "解約Churn", "value": -11.3, "kind": "delta" },
+        { "label": "期末ARR", "value": 161.4, "kind": "total" }
+      ]
+    },
+    {
+      "type": "pareto",
+      "span": 6,
+      "title": "解約・ダウングレード理由パレート図",
+      "yAxis": "件数",
+      "items": [
+        { "label": "定着不足", "value": 42 },
+        { "label": "権限/SSO", "value": 27 },
+        { "label": "速度遅延", "value": 19 },
+        { "label": "価格改定", "value": 12 },
+        { "label": "統合", "value": 8 },
+        { "label": "その他", "value": 5 }
+      ]
+    },
+    {
+      "type": "scatter",
+      "span": 6,
+      "title": "シート利用率 vs 解約スコア相関",
+      "xLabel": "シート利用率 (%)",
+      "yLabel": "解約リスクスコア",
+      "points": [
+        { "label": "北星運輸", "x": 18, "y": 86, "r": 10, "series": "要介入" },
+        { "label": "紅葉メディア", "x": 24, "y": 78, "r": 9, "series": "要介入" },
+        { "label": "蒼海ラボ", "x": 31, "y": 71, "r": 7, "series": "要介入" },
+        { "label": "大和物産", "x": 54, "y": 44, "r": 8, "series": "様子見" },
+        { "label": "朝日フーズ", "x": 68, "y": 29, "r": 6, "series": "健全" },
+        { "label": "銀河テック", "x": 84, "y": 16, "r": 9, "series": "健全" },
+        { "label": "新橋電機", "x": 91, "y": 11, "r": 8, "series": "健全" }
+      ]
+    },
+    {
+      "type": "diverging",
+      "span": 6,
+      "title": "プラン別 NPS 推奨 vs 批判比率",
+      "seriesA": "推奨 (%)",
+      "seriesB": "批判 (%)",
+      "max": 70,
+      "items": [
+        { "label": "Enterprise", "a": 62, "aDisplay": "62%", "b": 14, "bDisplay": "14%" },
+        { "label": "Growth", "a": 54, "aDisplay": "54%", "b": 22, "bDisplay": "22%" },
+        { "label": "Starter", "a": 38, "aDisplay": "38%", "b": 34, "bDisplay": "34%" }
+      ]
+    },
+    {
+      "type": "cohort",
+      "span": 12,
+      "title": "獲得コホート別 契約維持率",
+      "cohortLabel": "登録月",
+      "sizeLabel": "社数",
+      "periods": ["M0", "M1", "M2", "M3", "M4", "M5"],
+      "cohorts": [
+        { "label": "2026-01", "size": "112社", "values": [100, 84, 76, 71, 68, 66] },
+        { "label": "2026-02", "size": "126社", "values": [100, 86, 79, 75, 72, null] },
+        { "label": "2026-03", "size": "134社", "values": [100, 88, 81, 77, null, null] },
+        { "label": "2026-04", "size": "145社", "values": [100, 89, 83, null, null, null] }
+      ]
+    },
+    {
+      "type": "table",
+      "span": 12,
+      "title": "要注意セグメント詳細",
+      "columns": ["顧客名", "プラン", "ARR", "シート利用率", "解約スコア", "推奨アクション"],
+      "rows": [
+        ["北星運輸", "Enterprise", "¥4.8M", "18%", { "badge": "danger", "text": "86" }, "専任CSによる管理者オンボード再実施"],
+        ["紅葉メディア", "Enterprise", "¥3.6M", "24%", { "badge": "danger", "text": "78" }, "SSO構成支援と部門展開"],
+        ["蒼海ラボ", "Growth", "¥1.8M", "31%", { "badge": "warning", "text": "71" }, "CSV高速インポート新機能の案内"],
+        ["銀河テック", "Enterprise", "¥5.2M", "84%", { "badge": "success", "text": "16" }, "追加部門拡張提案"]
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "data-analysis",
+    "name": "データ分析・要因分解レポート",
+    "genre": "データ分析",
+    "purpose": "定量データの増減要因・集中度（パレート）・相関（散布図）・コホート・セグメント詳細を一画面に構造化し、データから次の打つ手を導く。",
+    "audience": "プロダクトマネージャー・データアナリスト・事業責任者",
+    "triggers": {
+      "ja": ["データ分析結果を可視化して", "要因分解して見せて", "統計やKPIを深掘り分析", "相関やパレート分析を出して", "CSV/分析データをレポートにして"],
+      "en": ["data analysis report", "exploratory analysis", "root cause metrics", "waterfall pareto scatter dashboard"],
+      "ko": ["데이터 분석 리포트", "원인 분해 시각화", "상관관계/코호트 대시보드"]
+    },
+    "axes": {
+      "theme": "nord",
+      "layout": "bento",
+      "header": "compact",
+      "density": "comfortable",
+      "rationale": "視認性の高い nord の寒色パレット + bento 2列グリッドで複数チャート（waterfall/pareto/scatter/diverging）を並べつつ、サマリー・コホート・テーブルを全幅で比較できる。"
+    },
+    "outline": [
+      { "n": 1, "type": "takeaways", "role": "分析結論先出し", "required": true, "guide": "データから分かった最重要ファインディングを3点に絞って提示。", "volume": "3項目" },
+      { "n": 2, "type": "kpi", "role": "主要KPI", "required": true, "guide": "基準値・変化率・対象母数を一覧。", "volume": "4指標" },
+      { "n": 3, "type": "waterfall", "role": "増減要因分解", "required": false, "guide": "期首→各増減要因→期末の寄与度を可視化。", "volume": "4〜7要素" },
+      { "n": 4, "type": "pareto", "role": "集中度・80/20分析", "required": false, "guide": "課題件数や売上寄与の上位集中を棒+累積線で特定。", "volume": "5〜8カテゴリ" },
+      { "n": 5, "type": "scatter", "role": "2変数の相関・外れ値", "required": false, "guide": "利用度 vs リスク等の相関と中央値クロスヘアを表示。", "volume": "6〜25点" },
+      { "n": 6, "type": "cohort", "role": "時系列コホート定着率", "required": false, "guide": "登録時期ごとの継続率ヒートマップ。", "volume": "4〜6コホート" },
+      { "n": 7, "type": "table", "role": "明細・絞り込み一覧", "required": true, "guide": "ソート・検索可能な詳細データ。", "volume": "4〜12行" }
+    ],
+    "swaps": [
+      { "slot": 3, "default": "waterfall", "alternative": "barstacked", "when": "加減要因より構成要素の積み上げ推移を見たいとき" },
+      { "slot": 6, "default": "cohort", "alternative": "heatmap / funnel", "when": "継続率ではなくコンバージョン段階や2軸マトリクスを見たいとき" }
+    ],
+    "modules": ["takeaways", "kpi", "waterfall", "pareto", "scatter", "diverging", "cohort", "table"],
+    "sampleMarkers": ["AetherSaaS 月次ARR", "北星運輸", "紅葉メディア"]
+  }
+}

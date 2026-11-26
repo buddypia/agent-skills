@@ -409,7 +409,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* ----- Header variants (data `header` key; standard = .page-header alone) --
    compact  one baseline row    banner  full-bleed surface band
    split    title left / meta right    none  floating .page-controls strip   */
-.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 120px; }
+.header-actions { position: absolute; top: var(--sp-4); right: var(--sp-5); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-2); }
+.header-actions .ha-viewport-controls { position: static; margin: 0; }
+.review-jump { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-default)); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface)); text-decoration: none; }
+.review-jump:hover { background: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); color: var(--accent); }
+.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 260px; }
 .header-compact .eyebrow { width: 100%; margin-bottom: -4px; }
 .header-compact h1 { font: var(--type-h1); }
 .header-compact .lede { font: var(--type-small); color: var(--text-secondary); max-width: none; margin-top: 0; }
@@ -424,7 +428,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* standard / banner: a compact property strip (label over value) instead of a full-width two-column table */
 .page-header:not(.header-split) .header-meta { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6); width: fit-content; max-width: 100%; margin-top: var(--sp-4); }
 .page-header:not(.header-split) .header-meta .hm-item { display: grid; gap: 2px; }
-@media (max-width: 720px) { .header-split { grid-template-columns: 1fr; } .header-compact { padding-right: var(--sp-5); } }
+@media (max-width: 720px) {
+  .header-split { grid-template-columns: 1fr; }
+  .header-compact { padding-right: var(--sp-5); }
+  .header-actions { position: static; justify-content: flex-start; margin-bottom: var(--sp-3); }
+}
 .page-controls { position: absolute; top: var(--sp-4); right: var(--sp-4); z-index: 5; display: flex; gap: var(--sp-2); align-items: center; }
 .page-controls .ha-viewport-controls { position: static; }
 
@@ -834,209 +842,176 @@ table[data-row-select] tbody tr { cursor: pointer; }
     .callout-box:hover { border-color: color-mix(in srgb, var(--cl-tint) 52%, var(--border-subtle)); }
   }
 
+/* module: key-takeaways */
+.ktw { margin: 0; border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-default)); background: color-mix(in srgb, var(--accent) 3%, var(--bg-surface)); }
+  .ktw-title { display: flex; align-items: center; gap: var(--sp-2); font: var(--type-h3); color: var(--text-primary); margin-bottom: var(--sp-4); }
+  .ktw-list { margin: 0; padding: 0; list-style: none; counter-reset: ktw; display: flex; flex-direction: column; gap: var(--sp-2); }
+  .ktw-row { counter-increment: ktw; display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: start; padding: var(--sp-3); border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease); }
+  /* number badge: accent-tinted disc carrying the auto counter */
+  .ktw-num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: var(--type-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--bg-surface)); border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border-default)); transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .ktw-num::before { content: counter(ktw); }
+  .ktw-body { min-width: 0; padding-top: 2px; }
+  .ktw-lead { font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .ktw-elab { display: block; margin-top: 2px; font: var(--type-small); color: var(--text-secondary); }
+  @media (hover: hover) {
+    .ktw-row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+    .ktw-row:hover .ktw-num { background: var(--accent); color: var(--bg-surface); border-color: var(--accent); }
+  }
+  @media (prefers-reduced-motion: reduce) { .ktw-row, .ktw-num { transition: none; } }
+
 /* module: diff-block */
-.diff-block { border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+.diff-sec { display: grid; gap: var(--sp-4); }
+  .diff-sec h2 { margin-bottom: 0; }
+  .diff-nav { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .diff-nav a { display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none; }
+  .diff-stack { display: grid; gap: var(--sp-4); }
+  .diff-block { margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface); box-shadow: var(--shadow-sm); scroll-margin-top: var(--sp-5); }
   /* header: hairline-quiet bar with a left accent rail tying the file to the theme */
   .diff-head { position: relative; display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; background: var(--bg-muted); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+  summary.diff-head { cursor: pointer; list-style: none; }
+  summary.diff-head::-webkit-details-marker { display: none; }
+  details.diff-block:not([open]) > summary.diff-head { border-bottom: none; }
+  .diff-caret { flex: 0 0 auto; color: var(--text-muted); transition: transform var(--dur-fast) var(--ease); }
+  details.diff-block[open] > summary.diff-head .diff-caret { transform: rotate(90deg); }
   .diff-head::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: color-mix(in srgb, var(--accent) 70%, transparent); }
-  .diff-file { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: var(--tracking-tight); }
-  .diff-stats { margin-left: auto; display: flex; gap: var(--sp-2); }
+  .diff-file { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
+  .diff-kind { flex: 0 0 auto; }
+  .diff-stats { margin-left: auto; display: flex; align-items: center; gap: var(--sp-2); }
   .diff-block pre { margin: 0; border: none; border-radius: 0; padding-block: var(--sp-2); background: transparent; }
   /* a diff row: signed change rows carry a tinted fill + an accent-neutral gutter tick;
      hover warms the whole row toward the accent so a reader can track a line calmly. */
   .dl { position: relative; display: grid; grid-template-columns: 3.5em 1fr; align-items: baseline; transition: background var(--dur-fast) var(--ease); }
+  .dl.-dual { grid-template-columns: 3em 3em 1fr; }
   .dl:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
-  .dl .ln { text-align: right; padding: 0 var(--sp-3) 0 var(--sp-2); color: var(--text-muted); user-select: none; border-right: 1px solid var(--border-subtle); transition: color var(--dur-fast) var(--ease); }
+  .dl .ln { text-align: right; padding: 0 var(--sp-3) 0 var(--sp-2); color: var(--text-muted); user-select: none; border-right: 1px solid var(--border-subtle); transition: color var(--dur-fast) var(--ease); font-variant-numeric: tabular-nums; }
   .dl .code { padding: 0 var(--sp-4); white-space: pre; }
   /* signed rows: stronger-than-default tint + a rounded-cap colored rail in the gutter edge */
   .dl.diff-add    { background: color-mix(in srgb, var(--color-success) 13%, transparent); }
   .dl.diff-remove { background: color-mix(in srgb, var(--color-danger) 13%, transparent); }
+  .dl.diff-hunk   { background: color-mix(in srgb, var(--color-info) 10%, var(--bg-muted)); color: var(--text-muted); }
+  .dl.diff-hunk .code { color: var(--text-muted); font-style: italic; }
   .dl.diff-add:hover    { background: color-mix(in srgb, var(--color-success) 20%, transparent); }
   .dl.diff-remove:hover { background: color-mix(in srgb, var(--color-danger) 20%, transparent); }
   .dl.diff-add .ln, .dl.diff-remove .ln { color: var(--text-secondary); position: relative; }
-  .dl.diff-add .ln::after, .dl.diff-remove .ln::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 2px; height: 1.05em; border-radius: var(--radius-pill); }
-  .dl.diff-add .ln::after    { background: var(--color-success); }
-  .dl.diff-remove .ln::after { background: var(--color-danger); }
-  .diff-note { border-radius: 0; }
+  .dl.diff-add .ln:last-of-type::after, .dl.diff-remove .ln:last-of-type::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 2px; height: 1.05em; border-radius: var(--radius-pill); }
+  .dl.diff-add .ln:last-of-type::after    { background: var(--color-success); }
+  .dl.diff-remove .ln:last-of-type::after { background: var(--color-danger); }
+  .diff-note { border-radius: 0; border: none; border-top: 1px solid var(--border-subtle); }
+  @media (prefers-reduced-motion: reduce) { .diff-caret, .dl, .dl .ln { transition: none; } }
+
+/* module: verification-run */
+.vr { display: grid; gap: var(--sp-3); padding: var(--sp-5); border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  .vr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+  .vr-title-wrap { display: grid; gap: 2px; min-width: 0; }
+  .vr-title { margin: 0; font: var(--type-h3); color: var(--text-primary); }
+  .vr-sub { margin: 0; font: var(--type-small); color: var(--text-muted); }
+  .vr-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+  .vr-verdict { padding: 3px var(--sp-3); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 800; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; border: 1px solid transparent; }
+  .vr-verdict.-pass { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-success) 38%, var(--border-default)); }
+  .vr-verdict.-fail { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-danger) 38%, var(--border-default)); }
+  .vr-verdict.-warn { color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 16%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-warning) 38%, var(--border-default)); }
+  .vr-stat { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); padding: 3px var(--sp-2); border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .vr-list { display: grid; gap: var(--sp-2); }
+  .vr-item { border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-card); overflow: hidden; }
+  .vr-item[data-status="fail"] { border-color: color-mix(in srgb, var(--color-danger) 48%, var(--border-default)); }
+  .vr-row { list-style: none; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); cursor: pointer; }
+  .vr-row::-webkit-details-marker { display: none; }
+  .vr-badge { padding: 2px 8px; border-radius: var(--radius-xs); font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; }
+  .vr-item[data-status="pass"] .vr-badge { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); }
+  .vr-item[data-status="fail"] .vr-badge { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 14%, var(--bg-surface)); }
+  .vr-item[data-status="warn"] .vr-badge { color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 16%, var(--bg-surface)); }
+  .vr-item[data-status="skip"] .vr-badge { color: var(--text-muted); background: var(--bg-muted); }
+  .vr-main { display: grid; gap: 2px; min-width: 0; }
+  .vr-name { font: var(--type-small); font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+  .vr-cmd { font: 12px/1.4 var(--font-mono); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vr-meta { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); }
+  .vr-caret { color: var(--text-muted); font-size: 11px; transition: transform var(--dur-fast) var(--ease); }
+  .vr-item[open] .vr-caret { transform: rotate(90deg); }
+  .vr-body { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4) var(--sp-4); border-top: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .vr-note { margin: 0; font: var(--type-small); color: var(--text-secondary); }
+  .vr-log { margin: 0; padding: var(--sp-3); border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); font: 12px/1.55 var(--font-mono); color: var(--text-primary); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  @media (max-width: 720px) {
+    .vr { padding: var(--sp-4); }
+    .vr-row { grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); padding: var(--sp-3); }
+    .vr-meta { grid-column: 2 / 4; }
+  }
+
+/* module: review-signoff */
+.rv { display: grid; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  .rv-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+  .rv-title-wrap { display: grid; gap: 2px; min-width: 0; }
+  .rv-title { margin: 0; font: var(--type-h3); color: var(--text-primary); }
+  .rv-subtitle { margin: 0; font: var(--type-small); color: var(--text-muted); }
+  .rv-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+  .rv-progress { font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; color: var(--text-secondary); padding: 4px var(--sp-3); border-radius: var(--radius-pill); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .rv-filters { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+  .rv-filter { appearance: none; padding: 4px var(--sp-2); border: 1px solid var(--border-default); border-radius: var(--radius-pill); background: var(--bg-card); color: var(--text-secondary); font: var(--type-caption); font-weight: 600; cursor: pointer; }
+  .rv-filter[aria-pressed="true"], .rv-filter.active { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default)); }
+  .rv-list { display: grid; gap: var(--sp-3); }
+  .rv-item { --rv-tone: var(--border-default); display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-card); transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .rv-item[data-status="ok"] { --rv-tone: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 48%, var(--border-default)); background: color-mix(in srgb, var(--color-success) 3%, var(--bg-card)); }
+  .rv-item[data-status="fix"] { --rv-tone: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 55%, var(--border-default)); background: color-mix(in srgb, var(--color-danger) 4%, var(--bg-card)); }
+  .rv-item[data-status="hold"] { --rv-tone: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 52%, var(--border-default)); background: color-mix(in srgb, var(--color-warning) 4%, var(--bg-card)); }
+  .rv-item-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+  .rv-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); min-width: 0; }
+  .rv-scope { padding: 2px var(--sp-2); border-radius: var(--radius-xs); font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .rv-item-title { margin: 0; font: var(--type-body); font-weight: 700; color: var(--text-primary); }
+  .rv-actions { display: inline-flex; flex-wrap: wrap; gap: var(--sp-1); }
+  .rv-btn { appearance: none; padding: 4px var(--sp-3); border: 1px solid var(--border-default); border-radius: var(--radius-pill); background: var(--bg-surface); color: var(--text-secondary); font: var(--type-caption); font-weight: 700; cursor: pointer; transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .rv-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+  .rv-btn[data-review-status="ok"][aria-pressed="true"] { background: color-mix(in srgb, var(--color-success) 16%, var(--bg-surface)); border-color: var(--color-success); color: var(--color-success); }
+  .rv-btn[data-review-status="fix"][aria-pressed="true"] { background: color-mix(in srgb, var(--color-danger) 16%, var(--bg-surface)); border-color: var(--color-danger); color: var(--color-danger); }
+  .rv-btn[data-review-status="hold"][aria-pressed="true"] { background: color-mix(in srgb, var(--color-warning) 18%, var(--bg-surface)); border-color: var(--color-warning); color: var(--color-warning); }
+  .rv-desc { margin: 0; font: var(--type-small); color: var(--text-secondary); line-height: 1.55; }
+  .rv-evidence { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-muted); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); overflow-wrap: anywhere; }
+  .rv-input { width: 100%; box-sizing: border-box; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); font: var(--type-small); resize: vertical; }
+  .rv-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .rv-export { display: grid; gap: var(--sp-2); padding-top: var(--sp-3); border-top: 1px solid var(--border-subtle); }
+  .rv-export-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+  .rv-export-title { font: var(--type-small); font-weight: 700; color: var(--text-primary); }
+  .rv-output { width: 100%; box-sizing: border-box; padding: var(--sp-3); border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-muted); color: var(--text-primary); font: 12px/1.55 var(--font-mono); resize: vertical; }
+  @media (max-width: 720px) { .rv { padding: var(--sp-4); } .rv-item { padding: var(--sp-3); } }
 </style>
 </head>
 <body>
-<header class="page-header header-compact container"><button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="Toggle theme" style="position:absolute;top:var(--sp-5);right:var(--sp-5)">◐ Theme</button><p class="eyebrow">PR #482 · CODE REVIEW</p><h1>Tax Calculation Refactor in the Checkout Module</h1><p class="lede">Adds support for region-specific tax rates and fixes currency rounding. 3 files, 4 findings (1 critical, 2 medium, 1 low). The critical finding must be resolved before merging.</p></header>
+<header class="page-header header-compact container"><div class="header-actions no-print"><a class="btn-ghost btn-sm review-jump" href="#review-signoff" data-review-jump>Review <span data-review-badge>0</span></a><button type="button" class="btn-ghost btn-sm" data-details-toggle>Expand all</button><button type="button" class="btn-ghost btn-sm" data-theme-toggle aria-label="Toggle theme">◐ Theme</button></div><p class="eyebrow">PR #482 · CODE REVIEW</p><h1>Tax Calculation Refactor in the Checkout Module</h1><p class="lede">Adds support for region-specific tax rates and fixes currency rounding. 3 files changed, 1 critical bug identified before merge.</p></header>
 <main class="container layout-sidebar">
 <aside class="layout-side">
 <!-- section 2: callout -->
-<div id="s2" class="callout callout-box callout-warning"><svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="warning"><path d="M12 3 2 20h20z"/><path d="M12 9v5M12 17h.01"/></svg><div><p class="callout-title">Merge blocked</p><div class="callout-body"><p>The critical finding in src/checkout/tax.ts (null reference when region is undefined) must be fixed and covered by boundary tests before merging. The two medium findings can land as fast follow-ups; the low finding is optional.</p></div></div></div>
+<div id="s2" class="callout callout-box callout-warning"><svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="warning"><path d="M12 3 2 20h20z"/><path d="M12 9v5M12 17h.01"/></svg><div><p class="callout-title">Merge blocked</p><div class="callout-body"><p>The critical finding in src/checkout/tax.ts (null reference when region is undefined) must be fixed and covered by boundary tests before merging.</p></div></div></div>
 <!-- section 3: kpi -->
-<section id="s3" class="kpi-sec" aria-label="Review at a glance"><div class="kpi-strip"><article class="metric metric-inline"><span class="metric-label">Findings</span><span class="metric-value">4</span></article><article class="metric metric-inline"><span class="metric-label">Critical</span><span class="metric-value">1</span></article><article class="metric metric-inline"><span class="metric-label">Files Changed</span><span class="metric-value">3</span></article><article class="metric metric-inline"><span class="metric-label">Lines</span><span class="metric-value">+19 / −5</span></article></div></section>
+<section id="s3" class="kpi-sec" aria-label="Review at a glance"><div class="kpi-strip"><article class="metric metric-inline"><span class="metric-label">Findings</span><span class="metric-value">3</span></article><article class="metric metric-inline"><span class="metric-label">Critical</span><span class="metric-value">1</span><span class="metric-delta-down metric-delta-bad">▼ blocker</span></article><article class="metric metric-inline"><span class="metric-label">Files Changed</span><span class="metric-value">3</span></article><article class="metric metric-inline"><span class="metric-label">Lines</span><span class="metric-value">+12 / -4</span></article></div></section>
 </aside>
 <div class="layout-main">
 <!-- section 1: html -->
-<style id="s1">
-  /* artifact-local helpers */
-  .review-meta { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; color: var(--text-secondary); font: var(--type-small); }
-  .file-nav { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-  .file-nav a { display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none; }
-  .diff-block { scroll-margin-top: var(--sp-5); }
-</style>
-<div class="review-meta" aria-label="Review metadata">
-  <span class="chip">feature/region-tax → main</span>
-  <span class="badge badge-warning">Changes Requested</span>
-  <span class="muted">Author: @tanaka-y · Reviewer: @suzuki-k · 2026-06-07</span>
-</div>
-<!-- section 4: html -->
-<section id="s4" aria-label="Review summary" class="stack">
-  <h2>Review Summary</h2>
-
-  <!-- TL;DR -->
-  <div class="callout callout-box callout-tldr">
-    <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Summary">
-      <path d="M5 4h14v16l-7-3-7 3z"/>
-    </svg>
-    <div>
-      <p class="callout-title">TL;DR</p>
-      <div class="callout-body"><p>Replacing the hard-coded tax rate with a value pulled from regional settings is a solid improvement. However, a critical bug remains: when <code>region</code> is undefined, referencing <code>taxRate</code> throws an exception, so this cannot be merged as is. Please also address the missing rounding logic and unit tests.</p></div>
-    </div>
-  </div>
-
-  <!-- Warning -->
-  <div class="callout callout-box callout-warning">
-    <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Warning">
-      <path d="M12 3 2 20h20z"/>
-      <path d="M12 9v5M12 17h.01"/>
-    </svg>
-    <div>
-      <p class="callout-title">Required before merge</p>
-      <div class="callout-body"><p>Resolve the critical finding in <code>src/checkout/tax.ts</code> (null reference when region is undefined) and add corresponding boundary tests. The CI type check passes, but it cannot catch this runtime exception.</p></div>
-    </div>
-  </div>
-
-  <!-- Note -->
-  <div class="callout callout-box callout-note">
-    <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Note">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M12 11v5M12 7.5h.01"/>
-    </svg>
-    <div>
-      <p class="callout-title">Design note</p>
-      <div class="callout-body"><p>The tax rate table is currently hard-coded, but moving it out to <code>config/regions.json</code> is planned for the next phase. It's fine to keep this PR within its existing scope and leave a reference behind in a TODO comment.</p></div>
-    </div>
-  </div>
-
-  <!-- Success -->
-  <div class="callout callout-box callout-success">
-    <svg class="callout-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" role="img" aria-label="Strengths">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="m8 12 3 3 5-6"/>
-    </svg>
-    <div>
-      <p class="callout-title">What went well</p>
-      <div class="callout-body"><p>Eliminating the magic number <code>0.1</code> and splitting the function's responsibilities makes the code clearer and easier to read. Extracting <code>formatCurrency</code> is also highly reusable and likely to be picked up by other modules.</p></div>
-    </div>
-  </div>
-</section>
-<!-- section 5: html -->
-<section id="s5" aria-label="File list" class="stack">
-  <h2>Changed Files</h2>
-  <nav class="file-nav" aria-label="Jump to file">
-    <a class="chip" href="#file-tax">src/checkout/tax.ts <span class="badge badge-danger">Critical</span></a>
-    <a class="chip" href="#file-cart">src/checkout/cart.ts <span class="badge badge-warning">Medium</span></a>
-    <a class="chip" href="#file-format">src/utils/format.ts <span class="badge badge-info">Low</span></a>
-  </nav>
-</section>
-<!-- section 6: html -->
-<section aria-label="tax.ts diff" class="stack" id="file-tax">
-  <figure class="diff-block">
-    <figcaption class="diff-head">
-      <span class="diff-file">src/checkout/tax.ts</span>
-      <span class="diff-stats">
-        <span class="badge badge-success">+8</span>
-        <span class="badge badge-danger">-3</span>
-      </span>
-    </figcaption>
-
-    <pre><code><span class="dl"><span class="ln">12</span><span class="code">export function calcTax(subtotal: number, region: Region): number {</span></span>
+<div id="s1" class="cluster" aria-label="Review metadata"><span class="chip">feature/region-tax → main</span><span class="badge badge-warning">Changes Requested</span><span class="muted">Author: @tanaka-y · Reviewer: @suzuki-k</span></div>
+<!-- section 4: takeaways -->
+<figure id="s4" class="ktw card-outlined" aria-label="Review Summary"><figcaption class="ktw-title">Review Summary</figcaption><ol class="ktw-list"><li class="ktw-row"><span class="ktw-num" aria-hidden="true"></span><div class="ktw-body"><span class="ktw-lead">Critical runtime TypeError in calcTax when region is undefined</span><span class="ktw-elab">resolveRegion() defaults to REGIONS.DEFAULT, yet direct callers to calcTax(subtotal, undefined) still crash without a guard.</span></div></li><li class="ktw-row"><span class="ktw-num" aria-hidden="true"></span><div class="ktw-body"><span class="ktw-lead">Total amount leaves unrounded floating-point decimals in cart.ts</span><span class="ktw-elab">Need Math.round((subtotal + tax) * 100) / 100 or formatCurrency rounding consistency.</span></div></li><li class="ktw-row"><span class="ktw-num" aria-hidden="true"></span><div class="ktw-body"><span class="ktw-lead">formatCurrency helper extraction cleanly decouples locale formatting</span><span class="ktw-elab">Hard-coded JPY parameter is acceptable for this PR; optional currency parameter can land later.</span></div></li></ol></figure>
+<!-- section 5: diff -->
+<section id="s5" class="diff-sec" aria-label="Changed Files &amp; Code Diff"><h2>Changed Files &amp; Code Diff</h2><nav class="diff-nav no-print" aria-label="Changed Files &amp; Code Diff"><a class="btn-ghost btn-sm" href="#diff-4-0">src/checkout/tax.ts</a><a class="btn-ghost btn-sm" href="#diff-4-1">src/checkout/cart.ts</a><a class="btn-ghost btn-sm" href="#diff-4-2">src/utils/format.ts</a></nav><div class="diff-stack"><details class="diff-block" id="diff-4-0" open><summary class="diff-head"><span class="diff-caret" aria-hidden="true">▸</span><span class="diff-kind">modified</span><span class="diff-file">src/checkout/tax.ts</span><span class="diff-stats"><span class="badge badge-success">+2</span><span class="badge badge-danger">-2</span></span></summary><pre><code><span class="dl"><span class="ln">12</span><span class="code">export function calcTax(subtotal: number, region: Region): number {</span></span>
 <span class="dl diff-remove"><span class="ln">13</span><span class="code">-  const tax = subtotal * 0.1;</span></span>
 <span class="dl diff-add"><span class="ln">13</span><span class="code">+  const tax = subtotal * region.taxRate;</span></span>
 <span class="dl"><span class="ln">14</span><span class="code">  return Math.round(tax);</span></span>
 <span class="dl"><span class="ln">15</span><span class="code">}</span></span>
-<span class="dl"><span class="ln">16</span><span class="code"> </span></span>
-<span class="dl"><span class="ln">17</span><span class="code">export function resolveRegion(code?: string): Region {</span></span>
 <span class="dl diff-remove"><span class="ln">18</span><span class="code">-  return REGIONS[code];</span></span>
-<span class="dl diff-add"><span class="ln">18</span><span class="code">+  return REGIONS[code] ?? REGIONS.DEFAULT;</span></span>
-<span class="dl"><span class="ln">19</span><span class="code">}</span></span></code></pre>
-
-    <aside class="callout diff-note sev-high">
-      <div>
-        <span class="callout-title">Critical: null reference exception when region is undefined</span>
-        <div class="callout-body" style="color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)">
-          <p><code>calcTax</code> takes <code>region</code> as a required argument, but the caller at <code>cart.ts:41</code> passes the result of <code>resolveRegion</code>. When no code is supplied, <code>REGIONS[undefined]</code> evaluates to <code>undefined</code>, and accessing <code>region.taxRate</code> throws a <code>TypeError</code>. Line 18 of the fix introduces <code>?? REGIONS.DEFAULT</code>, but please also add an argument guard inside <code>calcTax</code> and be sure to include boundary tests.</p>
-        </div>
-      </div>
-    </aside>
-  </figure>
-</section>
-<!-- section 7: html -->
-<section aria-label="cart.ts diff" class="stack" id="file-cart">
-  <figure class="diff-block">
-    <figcaption class="diff-head">
-      <span class="diff-file">src/checkout/cart.ts</span>
-      <span class="diff-stats">
-        <span class="badge badge-success">+5</span>
-        <span class="badge badge-danger">-2</span>
-      </span>
-    </figcaption>
-
-    <pre><code><span class="dl"><span class="ln">38</span><span class="code">function getCartTotal(items: Item[], regionCode?: string): number {</span></span>
-<span class="dl"><span class="ln">39</span><span class="code">  const subtotal = items.reduce((s, i) =&gt; s + i.price * i.qty, 0);</span></span>
+<span class="dl diff-add"><span class="ln">18</span><span class="code">+  return REGIONS[code] ?? REGIONS.DEFAULT;</span></span></code></pre><aside class="callout diff-note sev-high"><div><span class="callout-title">Critical: add runtime fallback inside calcTax(subtotal, region) so undefined region cannot throw TypeError.</span></div></aside></details><details class="diff-block" id="diff-4-1" open><summary class="diff-head"><span class="diff-caret" aria-hidden="true">▸</span><span class="diff-kind">modified</span><span class="diff-file">src/checkout/cart.ts</span><span class="diff-stats"><span class="badge badge-success">+2</span><span class="badge badge-danger">-1</span></span></summary><pre><code><span class="dl"><span class="ln">38</span><span class="code">function getCartTotal(items: Item[], regionCode?: string): number {</span></span>
 <span class="dl"><span class="ln">40</span><span class="code">  const region = resolveRegion(regionCode);</span></span>
 <span class="dl diff-remove"><span class="ln">41</span><span class="code">-  const tax = subtotal * 0.1;</span></span>
 <span class="dl diff-add"><span class="ln">41</span><span class="code">+  const tax = calcTax(subtotal, region);</span></span>
 <span class="dl diff-add"><span class="ln">42</span><span class="code">+  // TODO(#487): consolidate rounding into formatCurrency</span></span>
-<span class="dl"><span class="ln">43</span><span class="code">  return subtotal + tax;</span></span>
-<span class="dl"><span class="ln">44</span><span class="code">}</span></span></code></pre>
-
-    <aside class="callout diff-note sev-med">
-      <div>
-        <span class="callout-title">Medium: total is not rounded and leaves a trailing decimal</span>
-        <div class="callout-body" style="color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)">
-          <p>Returning <code>subtotal + tax</code> directly means floating-point errors such as <code>1234.56000000001</code> propagate all the way to the display when the tax rate is something like <code>0.08</code>. Either pass it through <code>round2</code> from <code>format.ts</code> before returning, or round to 2 decimal places with <code>Math.round((subtotal + tax) * 100) / 100</code>. The issue number referenced in the TODO comment is correct.</p>
-        </div>
-      </div>
-    </aside>
-  </figure>
-</section>
-<!-- section 8: html -->
-<section aria-label="format.ts diff" class="stack" id="file-format">
-  <figure class="diff-block">
-    <figcaption class="diff-head">
-      <span class="diff-file">src/utils/format.ts</span>
-      <span class="diff-stats">
-        <span class="badge badge-success">+6</span>
-        <span class="badge badge-danger">-0</span>
-      </span>
-    </figcaption>
-
-    <pre><code><span class="dl"><span class="ln">1</span><span class="code">const DEFAULT_LOCALE = "ja-JP";</span></span>
-<span class="dl"><span class="ln">2</span><span class="code"> </span></span>
+<span class="dl"><span class="ln">43</span><span class="code">  return subtotal + tax;</span></span></code></pre><aside class="callout diff-note sev-high"><div><span class="callout-title">Medium: round total before returning so binary float artifacts never leak into totals.</span></div></aside></details><details class="diff-block" id="diff-4-2"><summary class="diff-head"><span class="diff-caret" aria-hidden="true">▸</span><span class="diff-kind">modified</span><span class="diff-file">src/utils/format.ts</span><span class="diff-stats"><span class="badge badge-success">+3</span><span class="badge badge-danger">-0</span></span></summary><pre><code><span class="dl"><span class="ln">1</span><span class="code">const DEFAULT_LOCALE = &quot;ja-JP&quot;;</span></span>
 <span class="dl diff-add"><span class="ln">3</span><span class="code">+export function formatCurrency(value: number, locale = DEFAULT_LOCALE): string {</span></span>
-<span class="dl diff-add"><span class="ln">4</span><span class="code">+  return new Intl.NumberFormat(locale, {</span></span>
-<span class="dl diff-add"><span class="ln">5</span><span class="code">+    style: "currency", currency: "JPY",</span></span>
-<span class="dl diff-add"><span class="ln">6</span><span class="code">+  }).format(value);</span></span>
-<span class="dl diff-add"><span class="ln">7</span><span class="code">+}</span></span></code></pre>
-
-    <aside class="callout diff-note sev-low">
-      <div>
-        <span class="callout-title">Low: currency code is hard-coded</span>
-        <div class="callout-body" style="color:var(--text-secondary);font:var(--type-small);margin-top:var(--sp-1)">
-          <p>Because <code>currency: "JPY"</code> is fixed, future multi-currency support will require rewriting <code>formatCurrency</code> again. This is acceptable within the current scope, but adding a <code>currency = "JPY"</code> argument would let you extend it while staying backward compatible. This is optional and not required.</p>
-        </div>
-      </div>
-    </aside>
-  </figure>
-</section>
+<span class="dl diff-add"><span class="ln">4</span><span class="code">+  return new Intl.NumberFormat(locale, { style: &quot;currency&quot;, currency: &quot;JPY&quot; }).format(value);</span></span>
+<span class="dl diff-add"><span class="ln">5</span><span class="code">+}</span></span></code></pre><aside class="callout diff-note sev-high"><div><span class="callout-title">Low: hard-coded currency JPY is fine for v1; parameterize when multi-currency ships.</span></div></aside></details></div></section>
+<!-- section 6: verification -->
+<section id="s6" class="vr" aria-label="Automated Checks"><div class="vr-head"><div class="vr-title-wrap"><h3 class="vr-title">Automated Checks</h3><p class="vr-sub">CI checks ran against feature/region-tax</p></div><div class="vr-summary"><span class="vr-verdict -fail">FAIL</span><span class="vr-stat">1 passed</span><span class="vr-stat">1 failed</span><span class="vr-stat">3.4s</span></div></div><div class="vr-list"><details class="vr-item" data-status="pass"><summary class="vr-row"><span class="vr-badge">PASS</span><span class="vr-main"><span class="vr-name">TypeScript strict check</span><code class="vr-cmd">npm run typecheck</code></span><span class="vr-meta"><span>0 errors</span><span>1.6s</span></span><span class="vr-caret" aria-hidden="true">▸</span></summary><div class="vr-body"></div></details><details class="vr-item" data-status="fail" open><summary class="vr-row"><span class="vr-badge">FAIL</span><span class="vr-main"><span class="vr-name">Checkout tax boundary tests</span><code class="vr-cmd">npm test -- test/checkout/tax.test.ts</code></span><span class="vr-meta"><span>5 passed, 1 failed</span><span>1.8s</span></span><span class="vr-caret" aria-hidden="true">▸</span></summary><div class="vr-body"><p class="vr-note">calcTax(1000, undefined as any) threw TypeError: Cannot read properties of undefined (reading 'taxRate').</p><pre class="vr-log"><code>FAIL test/checkout/tax.test.ts
+  x handles missing region defensively (4ms)
+    TypeError: Cannot read properties of undefined (reading 'taxRate')</code></pre></div></details></div></section>
+<!-- section 7: review -->
+<section class="rv" id="review-signoff" data-review data-review-id="review-signoff" aria-label="PR Review Signoff"><div class="rv-head"><div class="rv-title-wrap"><h3 class="rv-title">PR Review Signoff</h3><p class="rv-subtitle">Mark each change and add notes to generate structured Markdown feedback.</p></div><div class="rv-controls no-print"><span class="rv-progress" data-review-progress>0 / 3</span><div class="rv-filters" role="group" aria-label="PR Review Signoff"><button type="button" class="rv-filter active" data-review-filter="all" aria-pressed="true">All</button><button type="button" class="rv-filter" data-review-filter="pending" aria-pressed="false">Pending</button><button type="button" class="rv-filter" data-review-filter="fix" aria-pressed="false">Needs Fix</button><button type="button" class="rv-filter" data-review-filter="ok" aria-pressed="false">OK</button></div><button type="button" class="btn-ghost btn-sm" data-review-reset>Reset</button></div></div><div class="rv-list"><article class="rv-item" data-review-item="tax-guard" data-review-title="Guard undefined region inside calcTax" data-status="fix"><div class="rv-item-head"><div class="rv-item-meta"><span class="rv-scope">src/checkout/tax.ts:12</span><h4 class="rv-item-title">Guard undefined region inside calcTax</h4></div><div class="rv-actions no-print" role="group" aria-label="Guard undefined region inside calcTax"><button type="button" class="rv-btn" data-review-status="ok" aria-pressed="false">OK</button><button type="button" class="rv-btn" data-review-status="fix" aria-pressed="true">Needs Fix</button><button type="button" class="rv-btn" data-review-status="hold" aria-pressed="false">Hold</button></div></div><p class="rv-desc">Add `const rate = region?.taxRate ?? REGIONS.DEFAULT.taxRate;` and boundary test.</p><div class="rv-evidence">checkout/tax.test.ts failed on missing region input</div><textarea class="rv-input" data-review-note rows="2" aria-label="Guard undefined region inside calcTax — Notes or requested edits (optional)..." placeholder="Notes or requested edits (optional)..."></textarea></article><article class="rv-item" data-review-item="cart-round" data-review-title="Round subtotal + tax output" data-status="hold"><div class="rv-item-head"><div class="rv-item-meta"><span class="rv-scope">src/checkout/cart.ts:43</span><h4 class="rv-item-title">Round subtotal + tax output</h4></div><div class="rv-actions no-print" role="group" aria-label="Round subtotal + tax output"><button type="button" class="rv-btn" data-review-status="ok" aria-pressed="false">OK</button><button type="button" class="rv-btn" data-review-status="fix" aria-pressed="false">Needs Fix</button><button type="button" class="rv-btn" data-review-status="hold" aria-pressed="true">Hold</button></div></div><p class="rv-desc">Decide whether to round here or standardize inside formatCurrency.</p><textarea class="rv-input" data-review-note rows="2" aria-label="Round subtotal + tax output — Notes or requested edits (optional)..." placeholder="Notes or requested edits (optional)..."></textarea></article><article class="rv-item" data-review-item="format-extract" data-review-title="Extract reusable formatCurrency helper" data-status="ok"><div class="rv-item-head"><div class="rv-item-meta"><span class="rv-scope">src/utils/format.ts:3</span><h4 class="rv-item-title">Extract reusable formatCurrency helper</h4></div><div class="rv-actions no-print" role="group" aria-label="Extract reusable formatCurrency helper"><button type="button" class="rv-btn" data-review-status="ok" aria-pressed="true">OK</button><button type="button" class="rv-btn" data-review-status="fix" aria-pressed="false">Needs Fix</button><button type="button" class="rv-btn" data-review-status="hold" aria-pressed="false">Hold</button></div></div><p class="rv-desc">Clean Intl.NumberFormat abstraction with localized defaults.</p><textarea class="rv-input" data-review-note rows="2" aria-label="Extract reusable formatCurrency helper — Notes or requested edits (optional)..." placeholder="Notes or requested edits (optional)..."></textarea></article></div><div class="rv-export no-print"><div class="rv-export-head"><span class="rv-export-title">Markdown Feedback Summary for AI</span><button type="button" class="btn btn-sm" data-review-copy>Copy Markdown</button></div><textarea class="rv-output" data-review-output readonly rows="5" aria-label="Markdown Feedback Summary for AI"></textarea></div></section>
 </div>
 </main>
-<footer class="page-footer container">PR #482 · Repository payments-service · Generated 2026-06-07 · Self-contained artifact (viewable offline)</footer>
+<footer class="page-footer container">PR #482 · Repository payments-service · Self-contained review artifact</footer>
 <script>
 /* ============================================================================
    interactions.js  -  Layer 3 / Behaviors  (v2 - visual + interactive)
@@ -1046,9 +1021,12 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
    ── Markup contract (add the attribute, the behaviour attaches itself) ──
    BASIC
-     [data-theme-toggle]                 swap to the theme's light/dark counterpart and back
+     [data-theme-toggle]                 swap to the theme's light/dark counterpart and sync aria-pressed + color-scheme meta
      [data-toc-spy] a[href="#id"]        scrollspy: aria-current on the section in view
-     table[data-sortable]                click <th> to sort (asc/desc, num-aware)
+     table[data-sortable]                sort rows via button.dt-sort-btn inside th (aria-sort + live status)
+     [data-details-toggle]               expand/collapse all <details> elements on the page
+     [data-walkthrough] + [data-walk-step] + [data-walk-target]   synchronized step & diagram highlight
+     [data-review] + [data-review-item] + [data-review-status]    human OK/Fix/Hold review + Markdown export
      [data-filter] + [data-filter-in]    live text filter (toggles .hidden; scoped to its own
                                          [data-filter-scope] / .data-table when the selector matches there)
      [data-kanban] + [data-col] + .kanban-card     drag cards across columns
@@ -1091,17 +1069,30 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
   /* Light ↔ dark counterpart of the page's own theme (same structural family where one
      exists), so a dark theme toggles to LIGHT instead of to another dark theme. */
+  var DARK_THEMES = { midnight: true, nord: true, sunset: true, "dark-focus": true };
   var THEME_PAIR = { birchline: "sunset", rose: "sunset", forest: "dark-focus", minimal: "dark-focus", slate: "midnight",
     "interactive-warm": "nord", midnight: "slate", nord: "interactive-warm", sunset: "birchline", "dark-focus": "birchline" };
+  function syncThemeMeta(themeName, btn) {
+    var isDark = !!DARK_THEMES[themeName];
+    if (btn) btn.setAttribute("aria-pressed", isDark ? "true" : "false");
+    var meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta && document.documentElement.dataset.themeExplicit === "1") {
+      meta.setAttribute("content", isDark ? "dark" : "light");
+    }
+  }
   HA.themeToggle = function (root) {
     $all("[data-theme-toggle]", root).forEach(function (btn) {
       if (btn._ha) return; btn._ha = true;
+      var curInit = document.documentElement.getAttribute("data-theme") || "birchline";
+      syncThemeMeta(curInit, btn);
       btn.addEventListener("click", function () {
         var html = document.documentElement;
         var cur = html.getAttribute("data-theme") || "birchline";
         var next = html.dataset.prevTheme || THEME_PAIR[cur] || "dark-focus";
         html.dataset.prevTheme = cur;
+        html.dataset.themeExplicit = "1";
         html.setAttribute("data-theme", next);
+        $all("[data-theme-toggle]").forEach(function (b) { syncThemeMeta(next, b); });
       });
     });
   };
@@ -1135,26 +1126,76 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  function parseSortCell(cell) {
+    if (!cell) return { num: NaN, str: "" };
+    var raw = (cell.getAttribute("data-sort-value") || cell.textContent || "").trim();
+    var cleaned = raw.replace(/[\s,+$¥€£₩%]/g, "");
+    var isNum = /^[+\-]?(\d+(\.\d+)?|\.\d+)$/.test(cleaned);
+    return { num: isNum ? parseFloat(cleaned) : NaN, str: raw };
+  }
+
   HA.sortable = function (root) {
     $all("table[data-sortable]", root).forEach(function (table) {
-      var ths = table.tHead ? table.tHead.rows[0].cells : [];
+      if (table._haSort) return; table._haSort = true;
+      if (!table.tHead || !table.tHead.rows.length || !table.tBodies.length) return;
+      var ths = table.tHead.rows[0].cells;
+      var docLang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var collator = (typeof Intl !== "undefined" && Intl.Collator)
+        ? new Intl.Collator(docLang || undefined, { numeric: true, sensitivity: "base" })
+        : null;
+      var host = table.parentNode || table;
+      var statusEl = host.querySelector("[data-sort-status]");
+      if (!statusEl) {
+        statusEl = document.createElement("div");
+        statusEl.setAttribute("role", "status");
+        statusEl.setAttribute("aria-live", "polite");
+        statusEl.setAttribute("data-sort-status", "");
+        statusEl.style.cssText = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;";
+        host.appendChild(statusEl);
+      }
       Array.prototype.forEach.call(ths, function (th, idx) {
-        th.style.cursor = "pointer"; th.setAttribute("role", "button");
-        th.addEventListener("click", function () {
+        if (th.hasAttribute("data-nosort")) return;
+        th.removeAttribute("role");
+        th.style.cursor = "";
+        var btn = th.querySelector("button.dt-sort-btn");
+        if (!btn) {
+          btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "dt-sort-btn";
+          while (th.firstChild) btn.appendChild(th.firstChild);
+          th.appendChild(btn);
+        }
+        btn.addEventListener("click", function () {
           var tbody = table.tBodies[0];
           var rows = Array.prototype.slice.call(tbody.rows);
-          var asc = th.dataset.sort !== "asc";
-          Array.prototype.forEach.call(ths, function (h) { h.removeAttribute("data-sort"); });
+          var asc = th.getAttribute("aria-sort") !== "ascending" && th.dataset.sort !== "asc";
+          Array.prototype.forEach.call(ths, function (h) {
+            h.removeAttribute("aria-sort");
+            h.removeAttribute("data-sort");
+          });
+          th.setAttribute("aria-sort", asc ? "ascending" : "descending");
           th.dataset.sort = asc ? "asc" : "desc";
-          rows.sort(function (a, b) {
-            var x = a.cells[idx].textContent.trim(), y = b.cells[idx].textContent.trim();
-            var nx = parseFloat(x.replace(/[^0-9.\-]/g, "")), ny = parseFloat(y.replace(/[^0-9.\-]/g, ""));
-            var both = !isNaN(nx) && !isNaN(ny);
-            var cmp = both ? nx - ny : x.localeCompare(y);
+          var keyed = rows.map(function (r, orig) {
+            return { row: r, orig: orig, val: parseSortCell(r.cells[idx]) };
+          });
+          keyed.sort(function (a, b) {
+            var both = !isNaN(a.val.num) && !isNaN(b.val.num);
+            var cmp = both
+              ? a.val.num - b.val.num
+              : (collator ? collator.compare(a.val.str, b.val.str) : a.val.str.localeCompare(b.val.str));
+            if (cmp === 0) return a.orig - b.orig;
             return asc ? cmp : -cmp;
           });
-          rows.forEach(function (r) { tbody.appendChild(r); });
+          keyed.forEach(function (item) { tbody.appendChild(item.row); });
           if (table._repage) table._repage();
+          var colLabel = btn.textContent.trim() || ("column " + (idx + 1));
+          if (docLang.indexOf("ja") === 0) {
+            statusEl.textContent = colLabel + "を" + (asc ? "昇順" : "降順") + "で並べ替えました";
+          } else if (docLang.indexOf("ko") === 0) {
+            statusEl.textContent = colLabel + " " + (asc ? "오름차순" : "내림차순") + " 정렬됨";
+          } else {
+            statusEl.textContent = "Sorted by " + colLabel + ", " + (asc ? "ascending" : "descending");
+          }
         });
       });
     });
@@ -1195,53 +1236,58 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  function haFallbackCopy(text) {
+    var ta, focused = document.activeElement;
+    try {
+      ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      return document.execCommand("copy") === true;
+    } catch (e) { return false; }
+    finally {
+      if (ta && ta.parentNode) ta.parentNode.removeChild(ta);
+      if (focused && focused.focus) focused.focus({ preventScroll: true });
+    }
+  }
+
+  function haCopyWithFeedback(btn, getText) {
+    var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    var doneMsg = btn.getAttribute("data-copy-done") || (lang.indexOf("ja") === 0 ? "✓ コピーしました！" : lang.indexOf("ko") === 0 ? "✓ 복사되었습니다!" : "Copied ✓");
+    var failMsg = btn.getAttribute("data-copy-failed") || (lang.indexOf("ja") === 0 ? "コピーできませんでした" : lang.indexOf("ko") === 0 ? "복사하지 못했습니다" : "Copy failed");
+    function flash(message, ok) {
+      var old = btn.dataset.origLabel || btn.textContent;
+      btn.dataset.origLabel = old;
+      btn.textContent = message;
+      btn.classList.toggle("copied", ok);
+      clearTimeout(btn._copyTimer);
+      btn._copyTimer = setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+    }
+    var text;
+    try { text = getText(); } catch (e) { flash(failMsg, false); return; }
+    if (text === null || text === undefined) { flash(failMsg, false); return; }
+    text = String(text);
+    function fallback() { if (haFallbackCopy(text)) flash(doneMsg, true); else flash(failMsg, false); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash(doneMsg, true); }, fallback);
+      } else fallback();
+    } catch (e) { fallback(); }
+  }
+
   HA.copy = function (root) {
     $all("[data-copy],[data-copy-text]", root).forEach(function (btn) {
       if (btn._haCopy) return; btn._haCopy = true;
       btn.addEventListener("click", function () {
-        var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
-        var doneMsg = btn.getAttribute("data-copy-done") || (lang.indexOf("ja") === 0 ? "✓ コピーしました！" : lang.indexOf("ko") === 0 ? "✓ 복사되었습니다!" : "Copied ✓");
-        var failMsg = btn.getAttribute("data-copy-failed") || (lang.indexOf("ja") === 0 ? "コピーできませんでした" : lang.indexOf("ko") === 0 ? "복사하지 못했습니다" : "Copy failed");
-        function flash(message, ok) {
-          var old = btn.dataset.origLabel || btn.textContent;
-          btn.dataset.origLabel = old;
-          btn.textContent = message;
-          btn.classList.toggle("copied", ok);
-          clearTimeout(btn._copyTimer);
-          btn._copyTimer = setTimeout(function () { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
-        }
-        function done() { flash(doneMsg, true); }
-        function failed() { flash(failMsg, false); }
-        var text = btn.getAttribute("data-copy-text");
-        if (text === null) {
-          try {
-            var selector = btn.getAttribute("data-copy");
-            var target = selector ? document.querySelector(selector) : null;
-            if (!target) { failed(); return; }
-            text = "value" in target ? target.value : target.textContent;
-          } catch (e) { failed(); return; }
-        }
-        function fallback() { if (fallbackCopy(text)) done(); else failed(); }
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, fallback);
-          } else fallback();
-        } catch (e) { fallback(); }
+        haCopyWithFeedback(btn, function () {
+          var literal = btn.getAttribute("data-copy-text");
+          if (literal !== null) return literal;
+          var selector = btn.getAttribute("data-copy");
+          var target = selector ? document.querySelector(selector) : null;
+          if (!target) return null;
+          return "value" in target ? target.value : target.textContent;
+        });
       });
     });
-    function fallbackCopy(text) {
-      var ta, focused = document.activeElement;
-      try {
-        ta = document.createElement("textarea");
-        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-        document.body.appendChild(ta); ta.select();
-        return document.execCommand("copy") === true;
-      } catch (e) { return false; }
-      finally {
-        if (ta && ta.parentNode) ta.parentNode.removeChild(ta);
-        if (focused && focused.focus) focused.focus({ preventScroll: true });
-      }
-    }
   };
 
   HA.switcher = function (root) {
@@ -1283,14 +1329,64 @@ table[data-row-select] tbody tr { cursor: pointer; }
 
   HA.tabs = function (root) {
     $all("[data-tabs]", root).forEach(function (group) {
+      if (group._haTabs) return; group._haTabs = true;
       var tabs = $all(".tab", group);
-      tabs.forEach(function (tab) {
-        tab.addEventListener("click", function () {
-          tabs.forEach(function (t) { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
-          $all("[data-panel]", group).forEach(function (p) { p.classList.add("hidden"); });
-          tab.classList.add("active"); tab.setAttribute("aria-selected", "true");
-          var panel = group.querySelector('[data-panel="' + tab.getAttribute("data-tab") + '"]');
-          if (panel) { panel.classList.remove("hidden"); if (HA.fitSvgText) HA.fitSvgText(panel); }
+      var panels = $all("[data-panel]", group);
+      if (!tabs.length) return;
+      var tablist = group.querySelector('[role="tablist"]') || tabs[0].parentElement;
+      if (tablist && !tablist.getAttribute("role")) tablist.setAttribute("role", "tablist");
+
+      function activateTab(tab, focusTab) {
+        var key = tab.getAttribute("data-tab");
+        tabs.forEach(function (t) {
+          var sel = t === tab;
+          t.classList.toggle("active", sel);
+          t.setAttribute("aria-selected", sel ? "true" : "false");
+          t.setAttribute("tabindex", sel ? "0" : "-1");
+        });
+        panels.forEach(function (p) {
+          var show = p.getAttribute("data-panel") === key;
+          if (p.classList.contains("tab-panel") || p.hasAttribute("data-until-found")) {
+            if (show) { p.removeAttribute("hidden"); p.classList.remove("hidden"); }
+            else { p.setAttribute("hidden", "until-found"); p.classList.remove("hidden"); }
+          } else {
+            p.classList.toggle("hidden", !show);
+          }
+          if (show && HA.fitSvgText) HA.fitSvgText(p);
+        });
+        if (focusTab && tab.focus) tab.focus();
+      }
+
+      var initial = tabs.filter(function (t) {
+        return t.getAttribute("aria-selected") === "true" || t.classList.contains("active");
+      })[0] || tabs[0];
+      tabs.forEach(function (t) {
+        if (!t.getAttribute("role")) t.setAttribute("role", "tab");
+        t.setAttribute("tabindex", t === initial ? "0" : "-1");
+        t.addEventListener("click", function () { activateTab(t, false); });
+      });
+
+      if (tablist) {
+        tablist.addEventListener("keydown", function (e) {
+          var curIdx = tabs.indexOf(document.activeElement);
+          if (curIdx === -1) return;
+          var nextIdx = -1;
+          if (e.key === "ArrowRight") nextIdx = (curIdx + 1) % tabs.length;
+          else if (e.key === "ArrowLeft") nextIdx = (curIdx - 1 + tabs.length) % tabs.length;
+          else if (e.key === "Home") nextIdx = 0;
+          else if (e.key === "End") nextIdx = tabs.length - 1;
+          if (nextIdx !== -1) {
+            e.preventDefault();
+            activateTab(tabs[nextIdx], true);
+          }
+        });
+      }
+
+      panels.forEach(function (panel) {
+        panel.addEventListener("beforematch", function () {
+          var key = panel.getAttribute("data-panel");
+          var targetTab = tabs.filter(function (t) { return t.getAttribute("data-tab") === key; })[0];
+          if (targetTab) activateTab(targetTab, false);
         });
       });
     });
@@ -2668,11 +2764,267 @@ table[data-row-select] tbody tr { cursor: pointer; }
     });
   };
 
+  /* ===================== DETAILS / WALKTHROUGH / REVIEW ===================== */
+
+  HA.detailsToggle = function (root) {
+    $all("[data-details-toggle]", root).forEach(function (btn) {
+      if (btn._haDetails) return; btn._haDetails = true;
+      var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var openLbl = btn.getAttribute("data-open-label") || (lang.indexOf("ja") === 0 ? "すべて展開" : lang.indexOf("ko") === 0 ? "모두 펼치기" : "Expand all");
+      var closeLbl = btn.getAttribute("data-close-label") || (lang.indexOf("ja") === 0 ? "すべて折りたたむ" : lang.indexOf("ko") === 0 ? "모두 접기" : "Collapse all");
+      function getTargets() {
+        var sel = btn.getAttribute("data-details-target") || "main details";
+        var list = $all(sel, document);
+        return list.length ? list : $all("details", document);
+      }
+      function syncLabel() {
+        var list = getTargets();
+        var anyClosed = list.some(function (d) { return !d.open; });
+        btn.setAttribute("aria-pressed", anyClosed ? "false" : "true");
+        btn.textContent = anyClosed ? openLbl : closeLbl;
+        return anyClosed;
+      }
+      syncLabel();
+      btn.addEventListener("click", function () {
+        var shouldOpen = syncLabel();
+        getTargets().forEach(function (d) { d.open = shouldOpen; });
+        syncLabel();
+      });
+    });
+  };
+
+  HA.walkthrough = function (root) {
+    $all("[data-walkthrough]", root).forEach(function (wk) {
+      if (wk._haWalk) return; wk._haWalk = true;
+      var steps = $all("[data-walk-step]", wk);
+      var targets = $all("[data-walk-target]", wk);
+      if (!steps.length) return;
+      var readout = wk.querySelector("[data-walk-readout]");
+      var prevBtn = wk.querySelector("[data-walk-prev]");
+      var nextBtn = wk.querySelector("[data-walk-next]");
+      var activeIdx = 0;
+      steps.forEach(function (s, i) { if (s.classList.contains("is-active") || s.getAttribute("aria-current") === "step") activeIdx = i; });
+
+      function activate(idx, focusStep) {
+        if (idx < 0) idx = 0;
+        if (idx >= steps.length) idx = steps.length - 1;
+        activeIdx = idx;
+        var activeId = steps[idx].getAttribute("data-walk-step");
+        steps.forEach(function (s, i) {
+          var on = i === idx;
+          s.classList.toggle("is-active", on);
+          if (on) s.setAttribute("aria-current", "step");
+          else s.removeAttribute("aria-current");
+        });
+        targets.forEach(function (t) {
+          var match = t.getAttribute("data-walk-target") === activeId;
+          t.classList.toggle("is-active", match);
+          t.classList.toggle("is-dimmed", !match);
+        });
+        if (readout) readout.textContent = (idx + 1) + " / " + steps.length;
+        if (prevBtn) prevBtn.disabled = idx === 0;
+        if (nextBtn) nextBtn.disabled = idx === steps.length - 1;
+        if (focusStep && steps[idx].focus) steps[idx].focus();
+      }
+
+      steps.forEach(function (step, i) {
+        step.addEventListener("click", function () { activate(i, false); });
+        step.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); activate((i + 1) % steps.length, true); }
+          else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); activate((i - 1 + steps.length) % steps.length, true); }
+        });
+      });
+      targets.forEach(function (t) {
+        t.addEventListener("click", function () {
+          var tid = t.getAttribute("data-walk-target");
+          for (var i = 0; i < steps.length; i++) {
+            if (steps[i].getAttribute("data-walk-step") === tid) { activate(i, false); break; }
+          }
+        });
+      });
+      if (prevBtn) prevBtn.addEventListener("click", function () { activate(activeIdx - 1, false); });
+      if (nextBtn) nextBtn.addEventListener("click", function () { activate(activeIdx + 1, false); });
+      activate(activeIdx, false);
+    });
+  };
+
+  HA.review = function (root) {
+    $all("[data-review]", root).forEach(function (rv) {
+      if (rv._haReview) return; rv._haReview = true;
+      var items = $all("[data-review-item]", rv);
+      var filterBtns = $all("[data-review-filter]", rv);
+      var progressEl = rv.querySelector("[data-review-progress]");
+      var outputEl = rv.querySelector("[data-review-output]");
+      var copyBtn = rv.querySelector("[data-review-copy]");
+      var resetBtn = rv.querySelector("[data-review-reset]");
+      var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+      var isJa = lang.indexOf("ja") === 0;
+      var isKo = lang.indexOf("ko") === 0;
+      var rvId = rv.getAttribute("data-review-id") || (location.pathname + ":" + (document.title || "review"));
+      var storeKey = "ha-review:" + rvId;
+      var state = { statuses: {}, notes: {} };
+      var activeFilter = "all";
+
+      try {
+        var raw = window.localStorage && window.localStorage.getItem(storeKey);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.statuses) state.statuses = parsed.statuses;
+            if (parsed.notes) state.notes = parsed.notes;
+          }
+        }
+      } catch (e) { /* storage optional */ }
+
+      function save() {
+        try {
+          if (window.localStorage) window.localStorage.setItem(storeKey, JSON.stringify(state));
+        } catch (e) { /* ignore quota / file:// restriction */ }
+      }
+
+      function labelMap() {
+        if (isJa) return { title: "レビュー結果", reviewed: "確認済", fix: "要修正", hold: "保留", ok: "OK", pending: "未確認" };
+        if (isKo) return { title: "리뷰 결과", reviewed: "확인됨", fix: "수정 필요", hold: "보류", ok: "OK", pending: "미확인" };
+        return { title: "Review Feedback", reviewed: "reviewed", fix: "Needs Fix", hold: "Hold", ok: "OK", pending: "Pending" };
+      }
+
+      function buildMarkdown() {
+        var L = labelMap();
+        var docTitle = document.title || rvId;
+        var groups = { fix: [], hold: [], ok: [], pending: [] };
+        items.forEach(function (it) {
+          var id = it.getAttribute("data-review-item") || "";
+          var st = state.statuses[id] || "";
+          var title = it.getAttribute("data-review-title") || (it.querySelector(".rv-item-title") ? it.querySelector(".rv-item-title").textContent.trim() : id);
+          var scopeEl = it.querySelector(".rv-scope");
+          var scope = scopeEl ? scopeEl.textContent.trim() : "";
+          var note = (state.notes[id] || "").trim();
+          (groups[st] || groups.pending).push({ id: id, title: title, scope: scope, note: note });
+        });
+        var lines = [
+          "## " + L.title + ": " + docTitle,
+          "- Summary: OK " + groups.ok.length + " / " + L.fix + " " + groups.fix.length + " / " + L.hold + " " + groups.hold.length + " / " + L.pending + " " + groups.pending.length
+        ];
+        [["fix", L.fix], ["hold", L.hold], ["ok", L.ok]].forEach(function (pair) {
+          var key = pair[0], heading = pair[1];
+          if (!groups[key].length) return;
+          lines.push("", "### " + heading);
+          groups[key].forEach(function (entry) {
+            var head = "- [" + key.toUpperCase() + "] " + entry.title + (entry.scope ? " (`" + entry.scope + "`)" : "");
+            if (entry.note) head += ": " + entry.note.replace(/\r?\n/g, " ");
+            lines.push(head);
+          });
+        });
+        return lines.join("\n");
+      }
+
+      function syncAll() {
+        var counts = { ok: 0, fix: 0, hold: 0, pending: 0 };
+        items.forEach(function (it) {
+          var id = it.getAttribute("data-review-item") || "";
+          var st = state.statuses[id] || "";
+          if (st === "ok" || st === "fix" || st === "hold") {
+            it.setAttribute("data-status", st);
+            counts[st]++;
+          } else {
+            it.removeAttribute("data-status");
+            counts.pending++;
+          }
+          $all("[data-review-status]", it).forEach(function (btn) {
+            btn.setAttribute("aria-pressed", btn.getAttribute("data-review-status") === st ? "true" : "false");
+          });
+          var noteEl = it.querySelector("[data-review-note]");
+          if (noteEl && noteEl.value !== (state.notes[id] || "")) noteEl.value = state.notes[id] || "";
+          var show = activeFilter === "all" || (activeFilter === "pending" ? !st : st === activeFilter);
+          it.classList.toggle("hidden", !show);
+        });
+        var done = counts.ok + counts.fix + counts.hold;
+        var L = labelMap();
+        if (progressEl) {
+          progressEl.textContent = done + " / " + items.length + " " + L.reviewed + (counts.fix ? " (" + L.fix + " " + counts.fix + ")" : "");
+        }
+        $all("[data-review-jump]").forEach(function (jump) {
+          var badge = jump.querySelector("[data-review-badge]");
+          if (badge) {
+            badge.textContent = counts.fix ? String(counts.fix) : (done + "/" + items.length);
+            badge.setAttribute("data-state", counts.fix ? "fix" : (done === items.length && items.length > 0 ? "ok" : "pending"));
+          }
+        });
+        if (outputEl) {
+          var md = buildMarkdown();
+          if ("value" in outputEl) outputEl.value = md;
+          else outputEl.textContent = md;
+        }
+      }
+
+      items.forEach(function (it) {
+        var id = it.getAttribute("data-review-item") || "";
+        var initSt = it.getAttribute("data-status");
+        if (!state.statuses[id] && (initSt === "ok" || initSt === "fix" || initSt === "hold")) {
+          state.statuses[id] = initSt;
+        }
+        $all("[data-review-status]", it).forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var next = btn.getAttribute("data-review-status");
+            state.statuses[id] = state.statuses[id] === next ? "" : next;
+            save();
+            syncAll();
+          });
+        });
+        var noteEl = it.querySelector("[data-review-note]");
+        if (noteEl) {
+          noteEl.addEventListener("input", function () {
+            state.notes[id] = noteEl.value;
+            save();
+            syncAll();
+          });
+        }
+      });
+
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeFilter = btn.getAttribute("data-review-filter") || "all";
+          filterBtns.forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+          syncAll();
+        });
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+          state = { statuses: {}, notes: {} };
+          activeFilter = "all";
+          filterBtns.forEach(function (b) {
+            var on = (b.getAttribute("data-review-filter") || "all") === "all";
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+          try { if (window.localStorage) window.localStorage.removeItem(storeKey); } catch (e) { /* ignore */ }
+          syncAll();
+        });
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener("click", function () {
+          haCopyWithFeedback(copyBtn, function () {
+            return outputEl ? ("value" in outputEl ? outputEl.value : outputEl.textContent) : buildMarkdown();
+          });
+        });
+      }
+
+      syncAll();
+    });
+  };
+
   /* ===================== BOOT ===================== */
   HA.init = function (root) {
     root = root || document;
     ["themeToggle", "sortable", "filter", "kanban", "copy", "switcher", "slider", "tabs",
-     "zoompan", "fitSvgText", "dragNode", "tree", "crossfilter", "paginate", "tooltip", "counter", "reveal", "reorder", "wfedit", "wfflow", "designpick", "formMock", "archExplorer", "tocSpy"
+     "zoompan", "fitSvgText", "dragNode", "tree", "crossfilter", "paginate", "tooltip", "counter", "reveal", "reorder", "wfedit", "wfflow", "designpick", "formMock", "archExplorer", "tocSpy",
+     "detailsToggle", "walkthrough", "review"
     ].forEach(function (fn) { try { HA[fn](root); } catch (e) { /* isolate */ } });
     $all("details", root).forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open && HA.fitSvgText) HA.fitSvgText(d); });

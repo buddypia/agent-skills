@@ -39,6 +39,11 @@ const REQUIRED = {
   areastacked: ['xLabels', 'series'], feed: ['items'], checklist: ['items'], form: ['fields'], bullet: ['rows'],
   calendar: ['weeks'], diagram: ['nodes'], archexplorer: ['nodes'], pipelineflow: ['stages'], servicecatalog: ['services'],
   requesttrace: ['hops'], eventcatalog: ['events'], deploymenttopology: ['regions'], failuremodes: ['rows'], prose: ['md'],
+  review: ['items'], verification: ['items'], walkthrough: ['steps'], takeaways: ['items'],
+  waterfall: ['items'], scatter: ['points'], pareto: ['items'], diverging: ['items'],
+  cohort: ['periods'], leaderboard: ['items'], quadrant: ['items'], riskmatrix: ['items'],
+  sequence: ['actors', 'messages'], statediagram: ['states', 'transitions'], erd: ['entities'],
+  sankey: ['flows'], fishbone: ['categories'],
 };
 const NESTED = {
   kpi: { items: ['label', 'value', 'valueNum', 'prefix', 'suffix', 'delta', 'dir', 'tone', 'good', 'note'] },
@@ -48,6 +53,15 @@ const NESTED = {
   comparison: { options: ['name', 'pros', 'cons', 'metrics', 'cta', 'href', 'recommended'] },
   timeline: { events: ['date', 'title', 'body', 'status'] },
   pipelineflow: { stages: ['num', 'name', 'proto', 'cards', 'emphasis'] },
+  review: { items: ['id', 'title', 'scope', 'desc', 'evidence', 'status', 'note'] },
+  verification: { items: ['name', 'cmd', 'status', 'counts', 'duration', 'note', 'log', 'open'] },
+  walkthrough: { steps: ['id', 'title', 'desc', 'meta', 'label', 'code', 'target'] },
+  changelog: { versions: ['version', 'date', 'latest', 'groups'], releases: ['version', 'date', 'latest', 'groups'] },
+  waterfall: { items: ['label', 'value', 'display', 'kind'] },
+  scatter: { points: ['x', 'y', 'r', 'label', 'series', 'cat', 'value'] },
+  leaderboard: { items: ['name', 'value', 'display', 'move', 'dir', 'cat', 'rank'] },
+  quadrant: { items: ['label', 'x', 'y', 'cat'] },
+  riskmatrix: { items: ['label', 'prob', 'impact'] },
 };
 const TEXT_REQUIRED = { html: ['html'], device: ['html'], empty: ['title'] };
 
@@ -124,7 +138,16 @@ export function checkSpec(spec, { root, buildSrc, specPath, moduleIds }) {
   const errors = [], warns = [], notes = [];
   if (!spec || typeof spec !== 'object' || Array.isArray(spec)) return { errors: ['spec must be a JSON object'], warns, notes };
   const keysByType = rendererKeys(buildSrc);
-  const ALIASES = { 'arch-explorer': 'archexplorer', 'pipeline-flow': 'pipelineflow', 'service-catalog': 'servicecatalog', 'request-trace': 'requesttrace', 'event-catalog': 'eventcatalog', 'deployment-topology': 'deploymenttopology', 'failure-modes': 'failuremodes' };
+  const ALIASES = {
+    'arch-explorer': 'archexplorer', 'pipeline-flow': 'pipelineflow', 'service-catalog': 'servicecatalog',
+    'request-trace': 'requesttrace', 'event-catalog': 'eventcatalog', 'deployment-topology': 'deploymenttopology',
+    'failure-modes': 'failuremodes',
+    'review-signoff': 'review', 'verification-run': 'verification', 'annotated-walkthrough': 'walkthrough',
+    'diff-block': 'diff', 'before-after': 'beforeafter', 'code-snippet': 'code', 'file-tree': 'filetree',
+    'api-endpoint': 'apiendpoint', 'key-takeaways': 'takeaways', 'chart-waterfall': 'waterfall',
+    'chart-scatter': 'scatter', 'diverging-bar': 'diverging', 'cohort-grid': 'cohort', 'risk-matrix': 'riskmatrix',
+    'sequence-diagram': 'sequence', 'state-diagram': 'statediagram', 'kpi-tree': 'kpitree',
+  };
   const types = [...Object.keys(keysByType), ...Object.keys(ALIASES)];
   // for the "valid:" list show each type once, in its documented spelling ("arch-explorer", not "archexplorer")
   const shownTypes = types.filter((t) => ALIASES[t] || !Object.values(ALIASES).includes(t));
@@ -180,6 +203,14 @@ export function checkSpec(spec, { root, buildSrc, specPath, moduleIds }) {
     }
     for (const k of TEXT_REQUIRED[type] || []) if (typeof s[k] !== 'string' || !s[k].trim()) errors.push(`${at}: "${k}" is required for type "${s.type}"`);
     if (type === 'callout' && !s.title && !s.body) errors.push(`${at}: a callout needs "title" and/or "body"`);
+    if (type === 'diff' && !(Array.isArray(s.files) && s.files.length) && typeof s.patch !== 'string' && !(Array.isArray(s.lines) && s.lines.length)) errors.push(`${at}: diff requires non-empty "files", "patch", or "lines"`);
+    if (type === 'code' && typeof s.code !== 'string' && !(Array.isArray(s.lines) && s.lines.length)) errors.push(`${at}: code requires "code" string or non-empty "lines" array`);
+    if (type === 'beforeafter' && (!Array.isArray(s.before) || !Array.isArray(s.after))) errors.push(`${at}: beforeafter requires "before" and "after" arrays`);
+    if (type === 'filetree' && !(Array.isArray(s.entries) && s.entries.length) && !(Array.isArray(s.items) && s.items.length)) errors.push(`${at}: filetree requires non-empty "entries" or "items" array`);
+    if (type === 'apiendpoint' && !(Array.isArray(s.endpoints) && s.endpoints.length) && !s.path) errors.push(`${at}: apiendpoint requires non-empty "endpoints" array or "path"`);
+    if (type === 'changelog' && !(Array.isArray(s.versions) && s.versions.length) && !(Array.isArray(s.releases) && s.releases.length)) errors.push(`${at}: changelog requires non-empty "versions" or "releases" array`);
+    if (type === 'cohort' && !(Array.isArray(s.cohorts) && s.cohorts.length) && !(Array.isArray(s.rows) && s.rows.length)) errors.push(`${at}: cohort requires non-empty "cohorts" or "rows" array`);
+    if (type === 'kpitree' && (!s.root || typeof s.root !== 'object')) errors.push(`${at}: kpitree requires a "root" node object`);
     if (type === 'chart') {
       const v = s.variant || 'bar';
       if (!['bar', 'line', 'donut'].includes(v)) errors.push(`${at}: chart variant "${v}"${hint(v, ['bar', 'line', 'donut'])}`);
@@ -277,11 +308,12 @@ export function checkSpec(spec, { root, buildSrc, specPath, moduleIds }) {
   }
 
   /* ---- blueprint sample data left in a real deliverable ---- */
-  const self = specPath ? path.resolve(specPath) : '';
+  const realPath = (p) => { try { return fs.realpathSync(p); } catch { return path.resolve(p); } };
+  const self = specPath ? realPath(specPath) : '';
   if (!spec._allowSample) {
     const hay = strings(spec).join('\n');
     for (const bp of blueprintMarkers(root)) {
-      if (bp.file === self) continue;
+      if (realPath(bp.file) === self) continue;
       const hit = bp.marks.filter((m) => hay.includes(m));
       if (hit.length) errors.push(`blueprint "${bp.id}" sample data is still in the spec: ${hit.slice(0, 3).map((h) => `"${h.slice(0, 30)}"`).join(', ')} - replace it with the user's real content (set "_allowSample": true only for a deliberate demo build)`);
     }

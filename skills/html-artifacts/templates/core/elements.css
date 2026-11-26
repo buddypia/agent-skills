@@ -68,7 +68,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* ----- Header variants (data `header` key; standard = .page-header alone) --
    compact  one baseline row    banner  full-bleed surface band
    split    title left / meta right    none  floating .page-controls strip   */
-.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 120px; }
+.header-actions { position: absolute; top: var(--sp-4); right: var(--sp-5); z-index: 4; display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-2); }
+.header-actions .ha-viewport-controls { position: static; margin: 0; }
+.review-jump { border-color: color-mix(in srgb, var(--accent) 42%, var(--border-default)); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface)); text-decoration: none; }
+.review-jump:hover { background: color-mix(in srgb, var(--accent) 16%, var(--bg-surface)); color: var(--accent); }
+.header-compact { padding-block: var(--sp-5); display: flex; align-items: baseline; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; padding-right: 260px; }
 .header-compact .eyebrow { width: 100%; margin-bottom: -4px; }
 .header-compact h1 { font: var(--type-h1); }
 .header-compact .lede { font: var(--type-small); color: var(--text-secondary); max-width: none; margin-top: 0; }
@@ -83,7 +87,11 @@ section > .lede { margin-bottom: var(--sp-4); }
 /* standard / banner: a compact property strip (label over value) instead of a full-width two-column table */
 .page-header:not(.header-split) .header-meta { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6); width: fit-content; max-width: 100%; margin-top: var(--sp-4); }
 .page-header:not(.header-split) .header-meta .hm-item { display: grid; gap: 2px; }
-@media (max-width: 720px) { .header-split { grid-template-columns: 1fr; } .header-compact { padding-right: var(--sp-5); } }
+@media (max-width: 720px) {
+  .header-split { grid-template-columns: 1fr; }
+  .header-compact { padding-right: var(--sp-5); }
+  .header-actions { position: static; justify-content: flex-start; margin-bottom: var(--sp-3); }
+}
 .page-controls { position: absolute; top: var(--sp-4); right: var(--sp-4); z-index: 5; display: flex; gap: var(--sp-2); align-items: center; }
 .page-controls .ha-viewport-controls { position: static; }
 

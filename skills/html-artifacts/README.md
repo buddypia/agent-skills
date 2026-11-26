@@ -107,17 +107,17 @@ html-artifacts/
 │   ├── base.template.html         ← {{VARIABLES}} 骨格（インライン順序を記載）
 │   ├── core/                      ← 基盤レイヤ一式
 │   │   ├── reset.css  tokens.css  themes.css  elements.css  interactions.js
-│   ├── modules/                   ← 名前つきモジュール 117種・5ファミリー（カタログは reference/04、索引は index/）
-│   └── blueprints/                ← 文書ジャンル別の設計図 11種（そのまま build 可能な spec + _recipe 適応ガイド。基準は reference/10）
+│   ├── modules/                   ← 名前つきモジュール 112種・5ファミリー（カタログは reference/04、索引は index/）
+│   └── blueprints/                ← 文書ジャンル別の設計図 15種（そのまま build 可能な spec + _recipe 適応ガイド。基準は reference/10）
 │       ├── charts: kpi-grid / stat-trend / chart-bar / chart-line / chart-donut
-│       │           chart-stacked / gauge / radar / funnel / progress / chart-bullet / heatmap / cal-heatmap
+│       │           chart-stacked / gauge / radar / funnel / progress / chart-bullet / heatmap / cal-heatmap ...
 │       ├── diagrams: flow-diagram / arch-diagram / erd / node-graph / mindmap
-│       │             timeline / stepper / mockup-frame / screen-flow / wireframe-block
-│       ├── interactive: data-table / tabs / collapsible / tree / slider-control / kanban-board / form-fields
-│       ├── document: callout-box / comparison-grid / decision-matrix / diff-block / stat-list / activity-feed / empty-state / checklist
-│       └── content: feature-grid
+│       │             timeline / stepper / mockup-frame / screen-flow / wireframe-block ...
+│       ├── interactive: data-table / tabs / collapsible / tree / slider-control / kanban-board / form-fields / review-signoff / annotated-walkthrough
+│       ├── document: callout-box / comparison-grid / decision-matrix / diff-block / stat-list / activity-feed / empty-state / checklist / verification-run
+│       └── content: feature-grid / persona-card / quote-block
 ├── index/                         ← コンポーネント索引（モジュール選定の入口）
-│   ├── components.json            ← 単一の正: 全117モジュールの機械可読メタ（tags/intent/useWhen/inputShape…）
+│   ├── components.json            ← 単一の正: 全112モジュールの機械可読メタ（tags/intent/useWhen/inputShape…）
 │   ├── INDEX.md                   ← 超小型の要約索引（約9KB・1行/モジュール、まず読む層）
 │   └── COMPONENTS.md              ← フル散文索引（components.json から自動生成）
 │       # 検索: node tools/index.mjs --find "<keywords>" → --details <id>

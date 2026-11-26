@@ -16,7 +16,7 @@ Do **not** read all module files up front.
 - **input** - the minimal data the section needs; confirm you have it before choosing.
 - Colors are always semantic tokens; SVG modules already carry `role/aria`; interactive ones auto-wire via `interactions.js` data-attributes (no custom JS).
 
-**Totals:** 117 components · 5 families · 39 builder section types.
+**Totals:** 112 components · 5 families · 63 builder section types.
 
 ## Quick lookup
 
@@ -35,33 +35,31 @@ Do **not** read all module files up front.
 | `chart-bullet` | charts | `bullet` | Goal-vs-actual bullet bars (Stephen Few): value bar over a track with a target tick and optional qualitative bands. |
 | `heatmap` | charts | `heatmap` | Value-shaded matrix heatmap (a real labeled table) for cohort/activity/correlation/risk grids; intensity = accent color-mix. |
 | `cal-heatmap` | charts | `calendar` | GitHub-style contribution calendar: week columns x weekday rows, day cells tinted by a 0-4 intensity bucket with Less/More legend. |
-| `chart-scatter` | charts | `(manual)` | SVG scatter / bubble chart: points (or value-sized bubbles) on X/Y axes with ticks and axis titles, series colored --cat-1..5, optional median quadrant splits. |
-| `chart-waterfall` | charts | `(manual)` | SVG waterfall chart: a start bar, floating increment (+, success) / decrement (-, danger) bars rising from the running total, a final total bar (accent), dashed step connectors, and per-bar value labels. |
+| `chart-scatter` | charts | `scatter (alias: chart-scatter)` | SVG scatter / bubble chart: points (or value-sized bubbles) on X/Y axes with ticks and axis titles, series colored --cat-1..5, optional median quadrant splits. |
+| `chart-waterfall` | charts | `waterfall (alias: chart-waterfall)` | SVG waterfall chart: a start bar, floating increment (+, success) / decrement (-, danger) bars rising from the running total, a final total bar (accent), dashed step connectors, and per-bar value labels. |
 | `spectrum` | charts | `(manual)` | One-dimensional spectrum / scale (pure CSS, no SVG): a diverging track labeled at both ends with one or more ▼ position markers placed at left:PCT%. For putting several things on a single axis. |
 | `treemap` | charts | `(manual)` | Area-proportional treemap (pure CSS, no SVG): categories become columns sized by share of the whole, inner tiles stack by height so tile area encodes value/total; each tile shows a label + value with a --cat-N wash. |
 | `boxplot` | charts | `(manual)` | SVG box-and-whisker plot: 3–5 vertical boxplots on a shared value axis with min/max whiskers, a Q1–Q3 box (--cat-N), a median line, optional outlier dots, and mono Y-axis ticks. |
 | `bump-chart` | charts | `(manual)` | SVG bump chart / rank trajectory: y = ordinal rank (1 on top), x = 3–5 time points; one polyline per item connects its rank at each point with a dot per vertex and a label at both ends, so line crossings read as overtakes. |
-| `chart-area` | charts | `(manual)` | SVG stacked area chart: 2–3 series stacked over 5–7 time points as translucent color-mix(--cat-N) bands with visible top edges, x labels, y gridlines, and a legend. |
 | `dot-plot` | charts | `(manual)` | Pure-CSS dot / range plot: one row per category with a min–max range bar and 1–2 value dots positioned by percent, plus a legend for the dot series (e.g. current vs target). |
 | `slope-chart` | charts | `(manual)` | SVG slope chart: two vertical axes (before/after) with one line per item connecting its two values; rising lines are success-tinted, falling danger-tinted, flat muted, and each end carries the item label + value. |
 | `waffle` | charts | `(manual)` | Pure-CSS waffle chart: a 10×10 grid of 100 cells where each category fills a run of consecutive --cat-N cells (one cell = 1%), with a legend mapping color to label + percent. |
 | `chart-bubble` | charts | `(manual)` | SVG bubble chart: a scatter where each point's radius encodes a third measure (e.g. market size), 5–8 labelled bubbles with translucent --cat-N fills, X & Y axes with ticks and titles, and optional dashed quadrant midlines — three dimensions at once. |
 | `chart-combo` | charts | `(manual)` | SVG dual-axis combo chart: bars encode a primary measure on the left axis while an overlaid line + dots encode a secondary measure on a right axis, correlating two measures with different units on one canvas. |
 | `histogram` | charts | `(manual)` | Pure-CSS frequency histogram: contiguous vertical bins (no gaps between bars) whose heights encode frequency, an x-axis of bin labels, and an optional dashed mean-marker line — showing the shape of a distribution. |
-| `pareto` | charts | `(manual)` | SVG Pareto chart: descending count bars (left axis) with an overlaid cumulative-percentage line + dots on a 0–100% right axis and a dashed 80% reference rule — sorting causes so the vital few stand out (80/20). |
-| `progress-ring` | charts | `(manual)` | SVG circular progress rings: a grid of 2–4 rings, each a track circle plus a stroke-dasharray arc, with a big % number and a label — a compact circular percentage widget grid for dashboards, toned per ring with --cat-N. |
+| `pareto` | charts | `pareto` | SVG Pareto chart: descending count bars (left axis) with an overlaid cumulative-percentage line + dots on a 0–100% right axis and a dashed 80% reference rule — sorting causes so the vital few stand out (80/20). |
 | `sparkline` | charts | `(manual)` | Compact multi-metric scan table: 3–5 thin rows, each with a label, current value, a tiny inline sparkline (per-row polyline SVG), and a ▲/▼ delta badge toned success/danger — many KPIs' now + recent shape in one dense block. |
-| `cohort-grid` | charts | `(manual)` | Pure-CSS retention cohort table: rows are monthly signup cohorts, columns are period offsets M0..M5, each cell shows a retention % with a background whose intensity scales via color-mix of --accent, staircased so newer cohorts have fewer observed cells. |
+| `cohort-grid` | charts | `cohort (alias: cohort-grid)` | Pure-CSS retention cohort table: rows are monthly signup cohorts, columns are period offsets M0..M5, each cell shows a retention % with a background whose intensity scales via color-mix of --accent, staircased so newer cohorts have fewer observed cells. |
 | `composition-bar` | charts | `(manual)` | Pure-CSS single 100% composition bar: one full-width strip split into cat-tinted segments (widths set inline as percents), each labeled, with a legend of values below; optionally stack a second bar to compare two periods. |
-| `diverging-bar` | charts | `(manual)` | Pure-CSS butterfly / diverging (tornado) bar chart: a central spine of category labels with bars extending left for series A and right for series B, mirrored around the center, values at the outer bar ends. |
-| `leaderboard` | charts | `(manual)` | Pure-CSS ranked standings table: rows carry a rank badge (top-3 medal-tinted), a name, a horizontal cat-tinted value bar, the value, and a since-last movement indicator (▲2 / ▼1 / – in success/danger/muted). |
+| `diverging-bar` | charts | `diverging (alias: diverging-bar)` | Pure-CSS butterfly / diverging (tornado) bar chart: a central spine of category labels with bars extending left for series A and right for series B, mirrored around the center, values at the outer bar ends. |
+| `leaderboard` | charts | `leaderboard` | Pure-CSS ranked standings table: rows carry a rank badge (top-3 medal-tinted), a name, a horizontal cat-tinted value bar, the value, and a since-last movement indicator (▲2 / ▼1 / – in success/danger/muted). |
 | `pictogram` | charts | `(manual)` | Pure-CSS icon-unit (ISOTYPE) chart: each row is a label plus a strip of repeated unit glyphs (● or a 人 glyph) where filled units are accent/cat-tinted and the rest dimmed, with a value readout like 7/10人. |
 | `tag-cloud` | charts | `(manual)` | Pure-CSS weighted tag cloud: inline-flex tags that wrap, each sized by a weight class (.w1–.w5 mapped onto the type scale) and cat-tinted, with an optional count, making topic frequency readable at a glance. |
 | `flow-diagram` | diagrams | `diagram (layout:vertical\|grid)` | SVG flowchart with draggable nodes (Start/Process/Decision shapes) and auto-routed orthogonal connectors with Yes/No labels. |
 | `arch-diagram` | diagrams | `diagram (layout:layered)` | Lightweight STATIC layered architecture diagram: services in dashed zones (Frontend/Backend/Data/External) with draggable nodes, protocol edges, zoom/pan. No scenarios, no component inspector — for a small system you can take in at a glance. |
 | `node-graph` | diagrams | `diagram (groups)` | Interactive node-edge network graph: group-tinted nodes, auto-tracking edges, zoom/pan, and a cross-filter legend that dims by group. |
 | `mindmap` | diagrams | `diagram (layout:radial)` | Radial mindmap: a central root with colored branches fanning out to child leaves; drag + zoom/pan. |
-| `erd` | diagrams | `(manual; closest builder: diagram)` | Entity-relationship diagram: table cards with PK/FK chips and typed columns, linked by 1:1/1:N/N:M cardinality connectors. |
+| `erd` | diagrams | `erd` | Entity-relationship diagram: table cards with PK/FK chips and typed columns, linked by 1:1/1:N/N:M cardinality connectors. |
 | `timeline` | diagrams | `timeline` | Vertical chronological milestone timeline (pure CSS): dated events on a left rail with done/active/todo status dots. |
 | `stepper` | diagrams | `stepper` | Numbered vertical stepper: ordered steps with an event tag, a mechanism (inline code), level coloring, and pass/block/advisory branch chips. |
 | `mockup-frame` | diagrams | `(manual; closest builder: device)` | Hi-fi single phone mockup with a live screen switcher: notch, status bar, app bar, scrollable rows, bottom tab bar, tap-to-swap screens. |
@@ -70,17 +68,17 @@ Do **not** read all module files up front.
 | `cycle-loop` | diagrams | `(manual)` | SVG cycle diagram: 3-6 steps placed around a ring and joined by curved arc arrows into a closed loop, each a circle + label, with the cycle name in a center hub. |
 | `gantt` | diagrams | `(manual; closest builder: diagram)` | SVG Gantt chart / roadmap: a period axis (month/week labels), one task row per bar with an inner % progress fill, milestone diamonds, and a dashed 'today' marker line. |
 | `journey-map` | diagrams | `(manual)` | User journey map: a row of stage columns, an SVG emotion curve (accent polyline + a dot per stage), then aligned touchpoint and pain-point rows (danger-tinted) under the same stages. |
-| `kpi-tree` | diagrams | `(manual; closest builder: diagram)` | SVG KPI / driver / logic tree: a root metric on the left decomposes rightward through two levels of driver nodes, with operator chips (x + division) on the junctions stating how children combine; each node shows a name + value. |
+| `kpi-tree` | diagrams | `kpitree (alias: kpi-tree)` | SVG KPI / driver / logic tree: a root metric on the left decomposes rightward through two levels of driver nodes, with operator chips (x + division) on the junctions stating how children combine; each node shows a name + value. |
 | `org-chart` | diagrams | `(manual; closest builder: diagram)` | SVG top-down organization chart: a box tree (1-2-4) joined by orthogonal elbow connectors, each box showing a name + role over two lines, with depth encoded as a subtle accent color-mix density step. |
-| `sequence-diagram` | diagrams | `(manual; closest builder: diagram)` | UML-style sequence diagram: participants, dashed lifelines, activation bars, solid sync calls and dashed returns, plus an optional note box. |
-| `state-diagram` | diagrams | `(manual; closest builder: diagram)` | SVG UML state machine: an initial dot, rounded-rect states, a double-circle final state, and guarded transition arrows carrying [guard] condition labels. |
+| `sequence-diagram` | diagrams | `sequence (alias: sequence-diagram)` | UML-style sequence diagram: participants, dashed lifelines, activation bars, solid sync calls and dashed returns, plus an optional note box. |
+| `state-diagram` | diagrams | `statediagram (alias: state-diagram)` | SVG UML state machine: an initial dot, rounded-rect states, a double-circle final state, and guarded transition arrows carrying [guard] condition labels. |
 | `swimlane` | diagrams | `(manual; closest builder: diagram)` | SVG swimlane process map: horizontal lanes per actor/department (name on a left color band), process boxes placed across step columns, and arrows that hand the flow off between lanes. |
 | `concentric` | diagrams | `(manual; closest builder: diagram)` | SVG onion / concentric-circles diagram: a labeled core at the center wrapped by 3-4 nested rings, each a real <text> label with a per-ring --cat tint that deepens toward the center; encodes scope containment. |
 | `decision-tree` | diagrams | `(manual; closest builder: diagram)` | Pure-CSS left-to-right decision tree: a root question node fans through labeled condition edges (yes/no or custom) into intermediate question nodes and finally into leaf outcome nodes tinted by verdict (success / warning / danger). |
-| `fishbone` | diagrams | `(manual; closest builder: diagram)` | SVG Ishikawa (fishbone) cause-and-effect diagram: a horizontal spine drives into a problem-statement head box on the right, with four angled major bones (2 up, 2 down) each carrying a --cat category label and 2-3 rib lines of cause labels. |
+| `fishbone` | diagrams | `fishbone` | SVG Ishikawa (fishbone) cause-and-effect diagram: a horizontal spine drives into a problem-statement head box on the right, with four angled major bones (2 up, 2 down) each carrying a --cat category label and 2-3 rib lines of cause labels. |
 | `force-field` | diagrams | `(manual; closest builder: diagram)` | Pure-CSS Lewin force-field analysis: a central vertical bar names the change, a left column of driving forces are right-pointing arrow bars (success tint) and a right column of restraining forces are left-pointing arrow bars (danger tint); each force's 1-5 strength scales its bar length via an inline --s custom property. |
 | `hub-spoke` | diagrams | `(manual; closest builder: diagram)` | SVG hub-and-spoke radial diagram: one central hub node with 5-8 peripheral nodes evenly placed on a circle, each joined to the hub by a spoke that can carry a relation label; every arm is tinted by --cat. |
-| `sankey` | diagrams | `(manual; closest builder: diagram)` | Simplified SVG Sankey / flow-quantity diagram: a left column of source node bars and a right column of target node bars, joined by cubic-bezier ribbons whose stroke-width encodes quantity and whose color is the source node's --cat tint at low opacity; nodes carry name + value. |
+| `sankey` | diagrams | `sankey` | Simplified SVG Sankey / flow-quantity diagram: a left column of source node bars and a right column of target node bars, joined by cubic-bezier ribbons whose stroke-width encodes quantity and whose color is the source node's --cat tint at low opacity; nodes carry name + value. |
 | `capability-map` | diagrams | `(manual)` | Pure-CSS business capability map: 3–4 top-level domain blocks side by side, each holding a grid of capability tiles, with optional maturity heat via data-level (1 success / 2 warning / 3 danger). |
 | `layer-stack` | diagrams | `(manual)` | Pure-CSS horizontal layered stack: full-width tiers stacked top → bottom (tech stack / OSI-style), each with a name gutter and item chips, plus an optional side aside of cross-cutting concern bands. |
 | `process-chevron` | diagrams | `(manual)` | Pure-CSS horizontal chevron band: 3–6 interlocking right-pointing arrows form a flat pipeline, each with a stage name and a short caption below, tinted by --cat-N via clip-path polygons. |
@@ -101,44 +99,41 @@ Do **not** read all module files up front.
 | `slider-control` | interactive | `(manual)` | Live CSS-variable tuner: a range input drives a CSS var, a preview reflects it, and a button copies the rule as CSS. |
 | `kanban-board` | interactive | `(manual)` | Drag-and-drop kanban triage board: columns with header counts hold cards (title, tags, assignee) draggable between columns. |
 | `form-fields` | interactive | `form` | Themed prototype form — text / email / number / select / textarea / checkbox fields on the elements.css field primitives, with a submit wired by HA.formMock (intercepts + confirms in place, never navigates). |
+| `review-signoff` | interactive | `review (alias: review-signoff)` | Interactive human-in-the-loop review checklist: mark each AI change OK / Needs Fix / Hold, write notes, filter items, persist state in localStorage, and copy structured Markdown feedback for the next AI turn. |
+| `annotated-walkthrough` | interactive | `walkthrough (alias: annotated-walkthrough)` | Synchronized step-by-step walkthrough pairing numbered code/diagram nodes on the left with interactive clickable/arrow-key explanations on the right. |
 | `activity-feed` | document | `feed` | Chronological activity/event stream: icon-marked rows with actor, action sentence, and timestamp, threaded by a connector line. |
 | `callout-box` | document | `callout` | Admonition box (glyph + title + body) in 4 tones: TL;DR, note, warning, success — for highlighting one key message. |
 | `comparison-grid` | document | `comparison` | Side-by-side option cards with pros, cons, key metrics, and a CTA; the recommended option carries an accent badge. |
 | `decision-matrix` | document | `decision` | Weighted criteria x options scoring grid with per-cell rationale, weighted totals, a tinted winner column, and a closing verdict callout. |
-| `diff-block` | document | `(manual)` | Annotated code-review diff hunk: file header with add/remove stat badges, a numbered <pre> of +/- lines, and a margin severity note. |
+| `diff-block` | document | `diff (alias: diff-block)` | Annotated code-review diff hunk: file header with add/remove stat badges, a numbered <pre> of +/- lines, and a margin severity note. |
 | `stat-list` | document | `statlist` | Bordered key->value definition/spec sheet for one subject: term on the lead edge, mono value trailing, optional note and status badge. |
 | `empty-state` | document | `empty` | Centered dashed-slot placeholder with a soft-disc glyph, title, body, and optional action button for no-data, all-clear, or error screens. |
 | `checklist` | document | `checklist` | Themed list of real checkbox / radio / switch controls with optional status badges — settings, acceptance criteria, requirements, launch readiness, or a filter panel. |
-| `before-after` | document | `(manual)` | As-Is -> To-Be transformation diagram: a danger-toned current-state panel, a large central transform arrow with an improvement summary, and a success-toned target-state panel. |
+| `before-after` | document | `beforeafter (alias: before-after)` | As-Is -> To-Be transformation diagram: a danger-toned current-state panel, a large central transform arrow with an improvement summary, and a success-toned target-state panel. |
 | `pyramid` | document | `(manual)` | Layered SVG pyramid: 3-5 stacked trapezoid bands narrowing to the apex, each with a centered label and a right-side supplement, with --accent density stepping per layer. |
-| `quadrant` | document | `(manual)` | 2x2 positioning matrix: a center-crossed square with four named quadrants and items plotted at an X/Y percent position, color-coded by --cat-N. |
-| `risk-matrix` | document | `(manual)` | Probability x impact risk matrix: a 5x5 (or 3x3) heat grid whose cell tint steps success -> warning -> danger by severity band, with risk-item chips dropped into their cells. |
+| `quadrant` | document | `quadrant` | 2x2 positioning matrix: a center-crossed square with four named quadrants and items plotted at an X/Y percent position, color-coded by --cat-N. |
+| `risk-matrix` | document | `riskmatrix (alias: risk-matrix)` | Probability x impact risk matrix: a 5x5 (or 3x3) heat grid whose cell tint steps success -> warning -> danger by severity band, with risk-item chips dropped into their cells. |
 | `venn` | document | `(manual)` | SVG Venn diagram: two or three translucent --cat-N circles whose overlaps deepen by alpha compositing, each set labeled, with a label in each intersection. |
 | `glossary` | document | `(manual)` | Pure-CSS term-definition list in <dl> styling: a bold term with an optional abbreviation badge and mono reading, an optional trailing category chip, and an indented definition paragraph; rows alternate a subtle tint. |
 | `pros-cons` | document | `(manual)` | Pure-CSS pros/cons board for one option: two columns under a topic — pros (success tint, ＋ markers) and cons (danger tint, − markers) — with an optional per-item weight note and a footer verdict strip. |
 | `rating-scale` | document | `(manual)` | Pure-CSS Likert / rating board: one row per criterion with a label, a discrete 5-step dot scale (filled accent dots = score) and optional trailing value; a header names the two scale ends, an optional averaged summary row closes it. |
 | `swot` | document | `(manual)` | Pure-CSS SWOT board: a fixed 2×2 grid of Strengths (success), Weaknesses (danger), Opportunities (accent) and Threats (warning) cards, each with a tinted header, an S/W/O/T monogram and a bullet list. |
 | `agenda` | document | `(manual)` | Pure-CSS forward-looking meeting/event agenda: time-slot rows (mono start-end time, session title, owner/speaker chip, optional room/track tag) grouped under section dividers for morning/afternoon blocks, each slot carrying a left accent rail. |
-| `code-snippet` | document | `(manual)` | Pure-CSS syntax-highlighted code listing: a dark-tinted panel (derived from --text-primary mixed with the page, no raw hex), a header bar with a mono filename + language badge, a line-number gutter, and token-role span classes (.cs-kw/.cs-str/.cs-com/.cs-fn) mapped to --cat-*/--color-* tokens. |
+| `code-snippet` | document | `code (alias: code-snippet)` | Pure-CSS syntax-highlighted code listing: a dark-tinted panel (derived from --text-primary mixed with the page, no raw hex), a header bar with a mono filename + language badge, a line-number gutter, and token-role span classes (.cs-kw/.cs-str/.cs-com/.cs-fn) mapped to --cat-*/--color-* tokens. |
 | `raci-matrix` | document | `(manual)` | Pure-CSS RACI responsibility table: rows are tasks / deliverables, columns are roles, and each cell holds an R / A / C / I badge in a distinct token color (A accent solid, R --cat-1, C --cat-2, I muted), with a legend. |
-| `toc` | document | `(manual)` | Pure-CSS table of contents: numbered chapters with a dotted leader running to a page number / anchor label, plus one indented level of subsections; every row is a real anchor link so it doubles as in-document navigation. |
-| `api-endpoint` | document | `(manual)` | Pure-CSS REST endpoint reference: a method badge (GET/POST/PUT/DELETE tinted success/accent/warning/danger) + mono path with highlighted params, a description, a params table (name/type/required/description), and a response row (status chip + description). |
+| `api-endpoint` | document | `apiendpoint (alias: api-endpoint)` | Pure-CSS REST endpoint reference: a method badge (GET/POST/PUT/DELETE tinted success/accent/warning/danger) + mono path with highlighted params, a description, a params table (name/type/required/description), and a response row (status chip + description). |
 | `calendar-month` | document | `(manual)` | Pure-CSS month calendar: a weekday header over a 5-week × 7-day grid, day cells showing day numbers and cat-tinted event chips, with today highlighted and out-of-month days dimmed — the familiar month-at-a-glance with events. |
-| `changelog` | document | `(manual)` | Pure-CSS release notes: version blocks (mono version number + date + optional latest badge) grouping entries under Added/Changed/Fixed chips (success/accent/warning), one short line per entry. |
-| `file-tree` | document | `(manual)` | Pure-CSS static directory listing: a mono-font tree with literal box-drawing guides (├─ └─ │), bold accent folder rows vs plain file rows, and optional dimmed right-aligned annotations. |
-| `key-takeaways` | document | `(manual)` | Pure-CSS TL;DR panel: an accent-framed box titled 要点 / Key Takeaways with 3–5 numbered rows, each a number badge plus a bold one-line lead and an optional short elaboration. |
+| `changelog` | document | `changelog` | Pure-CSS release notes: version blocks (mono version number + date + optional latest badge) grouping entries under Added/Changed/Fixed chips (success/accent/warning), one short line per entry. |
+| `file-tree` | document | `filetree (alias: file-tree)` | Pure-CSS static directory listing: a mono-font tree with literal box-drawing guides (├─ └─ │), bold accent folder rows vs plain file rows, and optional dimmed right-aligned annotations. |
+| `key-takeaways` | document | `takeaways (alias: key-takeaways)` | Pure-CSS TL;DR panel: an accent-framed box titled 要点 / Key Takeaways with 3–5 numbered rows, each a number badge plus a bold one-line lead and an optional short elaboration. |
 | `project-status` | document | `(manual)` | Pure-CSS weekly status report board: a header with the overall RAG chip + reporting period, then one row per workstream with a RAG chip (green/amber/red), a thin progress bar + %, an owner chip, and a next-milestone note — the point-in-time health snapshot. |
 | `service-catalog` | document | `servicecatalog` | Component & service specification directory cards displaying role, repository path, technologies, ports, storage, and key responsibilities. |
 | `event-catalog` | document | `eventcatalog` | Producer to event to consumers fan-out, one card per event, with delivery guarantee, transport, volume and payload shape — the 1-to-N shape a linear pipeline diagram cannot express. |
 | `failure-modes` | document | `failuremodes` | Per component: what breaks, who feels it, how you find out and what absorbs it — impact, blast radius, detection, mitigation and RTO, sorted severity-first. |
+| `verification-run` | document | `verification (alias: verification-run)` | Verification & test execution evidence card: summarizes PASS/FAIL/WARN verdicts across checks with exact CLI commands, counts, durations, and expandable raw log excerpts. |
 | `feature-grid` | content | `features` | Grid of icon cards (icon + title + desc) — product/spec capabilities, "what's included", release highlights, or benefits. |
 | `persona-card` | content | `(manual)` | Pure-CSS user-persona card: a --cat-N initials avatar, name, role/age/context meta, a one-line quote, and three tinted mini-sections (Goals / Frustrations / Behaviors) plus trait chips; sized to sit 2–3 across a grid. |
 | `quote-block` | content | `(manual)` | Pure-CSS pull-quote / testimonial: an oversized decorative quotation mark (CSS ::before glyph), the quote text, and an attribution line (name + title + optional mono org), with an optional accent left rail and support for a row of two quotes. |
-| `faq` | content | `(manual)` | Pure-CSS always-visible FAQ list: each item pairs a round Q badge + question heading with a round A badge + answer paragraph, separated by thin dividers; no toggle, every answer stays open. |
-| `hero-cta` | content | `(manual)` | Pure-CSS landing hero: an eyebrow label, a large headline with one accent-highlighted span, a supporting sub-lede, a primary + secondary CTA pair, and a small trust note (e.g. 導入実績) below the buttons. |
-| `pricing-table` | content | `(manual)` | Pure-CSS 3-column pricing block: each plan card shows a name, a big price + period, a feature checklist (checkmark included / dash excluded), and a CTA button; the middle plan is highlighted with an accent border, a lift, and a 人気 badge. |
-| `logo-wall` | content | `(manual)` | Pure-CSS social-proof strip: a 導入企業 kicker over a wrapped row of bordered logo tiles (company names as offline typographic marks, no images) plus an optional volume stat line. |
-| `team-grid` | content | `(manual)` | Pure-CSS team roster: a 3–4 column grid of member cards, each with an initials avatar (accent/cat-tinted disc), name, role, one-line bio, and contact/skill chips. |
 
 ## charts - quantitative visualization
 
@@ -223,7 +218,7 @@ Do **not** read all module files up front.
 - **intent:** EN: show utilization as a gauge ring / radial dials for these percentages / score vs target as a circular gauge / grid of percentage rings · KO: 사용률을 게이지 링으로 보여줘 / 이 퍼센트들을 원형 다이얼로 / 목표 대비 점수를 게이지로 / 퍼센트 링 그리드로 정리해줘 · JA: 使用率をゲージリングで見せて / このパーセントを円形ダイヤルで / 目標に対するスコアをゲージで / パーセントリングのグリッドで
 - **input:** `items[].{label,value,max?,display?,tone?}`
 - **shapes:** dashboard, report
-- **related:** `progress` (progress is a linear bar for completion; gauge is a circular ring for a ratio vs max); `chart-bullet` (chart-bullet compares value to target with qualitative bands; gauge is a single ring percentage); `chart-donut` (donut splits a whole into segments; gauge shows one value vs its max as an arc)
+- **related:** `progress` (progress is a linear bar for completion; gauge is a circular ring for a ratio vs max); `chart-bullet` (chart-bullet compares value to target with qualitative bands; gauge is a single ring percentage); `chart-donut` (donut splits a whole into segments; gauge shows one value vs its max as an arc); `waffle` (waffle uses a 10x10 square cell unit grid for shares summing to 100%, while gauge shows independent target progress rings)
 - **a11y:** section[aria-label]; each gauge SVG has role=img + aria-label combining label and display value (static, no JS).
 
 ### `radar` 🆕 - Multi-axis radar/spider chart plotting one or more series across shared axes as translucent polygons.
@@ -299,25 +294,25 @@ Do **not** read all module files up front.
 - **a11y:** figure is role=img + aria-label; cells carry a 'date: value' title; padding cells are aria-hidden.
 
 ### `chart-scatter` 🆕 - SVG scatter / bubble chart: points (or value-sized bubbles) on X/Y axes with ticks and axis titles, series colored --cat-1..5, optional median quadrant splits.
-`section: (manual)` · `interaction: [data-chart-tip] + data-tip per point -> HA.tooltip; CSS hover highlight` · `variants: point (default) / bubble (r proportional to a third value)`
+`section: scatter (alias: chart-scatter)` · `interaction: [data-chart-tip] + data-tip per point -> HA.tooltip; CSS hover highlight` · `variants: point (default) / bubble (r proportional to a third value)`
 
 - **use when:** plotting two numeric variables against each other to read correlation or clusters; positioning items on a two-dimensional quadrant (effort vs impact, risk vs return); encoding a third value as bubble size on top of an x/y position; distinguishing several series by color across the same axes
 - **avoid when:** if comparing one value across independent, unordered categories → `chart-bar`; if showing a single metric's trajectory over an ordered time axis → `chart-line`; if a dense value matrix over two labeled dimensions rather than discrete points → `heatmap`
 - **keywords:** scatter, bubble, correlation, distribution, quadrant, x-y plot, effort-impact, risk map, dispersion, cluster
 - **intent:** EN: plot revenue vs churn as a scatter chart / make a bubble chart of effort vs impact / show the correlation between two metrics / map features on an effort / value quadrant · KO: 매출과 이탈률을 산점도로 그려줘 / 노력 대비 임팩트를 버블 차트로 만들어줘 / 두 지표의 상관관계를 보여줘 / 기능을 노력/가치 사분면에 배치해줘 · JA: 売上と解約率を散布図で描いて / 工数対インパクトのバブルチャートを作って / 2つの指標の相関を見せて / 施策を工数/価値の四象限に配置して
-- **input:** `points[].{x,y,z?,cat?,label}, xAxis, yAxis, medians?`
+- **input:** `{title, xLabel, yLabel, showMedian, points:[{x,y,r,label,series,cat,value}]}`
 - **shapes:** dashboard, report
-- **related:** `chart-line` (line connects points along an ordered x; scatter leaves points free to expose correlation and clusters); `heatmap` (heatmap shades a dense labeled matrix; scatter places individual x/y (and bubble-sized) observations); `chart-bar` (bars compare a value across categories; scatter relates two numeric variables per item)
+- **related:** `chart-line` (line connects points along an ordered x; scatter leaves points free to expose correlation and clusters); `heatmap` (heatmap shades a dense labeled matrix; scatter places individual x/y (and bubble-sized) observations); `chart-bar` (bars compare a value across categories; scatter relates two numeric variables per item); `quadrant` (quadrant plots items cleanly into 4 named 2x2 decision boxes without numeric scatter axes)
 - **a11y:** role=img + <title> on the SVG; each point carries a <title> value (the floating tooltip is decorative only).
 
 ### `chart-waterfall` 🆕 - SVG waterfall chart: a start bar, floating increment (+, success) / decrement (-, danger) bars rising from the running total, a final total bar (accent), dashed step connectors, and per-bar value labels.
-`section: (manual)` · `interaction: [data-chart-tip] + data-tip per bar -> HA.tooltip; CSS hover highlight`
+`section: waterfall (alias: chart-waterfall)` · `interaction: [data-chart-tip] + data-tip per bar -> HA.tooltip; CSS hover highlight`
 
 - **use when:** explaining how a start value bridges to an end value through signed steps; decomposing a net change into positive and negative contributions; showing budget / P&L variance or headcount build-up between two points; each step adds to or subtracts from a running cumulative total
 - **avoid when:** if stages only shrink monotonically as a conversion drop-off → `funnel`; if comparing independent category totals with no running sum → `chart-bar`; if showing part-to-whole composition of a single total → `chart-stacked`
 - **keywords:** waterfall, bridge, variance, increment, decrement, running total, cumulative, contribution, p&l bridge, delta
 - **intent:** EN: make a waterfall chart of the P&L bridge / show how we got from last quarter to this quarter / break down the budget variance as a waterfall / visualize the positive and negative contributions to the total change · KO: 손익 브리지를 워터폴 차트로 만들어줘 / 지난 분기에서 이번 분기로의 변화를 보여줘 / 예산 차이를 워터폴로 분해해줘 / 총 변화에 대한 증감 기여를 시각화해줘 · JA: 損益ブリッジをウォーターフォールで作って / 前四半期から今四半期への推移を見せて / 予算差異をウォーターフォールで分解して / 合計の変化への増減の寄与を可視化して
-- **input:** `start, steps[].{label,delta}, total? (running totals computed)`
+- **input:** `{title, yPrefix, ySuffix, items:[{label,value,kind:start|delta|total,display}]}`
 - **shapes:** dashboard, report
 - **related:** `chart-bar` (both are column charts; waterfall floats each bar from the running total to encode signed deltas rather than absolute category values); `funnel` (funnel tapers monotonically down a sequence; waterfall shows signed ups and downs bridging a start to a total); `chart-stacked` (stacked bars compose one total from parts; waterfall walks a total across additive and subtractive steps); `roadmap` (roadmap plans what happens across periods; chart-waterfall explains how a number moved from one period to the next)
 - **a11y:** role=img + <title> on the SVG; each bar carries a <title> value (the floating tooltip is decorative only).
@@ -369,18 +364,6 @@ Do **not** read all module files up front.
 - **shapes:** dashboard, report, infographic
 - **related:** `chart-line` (chart-line plots raw values on a continuous axis; bump-chart plots ordinal rank so crossings mean overtakes); `stat-trend` (stat-trend sparks one metric's path; bump-chart races several items' ranks against each other over time); `timeline` (timeline marks events along a time axis; bump-chart tracks each item's changing rank across periods)
 - **a11y:** figure with role=img SVG carrying a <title>; rank numbers, period labels, and item labels are real <text>.
-
-### `chart-area` 🆕 - SVG stacked area chart: 2–3 series stacked over 5–7 time points as translucent color-mix(--cat-N) bands with visible top edges, x labels, y gridlines, and a legend.
-`section: (manual)` · `interaction: none (bands deepen on hover)` · `variants: 2–3 series via cat-1..3; 5–7 time points (adjust x positions and labels)`
-
-- **use when:** showing how a total AND its composition change continuously over time; emphasizing cumulative volume where the top edge reads as the running total; 2–3 additive series that sum to a meaningful whole at each time point; the trend of parts within a growing or shrinking total
-- **avoid when:** if comparing independent series' levels without stacking them → `chart-line`; if discrete stacked totals at separate categories, not continuous time → `chart-stacked`; if a single composition captured at one instant → `chart-donut`
-- **keywords:** area chart, stacked area chart, cumulative, composition over time, trend, 영역 차트, 누적 영역 차트, 누적, 시간별 구성, 면적 그래프, エリアチャート, 積み上げ面グラフ, 累積, 時系列構成, 面グラフ
-- **intent:** EN: make a stacked area chart over time / show composition changing month by month / area chart of these series stacked / how the total and its parts evolve · KO: 시간에 따른 누적 영역 차트를 만들어줘 / 월별 구성 변화를 보여줘 / 이 계열들을 누적 면적 그래프로 / 총량과 구성의 변화를 보여줘 · JA: 時系列の積み上げ面グラフを作って / 月ごとの構成変化を見せて / この系列を積み上げエリアチャートで / 総量と内訳の推移を見せて
-- **input:** `points[].{x}, series[].{label, values[]}  (values stacked cumulatively)`
-- **shapes:** dashboard, report, infographic
-- **related:** `chart-line` (chart-line overlays independent series on a common baseline; chart-area stacks them so the top edge is the running total); `chart-stacked` (chart-stacked shows discrete stacked bars at separate categories; chart-area shows the same composition evolving continuously); `chart-donut` (donut captures composition at a single instant; chart-area shows how that composition shifts across time); `calendar-month` (calendar-month places events on dates; chart-area shows a composition shifting month over month); `composition-bar` (composition-bar is one 100% strip at a single point in time; chart-area shows that composition shifting across periods)
-- **a11y:** figure with role=img SVG carrying a <title>; x labels and the legend are real text.
 
 ### `dot-plot` 🆕 - Pure-CSS dot / range plot: one row per category with a min–max range bar and 1–2 value dots positioned by percent, plus a legend for the dot series (e.g. current vs target).
 `section: (manual)` · `interaction: none (dots grow on hover)` · `variants: one dot (single value) or two dots (dp-dot-a / dp-dot-b for two series); the min–max range bar is optional`
@@ -455,28 +438,16 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; bin frequency counts and x-axis bin labels are real text (no SVG).
 
 ### `pareto` 🆕 - SVG Pareto chart: descending count bars (left axis) with an overlaid cumulative-percentage line + dots on a 0–100% right axis and a dashed 80% reference rule — sorting causes so the vital few stand out (80/20).
-`section: (manual)` · `interaction: none (bars and dots highlight on hover)` · `variants: 5–8 descending categories; bars = --cat-1, cumulative line = --cat-4; dashed 80% rule`
+`section: pareto` · `interaction: none (bars and dots highlight on hover)` · `variants: 5–8 descending categories; bars = --cat-1, cumulative line = --cat-4; dashed 80% rule`
 
 - **use when:** identifying the vital few causes that account for most of an effect (80/20); ranking defects, complaints, or cost drivers by frequency with a cumulative view; showing how quickly the top few categories reach ~80% of the total; root-cause prioritization where sorted magnitude and cumulative share both matter
 - **avoid when:** if comparing category values with no sort or cumulative overlay → `chart-bar`; if showing stage-to-stage drop-off through a single funnel flow → `funnel`; if bridging a start and end total through signed increments → `chart-waterfall`
 - **keywords:** pareto, pareto chart, 80/20, vital few, cumulative percentage, defect analysis, root cause ranking, 파레토, 파레토 차트, 누적 백분율, 핵심 소수, 결함 분석, パレート図, パレート分析, 累積比率, 重点分析, 80対20
 - **intent:** EN: make a pareto chart of these defects / show the 80/20 with a cumulative line / rank causes and overlay cumulative percentage / which few causes drive most of the problem · KO: 이 결함들의 파레토 차트를 만들어줘 / 누적 선으로 80/20을 보여줘 / 원인을 순위로 정렬하고 누적 비율을 겹쳐줘 / 어떤 소수 원인이 대부분을 차지하는지 보여줘 · JA: この不良のパレート図を作って / 累積線で80対20を見せて / 原因を降順に並べて累積比率を重ねて / どの少数の原因が大半を占めるか見せて
-- **input:** `categories[].{label, count, cumulativePercent}, count{max, mid, axis}`
+- **input:** `{title, yAxis, preserveOrder, items:[{label,value,display}]}`
 - **shapes:** dashboard, report
 - **related:** `chart-bar` (chart-bar plots category values with no sort or cumulative overlay; pareto sorts them descending and adds a cumulative-% line and 80% rule); `funnel` (funnel shows conversion between stages of one flow; pareto ranks independent causes and tracks their cumulative share of the total); `chart-waterfall` (waterfall bridges a start and end total via signed steps; pareto lays sorted magnitudes under a cumulative-percentage curve)
 - **a11y:** figure with role=img SVG carrying a <title>; axis title, ticks, category labels, and the 80% tag are real <text>; each bar and dot has a <title> tooltip.
-
-### `progress-ring` 🆕 - SVG circular progress rings: a grid of 2–4 rings, each a track circle plus a stroke-dasharray arc, with a big % number and a label — a compact circular percentage widget grid for dashboards, toned per ring with --cat-N.
-`section: (manual)` · `interaction: none (arc gains a soft tinted shadow on hover)` · `variants: 2–4 rings via added .pgr-item; tone each with .cat-1..4`
-
-- **use when:** showing 2–4 completion or utilization percentages as compact circular widgets; a dashboard row of ratios where each reads as a filled ring at a glance; single-number progress toward 100% that a bar makes feel too plain; side-by-side percentage KPIs each with its own categorical tone
-- **avoid when:** if one value read against zones on a single dial → `gauge`; if progress toward a goal shown as a horizontal bar → `progress`; if splitting one total into proportional slices → `chart-donut`
-- **keywords:** progress ring, circular progress, radial progress, percentage ring, completion, donut progress, 진행 링, 원형 진행률, 퍼센트 링, 완료율, リングチャート, 円形プログレス, 進捗リング, 達成率, パーセント表示
-- **intent:** EN: make circular progress rings for these percentages / show completion as radial percentage widgets / a grid of donut-style progress circles / percentage rings with the number in the middle · KO: 이 퍼센트들을 원형 진행 링으로 만들어줘 / 완료율을 방사형 퍼센트 위젯으로 보여줘 / 도넛형 진행 원 그리드로 보여줘 / 가운데 숫자가 있는 퍼센트 링 · JA: このパーセントを円形の進捗リングにして / 達成率を円形パーセントウィジェットで見せて / ドーナツ型の進捗サークルを並べて / 中央に数字が入るパーセントリングにして
-- **input:** `rings[].{label, percent, cat?}`
-- **shapes:** dashboard, report
-- **related:** `gauge` (gauge reads one value against target/zones on a single dial; progress-ring is a compact grid of several percentage rings toned per category); `progress` (progress shows advancement as a linear bar; progress-ring wraps the same percentage into a circular arc widget); `chart-donut` (donut splits one total into proportional slices; progress-ring draws a single value's arc as a standalone completion ring)
-- **a11y:** figure with aria-label; each ring SVG carries role=img + <title>; the centre % and label are real text; the arc is computed from stroke-dasharray.
 
 ### `sparkline` 🆕 - Compact multi-metric scan table: 3–5 thin rows, each with a label, current value, a tiny inline sparkline (per-row polyline SVG), and a ▲/▼ delta badge toned success/danger — many KPIs' now + recent shape in one dense block.
 `section: (manual)` · `interaction: none (static rows)` · `variants: 3–5 rows; tone each row's sparkline + badge -up (success) / -down (danger)`
@@ -491,13 +462,13 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; each row's sparkline SVG carries role=img + <title>; labels, values, and delta badges are real text.
 
 ### `cohort-grid` 🆕 - Pure-CSS retention cohort table: rows are monthly signup cohorts, columns are period offsets M0..M5, each cell shows a retention % with a background whose intensity scales via color-mix of --accent, staircased so newer cohorts have fewer observed cells.
-`section: (manual)` · `interaction: none (cells outline on hover)` · `variants: any number of cohort rows; up to 6 period columns (M0..M5); staircased via .cht-na trailing cells`
+`section: cohort (alias: cohort-grid)` · `interaction: none (cells outline on hover)` · `variants: any number of cohort rows; up to 6 period columns (M0..M5); staircased via .cht-na trailing cells`
 
 - **use when:** showing retention or churn by signup cohort across relative period offsets; a triangular retention table where newer cohorts have fewer observed periods; spotting where a cohort's retention drops off across M0..M5; comparing cohorts on the same relative timeline rather than calendar dates
 - **avoid when:** if a generic value matrix with no cohort or period-offset meaning → `heatmap`; if intensity tiled onto real calendar days of the year → `cal-heatmap`; if one funnel of stage-to-stage drop-off, not cohort retention over time → `funnel`
 - **keywords:** cohort grid, retention table, cohort analysis, retention curve, churn cohort, triangular retention, 코호트 표, 리텐션 표, 코호트 분석, 잔존율, 이탈 코호트, コホート表, リテンション表, コホート分析, 継続率, 定着率
 - **intent:** EN: make a retention cohort table by signup month / cohort grid showing M0 to M5 retention / triangular retention analysis with intensity shading / how does each cohort retain over the following months · KO: 가입 월별 리텐션 코호트 표를 만들어줘 / M0부터 M5까지 잔존율을 보여주는 코호트 그리드 / 농도 음영이 있는 삼각형 리텐션 분석 / 각 코호트가 이후 몇 달간 얼마나 유지되는지 · JA: 登録月ごとのリテンションコホート表を作って / M0からM5までの継続率を示すコホートグリッド / 濃淡シェーディングつきの三角リテンション分析 / 各コホートがその後数か月でどれだけ定着するか
-- **input:** `periods[], cohorts[].{label, size, cells[].{pct, observed}}`
+- **input:** `{title, cohortLabel, sizeLabel, periods[], cohorts:[{label,size,values[]}]}`
 - **shapes:** dashboard, report
 - **related:** `heatmap` (heatmap is a generic full intensity matrix; cohort-grid is the specific triangular retention layout with relative period offsets and a staircase); `cal-heatmap` (cal-heatmap tiles intensity onto real calendar days; cohort-grid tiles retention onto relative period offsets from each cohort's start); `funnel` (funnel shows one path's stage-to-stage drop-off; cohort-grid shows retention decay across time for many cohorts at once)
 - **a11y:** figure with aria-label; cohort labels, sizes, period headers, and percents are real text; cell tint mirrors the printed percent and unobserved cells read as an em-dash.
@@ -515,25 +486,25 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; segment labels and legend values are real text; the second bar is an optional comparison sharing the same legend.
 
 ### `diverging-bar` 🆕 - Pure-CSS butterfly / diverging (tornado) bar chart: a central spine of category labels with bars extending left for series A and right for series B, mirrored around the center, values at the outer bar ends.
-`section: (manual)` · `interaction: none (fills brighten on hover)` · `variants: any number of category rows; two series (left/right) tinted cat-1 and cat-2`
+`section: diverging (alias: diverging-bar)` · `interaction: none (fills brighten on hover)` · `variants: any number of category rows; two series (left/right) tinted cat-1 and cat-2`
 
 - **use when:** contrasting two opposing series per category (男性/女性, 賛成/反対, 今期/前期); an age-pyramid or tornado layout where the two sides read as a mirror; before/after or for/against splits where the opposition is the message; a survey breakdown where each category has two directional magnitudes
 - **avoid when:** if showing a range or two points along one shared axis per row → `dot-plot`; if comparing two series with bars grouped on the same side → `chart-bar`; if splitting one whole into ordered parts of a single bar → `composition-bar`
 - **keywords:** diverging bar, butterfly chart, tornado chart, population pyramid, opposing bars, mirrored bars, 발산형 막대, 나비 차트, 토네이도 차트, 인구 피라미드, 대칭 막대, 対称バー, バタフライチャート, トルネードチャート, 人口ピラミッド, 左右対比バー
 - **intent:** EN: make a butterfly chart of men vs women by age / diverging bars for agree vs disagree / mirror these two series around a center spine / tornado chart contrasting this period and last · KO: 연령별 남성 대 여성 나비 차트를 만들어줘 / 찬성 대 반대의 발산형 막대 / 이 두 계열을 중앙 축 기준으로 대칭시켜줘 / 이번 기간과 지난 기간을 대비한 토네이도 차트 · JA: 年代別の男性と女性のバタフライチャートを作って / 賛成と反対の対称バー / この2系列を中央の軸で左右対称にして / 今期と前期を対比するトルネードチャート
-- **input:** `series{a{label}, b{label}}, rows[].{category, valueA, valueB, widthA, widthB}`
+- **input:** `{title, seriesA, seriesB, max, items:[{label,a,b,aDisplay,bDisplay}]}`
 - **shapes:** report, dashboard, infographic
 - **related:** `dot-plot` (dot-plot marks a range or two points on one shared axis; diverging-bar mirrors two magnitude series around a central spine); `chart-bar` (chart-bar groups the two series' bars side-by-side on the same side; diverging-bar sends them in opposite directions so the contrast is spatial); `chart-stacked` (chart-stacked accumulates parts within one bar; diverging-bar opposes two series across a center axis)
 - **a11y:** figure with aria-label; category labels, series names, and both values are real text; the two header chips name series A (left) and series B (right).
 
 ### `leaderboard` 🆕 - Pure-CSS ranked standings table: rows carry a rank badge (top-3 medal-tinted), a name, a horizontal cat-tinted value bar, the value, and a since-last movement indicator (▲2 / ▼1 / – in success/danger/muted).
-`section: (manual)` · `interaction: none (rows lift and bars brighten on hover)` · `variants: any number of rows; top-three badges via .is-1/.is-2/.is-3; movement via .up/.down/.flat`
+`section: leaderboard` · `interaction: none (rows lift and bars brighten on hover)` · `variants: any number of rows; top-three badges via .is-1/.is-2/.is-3; movement via .up/.down/.flat`
 
 - **use when:** showing current standings or a top-N ranking people should scan by position; a scoreboard where rank, value, and since-last movement all matter at once; sales / points / usage leaderboards with medal emphasis on the top three; a single snapshot of who is ahead right now, not how ranks changed over time
 - **avoid when:** if comparing category magnitudes with no ranking or standings meaning → `chart-bar`; if showing how each entrant's rank moved across several periods → `bump-chart`; if one metric's progress toward a target rather than a ranked field → `progress`
 - **keywords:** leaderboard, ranking, standings, top n, scoreboard, rank badge, movement, 리더보드, 순위표, 랭킹, 순위, 스코어보드, 리더보드 순위, リーダーボード, ランキング, 順位表, 順位, スコアボード, 順位変動
 - **intent:** EN: make a leaderboard of these teams / show the current top 10 standings / ranked table with score bars and rank movement / who is winning right now with medals on the top three · KO: 이 팀들로 리더보드를 만들어줘 / 현재 상위 10위 순위표를 보여줘 / 점수 막대와 순위 변동이 있는 랭킹 표 / 상위 3위에 메달을 붙인 현재 순위를 보여줘 · JA: このチームでリーダーボードを作って / 現在の上位10位の順位表を見せて / スコアバーと順位変動つきのランキング表 / 上位3位にメダルをつけた現在の順位を見せて
-- **input:** `rows[].{rank, name, value, max, cat?, move?{dir, delta}}`
+- **input:** `{title, items:[{rank,name,value,display,move,dir,cat}]}`
 - **shapes:** dashboard, report, infographic
 - **related:** `chart-bar` (chart-bar compares category magnitudes with no ranking semantics; leaderboard adds rank order, medal badges, and movement to make it a standings table); `bump-chart` (bump-chart plots rank trajectories across time; leaderboard is the current-standings snapshot with a single since-last movement mark); `stat-trend` (stat-trend shows one metric's change with a delta; leaderboard applies the up/down/flat delta per row across a ranked field)
 - **a11y:** figure with aria-label; ranks, names, values, and movement marks are real text; value bars are decorative fills whose width mirrors the printed value.
@@ -613,13 +584,13 @@ Do **not** read all module files up front.
 - **a11y:** SVG has role=img + aria-label; each node is focusable (tabindex) and arrow-key movable; root has <title>.
 
 ### `erd` - Entity-relationship diagram: table cards with PK/FK chips and typed columns, linked by 1:1/1:N/N:M cardinality connectors.
-`section: (manual; closest builder: diagram)` · `interaction: dragNode, zoompan`
+`section: erd` · `interaction: dragNode, zoompan`
 
 - **use when:** user wants to visualize a database schema or data model; content has entities/tables with columns, primary keys, and foreign keys; request mentions ERD, schema, data model, tables and relationships, or cardinality; relationships between tables (one-to-many, many-to-many) need to be shown
 - **avoid when:** if showing a generic object/dependency graph without DB columns or cardinality → `node-graph`; if showing system services and layers (frontend/backend/data tiers) → `arch-diagram`; if rows are plain key→value facts, not typed columns with keys/relations → `stat-list`
 - **keywords:** erd, entity relationship, database schema, data model, tables, primary key, foreign key, cardinality, sql schema
 - **intent:** EN: draw the database schema as an ERD / show these tables and their relationships / diagram the data model with PK/FK / visualize how these entities relate · KO: DB 스키마를 ERD로 그려줘 / 테이블 관계도를 보여줘 / PK/FK가 표시된 데이터 모델 그려줘 / 엔티티 간 관계를 도식화해줘 · JA: DBスキーマをER図にして / テーブルの関連を図で見せて / PK/FK付きのデータモデルを描いて / エンティティ間の関係を可視化して
-- **input:** `entities[].{cols[]}, relations[].{card}`
+- **input:** `{title, entities:[{id,name,columns:[{name,type,key}]}], relations:[{from,to,cardinality,label}]}`
 - **shapes:** diagram, spec
 - **related:** `node-graph` (node-graph is a generic node/edge graph; erd carries DB-specific column rows, PK/FK chips, and cardinality labels); `arch-diagram` (arch-diagram groups runtime services into tiers; erd models persistent data tables and their keys); `tree` (tree shows containment hierarchy; erd shows typed entities with many-to-many relations)
 - **a11y:** SVG has role=img + aria-label; each entity node is a focusable group with aria-label; cardinality legend included.
@@ -721,13 +692,13 @@ Do **not** read all module files up front.
 - **a11y:** SVG emotion curve has role=img + <title>; stage, touchpoint, and pain cells are real text. Figure carries aria-label.
 
 ### `kpi-tree` 🆕 - SVG KPI / driver / logic tree: a root metric on the left decomposes rightward through two levels of driver nodes, with operator chips (x + division) on the junctions stating how children combine; each node shows a name + value.
-`section: (manual; closest builder: diagram)` · `interaction: none`
+`section: kpitree (alias: kpi-tree)` · `interaction: none`
 
 - **use when:** decomposing a top metric into the drivers that mathematically produce it; you want operator chips between branches to show how children combine (x, +, division); each node should carry a name and a value (e.g. Revenue = Visits x CVR x AOV); content is a driver tree, unit-economics breakdown, or issue/logic tree
 - **avoid when:** if the hierarchy is a people/units reporting structure top-down → `org-chart`; if you need a collapsible indented outline rather than a math decomposition → `tree`; if ideas radiate from a central topic for brainstorming, without operators → `mindmap`
 - **keywords:** kpi tree, driver tree, logic tree, issue tree, metric decomposition, unit economics, operator, root cause breakdown, KPI 트리, ロジックツリー
 - **intent:** EN: break revenue into its drivers as a tree / make a KPI driver tree with operators / decompose this metric left to right / logic tree of what drives this number · KO: 매출을 드라이버 트리로 분해해줘 / 연산자가 들어간 KPI 드라이버 트리 만들어줘 / 이 지표를 왼쪽에서 오른쪽으로 분해해줘 / 이 숫자를 만드는 요인을 로직 트리로 보여줘 · JA: 売上をドライバーツリーに分解して / 演算子つきのKPIツリーを作って / この指標を左から右へ分解して / この数値の要因をロジックツリーで見せて
-- **input:** `nodes[].{name,value,parent?,level},junctions[].{parent,op}`
+- **input:** `{title, root:{name,value,op,children[]}}`
 - **shapes:** diagram, report
 - **related:** `org-chart` (org-chart is a people/units reporting hierarchy top-down; kpi-tree decomposes a metric left-to-right with operator chips and node values); `tree` (tree is a collapsible label outline; kpi-tree is a fixed SVG math decomposition with values and operators); `mindmap` (mindmap radiates ideas from a center for brainstorming; kpi-tree encodes a directed metric-to-drivers breakdown with operators)
 - **a11y:** role=img + <title>; node names, values, and operator symbols are real SVG text. Connectors are plain lines (no arrowheads / no marker ids).
@@ -745,25 +716,25 @@ Do **not** read all module files up front.
 - **a11y:** role=img + <title>; names and roles are real SVG text. Connectors are plain hierarchy lines (no arrowheads / no marker ids).
 
 ### `sequence-diagram` 🆕 - UML-style sequence diagram: participants, dashed lifelines, activation bars, solid sync calls and dashed returns, plus an optional note box.
-`section: (manual; closest builder: diagram)` · `interaction: none`
+`section: sequence (alias: sequence-diagram)` · `interaction: none`
 
 - **use when:** showing the message order between services/actors over time (API call flow, auth handshake); explaining who calls whom, in what order, with what payload/label; documenting a request/response round-trip incl. returns and side calls; the reader needs time flowing top-to-bottom with per-participant activity spans
 - **avoid when:** if the flow is a branching process (decisions/loops), not timed messages between parties → `flow-diagram`; if you want static structure (layers, zones, who talks to whom) without time order → `arch-diagram`; if steps are a single actor's ordered procedure → `stepper`
 - **keywords:** sequence, uml, lifeline, message flow, api call, handshake, interaction, 시퀀스 다이어그램, シーケンス図
 - **intent:** EN: draw a sequence diagram of the login flow / show the API call order between services / visualize the auth handshake between client and server / who calls whom in what order · KO: 로그인 흐름을 시퀀스 다이어그램으로 그려줘 / 서비스 간 API 호출 순서를 보여줘 / 클라이언트와 서버의 인증 핸드셰이크를 시각화해줘 / 누가 누구를 어떤 순서로 호출하는지 정리해줘 · JA: ログインフローをシーケンス図にして / サービス間のAPI呼び出し順を見せて / クライアントとサーバーの認証ハンドシェイクを図解して / どの順番で誰が誰を呼ぶか可視化して
-- **input:** `participants[].{name}; messages[].{from,to,label,kind:sync|return}; note?`
+- **input:** `{title, actors:[{id,label}], messages:[{from,to,label,type}], notes:[{actor,text}]}`
 - **shapes:** diagram, spec, report
 - **related:** `flow-diagram` (flowchart encodes branching logic; sequence encodes time-ordered messages between parties); `arch-diagram` (architecture shows static structure; sequence shows one scenario's runtime message order); `swimlane` (swimlane groups process steps by owner lane; sequence tracks call/return pairs on lifelines)
 - **a11y:** svg role=img + title; message labels are SVG text (mono, 11.5px).
 
 ### `state-diagram` 🆕 - SVG UML state machine: an initial dot, rounded-rect states, a double-circle final state, and guarded transition arrows carrying [guard] condition labels.
-`section: (manual; closest builder: diagram)` · `interaction: none`
+`section: statediagram (alias: state-diagram)` · `interaction: none`
 
 - **use when:** modeling a lifecycle or status machine where an entity moves between named states; you need UML statechart vocabulary: initial pseudo-state, states, final state, guarded transitions; transitions are driven by events/conditions shown as [guard] labels on the arrows; showing valid state changes for an order, ticket, subscription, or job (draft to pending to confirmed, with a cancelled branch)
 - **avoid when:** if the flow is abstract decision logic with diamonds and Yes/No branches, not named persistent states → `flow-diagram`; if it is a linear numbered procedure or pipeline with mechanisms and pass/block branches → `stepper`; if the content is dated milestones in chronological order, not state changes → `timeline`
 - **keywords:** state diagram, state machine, statechart, UML, transition, guard, lifecycle, status flow, 상태 다이어그램, 状態遷移図
 - **intent:** EN: draw the order status state machine / show the lifecycle states and their transitions / make a UML state diagram with guards / what states can this move between · KO: 주문 상태 머신을 그려줘 / 라이프사이클 상태와 전이를 보여줘 / 가드 조건이 붙은 상태 다이어그램 만들어줘 / 이 엔티티가 어떤 상태로 바뀌는지 보여줘 · JA: 注文ステータスの状態遷移図を描いて / ライフサイクルの状態と遷移を見せて / ガード条件つきのUML状態遷移図を作って / この状態がどこに遷移できるか見せて
-- **input:** `states[].{name,tone?},transitions[].{from,to,guard?}`
+- **input:** `{title, states:[{id,label,tone,initial,final}], transitions:[{from,to,label}]}`
 - **shapes:** diagram, spec
 - **related:** `flow-diagram` (flow-diagram is abstract process logic with decision diamonds; state-diagram models persistent named states and guarded transitions between them); `stepper` (stepper is a forward-only numbered procedure; state-diagram allows cycles, branches, and terminal states); `timeline` (timeline plots dated chronological milestones with no logic; state-diagram models named states joined by guarded, possibly-cyclic transitions)
 - **a11y:** role=img + <title>; state names and guard labels are real SVG text. Marker id namespaced state-diagram-arrow.
@@ -805,13 +776,13 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; question, condition, and outcome nodes are all real text; no SVG, so no title needed.
 
 ### `fishbone` 🆕 - SVG Ishikawa (fishbone) cause-and-effect diagram: a horizontal spine drives into a problem-statement head box on the right, with four angled major bones (2 up, 2 down) each carrying a --cat category label and 2-3 rib lines of cause labels.
-`section: (manual; closest builder: diagram)` · `interaction: none`
+`section: fishbone` · `interaction: none`
 
 - **use when:** attributing many potential causes to a single effect or problem; grouping causes by category (people, method, machine, material, 6M); structuring a root-cause or brainstorming session around one effect; you want the effect on the right fed by categorized cause branches
 - **avoid when:** if decomposing a metric into the drivers that mathematically produce it → `kpi-tree`; if radiating ideas from a central topic for open brainstorming, no single effect → `mindmap`; if showing a step-by-step process or decision flow → `flow-diagram`
 - **keywords:** fishbone, ishikawa, cause and effect, cause-and-effect diagram, root cause, 6M, 특성요인도, 피쉬본, 이시카와 다이어그램, 特性要因図, フィッシュボーン図, 魚骨図
 - **intent:** EN: make a fishbone diagram of these causes / root cause analysis grouped by category / draw an ishikawa diagram for this problem / why is this happening, organized by cause category · KO: 피쉬본 다이어그램 그려줘 / 원인을 범주별로 분석해줘 / 이 문제를 특성요인도로 만들어줘 / 이 문제가 왜 생기는지 원인별로 정리해줘 · JA: 特性要因図にして / 原因をカテゴリ別に分析して / この問題のフィッシュボーン図を作って / この問題の要因を魚骨図で見せて
-- **input:** `effect; bones[].{category, cat?, causes[]}  (2 up + 2 down)`
+- **input:** `{title, effect, categories:[{label,cat,causes[]}]}`
 - **shapes:** diagram, report
 - **related:** `mindmap` (mindmap radiates ideas from a topic for brainstorming; fishbone attributes categorized causes to one fixed effect); `kpi-tree` (kpi-tree decomposes a metric into drivers that combine with operators; fishbone groups qualitative causes behind an effect, no math); `org-chart` (org-chart is a top-down reporting hierarchy; fishbone is a cause taxonomy angled onto a single effect spine)
 - **a11y:** figure with role=img SVG carrying a <title>; effect, category, and cause labels are real <text>. No arrowheads, so no marker ids.
@@ -841,13 +812,13 @@ Do **not** read all module files up front.
 - **a11y:** figure with role=img SVG carrying a <title>; hub, node, and relation labels are real <text>.
 
 ### `sankey` 🆕 - Simplified SVG Sankey / flow-quantity diagram: a left column of source node bars and a right column of target node bars, joined by cubic-bezier ribbons whose stroke-width encodes quantity and whose color is the source node's --cat tint at low opacity; nodes carry name + value.
-`section: (manual; closest builder: diagram)` · `interaction: none` · `variants: 2-column (default); extend to 3+ columns by adding a middle node-bar column and routing source->mid then mid->target ribbons`
+`section: sankey` · `interaction: none` · `variants: 2-column (default); extend to 3+ columns by adding a middle node-bar column and routing source->mid then mid->target ribbons`
 
 - **use when:** showing how a quantity splits or merges across sources and targets; flow magnitude is the point (ribbon width = amount); budget, traffic, energy, or material allocation across branches; a total is conserved as it distributes (sum in = sum out)
 - **avoid when:** if one pipeline that only shrinks stage by stage → `funnel`; if the sequence or logic of steps matters more than amounts → `flow-diagram`; if showing each category's internal composition side by side → `chart-stacked`
 - **keywords:** sankey, sankey diagram, flow, alluvial, quantity flow, allocation, flow of budget, 산키 다이어그램, 흐름 다이어그램, サンキー図, サンキーダイアグラム, フロー量図
 - **intent:** EN: make a sankey diagram of this flow / show how the budget flows into categories / visualize traffic split by source and outcome / diagram where this quantity goes · KO: 산키 다이어그램 만들어줘 / 예산이 어디로 흐르는지 보여줘 / 유입 소스별 결과 분포를 시각화해줘 / 이 수량이 어디로 가는지 그려줘 · JA: サンキー図にして / 予算がどこに流れるか見せて / 流入元別の結果配分を可視化して / この量がどこへ行くか図にして
-- **input:** `nodes[].{id, label, value, cat?}, flows[].{from, to, value}`
+- **input:** `{title, leftTitle, rightTitle, sources[], targets[], flows:[{from,to,value,cat}]}`
 - **shapes:** diagram, dashboard, report
 - **related:** `funnel` (funnel is one monotonically shrinking pipeline; sankey splits and merges quantities across parallel branches); `flow-diagram` (flow-diagram shows control/sequence logic; sankey ribbons are sized by a quantity conserved across the flow); `chart-stacked` (stacked bars show each category's internal composition; sankey shows how each source's amount distributes across targets)
 - **a11y:** figure with role=img SVG carrying a <title>; node names, values, and column captions are real <text>. Ribbons are decorative paths.
@@ -1094,6 +1065,30 @@ Do **not** read all module files up front.
 - **related:** `checklist` (checklist is options-only (checkbox/radio/switch rows); form-fields adds text/select/textarea inputs + submit); `slider-control` (slider-control tunes one numeric value live; form-fields collects typed field values)
 - **a11y:** Every field has an explicit <label for> (+ aria-describedby for hints); required fields mark aria-required; submit confirms via role=status; HA.formMock prevents navigation.
 
+### `review-signoff` - Interactive human-in-the-loop review checklist: mark each AI change OK / Needs Fix / Hold, write notes, filter items, persist state in localStorage, and copy structured Markdown feedback for the next AI turn.
+`section: review (alias: review-signoff)` · `interaction: HA.review (toggle verdict, filter status, persist in localStorage, copy Markdown feedback)` · `variants: filters on|off, pre-set status ok|fix|hold`
+
+- **use when:** Human needs to sign off or request edits on AI code/UI/analysis output; Generating copy-ready Markdown review feedback to feed back to an AI agent; Tracking per-file or per-decision approval state across a review session
+- **avoid when:** if Simple static task list without feedback export → `checklist`; if Weighted scoring comparison of candidate options → `decision-matrix`
+- **keywords:** review signoff, approval checklist, human review, feedback export, markdown review, sign-off, ai review
+- **intent:** EN: interactive human review signoff with markdown feedback export / approve or request changes per item with feedback summary / review checklist for AI changes · KO: AI 변경 사항 리뷰 승인 체크리스트와 피드백 내보내기 / 항목별 OK/수정필요 판정과 마크다운 피드백 / 사람 검토 사인오프 패널 · JA: AIの変更に対するレビュー判定とMarkdownフィードバック生成 / 人間がOKや要修正を付けてAIへ戻すレビュー表 / 変更承認チェックリスト
+- **input:** `{id, title, subtitle, filters, exportTitle, items:[{id, title, scope, desc, evidence, status, note}]}`
+- **shapes:** code-review, review-signoff, change-review
+- **related:** `verification-run` (Pair verification-run test logs above review-signoff so reviewers judge with real command evidence); `diff-block` (Show exact code hunks above review-signoff verdict items)
+- **a11y:** Buttons use aria-pressed; progress summary updates in place; keyboard focusable inputs and filters.
+
+### `annotated-walkthrough` - Synchronized step-by-step walkthrough pairing numbered code/diagram nodes on the left with interactive clickable/arrow-key explanations on the right.
+`section: walkthrough (alias: annotated-walkthrough)` · `interaction: HA.walkthrough (click steps/targets, Prev/Next buttons, arrow key step navigation)` · `variants: auto node stage or custom inline SVG with [data-walk-target]`
+
+- **use when:** Explaining how code, requests, or architectures work step by step; Guiding a reviewer interactively through multi-file changes or mechanisms; Pairing a visual SVG or node list with synchronized highlighted callouts
+- **avoid when:** if Static linear instruction checklist without synchronized target stage → `stepper`; if Strict UML lifeline call ordering between services → `sequence-diagram`
+- **keywords:** annotated walkthrough, interactive explanation, step highlight, code tour, guided walkthrough, mechanism tour
+- **intent:** EN: interactive step by step annotated walkthrough / guided code tour with synchronized highlights / explain mechanism step by step with visual targets · KO: 단계별 인터랙티브 코드 워크스루 해설 / 클릭 시 해당 노드를 강조하는 동작 원리 투어 / 주석형 단계별 설명 UI · JA: ステップ切り替えで該当箇所を強調する解説ウォークスルー / コードや仕組みのインタラクティブ順路解説 / アノテーション付きガイド
+- **input:** `{title, subtitle, svg?, steps:[{id, title, label, code, desc, meta}]}`
+- **shapes:** explainer, code-review, walkthrough
+- **related:** `sequence-diagram` (Use sequence-diagram when exact inter-actor timing arrows matter more than prose steps); `code-snippet` (Show highlighted full code listing right below the guided walkthrough)
+- **a11y:** Button elements with aria-current="step" and arrow-key navigation; non-active targets dim smoothly without hiding content.
+
 ## document - structural reading blocks
 
 ### `activity-feed` 🆕 - Chronological activity/event stream: icon-marked rows with actor, action sentence, and timestamp, threaded by a connector line.
@@ -1145,13 +1140,13 @@ Do **not** read all module files up front.
 - **a11y:** Native <table> with scope=col/row th cells; verdict uses the callout pattern with role=img glyph.
 
 ### `diff-block` - Annotated code-review diff hunk: file header with add/remove stat badges, a numbered <pre> of +/- lines, and a margin severity note.
-`section: (manual)` · `interaction: none` · `variants: sev high|med|low`
+`section: diff (alias: diff-block)` · `interaction: none` · `variants: sev high|med|low`
 
 - **use when:** Showing a specific code change as added/removed lines for review; A PR writeup or code review needs an inline annotated hunk; Each diff needs a severity-tagged reviewer note (high/med/low); Presenting before/after at the source-line level
 - **avoid when:** if Comparing two non-code options or feature sets side by side → `comparison-grid`; if Listing flat key-value config or metadata facts → `stat-list`; if Highlighting a single advisory note without code lines → `callout-box`
 - **keywords:** diff, code review, pull request, hunk, added removed, patch, git diff, severity, before after code
 - **intent:** EN: show this code change as a reviewed diff / annotate this hunk with a severity note / render a PR diff with add/remove counts / code review block for these lines · KO: 이 코드 변경을 diff로 보여줘 / 리뷰 노트 달린 코드 차이를 만들어줘 / PR 디프를 추가/삭제 표시로 정리해줘 / 이 라인들 코드 리뷰 블록으로 보여줘 · JA: このコード変更をdiffとして見せて / 重大度メモ付きの差分ブロックにして / 追加/削除行つきのPR差分を出して / この行のコードレビュー用ブロックを作って
-- **input:** `{file,added,removed,lines[],note}`
+- **input:** `{title, files:[{file,kind,added,removed,patch|lines[],note,open}]}`
 - **shapes:** code-review, diff-block
 - **related:** `callout-box` (callout-box is a standalone admonition; diff-block embeds the note against actual +/- code lines)
 - **a11y:** Semantic <figure>/<figcaption>; line-number gutter is user-select:none and decorative, code lines remain readable text.
@@ -1193,13 +1188,13 @@ Do **not** read all module files up front.
 - **a11y:** Every control has an explicit <label for>; the set is wrapped in role=group with an aria-label; keyboard- and screen-reader-operable native inputs.
 
 ### `before-after` 🆕 - As-Is -> To-Be transformation diagram: a danger-toned current-state panel, a large central transform arrow with an improvement summary, and a success-toned target-state panel.
-`section: (manual)` · `interaction: none`
+`section: beforeafter (alias: before-after)` · `interaction: none`
 
 - **use when:** contrasting a current state with a target state as one transformation story; explaining an As-Is / To-Be migration and the change that bridges them; showing pain points on the left resolved into outcomes on the right; the emphasis is the shift itself, not a feature-by-feature scorecard
 - **avoid when:** if annotating the two versions of a code hunk line by line → `diff-block`; if weighing pros and cons of several options to choose between → `comparison-grid`; if a sequential multi-step process rather than a two-state contrast → `stepper`
 - **keywords:** before after, as-is to-be, transformation, current state, target state, migration, change, state transition, gap
 - **intent:** EN: show the current state versus the target state / make an as-is to-be transformation diagram / diagram before and after the change / contrast today's process with the improved one · KO: 현재 상태와 목표 상태를 나란히 보여줘 / As-Is와 To-Be 변환도를 만들어줘 / 개선 전후를 그림으로 보여줘 / 지금 프로세스와 개선된 모습을 대비해줘 · JA: 現状とあるべき姿を並べて見せて / As-IsとTo-Beの変換図にして / 改善前後を図で見せて / 今の業務と改善後を対比して
-- **input:** `before:{tag?,title,items[]}, transform:{label}, after:{tag?,title,items[]}`
+- **input:** `{title, beforeTag, beforeTitle, before[], transformLabel, afterTag, afterTitle, after[]}`
 - **shapes:** report, spec
 - **related:** `comparison-grid` (comparison-grid scores independent options; before-after tells one before->after story across a transform arrow); `stepper` (stepper walks a multi-step process; before-after collapses it into a two-state (current vs target) contrast); `diff-block` (diff-block diffs code line by line; before-after is a conceptual state-transition narrative)
 - **a11y:** figure with aria-label; both panels are real text, the arrow shape is aria-hidden and restacks/rotates on narrow screens.
@@ -1217,25 +1212,25 @@ Do **not** read all module files up front.
 - **a11y:** figure with role=img SVG carrying a <title>; layer and note labels are real <text>.
 
 ### `quadrant` 🆕 - 2x2 positioning matrix: a center-crossed square with four named quadrants and items plotted at an X/Y percent position, color-coded by --cat-N.
-`section: (manual)` · `interaction: none`
+`section: quadrant` · `interaction: none`
 
 - **use when:** plotting items against two independent axes so they fall into four quadrants; a priority / prioritization matrix (importance x urgency, effort x impact); competitive or product positioning on two dimensions; the reader should see where items sit relative to a midpoint, not exact numbers
 - **avoid when:** if comparing options across several weighted criteria to pick a winner → `decision-matrix`; if encoding one numeric magnitude across a labeled row x column grid → `heatmap`; if assessing risks by probability x impact severity bands → `risk-matrix`
 - **keywords:** quadrant, 2x2 matrix, positioning map, priority matrix, eisenhower, importance urgency, effort impact, four quadrants, scatter positioning
 - **intent:** EN: put these on a 2x2 matrix / make a priority matrix of importance vs urgency / plot these on a positioning map / show an effort vs impact quadrant chart · KO: 2x2 매트릭스로 정리해줘 / 중요도 긴급도 우선순위 매트릭스 만들어줘 / 포지셔닝 맵으로 보여줘 / 노력 대비 임팩트 사분면으로 그려줘 · JA: 2×2マトリクスにして / 重要度と緊急度の優先度マトリクスにして / ポジショニングマップで見せて / 工数とインパクトの四象限で整理して
-- **input:** `axes:{x:{name,low,high},y:{name,low,high}}, quadrants[4].{name}, items[].{label,x,y,cat?}`
+- **input:** `{title, xAxis, yAxis, xLow, xHigh, yLow, yHigh, quadrants:{tl,tr,bl,br}, items:[{label,x,y,cat}]}`
 - **shapes:** decision, report
 - **related:** `decision-matrix` (decision-matrix scores options on weighted criteria; quadrant only places items on two axes with no scoring); `heatmap` (heatmap shades a labeled grid by one value per cell; quadrant is a continuous 2-axis field with plotted points); `risk-matrix` (risk-matrix is the probability x impact specialization with severity-banded cells; quadrant is the generic two-axis map)
 - **a11y:** figure with aria-label; axis, quadrant, and item labels are real text (no SVG).
 
 ### `risk-matrix` 🆕 - Probability x impact risk matrix: a 5x5 (or 3x3) heat grid whose cell tint steps success -> warning -> danger by severity band, with risk-item chips dropped into their cells.
-`section: (manual)` · `interaction: none`
+`section: riskmatrix (alias: risk-matrix)` · `interaction: none`
 
 - **use when:** assessing risks by likelihood and impact on a heat grid; a risk register, threat assessment, or issue-triage board; cells should read as qualitative severity bands (low / medium / high); placing named risks into the probability x impact cell they belong to
 - **avoid when:** if encoding one numeric value per cell across a labeled matrix → `heatmap`; if positioning items on two generic axes with no severity banding → `quadrant`; if scoring options on weighted criteria to reach a decision → `decision-matrix`
 - **keywords:** risk matrix, probability impact, likelihood, severity, heat grid, risk register, threat assessment, issue triage, mitigation, 리스크 매트릭스, リスクマトリクス
 - **intent:** EN: make a risk matrix / chart these risks by probability and impact / build a probability vs impact heat grid / put our threats on a 5x5 risk matrix · KO: 리스크 매트릭스로 만들어줘 / 발생 확률과 영향도로 리스크를 정리해줘 / 확률 대 영향 히트 그리드로 그려줘 / 위협을 5x5 리스크 매트릭스에 배치해줘 · JA: リスクマトリクスにして / 発生確率と影響度でリスクを整理して / 確率×影響のヒートグリッドで見せて / 脅威を5×5のリスクマトリクスに配置して
-- **input:** `xLabels[] (impact), yLabels[] (probability), cells[][].{severity:1..5, risks[]?}`
+- **input:** `{title, xAxis, yAxis, xLabels[], yLabels[], items:[{label,prob,impact}]}`
 - **shapes:** decision, report
 - **related:** `heatmap` (heatmap shades cells by a continuous numeric value; risk-matrix uses discrete success->danger severity bands and drops risk chips in cells); `quadrant` (quadrant is the generic two-axis map; risk-matrix is the probability x impact specialization with a severity heat scale); `decision-matrix` (decision-matrix scores options to choose one; risk-matrix classifies risks by likelihood and impact)
 - **a11y:** figure with aria-label; axis labels, column/row headers, and risk chips are real text (no SVG).
@@ -1313,13 +1308,13 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; each part-of-day is a <section> with a label; slots pair a mono time with a session title, an owner chip, and a track tag as text.
 
 ### `code-snippet` 🆕 - Pure-CSS syntax-highlighted code listing: a dark-tinted panel (derived from --text-primary mixed with the page, no raw hex), a header bar with a mono filename + language badge, a line-number gutter, and token-role span classes (.cs-kw/.cs-str/.cs-com/.cs-fn) mapped to --cat-*/--color-* tokens.
-`section: (manual)` · `interaction: none` · `variants: token-role spans (.cs-kw/.cs-str/.cs-com/.cs-fn) are applied per token as needed; the language badge and line-number gutter can be dropped`
+`section: code (alias: code-snippet)` · `interaction: none` · `variants: token-role spans (.cs-kw/.cs-str/.cs-com/.cs-fn) are applied per token as needed; the language badge and line-number gutter can be dropped`
 
 - **use when:** presenting a single finished code listing in docs, a tutorial, or an API example; the code benefits from a filename, language badge, and line numbers; syntax roles (keywords, strings, comments, functions) should be color-coded; you want a dark code panel that still follows the active theme's tokens
 - **avoid when:** if showing added/removed change lines for a code review → `diff-block`; if the block is a prose quotation or testimonial rather than code → `quote-block`; if it is a short highlighted note, tip, or warning → `callout-box`
 - **keywords:** code, code block, code snippet, syntax highlighting, listing, source code, 코드, 코드 블록, 구문 강조, コード, コードブロック, シンタックスハイライト
 - **intent:** EN: show this code as a snippet / make a code block with syntax highlighting / add a code listing with line numbers / format this as a highlighted code panel · KO: 이 코드를 스니펫으로 보여줘 / 구문 강조된 코드 블록 만들어줘 / 줄 번호가 있는 코드 리스팅 추가해줘 / 코드를 하이라이트된 패널로 만들어줘 · JA: このコードをスニペットで見せて / シンタックスハイライト付きのコードブロックにして / 行番号つきのコードリストを追加して / コードをハイライト表示のパネルにして
-- **input:** `{file, lang, lines[].{n, tokens[].{role, text}}}  (role = kw|str|com|fn|plain)`
+- **input:** `{title, file, lang, code|lines[], highlight[], startLine, copyable}`
 - **shapes:** document, report
 - **related:** `diff-block` (diff-block colors add/remove change lines for review; code-snippet colors syntax roles in one finished listing); `quote-block` (quote-block sets apart a prose quotation; code-snippet sets apart a verbatim code listing); `callout-box` (callout-box is a short highlighted notice; code-snippet is a full monospace code panel)
 - **a11y:** figure with aria-label; real <pre>/<code>; the filename and language badge are text; token roles are color-only styling over the actual code text.
@@ -1336,26 +1331,14 @@ Do **not** read all module files up front.
 - **related:** `decision-matrix` (decision-matrix scores options against weighted criteria to pick a winner; raci-matrix assigns responsibility labels, no scoring); `swimlane` (swimlane shows the process flowing between roles over steps; raci-matrix is a static who-does-what grid); `comparison-grid` (comparison-grid contrasts items by attribute; raci-matrix maps tasks × roles to R/A/C/I badges)
 - **a11y:** figure with aria-label; a real <table> with th scope=row/col; badge letters are readable text and a legend spells out R/A/C/I.
 
-### `toc` 🆕 - Pure-CSS table of contents: numbered chapters with a dotted leader running to a page number / anchor label, plus one indented level of subsections; every row is a real anchor link so it doubles as in-document navigation.
-`section: (manual)` · `interaction: none` · `variants: each chapter may nest a .toc-subs subsection list or stand alone; the page column can be dropped for anchor-only navigation`
-
-- **use when:** a report, spec, or handbook needs a two-level contents index; sections map to page numbers or in-page anchors the reader jumps to; you want numbered chapters with indented subsections and leader dots; the document is long enough that readers navigate by section
-- **avoid when:** if walking the reader through a process one ordered step at a time → `stepper`; if pairing terms with their definitions rather than sections with pages → `glossary`; if showing an arbitrary nested hierarchy such as files or an org tree → `tree`
-- **keywords:** table of contents, toc, contents, index, outline, leader dots, 목차, 차례, 목차 리스트, 目次, もくじ, コンテンツ一覧
-- **intent:** EN: make a table of contents / build a toc with page numbers / create a document index with subsections / add a two-level contents list · KO: 목차를 만들어줘 / 페이지 번호가 있는 목차 만들어줘 / 하위 항목이 있는 문서 목차를 만들어줘 / 2단계 차례를 추가해줘 · JA: 目次を作って / ページ番号つきの目次にして / 小見出しつきの目次を作って / 2階層の目次を追加して
-- **input:** `chapters[].{num, label, page, anchor, subs?[].{num, label, page, anchor}}`
-- **shapes:** document, report
-- **related:** `stepper` (stepper walks a process forward step by step; toc is a navigational index of a document's own sections); `glossary` (glossary pairs terms with prose definitions; toc pairs section titles with their page/anchor); `tree` (tree renders an arbitrary nested hierarchy; toc is a fixed two-level chapter/subsection outline with leader dots); `data-table` (data-table is a sortable grid of records; toc is document navigation to sections)
-- **a11y:** root is a <nav aria-label> navigation landmark; an ordered <ol> of chapter and subsection rows, each a keyboard-focusable <a href> anchor link.
-
 ### `api-endpoint` 🆕 - Pure-CSS REST endpoint reference: a method badge (GET/POST/PUT/DELETE tinted success/accent/warning/danger) + mono path with highlighted params, a description, a params table (name/type/required/description), and a response row (status chip + description).
-`section: (manual)` · `interaction: none`
+`section: apiendpoint (alias: api-endpoint)` · `interaction: none`
 
 - **use when:** documenting a REST API endpoint in a tech spec or API reference; showing method, path, parameters, and response together as one unit; path params must be highlighted and required params flagged; presenting several endpoints as consistent self-labeling blocks
 - **avoid when:** if showing a raw code listing or request/response payload example → `code-snippet`; if presenting generic tabular data that may need sort/filter → `data-table`; if listing flat key→value config or metadata facts → `stat-list`
 - **keywords:** api endpoint, rest api, api reference, http method, api docs, request response, openapi, 엔드포인트, API 문서, REST API, 메서드, 요청 응답, APIエンドポイント, APIリファレンス, メソッド, リクエスト レスポンス
 - **intent:** EN: document this REST API endpoint / make an api reference block for GET /users / show the method, path, params, and response / write api docs for these endpoints · KO: 이 REST API 엔드포인트를 문서화해줘 / GET /users의 API 레퍼런스 블록을 만들어줘 / 메서드·경로·파라미터·응답을 보여줘 / 이 엔드포인트들의 API 문서를 작성해줘 · JA: このREST APIエンドポイントをドキュメント化して / GET /users のAPIリファレンスブロックを作って / メソッド・パス・パラメータ・レスポンスを見せて / これらのエンドポイントのAPIドキュメントを書いて
-- **input:** `endpoints[].{method, path, params[].{name,type,required,desc}, desc, response.{status,desc}}`
+- **input:** `{title, endpoints:[{method,path,desc,params[],status,responseTone,responseDesc}]}`
 - **shapes:** document, report
 - **related:** `code-snippet` (code-snippet is a raw code listing; api-endpoint is the structured method+path+params+response reference unit); `data-table` (data-table is a generic (possibly interactive) grid; api-endpoint's params table is a fixed, purpose-built schema); `stat-list` (stat-list is flat key→value facts; api-endpoint composes a badge, path, params table and response into one block)
 - **a11y:** figure with figcaption title; each endpoint is a section, the params table is a real <table> with header cells, method/status are text chips.
@@ -1373,37 +1356,37 @@ Do **not** read all module files up front.
 - **a11y:** figure with aria-label; weekday heads, day numbers and event chips are real text; the grid is CSS only and reads left-to-right by week.
 
 ### `changelog` 🆕 - Pure-CSS release notes: version blocks (mono version number + date + optional latest badge) grouping entries under Added/Changed/Fixed chips (success/accent/warning), one short line per entry.
-`section: (manual)` · `interaction: none`
+`section: changelog` · `interaction: none`
 
 - **use when:** recording what shipped in each versioned release of a product or library; a README / release page needs a version-keyed history of changes; grouping changes per release into Added / Changed / Fixed sections; readers scan by version number and date to see what is new
 - **avoid when:** if showing a chronological stream of events with actor and action (commits, deploys, comments) → `activity-feed`; if showing the added and removed code lines of a change → `diff-block`; if narrating project milestones along a time axis → `timeline`
 - **keywords:** changelog, release notes, version history, what's new, added changed fixed, semver, 변경 이력, 릴리스 노트, 변경사항, 버전 기록, 変更履歴, リリースノート, 更新履歴
 - **intent:** EN: make a changelog for these releases / show the release notes for each version / list what was added, changed, and fixed / turn this into a version history · KO: 변경 이력을 만들어줘 / 버전별 릴리스 노트를 보여줘 / 추가·변경·수정 사항을 정리해줘 / 체인지로그로 정리해줘 · JA: 変更履歴を作って / バージョンごとのリリースノートを見せて / 追加・変更・修正をまとめて / チェンジログにして
-- **input:** `versions[].{version, date, latest?, groups[].{tag(added|changed|fixed), entries[]}}`
+- **input:** `{title, versions:[{version,date,latest,groups:[{tag,tone,entries[]}]}]}`
 - **shapes:** report, document
 - **related:** `activity-feed` (activity-feed is a chronological event stream (actor+action+time); changelog is keyed by version, not by moment); `diff-block` (diff-block shows the actual +/- code lines of one change; changelog summarizes shipped changes as prose entries); `timeline` (timeline narrates milestones along a time axis; changelog is the discrete per-release product-change record)
 - **a11y:** figure with figcaption title; each release is a section with a mono version number and date; entries are real list items.
 
 ### `file-tree` 🆕 - Pure-CSS static directory listing: a mono-font tree with literal box-drawing guides (├─ └─ │), bold accent folder rows vs plain file rows, and optional dimmed right-aligned annotations.
-`section: (manual)` · `interaction: none`
+`section: filetree (alias: file-tree)` · `interaction: none`
 
 - **use when:** documenting a project's folder/file layout in a README or spec; a printed, always-visible directory structure that never collapses; distinguishing folders from files with per-line annotation comments; showing where files live without needing any JavaScript
-- **avoid when:** if the hierarchy should expand/collapse interactively → `tree`; if showing the contents of a file rather than the layout around it → `code-snippet`; if navigating document sections rather than a filesystem → `toc`
+- **avoid when:** if the hierarchy should expand/collapse interactively → `tree`; if showing the contents of a file rather than the layout around it → `code-snippet`; if navigating document sections rather than a filesystem → `tree`
 - **keywords:** file tree, directory structure, folder structure, project layout, ascii tree, repo structure, 파일 트리, 디렉터리 구조, 폴더 구조, 프로젝트 구조, ディレクトリ構成, ファイルツリー, フォルダ構成, ディレクトリ構造
 - **intent:** EN: show the directory structure as a file tree / make an ascii tree of this project layout / document the folder structure / lay out the repo files and folders · KO: 디렉터리 구조를 파일 트리로 보여줘 / 프로젝트 폴더 구조를 그려줘 / 폴더 구조를 문서로 정리해줘 / 아스키 트리로 파일 구조를 보여줘 · JA: ディレクトリ構成をファイルツリーで見せて / プロジェクトのフォルダ構成を図にして / フォルダ構造をドキュメント化して / アスキーツリーでファイル構成を示して
-- **input:** `rows[].{guide(box-drawing prefix), name, isDir, note?}`
+- **input:** `{title, entries:[{path|name,dir,note,children[]}]}`
 - **shapes:** document
-- **related:** `tree` (tree is the interactive collapsible hierarchy via HA.tree; file-tree is the flat, printed, always-open listing); `code-snippet` (code-snippet shows a file's contents; file-tree shows the folder structure around those files); `toc` (toc navigates document sections; file-tree lays out a filesystem with folder/file distinction)
+- **related:** `tree` (tree is the interactive collapsible hierarchy via HA.tree; file-tree is the flat, printed, always-open listing); `code-snippet` (code-snippet shows a file's contents; file-tree shows the folder structure around those files)
 - **a11y:** figure with figcaption title; the tree is a labeled group, guides are box-drawing glyphs, folder/file names are real text.
 
 ### `key-takeaways` 🆕 - Pure-CSS TL;DR panel: an accent-framed box titled 要点 / Key Takeaways with 3–5 numbered rows, each a number badge plus a bold one-line lead and an optional short elaboration.
-`section: (manual)` · `interaction: none`
+`section: takeaways (alias: key-takeaways)` · `interaction: none`
 
 - **use when:** opening a report or deck with the handful of conclusions that matter most; giving readers an 'if you read nothing else' executive summary; distilling a long analysis into 3–5 ordered takeaways; surfacing the decisions or findings a reader should walk away with
 - **avoid when:** if setting off a single aside, tip, warning, or note → `callout-box`; if listing numeric key→value facts or metadata at a glance → `stat-list`; if presenting actionable to-dos the reader should check off → `checklist`
 - **keywords:** key takeaways, tldr, summary, executive summary, highlights, in short, 요점, 핵심 정리, 요약, 핵심 요약, 要点, まとめ, TL;DR, エグゼクティブサマリー
 - **intent:** EN: give me the key takeaways / make a tldr box for this / summarize the main points up front / what are the top conclusions · KO: 핵심 요점을 정리해줘 / TL;DR 박스로 만들어줘 / 주요 내용을 앞에 요약해줘 / 결론을 몇 가지로 뽑아줘 · JA: 要点をまとめて / TL;DRのボックスにして / 主要ポイントを冒頭にまとめて / 結論を数点で示して
-- **input:** `takeaways[3..5].{lead, elaboration?}  (number badges auto 1..N)`
+- **input:** `{title, items:[string|{lead,elab}]}`
 - **shapes:** report, document
 - **related:** `callout-box` (callout-box is a single toned aside; key-takeaways is an ordered set of the top conclusions); `stat-list` (stat-list is numeric key→value facts; key-takeaways is prose conclusions, not metadata); `checklist` (checklist is actionable to-dos with checkboxes; key-takeaways is summary findings, not tasks)
 - **a11y:** figure with figcaption heading; takeaways are an ordered list, number badges are aria-hidden decoration carried by CSS counters.
@@ -1456,6 +1439,18 @@ Do **not** read all module files up front.
 - **related:** `risk-matrix` (risk-matrix scores generic risks on a 2-axis grid; failure-modes is component-anchored operational detail); `deployment-topology` (failure-modes explains what the redundancy in deployment-topology actually buys)
 - **a11y:** severity is a text chip as well as a colour; every field is a labelled key/value row
 
+### `verification-run` - Verification & test execution evidence card: summarizes PASS/FAIL/WARN verdicts across checks with exact CLI commands, counts, durations, and expandable raw log excerpts.
+`section: verification (alias: verification-run)` · `interaction: native <details>/<summary> expanders + header expand-all toggle` · `variants: verdict pass|fail|warn, auto-open on fail`
+
+- **use when:** Reporting tests, builds, lint checks, or browser visual audits executed by an AI; Auto-expanding failed checks while collapsing passing command output; Providing verifiable command evidence alongside code diffs
+- **avoid when:** if Checklist of unexecuted future manual tasks → `checklist`; if Chronological incident events with timestamps → `timeline`
+- **keywords:** verification run, test results, ci evidence, check output, build log, pass fail, audit log
+- **intent:** EN: show test and verification command results with logs / summarize CI pass fail evidence and durations / verification run report · KO: 테스트 및 검증 실행 결과와 로그 증거 보여줘 / 빌드/린트/브라우저 검증 pass fail 요약 / 검증 실행 리포트 · JA: 実行したテストやビルド検証の結果・ログを見せて / PASSやFAILの検証エビデンス一覧 / コマンド検証レポート
+- **input:** `{title, subtitle, verdict, duration, meta[], items:[{name, cmd, status, counts, duration, note, log, open}]}`
+- **shapes:** code-review, verification, postmortem
+- **related:** `review-signoff` (Verification evidence feeds directly into human signoff decisions); `diff-block` (Show what code changed alongside the checks that verified it); `deployment-topology` (deployment-topology maps runtime regions, AZs, and replicas rather than test/verification command runs)
+- **a11y:** Native <details>/<summary> keyboard disclosure; explicit PASS/FAIL text labels paired with status color.
+
 ## content - marketing / product blocks
 
 ### `feature-grid` 🆕 - Grid of icon cards (icon + title + desc) — product/spec capabilities, "what's included", release highlights, or benefits.
@@ -1493,63 +1488,3 @@ Do **not** read all module files up front.
 - **shapes:** landing, report, document
 - **related:** `callout-box` (callout-box flags info/warning/tip admonitions; quote-block gives voice to a named person); `activity-feed` (activity-feed logs timestamped events; quote-block is a single attributed statement, not a stream); `feature-grid` (feature-grid states product capabilities; quote-block often sits beside it carrying social proof)
 - **a11y:** each quote is a <figure> with <blockquote> + <figcaption> attribution; the decorative quotation mark is a ::before glyph (not read).
-
-### `faq` 🆕 - Pure-CSS always-visible FAQ list: each item pairs a round Q badge + question heading with a round A badge + answer paragraph, separated by thin dividers; no toggle, every answer stays open.
-`section: (manual)` · `interaction: none`
-
-- **use when:** a landing page or docs page needs a static frequently-asked-questions block; every answer should stay visible for scanning, not hidden behind a click; presenting a handful (4-5) of question and answer pairs; support, onboarding, or pre-sales objections laid out as Q&A
-- **avoid when:** if long answers should collapse behind an expand/collapse toggle → `collapsible`; if pairing short terms with their definitions rather than questions → `glossary`; if the items are sequential steps in a process to follow in order → `stepper`
-- **keywords:** faq, q&a, questions and answers, frequently asked questions, help, support, 자주 묻는 질문, 질문과 답변, 질의응답, よくある質問, Q&A, 質問と回答
-- **intent:** EN: make an faq section / turn these into a q&a list / build a frequently asked questions block / list common questions and answers · KO: FAQ 섹션 만들어줘 / 자주 묻는 질문으로 정리해줘 / 질문과 답변 목록 만들어줘 / 자주 하는 질문을 정리해줘 · JA: FAQ セクションを作って / よくある質問にまとめて / 質問と回答のリストを作って / Q&A を並べて
-- **input:** `items[2..6].{question, answer}`
-- **shapes:** landing, document
-- **related:** `collapsible` (collapsible is the interactive accordion that hides answers behind a JS toggle; faq keeps every answer open); `glossary` (glossary maps short terms to definitions; faq pairs full questions with prose answers); `feature-grid` (feature-grid is another landing content block; faq is the objection-answering Q&A section alongside it)
-- **a11y:** figure with aria-label; semantic <dl> with <dt> questions and <dd> answers; the Q/A badges are aria-hidden so the question and answer text are read directly.
-
-### `hero-cta` 🆕 - Pure-CSS landing hero: an eyebrow label, a large headline with one accent-highlighted span, a supporting sub-lede, a primary + secondary CTA pair, and a small trust note (e.g. 導入実績) below the buttons.
-`section: (manual)` · `interaction: none` · `variants: the secondary CTA and the trust note are optional; the headline's accent-highlighted span can be dropped for a plain headline`
-
-- **use when:** opening a marketing or product landing page with a conversion block; you need a headline, a lede, and a clear primary call to action; a secondary CTA and a trust/credibility line should sit near the buttons; the page's first screen should drive sign-ups or demos
-- **avoid when:** if the message is an inline notice or aside mid-content, not a page opener → `callout-box`; if filling a zero-data or empty view with a single recovery action → `empty-state`; if listing product features or benefits rather than a single conversion push → `feature-grid`
-- **keywords:** hero, cta, call to action, landing hero, headline, above the fold, 히어로, 행동 유도, 랜딩 히어로, ヒーロー, CTA, ファーストビュー
-- **intent:** EN: make a landing hero / build a hero with a headline and cta / create a hero section with two buttons / write a conversion hero block · KO: 랜딩 히어로 만들어줘 / 헤드라인과 CTA가 있는 히어로 만들어줘 / 버튼 두 개가 있는 히어로 섹션 만들어줘 / 전환용 히어로 블록 만들어줘 · JA: ランディングのヒーローを作って / 見出しと CTA のヒーローを作って / ボタン2つのヒーローセクションにして / コンバージョン用のファーストビューを作って
-- **input:** `{eyebrow, headline{lead, mark, tail}, lede, ctaPrimary, ctaSecondary?, trust?}`
-- **shapes:** landing
-- **related:** `callout-box` (callout-box is an inline notice within content; hero-cta is the page-opening conversion banner); `empty-state` (empty-state fills a zero-data view with a recovery action; hero-cta opens a marketing page to drive conversion); `feature-grid` (feature-grid enumerates capabilities below the fold; hero-cta is the single-focus headline and CTA above it)
-- **a11y:** root is a <section aria-label> banner region; a single <h1> headline with a real inline accent span; both CTAs are keyboard-focusable links.
-
-### `pricing-table` 🆕 - Pure-CSS 3-column pricing block: each plan card shows a name, a big price + period, a feature checklist (checkmark included / dash excluded), and a CTA button; the middle plan is highlighted with an accent border, a lift, and a 人気 badge.
-`section: (manual)` · `interaction: none` · `variants: any plan can be marked .prc-featured (accent border + lift + 人気 badge); each feature row toggles included (checkmark) / excluded (.prc-no dash + strike)`
-
-- **use when:** a pricing page needs side-by-side plan cards the reader chooses between; each plan has a price, a period, and a list of included/excluded features; you want to steer readers toward a recommended (featured) plan; SaaS tiers, subscription levels, or membership options with a CTA per plan
-- **avoid when:** if comparing arbitrary options feature-by-feature without prices in a matrix → `comparison-grid`; if showcasing product capabilities or benefits with no pricing → `feature-grid`; if the data is a plain aligned multi-column table → `data-table`
-- **keywords:** pricing, pricing table, plans, tiers, subscription, price comparison, 요금제, 가격표, 플랜, 料金表, 料金プラン, 価格表
-- **intent:** EN: make a pricing table / show three plans with prices / build a pricing comparison with a popular plan highlighted / lay out our subscription tiers · KO: 요금제 표 만들어줘 / 가격이 있는 3개 플랜을 보여줘 / 인기 플랜이 강조된 요금표 만들어줘 / 구독 플랜을 정리해줘 · JA: 料金表を作って / 価格つきの3プランを見せて / 人気プランを強調した料金表にして / サブスクのプランを並べて
-- **input:** `plans[2..4].{name, price, period, features[].{label, included}, cta, featured?}`
-- **shapes:** landing, report
-- **related:** `comparison-grid` (comparison-grid compares arbitrary options feature-by-feature; pricing-table is the priced one-card-per-plan layout); `feature-grid` (feature-grid showcases features with no prices; pricing-table attaches a price and CTA to each plan); `data-table` (data-table is a generic aligned grid; pricing-table is a plan-selection block whose job is to make the reader pick)
-- **a11y:** figure with aria-label; each plan is an <article> with a heading; the checkmark/dash marks are text glyphs paired with the feature label; every CTA is a real link.
-
-### `logo-wall` 🆕 - Pure-CSS social-proof strip: a 導入企業 kicker over a wrapped row of bordered logo tiles (company names as offline typographic marks, no images) plus an optional volume stat line.
-`section: (manual)` · `interaction: none` · `variants: with or without the stat line`
-
-- **use when:** showing 'trusted by' / adopting companies as credibility on a landing page; proving adoption breadth by displaying many customer names at once; a marketing section needs a logo band with an optional headline number; logos must stay offline, rendered as styled company-name tiles
-- **avoid when:** if explaining product capabilities or benefits in cards → `feature-grid`; if quoting one named customer's testimonial or voice → `quote-block`; if driving the primary conversion with a headline and action button → `hero-cta`
-- **keywords:** logo wall, social proof, trusted by, customers, clients, as seen in, logo strip, 로고월, 도입 기업, 고객사, 신뢰, 레퍼런스, 導入企業, 導入実績, ロゴ, 取引先
-- **intent:** EN: make a trusted-by logo wall / show the companies that use us / add a social proof logo strip / display our customer logos · KO: 도입 기업 로고월을 만들어줘 / 우리를 쓰는 회사들을 보여줘 / 신뢰를 주는 로고 스트립을 넣어줘 / 고객사 로고를 나열해줘 · JA: 導入企業のロゴウォールを作って / 利用中の企業を見せて / 信頼感の出るロゴ帯を入れて / 取引先ロゴを並べて
-- **input:** `kicker, tiles[].{company}, stat?`
-- **shapes:** landing
-- **related:** `feature-grid` (feature-grid explains what the product does; logo-wall proves who already uses it); `quote-block` (quote-block is one customer's voice in depth; logo-wall is credibility-by-volume across many names); `hero-cta` (hero-cta drives the action; logo-wall is the trust band that usually sits just below it)
-- **a11y:** figure with figcaption kicker; tiles carry company names as real text (no images), keeping the artifact self-contained.
-
-### `team-grid` 🆕 - Pure-CSS team roster: a 3–4 column grid of member cards, each with an initials avatar (accent/cat-tinted disc), name, role, one-line bio, and contact/skill chips.
-`section: (manual)` · `interaction: none` · `variants: 3 or 4 columns via --tmg-cols`
-
-- **use when:** introducing the people on a team, company, or project; an about page or proposal needs a 'who we are' gallery of members; showing members at equal weight with photo-free initials avatars; each person needs a name, role, short bio, and a few tags
-- **avoid when:** if profiling one archetypal user in depth (goals, pains, scenario) → `persona-card`; if showing who reports to whom in a reporting hierarchy → `org-chart`; if presenting product capabilities or features in cards, not people → `feature-grid`
-- **keywords:** team, team members, about us, staff, roster, our people, avatars, 팀, 팀원, 구성원, 회사 소개, 멤버, チーム, メンバー, チーム紹介, スタッフ
-- **intent:** EN: make a team grid of our members / show the people on the team with roles / build an about-us member gallery / introduce the team with avatars and bios · KO: 팀원 소개 그리드를 만들어줘 / 구성원과 역할을 보여줘 / 회사 소개용 멤버 갤러리를 만들어줘 / 아바타와 소개로 팀을 소개해줘 · JA: チーム紹介のグリッドを作って / メンバーと役割を見せて / 会社紹介用のメンバー一覧を作って / アバターと経歴でチームを紹介して
-- **input:** `members[].{initials, name, role, bio, tags[], cat?}`
-- **shapes:** landing, document
-- **related:** `persona-card` (persona-card is a deep UX archetype profile (goals/pains); team-grid is a flat, equal-weight roster of real people); `org-chart` (org-chart encodes reporting hierarchy between people; team-grid presents them side by side with no hierarchy); `feature-grid` (feature-grid is a card grid of capabilities; team-grid reuses the grid form for people, with avatars and roles)
-- **a11y:** figure with figcaption title; each card is a group with name, role, and bio as real text; initials avatars are aria-hidden.

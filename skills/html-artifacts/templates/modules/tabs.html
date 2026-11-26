@@ -13,35 +13,39 @@ USAGE: keep exactly one .tab.active + one visible panel; .hidden every other pan
        Repeat the .tab button and the [data-panel] block once per tab (3 shown).
 ============================================================================ -->
 <style data-module="tabs">
-  .tab-bar { display: flex; gap: var(--sp-4); border-bottom: 1px solid var(--border-default); margin-bottom: var(--sp-5); }
-  .tab { position: relative; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: var(--sp-2) var(--sp-2); border-radius: var(--radius-xs) var(--radius-xs) 0 0; font: var(--type-small); font-weight: 600; color: var(--text-muted); cursor: pointer; min-height: 44px; transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .tab-bar { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: var(--sp-3); border-bottom: 1px solid var(--border-default); margin-bottom: var(--sp-5); }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab { flex: none; position: relative; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-xs) var(--radius-xs) 0 0; font: var(--type-small); font-weight: 600; color: var(--text-muted); cursor: pointer; min-height: 44px; white-space: nowrap; transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
   .tab:hover { color: var(--text-secondary); background: color-mix(in srgb, var(--accent) 7%, transparent); border-bottom-color: color-mix(in srgb, var(--accent) 32%, transparent); }
   .tab:active { color: var(--accent); }
-  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-xs); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  /* active tab: rounded accent cap rides the hairline + a faint accent wash for depth */
-  .tab.active { background: color-mix(in srgb, var(--accent) 6%, transparent); }
-  .tab.active::after { content: ""; position: absolute; left: var(--sp-2); right: var(--sp-2); bottom: -1px; height: 2px; border-radius: var(--radius-pill); background: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--radius-xs); }
+  /* style active state from aria-selected (and .active fallback) using border-block-end so Forced Colors Mode keeps the indicator */
+  .tab[aria-selected="true"], .tab.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .tab[aria-selected="true"]::after, .tab.active::after { content: ""; position: absolute; inset: auto var(--sp-2) 0; border-block-end: 2.5px solid var(--accent); border-radius: var(--radius-pill); }
+  /* keep outer tabpanel unboxed so hidden="until-found" renders zero empty strip */
+  .tab-panel { margin: 0; padding: 0; border: 0; background: none; }
+  .tab-panel-body { min-width: 0; }
+  @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
 </style>
 
 <section class="tabs" data-tabs aria-label="{{TABS_LABEL}}">
   <div class="tab-bar" role="tablist">
     <!-- ↓ repeat one button per tab; first is .active + aria-selected="true" -->
-    <button class="tab active" data-tab="{{TAB_ID}}" role="tab" aria-selected="true" aria-controls="panel-{{TAB_ID}}">{{TAB_LABEL}}</button>
-    <button class="tab"        data-tab="{{TAB_ID_2}}" role="tab" aria-selected="false" aria-controls="panel-{{TAB_ID_2}}">{{TAB_LABEL_2}}</button>
-    <button class="tab"        data-tab="{{TAB_ID_3}}" role="tab" aria-selected="false" aria-controls="panel-{{TAB_ID_3}}">{{TAB_LABEL_3}}</button>
+    <button class="tab active" type="button" data-tab="{{TAB_ID}}" role="tab" aria-selected="true" tabindex="0">{{TAB_LABEL}}</button>
+    <button class="tab"        type="button" data-tab="{{TAB_ID_2}}" role="tab" aria-selected="false" tabindex="-1">{{TAB_LABEL_2}}</button>
+    <button class="tab"        type="button" data-tab="{{TAB_ID_3}}" role="tab" aria-selected="false" tabindex="-1">{{TAB_LABEL_3}}</button>
     <!-- ↑ repeat -->
   </div>
 
-  <!-- ↓ repeat one panel per tab; all but the first carry .hidden -->
-  <div class="stack" data-panel="{{TAB_ID}}" id="panel-{{TAB_ID}}" role="tabpanel" aria-label="{{TAB_LABEL}}">
-    {{PANEL_CONTENT}}
+  <!-- ↓ repeat one .tab-panel per tab; all but the first carry hidden="until-found" -->
+  <div class="tab-panel" data-panel="{{TAB_ID}}" id="panel-{{TAB_ID}}" role="tabpanel" aria-label="{{TAB_LABEL}}" tabindex="0">
+    <div class="tab-panel-body stack">{{PANEL_CONTENT}}</div>
   </div>
-  <div class="stack hidden" data-panel="{{TAB_ID_2}}" id="panel-{{TAB_ID_2}}" role="tabpanel" aria-label="{{TAB_LABEL_2}}">
-    {{PANEL_CONTENT_2}}
+  <div class="tab-panel" data-panel="{{TAB_ID_2}}" id="panel-{{TAB_ID_2}}" role="tabpanel" aria-label="{{TAB_LABEL_2}}" hidden="until-found">
+    <div class="tab-panel-body stack">{{PANEL_CONTENT_2}}</div>
   </div>
-  <div class="stack hidden" data-panel="{{TAB_ID_3}}" id="panel-{{TAB_ID_3}}" role="tabpanel" aria-label="{{TAB_LABEL_3}}">
-    {{PANEL_CONTENT_3}}
+  <div class="tab-panel" data-panel="{{TAB_ID_3}}" id="panel-{{TAB_ID_3}}" role="tabpanel" aria-label="{{TAB_LABEL_3}}" hidden="until-found">
+    <div class="tab-panel-body stack">{{PANEL_CONTENT_3}}</div>
   </div>
   <!-- ↑ repeat -->
 </section>

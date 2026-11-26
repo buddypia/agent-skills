@@ -32,10 +32,12 @@
       ]
     },
     {
-      "type": "html",
-      "html": "<!-- module: key-takeaways (hand-pasted, filled) -->\n<figure class=\"ktw card-outlined\" aria-label=\"本日の論点（決めたいこと）\">\n  <figcaption class=\"ktw-title\">本日の論点（決めたいこと）</figcaption> <!-- e.g. 要点 -->\n  <ol class=\"ktw-list\">\n\n    <!-- ── one .ktw-row per takeaway (3-5 total; badge numbers auto) ───────── -->\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">① 次期ECプラットフォームの方式を3案から1つ選定する</span>          <!-- e.g. 導入により問い合わせ対応時間が42%短縮 -->\n        <span class=\"ktw-elab\">内製刷新 / SaaS-A / SaaS-B（ヘッドレス）の3案を比較。</span>          <!-- e.g. 主因はテンプレート返信の自動提案。3か月の実測値。 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">② 初期投資と回収計画の承認</span>          <!-- e.g. 初期費用ゼロで既存フローに追加可能 -->\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">③ 移行開始時期とピーク商戦(11月)回避の可否</span>          <!-- e.g. 次の意思決定はPoC対象部署の選定 -->\n        <span class=\"ktw-elab\">本日決定できれば9月着手・翌2月本番が射程。</span>          <!-- e.g. 候補はサポート部とCS部。7月中に決定。 -->\n      </div>\n    </li>\n    <!-- ↑ repeat: one .ktw-row per takeaway -->\n  </ol>\n</figure>",
-      "cssModules": [
-        "key-takeaways"
+      "type": "takeaways",
+      "title": "本日の論点（決めたいこと）",
+      "items": [
+        { "lead": "① 次期ECプラットフォームの方式を3案から1つ選定する", "elab": "内製刷新 / SaaS-A / SaaS-B（ヘッドレス）の3案を比較。" },
+        { "lead": "② 初期投資と回収計画の承認" },
+        { "lead": "③ 移行開始時期とピーク商戦(11月)回避の可否", "elab": "本日決定できれば9月着手・翌2月本番が射程。" }
       ]
     },
     {

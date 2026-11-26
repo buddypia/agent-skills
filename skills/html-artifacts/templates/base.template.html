@@ -66,12 +66,13 @@
 </head>
 <body>
   <header class="page-header container">
-    <button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="{{LABEL_TOGGLE_THEME}}"
-            style="position:absolute;top:var(--sp-5);right:var(--sp-5)">◐ {{LABEL_THEME}}</button>
-    <div class="ha-viewport-controls no-print" data-target-controls aria-label="{{LABEL_VIEWPORT_CONTROLS}}">
-      <button class="btn-ghost btn-sm" data-viewport-target="phone" type="button">{{LABEL_PHONE}}</button>
-      <button class="btn-ghost btn-sm" data-viewport-target="tablet" type="button">{{LABEL_TABLET}}</button>
-      <button class="btn-ghost btn-sm" data-viewport-target="desktop" type="button">{{LABEL_DESKTOP}}</button>
+    <div class="header-actions no-print">
+      <div class="ha-viewport-controls" data-target-controls aria-label="{{LABEL_VIEWPORT_CONTROLS}}">
+        <button class="btn-ghost btn-sm" data-viewport-target="phone" type="button">{{LABEL_PHONE}}</button>
+        <button class="btn-ghost btn-sm" data-viewport-target="tablet" type="button">{{LABEL_TABLET}}</button>
+        <button class="btn-ghost btn-sm" data-viewport-target="desktop" type="button">{{LABEL_DESKTOP}}</button>
+      </div>
+      <button class="btn-ghost btn-sm" data-theme-toggle type="button" aria-label="{{LABEL_TOGGLE_THEME}}">◐ {{LABEL_THEME}}</button>
     </div>
     <p class="eyebrow">{{EYEBROW}}</p>
     <h1>{{TITLE}}</h1>

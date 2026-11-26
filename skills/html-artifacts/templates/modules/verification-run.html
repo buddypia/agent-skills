@@ -1,0 +1,107 @@
+<!-- ==========================================================================
+     module: verification-run
+     Verification & test execution evidence card with expandable command logs.
+     Uses native <details> — zero custom JS required.
+     ========================================================================== -->
+<style data-module="verification-run">
+.vr { display: grid; gap: var(--sp-3); padding: var(--sp-5); border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  .vr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+  .vr-title-wrap { display: grid; gap: 2px; min-width: 0; }
+  .vr-title { margin: 0; font: var(--type-h3); color: var(--text-primary); }
+  .vr-sub { margin: 0; font: var(--type-small); color: var(--text-muted); }
+  .vr-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+  .vr-verdict { padding: 3px var(--sp-3); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 800; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; border: 1px solid transparent; }
+  .vr-verdict.-pass { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-success) 38%, var(--border-default)); }
+  .vr-verdict.-fail { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 14%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-danger) 38%, var(--border-default)); }
+  .vr-verdict.-warn { color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 16%, var(--bg-surface)); border-color: color-mix(in srgb, var(--color-warning) 38%, var(--border-default)); }
+  .vr-stat { font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); padding: 3px var(--sp-2); border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); }
+  .vr-list { display: grid; gap: var(--sp-2); }
+  .vr-item { border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-card); overflow: hidden; }
+  .vr-item[data-status="fail"] { border-color: color-mix(in srgb, var(--color-danger) 48%, var(--border-default)); }
+  .vr-row { list-style: none; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); cursor: pointer; }
+  .vr-row::-webkit-details-marker { display: none; }
+  .vr-badge { padding: 2px 8px; border-radius: var(--radius-xs); font: var(--type-caption); font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; }
+  .vr-item[data-status="pass"] .vr-badge { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 14%, var(--bg-surface)); }
+  .vr-item[data-status="fail"] .vr-badge { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 14%, var(--bg-surface)); }
+  .vr-item[data-status="warn"] .vr-badge { color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 16%, var(--bg-surface)); }
+  .vr-item[data-status="skip"] .vr-badge { color: var(--text-muted); background: var(--bg-muted); }
+  .vr-main { display: grid; gap: 2px; min-width: 0; }
+  .vr-name { font: var(--type-small); font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+  .vr-cmd { font: 12px/1.4 var(--font-mono); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vr-meta { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; font: var(--type-caption); font-family: var(--font-mono); color: var(--text-secondary); }
+  .vr-caret { color: var(--text-muted); font-size: 11px; transition: transform var(--dur-fast) var(--ease); }
+  .vr-item[open] .vr-caret { transform: rotate(90deg); }
+  .vr-body { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4) var(--sp-4); border-top: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .vr-note { margin: 0; font: var(--type-small); color: var(--text-secondary); }
+  .vr-log { margin: 0; padding: var(--sp-3); border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border-subtle); font: 12px/1.55 var(--font-mono); color: var(--text-primary); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  @media (max-width: 720px) {
+    .vr { padding: var(--sp-4); }
+    .vr-row { grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); padding: var(--sp-3); }
+    .vr-meta { grid-column: 2 / 4; }
+  }
+</style>
+
+<section class="vr" aria-label="検証・テスト実行エビデンス">
+  <div class="vr-head">
+    <div class="vr-title-wrap">
+      <h3 class="vr-title">検証実行レポート</h3>
+      <p class="vr-sub">変更後に実行した自動チェックと目視確認の実測ログです。</p>
+    </div>
+    <div class="vr-summary">
+      <span class="vr-verdict -pass">PASS</span>
+      <span class="vr-stat">3 passed</span>
+      <span class="vr-stat">0 failed</span>
+      <span class="vr-stat">4.8s</span>
+    </div>
+  </div>
+
+  <div class="vr-list">
+    <details class="vr-item" data-status="pass">
+      <summary class="vr-row">
+        <span class="vr-badge">PASS</span>
+        <span class="vr-main">
+          <span class="vr-name">単体テスト (auth &amp; middleware)</span>
+          <code class="vr-cmd">npm test -- auth/verify.test.ts middleware/rateLimit.test.ts</code>
+        </span>
+        <span class="vr-meta"><span>28 / 28 passed</span><span>1.9s</span></span>
+        <span class="vr-caret" aria-hidden="true">▸</span>
+      </summary>
+      <div class="vr-body">
+        <p class="vr-note">スキップ・モック緩和なし。clock skew 境界値 (±30s) と Redis fallback の全ケース通過。</p>
+        <pre class="vr-log"><code>✔ verifyToken rejects 31s expired token (12ms)
+✔ rateLimit increments shared bucket and alerts on ECONNREFUSED (8ms)</code></pre>
+      </div>
+    </details>
+
+    <details class="vr-item" data-status="pass">
+      <summary class="vr-row">
+        <span class="vr-badge">PASS</span>
+        <span class="vr-main">
+          <span class="vr-name">型チェック &amp; Lint</span>
+          <code class="vr-cmd">npm run typecheck &amp;&amp; npm run lint</code>
+        </span>
+        <span class="vr-meta"><span>0 errors</span><span>2.1s</span></span>
+        <span class="vr-caret" aria-hidden="true">▸</span>
+      </summary>
+      <div class="vr-body">
+        <pre class="vr-log"><code>tsc --noEmit: 0 errors
+eslint src/: 0 errors, 0 warnings</code></pre>
+      </div>
+    </details>
+
+    <details class="vr-item" data-status="pass">
+      <summary class="vr-row">
+        <span class="vr-badge">PASS</span>
+        <span class="vr-main">
+          <span class="vr-name">再認証バナー E2E 確認</span>
+          <code class="vr-cmd">playwright test e2e/session-notice.spec.ts</code>
+        </span>
+        <span class="vr-meta"><span>3 / 3 scenarios</span><span>0.8s</span></span>
+        <span class="vr-caret" aria-hidden="true">▸</span>
+      </summary>
+      <div class="vr-body">
+        <p class="vr-note">401 レスポンス後も入力欄の文字列が保持されることを確認。</p>
+      </div>
+    </details>
+  </div>
+</section>

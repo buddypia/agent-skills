@@ -37,15 +37,18 @@ Caveat: The internal lookups of `filter` and `kanban` partly use `document.query
 
 | Behavior | Trigger attribute | Related class / child element | JS needed | Keyboard support |
 | --- | --- | --- | --- | --- |
-| Theme toggle | `[data-theme-toggle]` | - | Yes | Click only (Enter/Space via button) |
-| Sortable table | `table[data-sortable]` | `<th>` in `<thead>` | Yes | (described below / needs enhancement) |
+| Theme toggle | `[data-theme-toggle]` | - | Yes | Button (`Enter`/`Space`), syncs `aria-pressed` and `<meta name="color-scheme">` |
+| Sortable table | `table[data-sortable]` | `<th scope="col"><button type="button" class="dt-sort-btn">` | Yes | **Full support** (button focusable, sets `aria-sort`, `Intl.Collator`, `role="status"` live region) |
 | Live filter | `[data-filter]` + `[data-filter-in="selector"]` | toggles `.hidden` on targets inside the input's own `[data-filter-scope]` / `.data-table` (else the document) | Yes | `input` event |
 | Kanban DnD | `[data-kanban]` | `[data-col]` > `.kanban-cards` > `.kanban-card` (`.dragging` / `.drop-target`) | Yes | (described below / pointer only) |
 | Page-wide switcher | `[data-switch-group]` + `[data-switch]` | `[data-switch-for]` + `[data-switch-case]`, optional `data-switch-only` | Yes | via native button |
 | Copy | `[data-copy]` / `[data-copy-text]` | - | Yes | via button |
 | Slider | `[data-slider="--var"]` | `[data-out]` / `data-unit` | Yes | range standard key operation |
-| Tabs | `[data-tabs]` | `.tab(.active)[data-tab]` / `[data-panel]` | Yes | via button |
+| Tabs | `[data-tabs]` | `.tab(.active)[data-tab]` / `.tab-panel[data-panel]` (`hidden="until-found"`) | Yes | **Full support** (roving `tabindex`, `ArrowLeft`/`ArrowRight`/`Home`/`End`, `beforematch`) |
 | Collapsible | `[data-collapsible]` (optional) | native `<details>`/`<summary>` | **No** | native support |
+| Details toggle | `[data-details-toggle]` | optional `[data-details-target]` | Yes | via `<button>` (`aria-pressed`) |
+| Walkthrough | `[data-walkthrough]` | `[data-walk-step]` / `[data-walk-target]` / `[data-walk-prev]` / `[data-walk-next]` | Yes | via step `<button>` + arrow keys (`aria-current="step"`) |
+| Review signoff | `[data-review]` | `[data-review-item]` / `[data-review-status]` / `[data-review-note]` / `[data-review-output]` / `[data-review-copy]` | Yes | native `<button aria-pressed>` + `<textarea>` |
 | Zoom + pan | `[data-zoompan]` (stage wrapping `svg > g[data-viewport]`) | `[data-zoom-in]` / `[data-zoom-out]` / `[data-zoom-reset]` / `[data-zoom-readout]`, opts `data-zoom-min` / `data-zoom-max` (`.panning`) | Yes | `+` `-` `0` on the focused stage (give the stage `tabindex="0"`) |
 | Drag nodes | `svg[data-draggable]` + `g[data-node="id"]` | edges `[data-edge][data-from][data-to]` / labels `[data-edge-label="FROM-TO"]` / `[data-drag-reset]` (`.dragging`) | Yes | **Full support** (JS adds `tabindex="0"`; arrows move 8px, Shift = 24px) |
 | Tree collapse | `[data-tree]` + `[data-tree-toggle]` | `[data-tree-node]` > `[data-children]` (`.collapsed` / `.is-collapsed`, `.tw-caret`) | Yes | Enter/Space (JS adds `role="button"` + `tabindex="0"` + `aria-expanded`) |
@@ -71,64 +74,53 @@ Caveat: The internal lookups of `filter` and `kanban` partly use `document.query
 
 ### 3.1 Theme toggle - `HA.themeToggle`
 
-Clicking toggles `<html data-theme>` to `dark-focus`. The original theme is saved to `html.dataset.prevTheme` and restored on a second click (falling back to `birchline` if unset).
+Clicking toggles `<html data-theme>` between its light/dark counterpart (`THEME_PAIR`), saves `html.dataset.prevTheme`, sets `aria-pressed` on `[data-theme-toggle]`, and updates `<meta name="color-scheme">` content after explicit toggling.
 
 **Markup contract**
 
 ```html
-<button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="Toggle dark mode">◐ Theme</button>
+<button type="button" class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">◐ Theme</button>
 ```
 
 | Behavior | Detail |
 | --- | --- |
 | Target | A click on any element with `[data-theme-toggle]` |
-| ON | Save the current theme to `prevTheme` → `data-theme="dark-focus"` |
-| OFF | Return `data-theme` to `prevTheme` (or `birchline` if absent) |
-| Theme definition source | `[data-theme="…"]` in `themes.css` - 10 themes, `birchline` is the default and `dark-focus` is the toggle target (full palette details in `reference/03`) |
+| ON / OFF | Swaps to `THEME_PAIR[cur]` or restores `prevTheme`, updates `aria-pressed` and `<meta name="color-scheme">` (`dark`/`light`) |
+| Theme definition source | `[data-theme="…"]` in `themes.css` - 10 themes (full palette details in `reference/03`) |
 
 **Accessibility**
-- Always apply it to a `<button>` (to get native focus / Enter·Space activation).
-- Add an `aria-label` (the glyph `◐` alone cannot be read aloud).
-- It is conventional to also use `no-print` so it disappears when printing (as is the default in `base.template.html`).
-- The focus ring is guaranteed by `reset.css`.
+- Always apply it to a `<button type="button">` with `aria-label` and `aria-pressed`.
+- Keep `<meta name="color-scheme" content="light dark">` as the initial document default so UA preferences are respected before user override.
 
 ---
 
 ### 3.2 Sortable table - `HA.sortable`
 
-Makes each `<th>` of the first row of `table[data-sortable]`'s `<thead>` clickable, sorting the `<tbody>` rows ascending/descending by column content.
+Wires each `<th scope="col">` in the first row of `table[data-sortable]`'s `<thead>` with a `<button type="button" class="dt-sort-btn">` (auto-wrapped if plain `<th>` text was authored), sorting `<tbody>` rows ascending/descending by column content and announcing the sort via a single `role="status"` live region.
 
 | Behavior | Detail |
 | --- | --- |
-| Click target | `table.tHead.rows[0].cells` (= the cells of the header's first row) |
-| Numeric detection | Strip `[^0-9.\-]` from the cell string and `parseFloat`. If both cells are numeric, compare numerically; otherwise `localeCompare` |
-| Direction toggle | Each click alternates `th.dataset.sort` between `asc`/`desc`. The `data-sort` of other `<th>`s is removed |
-| Reorder | Re-place the sorted rows with `tbody.appendChild` |
-| Attributes added | `role="button"`, `style.cursor="pointer"`, `data-sort` on `th` |
+| Click target | `button.dt-sort-btn` inside `<th scope="col">` (`table.tHead.rows[0].cells`; headers with `data-nosort` stay static) |
+| Numeric vs string | Parses finite numbers/currency/percentages (`data-sort-value` supported) cleanly; falls back to `Intl.Collator(lang, { numeric: true, sensitivity: "base" })` |
+| Direction toggle | Clears `aria-sort` / `data-sort` from sibling `<th>`s and sets `aria-sort="ascending"|"descending"` (+ `data-sort="asc"|"desc"`) on the active `<th>` |
+| Reorder | Re-orders existing `<tr>` DOM nodes with `tbody.appendChild` via Schwartzian key caching; calls `table._repage()` when paginated |
 
 **Markup contract** (conforming to the `data-table` module)
 
 ```html
 <table data-sortable>
-  <thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead>
+  <thead><tr><th scope="col"><button type="button" class="dt-sort-btn">Name</button></th></tr></thead>
   <tbody>
-    <tr class="dt-row"><td>…</td><td>…</td><td>…</td></tr>
+    <tr class="dt-row"><td>…</td></tr>
   </tbody>
 </table>
 ```
 
-The sort-direction caret is drawn by the `data-table` module's CSS:
-
-```css
-.data-table th[data-sort="asc"]::after  { content: " \25B2"; color: var(--accent); }
-.data-table th[data-sort="desc"]::after { content: " \25BC"; color: var(--accent); }
-```
+The sort-direction caret is drawn by the `data-table` module's CSS via `th[aria-sort="ascending"|"descending"] .dt-sort-btn::after`.
 
 **Accessibility**
-- The JS adds `role="button"`, but the `<th>` itself is not focusable. If you require full keyboard operation, there is room to additionally add
-  `tabindex="0"` and Enter/Space on `keydown` (currently it assumes pointer use).
-- Always use `<thead>` for the header (because `table.tHead` is referenced; without `<thead>` sorting is impossible).
-- To convey the sort state to assistive technology, also using `aria-sort` is desirable (currently only the visual caret).
+- Interactive sort trigger is a native `<button type="button">`, never click-wrapped `<th>` with `role="button"`.
+- Uses semantic `aria-sort` on the active `<th scope="col">` only and announces updates in a single polite `role="status"` live region.
 
 ---
 
@@ -281,33 +273,41 @@ For prototype tuner purposes.
 
 ### 3.7 Tabs - `HA.tabs`
 
-Clicking a button in the tab bar shows exactly one corresponding `[data-panel]`.
+Switches active tab and reveals the matching `[data-panel]`, using WAI-ARIA roving `tabindex`, `ArrowLeft`/`ArrowRight`/`Home`/`End` keyboard navigation, `hidden="until-found"`, and `beforematch` so browser Find-in-Page opens matched tabs automatically.
 
 | Behavior | Detail |
 | --- | --- |
 | Button set | `group.querySelectorAll(".tab")` |
-| On click | Remove `.active` + `aria-selected="false"` from all `.tab`, add `.hidden` to all `[data-panel]` |
-| Activation | Add `.active` + `aria-selected="true"` to the clicked `.tab`, remove `.hidden` from the `[data-panel]` matching the `data-tab` value |
-| Linking key | `button[data-tab="X"]` ↔ `[data-panel="X"]` (matched by the same ID string) |
+| Activation | Updates `aria-selected`, `.active`, and roving `tabindex` (`"0"` active, `"-1"` inactive) |
+| Panel visibility | For `.tab-panel` (or `[data-until-found]`): removes `hidden` on match and sets `hidden="until-found"` on others (padding/borders live on inner `.tab-panel-body` so collapsed panels stay hidden cleanly); legacy `[data-panel]` falls back to `.hidden` |
+| Keyboard & Find | `ArrowLeft`/`ArrowRight`/`Home`/`End` move focus & select; `beforematch` activates the containing tab |
 
 **Markup contract** (conforming to the `tabs` module)
 
 ```html
 <section class="tabs" data-tabs aria-label="Sections">
   <div class="tab-bar" role="tablist">
-    <button class="tab active" data-tab="a" role="tab" aria-selected="true"  aria-controls="panel-a">A</button>
-    <button class="tab"        data-tab="b" role="tab" aria-selected="false" aria-controls="panel-b">B</button>
+    <button type="button" class="tab active" id="tab-a" data-tab="a" role="tab" aria-selected="true" tabindex="0">A</button>
+    <button type="button" class="tab" id="tab-b" data-tab="b" role="tab" aria-selected="false" tabindex="-1">B</button>
   </div>
-  <div class="stack"        data-panel="a" id="panel-a" role="tabpanel">…</div>
-  <div class="stack hidden" data-panel="b" id="panel-b" role="tabpanel">…</div>
+  <div class="tab-panel" data-panel="a" id="panel-a" role="tabpanel" aria-labelledby="tab-a"><div class="tab-panel-body stack">…</div></div>
+  <div class="tab-panel" data-panel="b" id="panel-b" role="tabpanel" aria-labelledby="tab-b" hidden="until-found"><div class="tab-panel-body stack">…</div></div>
 </section>
 ```
 
-**Accessibility**
-- The initial state has **only one** `.tab.active` + `aria-selected="true"`, and panels other than the corresponding one are `.hidden`.
-- Add `role="tablist" / tab / tabpanel`, `aria-controls`, and `aria-selected` (the JS updates `aria-selected`).
-- Using `<button>` secures keyboard activation (Enter/Space). Left/right arrow tab movement is not implemented, so
-  if you need the full WAI-ARIA tab pattern, there is room to add a separate key handler.
+---
+
+### 3.19 Expand/Collapse All Details - `HA.detailsToggle`
+
+Bound to `[data-details-toggle]` (emitted in header `.header-actions` whenever 3+ `<details>` appear on the page). Opens or closes matching `<details>` (default `main details`) and syncs `aria-pressed` and label.
+
+### 3.20 Annotated Walkthrough - `HA.walkthrough`
+
+Bound to `[data-walkthrough]`: clicking or using arrow keys on `[data-walk-step="id"]` (or clicking `[data-walk-target="id"]`) activates the step (`aria-current="step"`, `.is-active`), dims non-matching targets (`.is-dimmed`), and updates `[data-walk-prev]`/`[data-walk-next]`/`[data-walk-readout]`.
+
+### 3.21 Human Review Signoff - `HA.review`
+
+Bound to `[data-review]`: lets reviewers toggle `[data-review-status="ok"|"fix"|"hold"]` per `[data-review-item="id"]`, write notes in `[data-review-note]`, filter via `[data-review-filter]`, persist state safely in `localStorage`, update header `[data-review-jump] [data-review-badge]`, and copy structured Markdown feedback (`[data-review-output]` + `[data-review-copy]`).
 
 ---
 

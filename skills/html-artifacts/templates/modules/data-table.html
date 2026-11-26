@@ -21,13 +21,22 @@ USAGE: repeat the <tr class="dt-row"> block once per row inside <tbody>.
   .dt-search:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border-default)); }
   .dt-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
   .dt-search::placeholder { color: var(--text-muted); }
-  .data-table th { cursor: pointer; user-select: none; white-space: nowrap; transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .data-table th { user-select: none; white-space: nowrap; transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .data-table th:has(> .dt-sort-btn) { padding: 0; }
+  .data-table .dt-sort-btn { appearance: none; background: none; border: 0; margin: 0; width: 100%; min-height: 36px; padding: var(--sp-3); font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: flex-start; gap: var(--sp-1); text-align: left; }
+  .data-table .dt-compact .dt-sort-btn { padding: var(--sp-2); min-height: 30px; }
+  .data-table th.num .dt-sort-btn { justify-content: flex-end; text-align: right; }
+  .data-table th.num-badge .dt-sort-btn { justify-content: center; text-align: center; }
+  .data-table .dt-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--radius-xs); }
   /* hover affordance on the clickable header - tints the cell + reveals a hairline accent rail */
   .data-table thead th:hover { color: var(--text-secondary); background: color-mix(in srgb, var(--accent) 6%, transparent); box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
   /* active sort column carries a full accent underline + accent label */
+  .data-table th[aria-sort="ascending"], .data-table th[aria-sort="descending"],
   .data-table th[data-sort="asc"], .data-table th[data-sort="desc"] { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
-  .data-table th[data-sort="asc"]::after  { content: " \25B2"; color: var(--accent); font-size: .85em; }
-  .data-table th[data-sort="desc"]::after { content: " \25BC"; color: var(--accent); font-size: .85em; }
+  .data-table th[aria-sort="ascending"] .dt-sort-btn::after,
+  .data-table th[data-sort="asc"]:not(:has(> .dt-sort-btn))::after  { content: " \25B2"; color: var(--accent); font-size: .85em; }
+  .data-table th[aria-sort="descending"] .dt-sort-btn::after,
+  .data-table th[data-sort="desc"]:not(:has(> .dt-sort-btn))::after { content: " \25BC"; color: var(--accent); font-size: .85em; }
   /* selected-row refinement - softer accent tint reinforcing the inherited accent rail */
   .data-table tbody tr.selected:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
   /* numeric columns (class="num" - the builder detects them): right-aligned tabular figures so magnitudes line up */

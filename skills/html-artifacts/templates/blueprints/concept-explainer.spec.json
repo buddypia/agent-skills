@@ -1,0 +1,127 @@
+{
+  "title": "LoomQueue 分散ジョブキューの仕組みと配送保証",
+  "theme": "dark-focus",
+  "layout": "stack",
+  "header": "compact",
+  "density": "comfortable",
+  "lang": "ja",
+  "target": "document",
+  "eyebrow": "MECHANISM EXPLAINER",
+  "subtitle": "可視性タイムアウト付きリース制御により At-least-once 配送と安全なリトライを実現する内部設計の解説",
+  "footer": "LoomQueue Architecture Docs · Concept Explainer Blueprint",
+  "sections": [
+    {
+      "type": "callout",
+      "variant": "tldr",
+      "title": "一言でいうと",
+      "body": "LoomQueue は DB の行ロックを長時間保持せず、「期間限定のリース（Visibility Timeout）」をワーカーに貸し出す設計です。ワーカーが途中でクラッシュしてもリース期限切れで自動的に別のワーカーへ再割り当てされ、完了したジョブは ACK で確定削除されます。"
+    },
+    {
+      "type": "walkthrough",
+      "title": "処理メカニズム ウォークスルー",
+      "subtitle": "ステップをクリックしてジョブのライフサイクルを順番に辿れます。",
+      "steps": [
+        { "id": "1", "title": "1. リース取得 (Atomic Claim)", "label": "POST /v1/leases", "code": "UPDATE jobs SET status='leased', lease_until=NOW()+30s WHERE status='pending' LIMIT 1", "desc": "SKIP LOCKED を使い他ワーカーと競合せず1件だけリース状態へ遷移します。", "meta": "src/broker/claim.ts" },
+        { "id": "2", "title": "2. ワーカー実行 & ハートビート延長", "label": "WorkerRuntime", "code": "extendLease(jobId, leaseToken, +30s)", "desc": "処理に30秒以上かかるジョブはリース期限が切れる前にトークン付きで延長します。", "meta": "src/worker/runner.ts" },
+        { "id": "3", "title": "3. 完了 ACK による確定削除", "label": "POST /v1/ack", "code": "DELETE / UPDATE status='acked' WHERE id=$1 AND lease_token=$2", "desc": "同じ lease_token を検証することで、期限切れになった古いワーカーからの遅い完了通知を拒否します。", "meta": "src/broker/ack.ts" },
+        { "id": "4", "title": "4. 超過リトライと DLQ 退避", "label": "DeadLetterSweeper", "code": "if (attempt >= maxAttempts) moveToDLQ(jobId)", "desc": "毒メッセージによる無限ループを防ぐため、最大試行回数到達後は DLQ に隔離します。", "meta": "src/sweeper/requeue.ts" }
+      ]
+    },
+    {
+      "type": "sequence",
+      "title": "リース取得〜ACK の時系列シーケンス",
+      "actors": [
+        { "id": "producer", "label": "Producer" },
+        { "id": "broker", "label": "LeaseBroker" },
+        { "id": "worker", "label": "Worker" },
+        { "id": "dlq", "label": "DLQ Store" }
+      ],
+      "messages": [
+        { "from": "producer", "to": "broker", "label": "enqueue(payload)" },
+        { "from": "worker", "to": "broker", "label": "claim(visibility=30s)" },
+        { "from": "broker", "to": "worker", "type": "return", "label": "job + leaseToken" },
+        { "from": "worker", "to": "broker", "label": "ack(jobId, leaseToken)" },
+        { "from": "broker", "to": "dlq", "label": "if attempt > max -> quarantine" }
+      ],
+      "notes": [
+        { "actor": "broker", "text": "旧トークンでの ACK は 409 Conflict で安全に拒否" }
+      ]
+    },
+    {
+      "type": "statediagram",
+      "title": "ジョブ状態遷移図",
+      "states": [
+        { "id": "pending", "label": "Pending", "initial": true },
+        { "id": "leased", "label": "Leased (30s)" },
+        { "id": "acked", "label": "Acked", "tone": "success", "final": true },
+        { "id": "dlq", "label": "Dead Letter", "tone": "danger" }
+      ],
+      "transitions": [
+        { "from": "pending", "to": "leased", "label": "claim()" },
+        { "from": "leased", "to": "acked", "label": "ack()" },
+        { "from": "leased", "to": "pending", "label": "timeout / nack" },
+        { "from": "leased", "to": "dlq", "label": "maxAttempts" }
+      ]
+    },
+    {
+      "type": "code",
+      "title": "実装コード例（Fence Token 検証付き ACK）",
+      "file": "src/broker/ack.ts",
+      "lang": "typescript",
+      "highlight": [4, 7],
+      "code": "// Fence token による遅着 ACK の抑止\nexport async function ackJob(db: DB, jobId: string, leaseToken: string) {\n  const res = await db.query(\n    `UPDATE jobs SET status = 'acked' WHERE id = $1 AND status = 'leased' AND lease_token = $2`,\n    [jobId, leaseToken]\n  );\n  if (res.rowCount === 0) throw new ConflictError('stale lease token');\n}"
+    },
+    {
+      "type": "filetree",
+      "title": "主要ソースコード構成",
+      "entries": [
+        { "path": "loom-queue/", "dir": true, "note": "# パッケージルート" },
+        { "path": "loom-queue/src/broker/claim.ts", "note": "# SKIP LOCKED 取得" },
+        { "path": "loom-queue/src/broker/ack.ts", "note": "# トークン検証付き完了" },
+        { "path": "loom-queue/src/worker/runner.ts", "note": "# 実行と延長ハートビート" },
+        { "path": "loom-queue/src/sweeper/requeue.ts", "note": "# 期限切れ回収 / DLQ転送" }
+      ]
+    },
+    {
+      "type": "collapsible",
+      "title": "よくある設計上の疑問 (Q&A)",
+      "items": [
+        { "summary": "なぜ厳密な Exactly-once ではなく At-least-once にしているのか？", "body": "<p>ネットワーク分断やワーカー強制終了時に重複実行をゼロにすることは分散システム上コストが過大になるため、キュー側は At-least-once を保証し、業務ハンドラ側を冪等に保つ方が全体のスループットと単純性に優れます。</p>" },
+        { "summary": "ワーカーが ACK を返す直前にタイムアウトした場合は？", "body": "<p>Sweeper が新しい lease_token を発行して別ワーカーに再配付済みです。遅れて到着した古いワーカーの ACK は token 不一致で 409 Conflict となるため、進行中の新しい処理を誤って消すことはありません。</p>" }
+      ]
+    }
+  ],
+  "_recipe": {
+    "id": "concept-explainer",
+    "name": "仕組み・コード解説ドキュメント",
+    "genre": "技術解説",
+    "purpose": "「これはどういう仕組みか」「このコードはなぜこう動くか」という説明要求に対し、結論先出し・ウォークスルー・時系列図・状態遷移・コードハイライトを組み合わせて直感的に理解させる。",
+    "audience": "コードベースを把握したい開発者・新規メンバー・設計レビュー参加者",
+    "triggers": {
+      "ja": ["仕組みを図解して", "コードの動きを説明して", "処理フローをわかりやすく", "状態遷移とシーケンスで解説", "このアルゴリズムを可視化して"],
+      "en": ["explain how this works", "walkthrough code mechanics", "visualize architecture flow", "concept explainer"],
+      "ko": ["동작 원리 설명", "코드 흐름 시각화", "메커니즘 해설"]
+    },
+    "axes": {
+      "theme": "dark-focus",
+      "layout": "stack",
+      "header": "compact",
+      "density": "comfortable",
+      "rationale": "技術図解やコードスニペットに集中できる dark-focus + stack 構成。「一言サマリー→対話ウォークスルー→シーケンス→状態遷移→該当コード→ファイル構造」の順に解像度を上げる。"
+    },
+    "outline": [
+      { "n": 1, "type": "callout", "role": "一言でいうと (TL;DR)", "required": true, "guide": "核心となる設計原理を2〜3文で平易に説明。", "volume": "1段落" },
+      { "n": 2, "type": "walkthrough", "role": "ステップ別メカニズム解説", "required": true, "guide": "処理の順番に沿って各段階のコード断片と役割を対話式に解説。", "volume": "3〜5ステップ" },
+      { "n": 3, "type": "sequence", "role": "登場人物間のシーケンス図", "required": false, "guide": "コンポーネント間のメッセージ往復を時系列で表現。", "volume": "3〜5アクタ" },
+      { "n": 4, "type": "statediagram", "role": "状態遷移マシン", "required": false, "guide": "エンティティや処理が辿る状態とガード/遷移イベントを図示。", "volume": "3〜6状態" },
+      { "n": 5, "type": "code", "role": "核心コード解説", "required": true, "guide": "highlight で重要行を強調表示したコードブロック。", "volume": "8〜25行" },
+      { "n": 6, "type": "filetree", "role": "関連ファイル一覧", "required": false, "guide": "解説に関係するファイルだけを抽出したコンパクトなツリー。", "volume": "5〜10行" }
+    ],
+    "swaps": [
+      { "slot": 3, "default": "sequence", "alternative": "diagram / erd", "when": "時系列のやり取りよりデータモデル構造や静的依存関係を見せたいとき" },
+      { "slot": 4, "default": "statediagram", "alternative": "stepper", "when": "状態ループがなく一直線の手続きステップとして説明するとき" }
+    ],
+    "modules": ["callout", "walkthrough", "sequence", "statediagram", "code", "filetree", "collapsible"],
+    "sampleMarkers": ["LoomQueue 分散ジョブキュー", "LeaseBroker", "ackJob"]
+  }
+}

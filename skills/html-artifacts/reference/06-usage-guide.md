@@ -15,7 +15,7 @@ templates/
 │   ├── themes.css              Layer 0 Foundation (color palettes for 10 themes)
 │   ├── elements.css            Layer 1 Primitives (.card / .btn / .badge / table …)
 │   └── interactions.js         Layer 3 Behaviors (wires behaviors via data attributes)
-└── modules/                    ← Layer 2 Modules (117 blocks - catalog owned by reference/04 + index/)
+└── modules/                    ← Layer 2 Modules (112 blocks - catalog owned by reference/04 + index/)
 ```
 
 The flow of the 5-layer architecture is **Foundation (reset/tokens/themes) → Primitives (elements.css) → Modules (modules/*) → Behaviors (interactions.js) → Shapes (base.template + combinations)**. The inline order reflects this layer order directly.
@@ -172,7 +172,7 @@ via `index/INDEX.md` and see `04-module-catalog.md` for their full contracts):
 | Module file | Type | MODULE CSS | INTERACTION (required data attributes / wiring) |
 | --- | --- | --- | --- |
 | `kpi-grid.html` | KPI metric card row | none (pure primitives) | optional count-up: `[data-counter][data-to]` (+ `data-suffix` for units) |
-| `data-table.html` | sortable + filterable + paginated table | yes | `table[data-sortable]` + `input[data-filter][data-filter-in=".dt-row"]`; optional `[data-paginate][data-page-size]` + sibling `[data-pager]`, `[data-row-select]` |
+| `data-table.html` | sortable + filterable + paginated table | yes | `table[data-sortable]` with `<th scope="col"><button type="button" class="dt-sort-btn">` + `input[data-filter][data-filter-in=".dt-row"]`; optional `[data-paginate][data-page-size]` + sibling `[data-pager]`, `[data-row-select]` |
 | `comparison-grid.html` | side-by-side option comparison | yes | none |
 | `decision-matrix.html` | weighted decision matrix (score bars + per-cell rationale + verdict callout) | yes (+ `callout-box` CSS for the verdict) | none |
 | `callout-box.html` | callout box (4 variants) | yes | none |

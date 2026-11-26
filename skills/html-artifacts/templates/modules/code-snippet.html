@@ -26,13 +26,18 @@ USAGE: repeat one <span class="cs-row"> per line inside <code>; set the gutter
 <style data-module="code-snippet">
   .cs { margin: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); background: color-mix(in srgb, var(--text-primary) 91%, var(--bg-page)); }
   /* header bar: a slightly lighter slab off the panel, filename + language chip */
-  .cs-head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-4); background: color-mix(in srgb, var(--text-primary) 84%, var(--bg-page)); border-bottom: 1px solid color-mix(in srgb, var(--bg-surface) 16%, transparent); }
-  .cs-file { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: color-mix(in srgb, var(--bg-surface) 82%, var(--text-primary)); }
+  .cs-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; padding: var(--sp-2) var(--sp-4); background: color-mix(in srgb, var(--text-primary) 84%, var(--bg-page)); border-bottom: 1px solid color-mix(in srgb, var(--bg-surface) 16%, transparent); }
+  .cs-file { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: color-mix(in srgb, var(--bg-surface) 82%, var(--text-primary)); overflow-wrap: anywhere; }
+  .cs-actions { margin-left: auto; display: inline-flex; align-items: center; gap: var(--sp-2); }
   .cs-lang { margin-left: auto; padding: 1px var(--sp-2); border-radius: var(--radius-pill); font: var(--type-caption); font-weight: 700; color: color-mix(in srgb, var(--accent) 60%, var(--bg-surface)); background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .cs-actions .cs-lang { margin-left: 0; }
+  .cs-copy { color: color-mix(in srgb, var(--bg-surface) 82%, var(--text-primary)); border-color: color-mix(in srgb, var(--bg-surface) 24%, transparent); }
+  .cs-copy:hover { background: color-mix(in srgb, var(--bg-surface) 14%, transparent); color: var(--bg-surface); }
   .cs-body { margin: 0; padding: var(--sp-3) 0; overflow-x: auto; }
   .cs-body code { display: block; font-family: var(--font-mono); font-size: 13px; line-height: 1.65; }
   /* each line: fixed gutter + code cell; code lifts toward the surface tone */
   .cs-row { display: grid; grid-template-columns: 3em 1fr; align-items: baseline; }
+  .cs-row.is-hl { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 2px 0 0 var(--accent); }
   .cs-ln { text-align: right; padding-right: var(--sp-3); color: color-mix(in srgb, var(--bg-surface) 34%, var(--text-primary)); user-select: none; }
   .cs-code { padding-right: var(--sp-4); white-space: pre; color: color-mix(in srgb, var(--bg-surface) 86%, var(--text-primary)); }
   /* token roles: each hue mixed with the surface so it reads bright on the dark panel */

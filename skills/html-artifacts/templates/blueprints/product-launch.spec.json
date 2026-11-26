@@ -2,17 +2,26 @@
   "title": "Relay CLI v3.0.0「Nebula」リリースのお知らせ",
   "theme": "sunset",
   "layout": "stack",
-  "header": "none",
+  "header": "banner",
   "density": "comfortable",
   "lang": "ja",
   "target": "document",
+  "eyebrow": "RELAY CLI v3.0.0 — NEBULA",
+  "subtitle": "デプロイを 3 倍速く。並列ビルド、プルリクごとのプレビュー環境、数秒で戻せるロールバックを備えたエッジデプロイ CLI のメジャーリリースです。",
   "footer": "Relay Inc. · リリース 2026-07-08 · relay-cli v3.0.0（Nebula）",
+  "meta": [
+    { "k": "Version", "v": "v3.0.0" },
+    { "k": "Release Date", "v": "2026-07-08" },
+    { "k": "Runtime", "v": "Node.js 20 LTS+" }
+  ],
   "sections": [
     {
-      "type": "html",
-      "html": "<section class=\"hro\" aria-label=\"Relay CLI v3.0.0 Nebula\">\n  <div class=\"hro-inner\">\n    <p class=\"hro-eyebrow\">RELAY CLI v3.0.0 - NEBULA</p>\n    <h1 class=\"hro-headline\">デプロイを、<span class=\"hro-mark\">3倍速く</span>。</h1>\n    <p class=\"hro-lede\">並列ビルド、プルリクごとのプレビュー環境、数秒で戻せるロールバック。開発者のためのエッジデプロイ CLI が、メジャーアップデートで生まれ変わりました。</p>\n    <div class=\"hro-actions\">\n      <a class=\"btn\" href=\"#launch-changelog\">変更点を見る</a>\n      <a class=\"btn btn-ghost\" href=\"#launch-faq\">移行ガイド（FAQ）</a>\n    </div>\n  </div>\n</section>",
-      "cssModules": [
-        "hero-cta"
+      "type": "takeaways",
+      "title": "v3.0 リリース要点",
+      "items": [
+        { "lead": "依存グラフ単位の並列ビルドでビルド時間を最大 68% 短縮", "elab": "モノレポ内の変更パッケージだけを並列実行します。" },
+        { "lead": "すべての PR に本番相当の隔離プレビュー URL を自動発行", "elab": "マージ前の結合確認をレビュー画面から直接実施できます。" },
+        { "lead": "relay migrate / relay doctor で v2 系から安全に移行可能", "elab": "旧 .relayrc も 2026 年内は互換読み込みをサポートします。" }
       ]
     },
     {
@@ -59,10 +68,35 @@
       ]
     },
     {
-      "type": "html",
-      "html": "<figure class=\"clg card-outlined\" id=\"launch-changelog\" aria-label=\"変更履歴\">\n  <figcaption class=\"clg-title\">変更履歴</figcaption>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v3.0.0</span>\n      <span class=\"clg-date\">2026-07-08</span>\n      <span class=\"clg-latest\">latest</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -added\">追加</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">依存グラフ単位の並列ビルドエンジンを追加</li>\n        <li class=\"clg-entry\">プルリクごとのプレビュー環境を自動生成</li>\n        <li class=\"clg-entry\">互換性診断コマンド relay doctor を追加</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -changed\">変更</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">設定を relay.config.ts に統一（旧 .relayrc は非推奨）</li>\n        <li class=\"clg-entry\">既定の Node を 20 LTS に引き上げ</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">monorepo でのキャッシュ取りこぼしを修正</li>\n        <li class=\"clg-entry\">Windows でのパス解決を修正</li>\n      </ul>\n    </div>\n  </section>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v2.9.2</span>\n      <span class=\"clg-date\">2026-06-10</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">エッジ関数のコールドスタート遅延を改善</li>\n      </ul>\n    </div>\n  </section>\n  <section class=\"clg-ver\">\n    <div class=\"clg-head\">\n      <span class=\"clg-num\">v2.9.0</span>\n      <span class=\"clg-date\">2026-05-02</span>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -added\">追加</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">環境変数のグループ管理に対応</li>\n      </ul>\n    </div>\n    <div class=\"clg-group\">\n      <span class=\"clg-tag -fixed\">修正</span>\n      <ul class=\"clg-list\">\n        <li class=\"clg-entry\">CLI ログイン時のトークン更新不具合を修正</li>\n      </ul>\n    </div>\n  </section>\n</figure>",
-      "cssModules": [
-        "changelog"
+      "type": "changelog",
+      "id": "launch-changelog",
+      "title": "変更履歴",
+      "versions": [
+        {
+          "version": "v3.0.0",
+          "date": "2026-07-08",
+          "latest": true,
+          "groups": [
+            { "tag": "追加", "tone": "added", "entries": ["依存グラフ単位の並列ビルドエンジンを追加", "プルリクごとのプレビュー環境を自動生成", "互換性診断コマンド relay doctor を追加"] },
+            { "tag": "変更", "tone": "changed", "entries": ["設定を relay.config.ts に統一（旧 .relayrc は非推奨）", "既定の Node を 20 LTS に引き上げ"] },
+            { "tag": "修正", "tone": "fixed", "entries": ["monorepo でのキャッシュ取りこぼしを修正", "Windows でのパス解決を修正"] }
+          ]
+        },
+        {
+          "version": "v2.9.2",
+          "date": "2026-06-10",
+          "groups": [
+            { "tag": "修正", "tone": "fixed", "entries": ["エッジ関数のコールドスタート遅延を改善"] }
+          ]
+        },
+        {
+          "version": "v2.9.0",
+          "date": "2026-05-02",
+          "groups": [
+            { "tag": "追加", "tone": "added", "entries": ["環境変数のグループ管理に対応"] },
+            { "tag": "修正", "tone": "fixed", "entries": ["CLI ログイン時のトークン更新不具合を修正"] }
+          ]
+        }
       ]
     },
     {
@@ -108,10 +142,15 @@
       ]
     },
     {
-      "type": "html",
-      "html": "<figure class=\"faq card-outlined\" id=\"launch-faq\" aria-label=\"よくあるご質問\">\n  <figcaption class=\"faq-title\">よくあるご質問</figcaption>\n  <dl class=\"faq-list\">\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">破壊的変更はありますか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">設定ファイル形式が relay.config.ts に変わります。relay migrate で自動変換でき、旧 .relayrc も2026年内は読み込み可能です。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">料金は変わりますか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">既存プランの料金は据え置きです。並列ビルドは全プランで利用でき、監査ログと SSO は対象プランのみ提供します。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">v2 系のサポートはいつまでですか？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">セキュリティ修正を 2026 年 12 月 31 日まで提供します。それ以降は v3 系への移行をお願いします。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">対応する Node.js のバージョンは？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">Node.js 20 LTS 以上が必要です。18 系は非対応となりました。</span></dd>\n    </div>\n    <div class=\"faq-item\">\n      <dt class=\"faq-q\"><span class=\"faq-badge\" aria-hidden=\"true\">Q</span><span class=\"faq-text\">移行に不安がある場合は？</span></dt>\n      <dd class=\"faq-a\"><span class=\"faq-badge\" aria-hidden=\"true\">A</span><span class=\"faq-text\">relay doctor で影響範囲を可視化できます。Enterprise プランは移行サポートを無償でご利用いただけます。</span></dd>\n    </div>\n  </dl>\n</figure>",
-      "cssModules": [
-        "faq"
+      "type": "collapsible",
+      "id": "launch-faq",
+      "title": "よくあるご質問",
+      "items": [
+        { "summary": "破壊的変更はありますか？", "body": "<p>設定ファイル形式が relay.config.ts に変わります。relay migrate で自動変換でき、旧 .relayrc も2026年内は読み込み可能です。</p>" },
+        { "summary": "料金は変わりますか？", "body": "<p>既存プランの料金は据え置きです。並列ビルドは全プランで利用でき、監査ログと SSO は対象プランのみ提供します。</p>" },
+        { "summary": "v2 系のサポートはいつまでですか？", "body": "<p>セキュリティ修正を 2026 年 12 月 31 日まで提供します。それ以降は v3 系への移行をお願いします。</p>" },
+        { "summary": "対応する Node.js のバージョンは？", "body": "<p>Node.js 20 LTS 以上が必要です。18 系は非対応となりました。</p>" },
+        { "summary": "移行に不安がある場合は？", "body": "<p>relay doctor で影響範囲を可視化できます。Enterprise プランは移行サポートを無償でご利用いただけます。</p>" }
       ]
     },
     {
@@ -149,18 +188,18 @@
     "axes": {
       "theme": "sunset",
       "layout": "stack",
-      "header": "none",
+      "header": "banner",
       "density": "comfortable",
-      "rationale": "発表資料はsunsetの暖色でローンチの高揚感を演出。header=noneはhero-ctaが冒頭のヒーロー領域を兼ねるため二重ヘッダーを避ける選択（provenanceはhero eyebrowとfooterで担保）。stackで発表→機能→変更→手順→FAQと縦に読ませる。"
+      "rationale": "発表資料はsunsetの暖色でローンチの高揚感を演出。bannerヘッダでバージョン名と主価値を大きく提示し、stackで要点→機能→変更→手順→FAQと縦に読ませる。"
     },
     "outline": [
       {
         "n": 1,
-        "type": "html:hero-cta",
-        "role": "発表ヒーロー",
+        "type": "takeaways",
+        "role": "発表サマリー",
         "required": true,
-        "guide": "バージョン名と最大の価値を大見出しで。CTAのhrefは実在セクションid（#launch-changelog / #launch-faq）へ。ダミーの空アンカーは使わない。",
-        "volume": "1ブロック"
+        "guide": "最大の価値・変更点・互換性を番号付き3項目で端的に伝える。",
+        "volume": "3項目"
       },
       {
         "n": 2,
@@ -172,10 +211,10 @@
       },
       {
         "n": 3,
-        "type": "html:changelog",
+        "type": "changelog",
         "role": "変更履歴",
         "required": true,
-        "guide": "最新版にlatestバッジ+旧版。追加/変更/修正に整理。figureのid=launch-changelogはhero CTAのアンカー先。",
+        "guide": "最新版にlatestバッジ+旧版。追加/変更/修正に整理。",
         "volume": "3リリース"
       },
       {
@@ -188,10 +227,10 @@
       },
       {
         "n": 5,
-        "type": "html:faq",
+        "type": "collapsible",
         "role": "よくある質問",
         "required": true,
-        "guide": "破壊的変更/料金/サポート期限/対応バージョンなど。figureのid=launch-faqはhero CTAのアンカー先。",
+        "guide": "破壊的変更/料金/サポート期限/対応バージョンなどをQ&A折りたたみで整理。",
         "volume": "5件"
       },
       {
@@ -206,9 +245,9 @@
     "swaps": [
       {
         "slot": 1,
-        "default": "html:hero-cta + header:none",
-        "alternative": "header:banner + 通常見出し",
-        "when": "発表色を抑え社内向け告知にするとき"
+        "default": "takeaways + header:banner",
+        "alternative": "callout(tldr) + header:split",
+        "when": "発表色を抑え社内向けリリース告知にするとき"
       },
       {
         "slot": 2,
@@ -219,16 +258,16 @@
       {
         "slot": 4,
         "default": "stepper 手順",
-        "alternative": "html:code-snippet（一括移行スクリプト）",
+        "alternative": "code（一括移行スクリプト）",
         "when": "手順をコマンド列で一気に示すとき"
       }
     ],
     "modules": [
-      "hero-cta",
+      "takeaways",
       "features",
       "changelog",
       "stepper",
-      "faq",
+      "collapsible",
       "callout"
     ]
   }

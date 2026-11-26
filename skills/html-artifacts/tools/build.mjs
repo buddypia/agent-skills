@@ -270,9 +270,36 @@ const LABELS = {
   },
 };
 /* labels added with the navigation / chart passes (kept apart so the big tables above stay diffable) */
-Object.assign(LABELS.en, { filterBy: 'Filter (click to highlight)', contents: 'Contents', ofTop: 'of first stage', stepRate: 'from previous', target: 'Target', chartData: 'Chart data' });
-Object.assign(LABELS.ko, { filterBy: '필터 (클릭하여 강조)', contents: '목차', ofTop: '첫 단계 대비', stepRate: '이전 단계 대비', target: '목표', chartData: '차트 데이터' });
-Object.assign(LABELS.ja, { filterBy: '絞り込み（クリックで強調）', contents: '目次', ofTop: '初段比', stepRate: '前段比', target: '目標', chartData: 'グラフのデータ' });
+Object.assign(LABELS.en, {
+  filterBy: 'Filter (click to highlight)', contents: 'Contents', ofTop: 'of first stage', stepRate: 'from previous', target: 'Target', chartData: 'Chart data',
+  expandAll: 'Expand all', collapseAll: 'Collapse all', reviewJump: 'Review', reviewTitle: 'Review Signoff',
+  reviewOk: 'OK', reviewFix: 'Needs Fix', reviewHold: 'Hold', reviewPending: 'Pending', reviewAll: 'All',
+  reviewReset: 'Reset', reviewCopy: 'Copy Markdown', reviewNotePlaceholder: 'Notes or requested edits (optional)...',
+  reviewExportTitle: 'Markdown Feedback Summary for AI', reviewSubtitle: 'Mark each change and add notes to generate structured Markdown feedback.',
+  copyCode: 'Copy', parameters: 'Parameters', before: 'Before', after: 'After',
+  prevStep: 'Prev', nextStep: 'Next', reviewPass: 'PASS', reviewFail: 'FAIL', reviewWarn: 'WARN', reviewSkip: 'SKIP',
+  impactAxis: 'Impact', probAxis: 'Probability', countAxis: 'Count', low: 'Low', high: 'High',
+});
+Object.assign(LABELS.ko, {
+  filterBy: '필터 (클릭하여 강조)', contents: '목차', ofTop: '첫 단계 대비', stepRate: '이전 단계 대비', target: '목표', chartData: '차트 데이터',
+  expandAll: '모두 펼치기', collapseAll: '모두 접기', reviewJump: '리뷰', reviewTitle: '리뷰 판정 및 피드백',
+  reviewOk: 'OK', reviewFix: '수정 필요', reviewHold: '보류', reviewPending: '미확인', reviewAll: '전체',
+  reviewReset: '초기화', reviewCopy: 'Markdown 복사', reviewNotePlaceholder: '지적 사항이나 수정 요청(선택)...',
+  reviewExportTitle: 'AI 전달용 Markdown 피드백 요약', reviewSubtitle: '각 항목을 판정하고 메모를 남기면 AI에 붙여넣을 수 있는 Markdown이 생성됩니다.',
+  copyCode: '복사', parameters: 'Parameters', before: '변경 전', after: '변경 후',
+  prevStep: '이전', nextStep: '다음', reviewPass: 'PASS', reviewFail: 'FAIL', reviewWarn: 'WARN', reviewSkip: 'SKIP',
+  impactAxis: '영향도', probAxis: '발생 확률', countAxis: '건수', low: '낮음', high: '높음',
+});
+Object.assign(LABELS.ja, {
+  filterBy: '絞り込み（クリックで強調）', contents: '目次', ofTop: '初段比', stepRate: '前段比', target: '目標', chartData: 'グラフのデータ',
+  expandAll: 'すべて展開', collapseAll: 'すべて折りたたむ', reviewJump: 'レビュー', reviewTitle: 'レビュー判定・フィードバック',
+  reviewOk: 'OK', reviewFix: '要修正', reviewHold: '保留', reviewPending: '未確認', reviewAll: 'すべて',
+  reviewReset: 'リセット', reviewCopy: 'Markdown をコピー', reviewNotePlaceholder: '指摘事項・修正指示（任意）...',
+  reviewExportTitle: 'AI へのフィードバック用サマリー（自動生成）', reviewSubtitle: '各項目を判定してコメントを記入すると、AI へそのまま貼れる Markdown が生成されます。',
+  copyCode: 'コピー', parameters: 'Parameters', before: '変更前', after: '変更後',
+  prevStep: '← 前へ', nextStep: '次へ →', reviewPass: 'PASS', reviewFail: 'FAIL', reviewWarn: 'WARN', reviewSkip: 'SKIP',
+  impactAxis: '影響度', probAxis: '発生確率', countAxis: '件数', low: '低', high: '高',
+});
 function inferLanguage(spec) {
   const explicit = String(spec.lang || spec.language || spec.locale || '').slice(0, 2).toLowerCase();
   if (['ko', 'ja', 'en'].includes(explicit)) return explicit;
@@ -322,12 +349,13 @@ function deriveDefaults(spec) {
   let rule;
   if (has('screenflow') || has('device')) rule = { n: 1, why: 'screenflow/device', theme: 'interactive-warm', layout: 'stack', header: 'compact' };
   else if (has('decision')) rule = { n: 2, why: 'decision', theme: 'slate', layout: 'stack', header: 'split' };
-  else if (has('kpi') && count('chart') >= 2) rule = { n: 3, why: `kpi + ${count('chart')} charts`, theme: 'midnight', layout: 'bento', header: 'compact' };
-  else if (has('chart') || has('table') || ['gauge', 'radar', 'funnel', 'heatmap', 'progress', 'stattrend', 'barstacked', 'areastacked', 'bullet', 'calendar'].some((v) => has(v))) rule = { n: 4, why: 'chart/table/viz', theme: 'nord', layout: 'bento', header: 'compact' };
-  else if (has('diagram')) rule = { n: 5, why: 'diagram', theme: 'dark-focus', layout: 'stack', header: 'compact' };
-  else if (has('stepper') || has('timeline')) rule = { n: 6, why: 'stepper/timeline', theme: 'forest', layout: 'stack', header: 'banner' };
-  else if (has('comparison')) rule = { n: 7, why: 'comparison', theme: 'rose', layout: 'stack', header: 'banner' };
-  else rule = { n: 8, why: 'no signal', theme: 'birchline', layout: 'stack', header: 'standard' };
+  else if (['review', 'review-signoff', 'diff', 'diff-block', 'verification', 'verification-run', 'code', 'code-snippet'].some((v) => has(v))) rule = { n: 3, why: 'review/diff/code', theme: 'slate', layout: 'stack', header: 'compact' };
+  else if (has('kpi') && count('chart') >= 2) rule = { n: 4, why: `kpi + ${count('chart')} charts`, theme: 'midnight', layout: 'bento', header: 'compact' };
+  else if (has('chart') || has('table') || ['gauge', 'radar', 'funnel', 'heatmap', 'progress', 'stattrend', 'barstacked', 'areastacked', 'bullet', 'calendar', 'waterfall', 'chart-waterfall', 'scatter', 'chart-scatter', 'pareto', 'diverging', 'diverging-bar', 'cohort', 'cohort-grid', 'leaderboard', 'quadrant', 'riskmatrix', 'risk-matrix'].some((v) => has(v))) rule = { n: 5, why: 'chart/table/viz', theme: 'nord', layout: 'bento', header: 'compact' };
+  else if (has('diagram') || ['sequence', 'sequence-diagram', 'statediagram', 'state-diagram', 'erd', 'sankey', 'fishbone', 'kpitree', 'kpi-tree', 'walkthrough', 'annotated-walkthrough'].some((v) => has(v))) rule = { n: 6, why: 'diagram/walkthrough', theme: 'dark-focus', layout: 'stack', header: 'compact' };
+  else if (has('stepper') || has('timeline')) rule = { n: 7, why: 'stepper/timeline', theme: 'forest', layout: 'stack', header: 'banner' };
+  else if (has('comparison') || has('beforeafter') || has('before-after')) rule = { n: 8, why: 'comparison', theme: 'rose', layout: 'stack', header: 'banner' };
+  else rule = { n: 9, why: 'no signal', theme: 'birchline', layout: 'stack', header: 'standard' };
   const explicit = {
     theme: !!spec.theme,
     layout: spec.layout != null,
@@ -348,7 +376,11 @@ function deriveDefaults(spec) {
   return { theme, layout, header, density };
 }
 /* default --span per section type in bento (split defaults to 6, hero to 12) */
-const SPAN_DEFAULT = { kpi: 12, chart: 6, callout: 6, collapsible: 6, timeline: 6, stepper: 6, radar: 6, funnel: 6, barstacked: 6, areastacked: 6, feed: 6, quote: 6 };
+const SPAN_DEFAULT = {
+  kpi: 12, chart: 6, callout: 6, collapsible: 6, timeline: 6, stepper: 6, radar: 6, funnel: 6, barstacked: 6, areastacked: 6, feed: 6, quote: 6,
+  waterfall: 6, scatter: 6, pareto: 6, diverging: 6, leaderboard: 6, quadrant: 6, riskmatrix: 6, takeaways: 6,
+  'chart-waterfall': 6, 'chart-scatter': 6, 'diverging-bar': 6, 'risk-matrix': 6, 'key-takeaways': 6,
+};
 /* bento rows: default spans first (an explicit `span` always wins, a tl;dr callout spans the
    row), then a row that default-span sections leave part-empty is filled by its last
    default-span section - a lone half-width card beside nothing reads as a hole */
@@ -950,7 +982,8 @@ R.table = (s) => {
     return pills ? ' class="num num-badge"' : ' class="num"';
   });
   const cell = (c) => (typeof c === 'number' && Math.abs(c) >= 1000 ? groupDigits(c) : c);
-  const head = s.columns.map((c, j) => `<th${cls[j]}>${esc(c)}</th>`).join('');
+  const sortable = s.sortable !== false;
+  const head = s.columns.map((c, j) => `<th scope="col"${cls[j]}>${sortable ? `<button type="button" class="dt-sort-btn" data-sort-col="${j}">${esc(c)}</button>` : esc(c)}</th>`).join('');
   const body = s.rows.map((row) => `<tr class="dt-row">` + row.map((c, j) => (c && typeof c === 'object') ? `<td${cls[j] || ''}><span class="badge badge-${esc(c.badge)}">${esc(c.text)}</span></td>` : `<td${cls[j] || ''}>${esc(cell(c))}</td>`).join('') + `</tr>`).join('');
   const pag = s.paginate ? ` data-paginate data-page-size="${esc(s.paginate)}"` : '';
   const sel = s.select ? ' data-row-select' : '';
@@ -958,7 +991,7 @@ R.table = (s) => {
   const search = s.search === false ? '' : `<input class="dt-search" type="search" data-filter data-filter-in=".dt-row" placeholder="${esc(s.placeholder || t('searchPlaceholder'))}" aria-label="${esc(s.placeholder || t('search'))}">`;
   const pager = s.paginate ? `<div data-pager class="no-print"></div>` : '';
   const caption = s.title ? `<caption class="dt-title">${esc(s.title)}</caption>` : '';
-  return { css: ['data-table'], html: `<section class="data-table" aria-label="${esc(s.label || s.title || t('table'))}">${search}<div class="dt-scroll"><table${dense} data-sortable${pag}${sel}>${caption}<thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${pager}</section>` };
+  return { css: ['data-table'], html: `<section class="data-table" aria-label="${esc(s.label || s.title || t('table'))}">${search}<div class="dt-scroll"><table${dense}${sortable ? ' data-sortable' : ''}${pag}${sel}>${caption}<thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${pager}</section>` };
 };
 
 const GLYPH = { tldr: '<path d="M5 4h14v16l-7-3-7 3z"/>', note: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/>', warning: '<path d="M12 3 2 20h20z"/><path d="M12 9v5M12 17h.01"/>', success: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>' };
@@ -989,10 +1022,10 @@ R.comparison = (s) => ({
       ctaHtml(o.cta, o.href) + `</article>`).join('') + `</div></section>`,
 });
 
-R.tabs = (s) => {
+R.tabs = (s, idx = 0) => {
   const ids = s.tabs.map((t, i) => t.id || ('t' + (i + 1)));
-  const bar = s.tabs.map((t, i) => `<button class="tab${i === 0 ? ' active' : ''}" data-tab="${esc(ids[i])}" role="tab" aria-selected="${i === 0}" aria-controls="panel-${esc(ids[i])}">${esc(t.label)}</button>`).join('');
-  const panels = s.tabs.map((t, i) => `<div class="stack${i === 0 ? '' : ' hidden'}" data-panel="${esc(ids[i])}" id="panel-${esc(ids[i])}" role="tabpanel" aria-label="${esc(t.label)}">${t.body || ''}</div>`).join('');
+  const bar = s.tabs.map((t, i) => `<button type="button" class="tab${i === 0 ? ' active' : ''}" id="tab-${idx}-${esc(ids[i])}" data-tab="${esc(ids[i])}" role="tab" aria-selected="${i === 0}" tabindex="${i === 0 ? '0' : '-1'}">${esc(t.label)}</button>`).join('');
+  const panels = s.tabs.map((t, i) => `<div class="tab-panel" data-panel="${esc(ids[i])}" id="panel-${idx}-${esc(ids[i])}" role="tabpanel" aria-labelledby="tab-${idx}-${esc(ids[i])}"${i === 0 ? '' : ' hidden="until-found"'}><div class="tab-panel-body stack">${t.body || ''}</div></div>`).join('');
   return { css: ['tabs'], html: `<section class="tabs" data-tabs aria-label="${esc(s.label || s.title || 'Tabs')}">` + (s.title ? `<h2>${esc(s.title)}</h2>` : '') + `<div class="tab-bar" role="tablist">${bar}</div>${panels}</section>` };
 };
 
@@ -2106,6 +2139,921 @@ R.failuremodes = (s) => {
 };
 R['failure-modes'] = R.failuremodes;
 
+/* ---- helpers for new typed renderers ---- */
+function parseUnifiedDiff(patch) {
+  const rows = [];
+  let oldLn = 0, newLn = 0, added = 0, removed = 0;
+  for (const raw of String(patch || '').split(/\r?\n/)) {
+    const h = raw.match(/^@@\s+-(\d+)(?:,\d+)?\s+\+(\d+)(?:,\d+)?\s+@@(.*)$/);
+    if (h) {
+      oldLn = parseInt(h[1], 10);
+      newLn = parseInt(h[2], 10);
+      rows.push({ type: 'hunk', ln: '@@', text: raw });
+      continue;
+    }
+    if (/^(---|\+\+\+|diff --git|index )/.test(raw)) continue;
+    if (raw.startsWith('+')) {
+      added++;
+      rows.push({ type: 'add', ln: newLn++, text: raw });
+    } else if (raw.startsWith('-')) {
+      removed++;
+      rows.push({ type: 'remove', ln: oldLn++, text: raw });
+    } else {
+      rows.push({ type: 'ctx', ln: newLn || oldLn || '', text: raw });
+      if (oldLn) oldLn++;
+      if (newLn) newLn++;
+    }
+  }
+  return { rows, added, removed };
+}
+
+function highlightCodeLine(line, lang) {
+  const src = String(line == null ? '' : line);
+  const tokens = [];
+  const keep = (cls, text) => {
+    const k = `\x00${tokens.length}\x00`;
+    tokens.push(`<span class="${cls}">${esc(text)}</span>`);
+    return k;
+  };
+  let out = src;
+  // Comments
+  out = out.replace(/(\/\/.*$|#.*$|\/\*.*?\*\/)/g, (m) => keep('cs-com', m));
+  // Strings
+  out = out.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)/g, (m) => keep('cs-str', m));
+  // Escape remaining raw text
+  out = esc(out);
+  // Keywords (skip if shell/plain/yaml/diff)
+  if (!/^(txt|text|plain|diff)$/i.test(String(lang || ''))) {
+    out = out.replace(/\b(export|import|from|const|let|var|function|async|await|return|if|else|for|while|switch|case|break|default|try|catch|throw|new|class|extends|type|interface|def|fn|pub|struct|enum|impl|true|false|null|undefined|SELECT|FROM|WHERE|JOIN|ORDER|BY|GROUP)\b/g, '<span class="cs-kw">$1</span>');
+    out = out.replace(/\b([A-Za-z_]\w*)(?=\()/g, '<span class="cs-fn">$1</span>');
+  }
+  return out.replace(/\x00(\d+)\x00/g, (_, idx) => tokens[+idx]);
+}
+
+function parseHighlightLines(specHl) {
+  const set = new Set();
+  for (const h of (specHl || [])) {
+    if (typeof h === 'number' && Number.isFinite(h)) set.add(h);
+    else if (Array.isArray(h) && h.length === 2) {
+      for (let ln = +h[0]; ln <= +h[1]; ln++) set.add(ln);
+    }
+  }
+  return set;
+}
+
+/* ---- 24 typed renderers ---- */
+R.review = (s) => {
+  const items = s.items || [];
+  const title = s.title || t('reviewTitle');
+  const rvId = s.id || 'review';
+  const filters = s.filters === false ? '' :
+    `<div class="rv-filters" role="group" aria-label="${esc(title)}">` +
+    `<button type="button" class="rv-filter active" data-review-filter="all" aria-pressed="true">${esc(t('reviewAll'))}</button>` +
+    `<button type="button" class="rv-filter" data-review-filter="pending" aria-pressed="false">${esc(t('reviewPending'))}</button>` +
+    `<button type="button" class="rv-filter" data-review-filter="fix" aria-pressed="false">${esc(t('reviewFix'))}</button>` +
+    `<button type="button" class="rv-filter" data-review-filter="ok" aria-pressed="false">${esc(t('reviewOk'))}</button>` +
+    `</div>`;
+  const cards = items.map((it, i) => {
+    const id = it.id || `item-${i + 1}`;
+    const st = ['ok', 'fix', 'hold'].includes(it.status) ? it.status : '';
+    const stAttr = st ? ` data-status="${esc(st)}"` : '';
+    return `<article class="rv-item" data-review-item="${esc(id)}" data-review-title="${esc(it.title || id)}"${stAttr}>` +
+      `<div class="rv-item-head"><div class="rv-item-meta">` +
+      (it.scope ? `<span class="rv-scope">${esc(it.scope)}</span>` : '') +
+      `<h4 class="rv-item-title">${esc(it.title || id)}</h4></div>` +
+      `<div class="rv-actions no-print" role="group" aria-label="${esc(it.title || id)}">` +
+      `<button type="button" class="rv-btn" data-review-status="ok" aria-pressed="${st === 'ok'}">${esc(t('reviewOk'))}</button>` +
+      `<button type="button" class="rv-btn" data-review-status="fix" aria-pressed="${st === 'fix'}">${esc(t('reviewFix'))}</button>` +
+      `<button type="button" class="rv-btn" data-review-status="hold" aria-pressed="${st === 'hold'}">${esc(t('reviewHold'))}</button>` +
+      `</div></div>` +
+      (it.desc ? `<p class="rv-desc">${esc(it.desc)}</p>` : '') +
+      (it.evidence ? `<div class="rv-evidence">${esc(it.evidence)}</div>` : '') +
+      `<textarea class="rv-input" data-review-note rows="2" aria-label="${esc((it.title || id) + ' — ' + t('reviewNotePlaceholder'))}" placeholder="${esc(t('reviewNotePlaceholder'))}">${esc(it.note || '')}</textarea>` +
+      `</article>`;
+  }).join('');
+  return {
+    css: ['review-signoff'],
+    html: `<section class="rv" id="${esc(s.id || 'review-signoff')}" data-review data-review-id="${esc(rvId)}" aria-label="${esc(title)}">` +
+      `<div class="rv-head"><div class="rv-title-wrap"><h3 class="rv-title">${esc(title)}</h3><p class="rv-subtitle">${esc(s.subtitle || t('reviewSubtitle'))}</p></div>` +
+      `<div class="rv-controls no-print"><span class="rv-progress" data-review-progress>0 / ${items.length}</span>${filters}<button type="button" class="btn-ghost btn-sm" data-review-reset>${esc(t('reviewReset'))}</button></div></div>` +
+      `<div class="rv-list">${cards}</div>` +
+      `<div class="rv-export no-print"><div class="rv-export-head"><span class="rv-export-title">${esc(s.exportTitle || t('reviewExportTitle'))}</span><button type="button" class="btn btn-sm" data-review-copy>${esc(t('reviewCopy'))}</button></div>` +
+      `<textarea class="rv-output" data-review-output readonly rows="5" aria-label="${esc(s.exportTitle || t('reviewExportTitle'))}"></textarea></div>` +
+      `</section>`
+  };
+};
+R['review-signoff'] = R.review;
+
+R.verification = (s) => {
+  const items = s.items || [];
+  let nPass = 0, nFail = 0, nWarn = 0;
+  items.forEach((it) => {
+    const st = String(it.status || 'pass').toLowerCase();
+    if (st === 'fail') nFail++;
+    else if (st === 'warn') nWarn++;
+    else if (st === 'pass') nPass++;
+  });
+  const overall = s.verdict ? String(s.verdict).toLowerCase() : (nFail > 0 ? 'fail' : nWarn > 0 ? 'warn' : 'pass');
+  const verdictCls = overall === 'fail' ? '-fail' : overall === 'warn' ? '-warn' : '-pass';
+  const verdictLbl = overall === 'fail' ? t('reviewFail') : overall === 'warn' ? t('reviewWarn') : t('reviewPass');
+  const metaStats = (s.meta || []).map((m) => `<span class="vr-stat">${esc(m)}</span>`).join('');
+  const rows = items.map((it) => {
+    const st = String(it.status || 'pass').toLowerCase();
+    const badge = st === 'fail' ? t('reviewFail') : st === 'warn' ? t('reviewWarn') : st === 'skip' ? t('reviewSkip') : t('reviewPass');
+    const isOpen = it.open === true || (it.open !== false && st === 'fail');
+    return `<details class="vr-item" data-status="${esc(st)}"${isOpen ? ' open' : ''}>` +
+      `<summary class="vr-row"><span class="vr-badge">${esc(badge)}</span>` +
+      `<span class="vr-main"><span class="vr-name">${esc(it.name || '')}</span>${it.cmd ? `<code class="vr-cmd">${esc(it.cmd)}</code>` : ''}</span>` +
+      `<span class="vr-meta">${it.counts ? `<span>${esc(it.counts)}</span>` : ''}${it.duration ? `<span>${esc(it.duration)}</span>` : ''}</span>` +
+      `<span class="vr-caret" aria-hidden="true">▸</span></summary>` +
+      `<div class="vr-body">${it.note ? `<p class="vr-note">${esc(it.note)}</p>` : ''}${it.log ? `<pre class="vr-log"><code>${esc(it.log)}</code></pre>` : ''}</div>` +
+      `</details>`;
+  }).join('');
+  return {
+    css: ['verification-run'],
+    html: `<section class="vr" aria-label="${esc(s.title || 'Verification Run')}">` +
+      `<div class="vr-head"><div class="vr-title-wrap"><h3 class="vr-title">${esc(s.title || 'Verification Run')}</h3>${s.subtitle ? `<p class="vr-sub">${esc(s.subtitle)}</p>` : ''}</div>` +
+      `<div class="vr-summary"><span class="vr-verdict ${verdictCls}">${esc(verdictLbl)}</span><span class="vr-stat">${nPass} passed</span>` +
+      (nFail ? `<span class="vr-stat">${nFail} failed</span>` : '') +
+      (s.duration ? `<span class="vr-stat">${esc(s.duration)}</span>` : '') +
+      `${metaStats}</div></div>` +
+      `<div class="vr-list">${rows}</div></section>`
+  };
+};
+R['verification-run'] = R.verification;
+
+R.walkthrough = (s) => {
+  const steps = s.steps || [];
+  const stageNodes = s.svg ? s.svg : steps.map((st, i) => {
+    const sid = String(st.id || (i + 1));
+    const cls = i === 0 ? ' is-active' : ' is-dimmed';
+    return `<div class="wk-node${cls}" data-walk-target="${esc(sid)}">` +
+      `<span class="wk-pin">${i + 1}</span>` +
+      `<div class="wk-node-body"><span class="wk-node-label">${esc(st.label || st.title || '')}</span>` +
+      (st.code ? `<code class="wk-node-code">${esc(st.code)}</code>` : '') +
+      `</div></div>`;
+  }).join('');
+  const stepBtns = steps.map((st, i) => {
+    const sid = String(st.id || (i + 1));
+    const cls = i === 0 ? ' is-active' : '';
+    const cur = i === 0 ? ' aria-current="step"' : '';
+    const tgt = st.target ? ` data-walk-ref="${esc(st.target)}"` : '';
+    return `<button type="button" class="wk-step${cls}" data-walk-step="${esc(sid)}"${cur}${tgt}>` +
+      `<span class="wk-num">${i + 1}</span>` +
+      `<span class="wk-step-body"><span class="wk-step-title">${esc(st.title || '')}</span>` +
+      (st.desc ? `<span class="wk-step-desc">${esc(st.desc)}</span>` : '') +
+      (st.meta ? `<span class="wk-step-meta">${esc(st.meta)}</span>` : '') +
+      `</span></button>`;
+  }).join('');
+  return {
+    css: ['annotated-walkthrough'],
+    html: `<section class="wk" data-walkthrough aria-label="${esc(s.title || 'Walkthrough')}">` +
+      `<div class="wk-bar"><div class="wk-title-wrap"><h3 class="wk-title">${esc(s.title || 'Walkthrough')}</h3>${s.subtitle ? `<p class="wk-sub">${esc(s.subtitle)}</p>` : ''}</div>` +
+      `<div class="wk-nav no-print"><button type="button" class="btn-ghost btn-sm" data-walk-prev>${esc(t('prevStep'))}</button><span class="wk-readout" data-walk-readout>1 / ${steps.length}</span><button type="button" class="btn-ghost btn-sm" data-walk-next>${esc(t('nextStep'))}</button></div></div>` +
+      `<div class="wk-grid"><div class="wk-stage">${stageNodes}</div><div class="wk-steps" role="group" aria-label="${esc(s.title || 'Walkthrough')}">${stepBtns}</div></div></section>`
+  };
+};
+R['annotated-walkthrough'] = R.walkthrough;
+
+R.diff = (s, idx = 0) => {
+  const files = Array.isArray(s.files) && s.files.length ? s.files : [{
+    file: s.file || 'diff', kind: s.kind, added: s.added, removed: s.removed,
+    patch: s.patch, lines: s.lines, note: s.note, open: s.open, dual: s.dual
+  }];
+  const multi = files.length > 1;
+  let hasNote = false;
+  const blocks = files.map((f, fi) => {
+    const fid = `diff-${idx}-${fi}`;
+    let rows = [];
+    let added = f.added;
+    let removed = f.removed;
+    if (f.patch) {
+      const parsed = parseUnifiedDiff(f.patch);
+      rows = parsed.rows;
+      if (added == null) added = parsed.added;
+      if (removed == null) removed = parsed.removed;
+    } else if (Array.isArray(f.lines)) {
+      rows = f.lines.map((l) => {
+        if (typeof l === 'string') {
+          const tp = l.startsWith('+') ? 'add' : l.startsWith('-') ? 'remove' : l.startsWith('@@') ? 'hunk' : 'ctx';
+          return { type: tp, ln: '', text: l };
+        }
+        return { type: l.type || 'ctx', ln: l.ln == null ? '' : l.ln, text: l.text || '' };
+      });
+      if (added == null) added = rows.filter((r) => r.type === 'add').length;
+      if (removed == null) removed = rows.filter((r) => r.type === 'remove').length;
+    }
+    const lineHtml = rows.map((r) => {
+      const cls = r.type === 'add' ? 'dl diff-add' : r.type === 'remove' ? 'dl diff-remove' : r.type === 'hunk' ? 'dl diff-hunk' : 'dl';
+      return `<span class="${cls}"><span class="ln">${esc(r.ln)}</span><span class="code">${esc(r.text)}</span></span>`;
+    }).join('\n');
+    const noteHtml = f.note ? `<aside class="callout diff-note sev-high"><div><span class="callout-title">${esc(f.note)}</span></div></aside>` : '';
+    if (f.note) hasNote = true;
+    const statsHtml = `<span class="diff-stats"><span class="badge badge-success">+${added || 0}</span><span class="badge badge-danger">-${removed || 0}</span></span>`;
+    const kindHtml = f.kind ? `<span class="diff-kind">${esc(f.kind)}</span>` : '';
+    const body = `<pre><code>${lineHtml}</code></pre>${noteHtml}`;
+    if (multi || f.open != null) {
+      const openAttr = (f.open === false || (multi && f.open == null && fi >= 2)) ? '' : ' open';
+      return `<details class="diff-block" id="${fid}"${openAttr}><summary class="diff-head"><span class="diff-caret" aria-hidden="true">▸</span>${kindHtml}<span class="diff-file">${esc(f.file || '')}</span>${statsHtml}</summary>${body}</details>`;
+    }
+    return `<figure class="diff-block" id="${fid}"><figcaption class="diff-head">${kindHtml}<span class="diff-file">${esc(f.file || '')}</span>${statsHtml}</figcaption>${body}</figure>`;
+  });
+  const nav = multi ? `<nav class="diff-nav no-print" aria-label="${esc(s.title || 'Diff files')}">` + files.map((f, fi) => `<a class="btn-ghost btn-sm" href="#diff-${idx}-${fi}">${esc(f.file || `File ${fi + 1}`)}</a>`).join('') + `</nav>` : '';
+  const heading = s.title ? `<h2>${esc(s.title)}</h2>` : '';
+  return {
+    css: hasNote ? ['diff-block', 'callout-box'] : ['diff-block'],
+    html: `<section class="diff-sec" aria-label="${esc(s.title || 'Diff')}">${heading}${nav}<div class="diff-stack">${blocks.join('')}</div></section>`
+  };
+};
+R['diff-block'] = R.diff;
+
+R.code = (s, idx = 0) => {
+  const rawLines = Array.isArray(s.lines) ? s.lines : String(s.code || '').split(/\r?\n/);
+  const startLn = Number.isInteger(+s.startLine) ? +s.startLine : 1;
+  const hl = parseHighlightLines(s.highlight);
+  const codeId = `cs-code-${idx}`;
+  const lang = s.lang || '';
+  const rows = rawLines.map((line, i) => {
+    const ln = startLn + i;
+    const isHl = hl.has(ln);
+    return `<span class="cs-row${isHl ? ' is-hl' : ''}"><span class="cs-ln">${ln}</span><span class="cs-code">${highlightCodeLine(line, lang)}</span></span>`;
+  }).join('\n');
+  const fileLabel = s.file || s.title || '';
+  const heading = (s.title && s.file && s.title !== s.file) ? `<h2>${esc(s.title)}</h2>` : '';
+  const copyBtn = s.copyable === false ? '' : `<button type="button" class="cs-copy no-print" data-copy="#${codeId}">${esc(t('copyCode'))}</button>`;
+  return {
+    css: ['code-snippet'],
+    html: `<section class="stack" aria-label="${esc(s.title || s.file || 'Code snippet')}">${heading}<figure class="cs" aria-label="${esc(fileLabel)}">` +
+      `<figcaption class="cs-head"><span class="cs-file">${esc(fileLabel)}</span><span class="cs-actions">${lang ? `<span class="cs-lang">${esc(lang)}</span>` : ''}${copyBtn}</span></figcaption>` +
+      `<pre class="cs-body"><code id="${codeId}">${rows}</code></pre></figure></section>`
+  };
+};
+R['code-snippet'] = R.code;
+
+R.beforeafter = (s) => {
+  const bList = (s.before || []).map((x) => `<li class="ba-chip ba-neg">${esc(x)}</li>`).join('');
+  const aList = (s.after || []).map((x) => `<li class="ba-chip ba-pos">${esc(x)}</li>`).join('');
+  return {
+    css: ['before-after'],
+    html: `<figure class="ba card-outlined" aria-label="${esc(s.title || 'Before / After')}">` +
+      (s.title ? `<figcaption class="ba-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="ba-grid">` +
+      `<section class="ba-panel ba-before"><header class="ba-head"><span class="ba-tag">${esc(s.beforeTag || t('before'))}</span><h3>${esc(s.beforeTitle || t('before'))}</h3></header><ul class="ba-list">${bList}</ul></section>` +
+      `<div class="ba-arrow"><span class="ba-arrow-shape" aria-hidden="true"></span>${s.transformLabel ? `<span class="ba-arrow-label">${esc(s.transformLabel)}</span>` : ''}</div>` +
+      `<section class="ba-panel ba-after"><header class="ba-head"><span class="ba-tag">${esc(s.afterTag || t('after'))}</span><h3>${esc(s.afterTitle || t('after'))}</h3></header><ul class="ba-list">${aList}</ul></section>` +
+      `</div></figure>`
+  };
+};
+R['before-after'] = R.beforeafter;
+
+R.filetree = (s) => {
+  const items = s.entries || s.items || [];
+  let rows = [];
+  if (items.length && items[0] && items[0].guide != null) {
+    rows = items.map((e) => ({ guide: e.guide, name: e.name || e.path || '', dir: !!e.dir, note: e.note }));
+  } else {
+    // Build hierarchical tree from slash paths or { name, children, note, dir }
+    const rootMap = new Map();
+    const insertPath = (parts, note, isDirFlag) => {
+      let cur = rootMap;
+      parts.forEach((part, k) => {
+        if (!cur.has(part)) cur.set(part, { name: part, dir: k < parts.length - 1 || !!isDirFlag, note: '', children: new Map() });
+        const node = cur.get(part);
+        if (k === parts.length - 1) { if (note) node.note = note; if (isDirFlag) node.dir = true; }
+        cur = node.children;
+      });
+    };
+    const walkInput = (list, prefix = []) => {
+      list.forEach((it) => {
+        if (typeof it === 'string') {
+          const clean = it.replace(/\/+$/, '');
+          insertPath(clean.split('/').filter(Boolean), '', it.endsWith('/'));
+        } else if (it && it.path) {
+          const raw = String(it.path);
+          const clean = raw.replace(/\/+$/, '');
+          insertPath(clean.split('/').filter(Boolean), it.note || '', it.dir || raw.endsWith('/'));
+        } else if (it && it.name) {
+          const segs = [...prefix, it.name];
+          insertPath(segs, it.note || '', !!it.dir || (Array.isArray(it.children) && it.children.length > 0));
+          if (Array.isArray(it.children)) walkInput(it.children, segs);
+        }
+      });
+    };
+    walkInput(items);
+    const flatten = (map, prefix) => {
+      const entries = [...map.values()];
+      entries.forEach((node, i) => {
+        const last = i === entries.length - 1;
+        const guide = prefix === '' && entries.length === 1 && rows.length === 0 ? '' : (prefix + (last ? '└── ' : '├── '));
+        rows.push({ guide, name: node.name + (node.dir && !node.name.endsWith('/') ? '/' : ''), dir: node.dir || node.children.size > 0, note: node.note });
+        if (node.children.size) flatten(node.children, prefix === '' && guide === '' ? '' : prefix + (last ? '    ' : '│   '));
+      });
+    };
+    flatten(rootMap, '');
+  }
+  const htmlRows = rows.map((r) => `<div class="ftr-row">${r.guide ? `<span class="ftr-guide">${esc(r.guide)}</span>` : ''}<span class="ftr-name${r.dir ? ' -dir' : ''}">${esc(r.name)}</span>${r.note ? `<span class="ftr-note">${esc(r.note)}</span>` : ''}</div>`).join('');
+  return {
+    css: ['file-tree'],
+    html: `<figure class="ftr card-outlined" aria-label="${esc(s.title || 'File tree')}">` +
+      (s.title ? `<figcaption class="ftr-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="ftr-tree" role="group" aria-label="${esc(s.title || 'File tree')}">${htmlRows}</div></figure>`
+  };
+};
+R['file-tree'] = R.filetree;
+
+R.apiendpoint = (s) => {
+  const eps = Array.isArray(s.endpoints) && s.endpoints.length ? s.endpoints : [{
+    method: s.method || 'GET', path: s.path || '/', desc: s.desc, params: s.params, status: s.status, responseDesc: s.responseDesc, responseTone: s.responseTone
+  }];
+  const epHtml = eps.map((ep) => {
+    const m = String(ep.method || 'GET').toUpperCase();
+    const mCls = m === 'POST' ? '-post' : m === 'PUT' || m === 'PATCH' ? '-put' : m === 'DELETE' ? '-delete' : '-get';
+    const params = ep.params || [];
+    const tableHtml = params.length
+      ? `<table class="api-params"><caption>${esc(t('parameters'))}</caption><thead><tr><th>name</th><th>type</th><th>required</th><th>description</th></tr></thead><tbody>` +
+        params.map((p) => `<tr class="api-prow"><td class="api-pn">${esc(p.name || '')}</td><td class="api-pt">${esc(p.type || '')}</td><td><span class="${p.required ? 'api-req' : 'api-opt'}">${p.required ? 'required' : 'optional'}</span></td><td>${esc(p.desc || '')}</td></tr>`).join('') +
+        `</tbody></table>`
+      : '';
+    const stNum = parseInt(ep.status, 10);
+    const stCls = ep.responseTone === 'err' || stNum >= 400 ? '-err' : ep.responseTone === 'warn' || (stNum >= 300 && stNum < 400) ? '-warn' : '-ok';
+    const resHtml = ep.status ? `<div class="api-res"><span class="api-status ${stCls}">${esc(ep.status)}</span><span class="api-rdesc">${esc(ep.responseDesc || '')}</span></div>` : '';
+    return `<section class="api-ep"><div class="api-head"><span class="api-method ${mCls}">${esc(m)}</span><span class="api-path">${esc(ep.path || '')}</span></div>` +
+      (ep.desc ? `<p class="api-desc">${esc(ep.desc)}</p>` : '') + tableHtml + resHtml + `</section>`;
+  }).join('');
+  return {
+    css: ['api-endpoint'],
+    html: `<figure class="api card-outlined" aria-label="${esc(s.title || 'API Reference')}">` +
+      (s.title ? `<figcaption class="api-title">${esc(s.title)}</figcaption>` : '') + epHtml + `</figure>`
+  };
+};
+R['api-endpoint'] = R.apiendpoint;
+
+R.changelog = (s) => {
+  const vers = s.versions || s.releases || [];
+  const versHtml = vers.map((v) => {
+    const groupsHtml = (v.groups || []).map((g) => {
+      const tone = String(g.tone || g.tag || 'added').toLowerCase();
+      const tCls = tone.includes('fix') ? '-fixed' : tone.includes('chang') || tone.includes('mod') || tone.includes('break') ? '-changed' : '-added';
+      const list = (g.entries || []).map((e) => `<li class="clg-entry">${esc(e)}</li>`).join('');
+      return `<div class="clg-group"><span class="clg-tag ${tCls}">${esc(g.tag || 'Added')}</span><ul class="clg-list">${list}</ul></div>`;
+    }).join('');
+    return `<section class="clg-ver"><div class="clg-head"><span class="clg-num">${esc(v.version || '')}</span>` +
+      (v.date ? `<span class="clg-date">${esc(v.date)}</span>` : '') +
+      (v.latest ? `<span class="clg-latest">latest</span>` : '') +
+      `</div>${groupsHtml}</section>`;
+  }).join('');
+  return {
+    css: ['changelog'],
+    html: `<figure class="clg card-outlined" aria-label="${esc(s.title || 'Changelog')}">` +
+      (s.title ? `<figcaption class="clg-title">${esc(s.title)}</figcaption>` : '') + versHtml + `</figure>`
+  };
+};
+
+R.takeaways = (s) => {
+  const rows = (s.items || []).map((it) => {
+    if (typeof it === 'string') return `<li class="ktw-row"><span class="ktw-num" aria-hidden="true"></span><div class="ktw-body"><span class="ktw-lead">${esc(it)}</span></div></li>`;
+    const lead = it.lead || it.title || it.text || '';
+    const elab = it.elab || it.detail || it.body || '';
+    return `<li class="ktw-row"><span class="ktw-num" aria-hidden="true"></span><div class="ktw-body"><span class="ktw-lead">${esc(lead)}</span>${elab ? `<span class="ktw-elab">${esc(elab)}</span>` : ''}</div></li>`;
+  }).join('');
+  return {
+    css: ['key-takeaways'],
+    html: `<figure class="ktw card-outlined" aria-label="${esc(s.title || 'Key Takeaways')}">` +
+      (s.title ? `<figcaption class="ktw-title">${esc(s.title)}</figcaption>` : '') +
+      `<ol class="ktw-list">${rows}</ol></figure>`
+  };
+};
+R['key-takeaways'] = R.takeaways;
+
+R.waterfall = (s) => {
+  const items = s.items || [];
+  if (!items.length) return { css: ['chart-waterfall'], html: '<div class="empty-state">No data</div>' };
+  const bars = [];
+  let running = 0;
+  items.forEach((it, i) => {
+    const kind = it.kind || (i === 0 ? 'start' : 'delta');
+    const v = +it.value || 0;
+    if (kind === 'start') {
+      running = v;
+      bars.push({ label: it.label, from: 0, to: v, kind: 'start', display: it.display });
+    } else if (kind === 'total') {
+      const endV = it.value != null ? v : running;
+      bars.push({ label: it.label, from: 0, to: endV, kind: 'total', display: it.display });
+      running = endV;
+    } else {
+      const next = running + v;
+      bars.push({ label: it.label, from: running, to: next, delta: v, kind: v >= 0 ? 'up' : 'down', display: it.display });
+      running = next;
+    }
+  });
+  const vals = [0, ...bars.flatMap((b) => [b.from, b.to])];
+  const dom = niceDomain(vals, true, s.yMin, s.yMax);
+  const fmt = axisFormat(items, s);
+  const W = 720, L = 40, R_ = 700, TOP = 40, BOT = 280;
+  const yOf = (v) => r2(BOT - ((v - dom.lo) / ((dom.hi - dom.lo) || 1)) * (BOT - TOP));
+  const slot = (R_ - L) / Math.max(bars.length, 1);
+  const bw = r2(Math.min(64, Math.max(24, slot * 0.62)));
+  const gridLines = [0, 0.25, 0.5, 0.75].map((f) => {
+    const yy = r2(TOP + f * (BOT - TOP));
+    return `<line class="grid-line" x1="${L}" y1="${yy}" x2="${R_}" y2="${yy}"/>`;
+  }).join('') + `<line class="axis" x1="${L}" y1="${yOf(Math.max(dom.lo, Math.min(0, dom.hi)))}" x2="${R_}" y2="${yOf(Math.max(dom.lo, Math.min(0, dom.hi)))}"/>`;
+  const svgBars = bars.map((b, i) => {
+    const x = r2(L + i * slot + (slot - bw) / 2);
+    const y1 = yOf(b.from), y2 = yOf(b.to);
+    const y = Math.min(y1, y2);
+    const h = Math.max(2, r2(Math.abs(y2 - y1)));
+    const rawVal = b.kind === 'up' || b.kind === 'down' ? b.delta : b.to;
+    const lblVal = b.display || ((b.kind === 'up' && rawVal > 0 ? '+' : '') + fmt(rawVal, dom.step));
+    const cls = b.kind === 'start' ? 'is-start' : b.kind === 'total' ? 'is-total' : b.kind === 'up' ? 'is-up' : 'is-down';
+    const nextX = i + 1 < bars.length ? r2(L + (i + 1) * slot + (slot - bw) / 2) : null;
+    const conn = nextX != null ? `<line class="connector" x1="${r2(x + bw)}" y1="${y2}" x2="${nextX}" y2="${y2}"/>` : '';
+    const tip = `${b.label}: ${lblVal}`;
+    const valY = b.to >= b.from ? r2(y - 8) : r2(y + h + 14);
+    return `<g><rect class="bar ${cls}" x="${x}" y="${y}" width="${bw}" height="${h}" rx="4" data-tip="${esc(tip)}"><title>${esc(tip)}</title></rect>` +
+      `<text class="val" x="${r2(x + bw / 2)}" y="${valY}">${esc(lblVal)}</text>` +
+      `<text class="cat" x="${r2(x + bw / 2)}" y="300">${esc(b.label)}</text>${conn}</g>`;
+  }).join('');
+  return {
+    css: ['chart-waterfall'],
+    html: `<figure class="waterfall card-outlined" data-chart-tip aria-label="${esc(s.title || 'Waterfall')}">` +
+      (s.title ? `<figcaption class="waterfall-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 ${W} 320" role="img" aria-label="${esc(s.title || 'Waterfall')}"><title>${esc(s.title || 'Waterfall')}</title>${gridLines}${svgBars}</svg></figure>`
+  };
+};
+R['chart-waterfall'] = R.waterfall;
+
+R.scatter = (s) => {
+  const pts = s.points || [];
+  if (!pts.length) return { css: ['chart-scatter'], html: '<div class="empty-state">No data</div>' };
+  const xs = pts.map((p) => +p.x || 0), ys = pts.map((p) => +p.y || 0);
+  const xDom = niceDomain(xs, false, s.xMin, s.xMax);
+  const yDom = niceDomain(ys, false, s.yMin, s.yMax);
+  const L = 56, R_ = 700, TOP = 40, BOT = 300;
+  const xOf = (v) => r2(L + ((v - xDom.lo) / ((xDom.hi - xDom.lo) || 1)) * (R_ - L));
+  const yOf = (v) => r2(BOT - ((v - yDom.lo) / ((yDom.hi - yDom.lo) || 1)) * (BOT - TOP));
+  const grid = [0.25, 0.5, 0.75].map((f) => {
+    const yy = r2(TOP + f * (BOT - TOP));
+    const xx = r2(L + f * (R_ - L));
+    return `<line class="grid-line" x1="${L}" y1="${yy}" x2="${R_}" y2="${yy}"/><line class="grid-line" x1="${xx}" y1="${TOP}" x2="${xx}" y2="${BOT}"/>`;
+  }).join('');
+  const median = (arr) => { const a = [...arr].sort((x, y) => x - y); const m = Math.floor(a.length / 2); return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
+  const medHtml = s.showMedian !== false
+    ? `<line class="median" x1="${xOf(median(xs))}" y1="${TOP}" x2="${xOf(median(xs))}" y2="${BOT}"/><line class="median" x1="${L}" y1="${yOf(median(ys))}" x2="${R_}" y2="${yOf(median(ys))}"/>`
+    : '';
+  const seriesOrder = [...new Set(pts.map((p) => p.series).filter(Boolean))];
+  const circles = pts.map((p, i) => {
+    const cat = p.cat != null ? catOf(p.cat, i) : (p.series ? catOf(seriesOrder.indexOf(p.series) + 1, i) : catOf(null, i));
+    const r = Math.max(4, Math.min(20, +(p.r || 6)));
+    const valStr = p.value != null ? String(p.value) : `${p.x}, ${p.y}`;
+    const tip = `${p.label || ''}: ${valStr}`;
+    return `<circle class="pt cat-${cat}" cx="${xOf(+p.x || 0)}" cy="${yOf(+p.y || 0)}" r="${r}" data-tip="${esc(tip)}"><title>${esc(tip)}</title></circle>`;
+  }).join('');
+  const legend = seriesOrder.length ? `<div class="scatter-legend">` + seriesOrder.map((nm, i) => `<span class="lg"><span class="lg-dot cat-${catOf(i + 1, i)}"></span>${esc(nm)}</span>`).join('') + `</div>` : '';
+  const xMid = (xDom.lo + xDom.hi) / 2, yMid = (yDom.lo + yDom.hi) / 2;
+  return {
+    css: ['chart-scatter'],
+    html: `<figure class="scatter card-outlined" data-chart-tip aria-label="${esc(s.title || 'Scatter')}">` +
+      (s.title ? `<figcaption class="scatter-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 720 340" role="img" aria-label="${esc(s.title || 'Scatter')}"><title>${esc(s.title || 'Scatter')}</title>${grid}${medHtml}` +
+      `<line class="axis" x1="${L}" y1="${TOP}" x2="${L}" y2="${BOT}"/><line class="axis" x1="${L}" y1="${BOT}" x2="${R_}" y2="${BOT}"/>` +
+      `<text class="tick" x="50" y="304" text-anchor="end">${esc(fmtNum(yDom.lo, yDom.step))}</text>` +
+      `<text class="tick" x="50" y="174" text-anchor="end">${esc(fmtNum(yMid, yDom.step))}</text>` +
+      `<text class="tick" x="50" y="44" text-anchor="end">${esc(fmtNum(yDom.hi, yDom.step))}</text>` +
+      `<text class="tick" x="${L}" y="316" text-anchor="middle">${esc(fmtNum(xDom.lo, xDom.step))}</text>` +
+      `<text class="tick" x="${r2((L + R_) / 2)}" y="316" text-anchor="middle">${esc(fmtNum(xMid, xDom.step))}</text>` +
+      `<text class="tick" x="${R_}" y="316" text-anchor="middle">${esc(fmtNum(xDom.hi, xDom.step))}</text>` +
+      (s.xLabel ? `<text class="axis-label" x="${r2((L + R_) / 2)}" y="334">${esc(s.xLabel)}</text>` : '') +
+      (s.yLabel ? `<text class="axis-label" x="18" y="170" transform="rotate(-90 18 170)">${esc(s.yLabel)}</text>` : '') +
+      circles + `</svg>${legend}</figure>`
+  };
+};
+R['chart-scatter'] = R.scatter;
+
+R.pareto = (s) => {
+  const raw = (s.items || []).map((it) => ({ label: it.label, value: Math.max(0, +it.value || 0), display: it.display }));
+  if (!raw.length) return { css: ['pareto'], html: '<div class="empty-state">No data</div>' };
+  const items = s.preserveOrder ? raw : [...raw].sort((a, b) => b.value - a.value);
+  const total = items.reduce((a, b) => a + b.value, 0) || 1;
+  const maxV = Math.max(...items.map((d) => d.value), 1);
+  const L = 52, R_ = 588, TOP = 36, BOT = 300;
+  const slot = (R_ - L) / items.length;
+  const bw = r2(Math.min(52, Math.max(20, slot * 0.56)));
+  let cum = 0;
+  const pts = [];
+  const bars = items.map((d, i) => {
+    cum += d.value;
+    const cumPct = (cum / total) * 100;
+    const h = r2((d.value / maxV) * (BOT - TOP));
+    const y = r2(BOT - h);
+    const x = r2(L + i * slot + (slot - bw) / 2);
+    const cx = r2(x + bw / 2);
+    const cy = r2(BOT - (cumPct / 100) * (BOT - TOP));
+    pts.push({ x: cx, y: cy, label: d.label, cum: `${r2(cumPct)}%` });
+    const valStr = d.display || fmtNum(d.value);
+    return `<g><rect class="bar" x="${x}" y="${y}" width="${bw}" height="${h}" rx="4"><title>${esc(d.label)}: ${esc(valStr)}</title></rect><text class="cat" x="${cx}" y="318">${esc(d.label)}</text></g>`;
+  }).join('');
+  const poly = pts.map((p) => `${p.x},${p.y}`).join(' ');
+  const dots = pts.map((p) => `<circle class="cum-dot" cx="${p.x}" cy="${p.y}" r="4"><title>${esc(p.label)}: ${esc(p.cum)}</title></circle>`).join('');
+  const y80 = r2(BOT - 0.8 * (BOT - TOP));
+  return {
+    css: ['pareto'],
+    html: `<figure class="prt card-outlined" aria-label="${esc(s.title || 'Pareto')}">` +
+      (s.title ? `<figcaption class="prt-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 640 360" role="img" aria-label="${esc(s.title || 'Pareto')}"><title>${esc(s.title || 'Pareto')}</title>` +
+      `<line class="grid-line" x1="${L}" y1="124" x2="${R_}" y2="124"/><line class="grid-line" x1="${L}" y1="212" x2="${R_}" y2="212"/>` +
+      `<line class="axis" x1="${L}" y1="${TOP}" x2="${L}" y2="${BOT}"/><line class="axis" x1="${R_}" y1="${TOP}" x2="${R_}" y2="${BOT}"/><line class="axis" x1="${L}" y1="${BOT}" x2="${R_}" y2="${BOT}"/>` +
+      `<text class="tick" x="46" y="304" text-anchor="end">0</text><text class="tick" x="46" y="216" text-anchor="end">${esc(fmtNum(Math.round(maxV / 2)))}</text><text class="tick" x="46" y="40" text-anchor="end">${esc(fmtNum(maxV))}</text>` +
+      `<text class="tick" x="594" y="304">0%</text><text class="tick" x="594" y="172">50%</text><text class="tick" x="594" y="40">100%</text>` +
+      `<text class="axis-label" x="20" y="168" transform="rotate(-90 20 168)">${esc(s.yAxis || t('countAxis'))}</text>` +
+      `<line class="ref80" x1="${L}" y1="${y80}" x2="${R_}" y2="${y80}"/><text class="ref80-tag" x="${R_ - 2}" y="${y80 - 5}" text-anchor="end">80%</text>` +
+      bars + `<polyline class="cum-line" points="${poly}"/>${dots}</svg></figure>`
+  };
+};
+
+R.diverging = (s) => {
+  const items = s.items || [];
+  const max = +(s.max || Math.max(...items.flatMap((it) => [Math.abs(+it.a || 0), Math.abs(+it.b || 0)]), 1));
+  const rows = items.map((it) => {
+    const wa = r2(Math.min(100, (Math.abs(+it.a || 0) / max) * 100));
+    const wb = r2(Math.min(100, (Math.abs(+it.b || 0) / max) * 100));
+    return `<div class="dvb-row">` +
+      `<span class="dvb-val a">${esc(it.aDisplay != null ? it.aDisplay : it.a)}</span>` +
+      `<span class="dvb-track a"><span class="dvb-fill" style="--w:${wa}%"></span></span>` +
+      `<span class="dvb-cat">${esc(it.label)}</span>` +
+      `<span class="dvb-track b"><span class="dvb-fill" style="--w:${wb}%"></span></span>` +
+      `<span class="dvb-val b">${esc(it.bDisplay != null ? it.bDisplay : it.b)}</span>` +
+      `</div>`;
+  }).join('');
+  return {
+    css: ['diverging-bar'],
+    html: `<figure class="dvb card-outlined" aria-label="${esc(s.title || 'Diverging bar')}">` +
+      (s.title ? `<figcaption class="dvb-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="dvb-legend"><span class="dvb-key a"><i></i>${esc(s.seriesA || 'A')}</span><span class="dvb-key b"><i></i>${esc(s.seriesB || 'B')}</span></div>` +
+      `<div class="dvb-rows">${rows}</div></figure>`
+  };
+};
+R['diverging-bar'] = R.diverging;
+
+R.cohort = (s) => {
+  const periods = s.periods || [];
+  const cohorts = s.cohorts || s.rows || [];
+  const colsStyle = `grid-template-columns: minmax(110px, 1.4fr) minmax(56px, .6fr) repeat(${Math.max(periods.length, 1)}, minmax(48px, 1fr))`;
+  const head = `<div class="cht-h lead">${esc(s.cohortLabel || 'Cohort')}</div><div class="cht-h">${esc(s.sizeLabel || 'Size')}</div>` + periods.map((p) => `<div class="cht-h">${esc(p)}</div>`).join('');
+  const body = cohorts.map((c) => {
+    const cells = periods.map((_, i) => {
+      const val = (c.values || [])[i];
+      if (val == null || val === '') return `<span class="cht-cell cht-na">-</span>`;
+      const num = parseFloat(String(val).replace(/[^0-9.\-]/g, ''));
+      const intensity = Number.isFinite(num) ? Math.max(5, Math.min(100, Math.round(num))) : 50;
+      return `<span class="cht-cell" style="--i:${intensity}">${esc(typeof val === 'number' ? val + '%' : val)}</span>`;
+    }).join('');
+    return `<span class="cht-cohort">${esc(c.label || '')}</span><span class="cht-size">${esc(c.size != null ? c.size : '')}</span>${cells}`;
+  }).join('');
+  return {
+    css: ['cohort-grid'],
+    html: `<figure class="cht card-outlined" aria-label="${esc(s.title || 'Cohort grid')}">` +
+      (s.title ? `<figcaption class="cht-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="cht-grid" style="${colsStyle}">${head}${body}</div></figure>`
+  };
+};
+R['cohort-grid'] = R.cohort;
+
+R.leaderboard = (s) => {
+  const items = s.items || [];
+  const max = Math.max(...items.map((it) => Math.abs(+it.value || 0)), 1);
+  const rows = items.map((it, i) => {
+    const rank = it.rank || (i + 1);
+    const rCls = rank <= 3 ? ` is-${rank}` : '';
+    const v = r2(Math.min(100, (Math.abs(+it.value || 0) / max) * 100));
+    const cat = catOf(it.cat, i);
+    const dir = it.dir || (String(it.move || '').startsWith('-') ? 'down' : String(it.move || '').startsWith('+') ? 'up' : 'flat');
+    const moveSym = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '';
+    return `<div class="ldb-row"><span class="ldb-rank${rCls}">${esc(rank)}</span><span class="ldb-name">${esc(it.name || '')}</span>` +
+      `<span class="ldb-bar"><span class="ldb-fill cat-${cat}" style="--v:${v}%"></span></span>` +
+      `<span class="ldb-val">${esc(it.display != null ? it.display : it.value)}</span>` +
+      `<span class="ldb-move ${esc(dir)}">${it.move != null && it.move !== '' ? esc(moveSym + String(it.move).replace(/^[+\-▲▼]/, '')) : '-'}</span></div>`;
+  }).join('');
+  return {
+    css: ['leaderboard'],
+    html: `<figure class="ldb card-outlined" aria-label="${esc(s.title || 'Leaderboard')}">` +
+      (s.title ? `<figcaption class="ldb-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="ldb-list">${rows}</div></figure>`
+  };
+};
+
+R.quadrant = (s) => {
+  const q = s.quadrants || {};
+  const clamp = (n) => Math.max(8, Math.min(92, n));
+  const chips = (s.items || []).map((it, i) => {
+    const left = r2(clamp(+it.x || 50));
+    const top = r2(clamp(100 - (+it.y || 50)));
+    return `<span class="qd-item cat-${catOf(it.cat, i)}" style="left:${left}%;top:${top}%">${esc(it.label || '')}</span>`;
+  }).join('');
+  return {
+    css: ['quadrant'],
+    html: `<figure class="qd card-outlined" aria-label="${esc(s.title || 'Quadrant')}">` +
+      (s.title ? `<figcaption class="qd-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="qd-frame">` +
+      `<div class="qd-ax-y"><span class="qd-end">${esc(s.yHigh || t('high'))}</span><span class="qd-dim">${esc(s.yAxis || '')}</span><span class="qd-end">${esc(s.yLow || t('low'))}</span></div>` +
+      `<div class="qd-canvas"><span class="qd-quad qd-tl">${esc(q.tl || '')}</span><span class="qd-quad qd-tr">${esc(q.tr || '')}</span><span class="qd-quad qd-bl">${esc(q.bl || '')}</span><span class="qd-quad qd-br">${esc(q.br || '')}</span>${chips}</div>` +
+      `<div class="qd-ax-x"><span class="qd-end">${esc(s.xLow || t('low'))}</span><span class="qd-dim">${esc(s.xAxis || '')}</span><span class="qd-end">${esc(s.xHigh || t('high'))}</span></div>` +
+      `</div></figure>`
+  };
+};
+
+R.riskmatrix = (s) => {
+  const xLabels = s.xLabels && s.xLabels.length === 5 ? s.xLabels : ['1', '2', '3', '4', '5'];
+  const yLabels = s.yLabels && s.yLabels.length === 5 ? s.yLabels : ['5', '4', '3', '2', '1'];
+  const bucket = Array.from({ length: 5 }, () => Array.from({ length: 5 }, () => []));
+  (s.items || []).forEach((it) => {
+    const p = Math.max(1, Math.min(5, Math.round(+it.prob || 3)));
+    const imp = Math.max(1, Math.min(5, Math.round(+it.impact || 3)));
+    bucket[5 - p][imp - 1].push(it.label || '');
+  });
+  const sevClass = (p, imp) => {
+    const sc = p * imp;
+    return sc >= 15 ? 'rm-s5' : sc >= 10 ? 'rm-s4' : sc >= 6 ? 'rm-s3' : sc >= 3 ? 'rm-s2' : 'rm-s1';
+  };
+  let gridHtml = `<span class="rm-corner"></span>` + xLabels.map((l) => `<span class="rm-colhead">${esc(l)}</span>`).join('');
+  for (let row = 0; row < 5; row++) {
+    const p = 5 - row;
+    gridHtml += `<span class="rm-rowhead">${esc(yLabels[row])}</span>`;
+    for (let col = 0; col < 5; col++) {
+      const imp = col + 1;
+      const chips = bucket[row][col].map((lbl) => `<span class="rm-chip">${esc(lbl)}</span>`).join('');
+      gridHtml += `<div class="rm-cell ${sevClass(p, imp)}">${chips}</div>`;
+    }
+  }
+  return {
+    css: ['risk-matrix'],
+    html: `<figure class="rm card-outlined" aria-label="${esc(s.title || 'Risk Matrix')}">` +
+      (s.title ? `<figcaption class="rm-title">${esc(s.title)}</figcaption>` : '') +
+      `<div class="rm-frame"><div class="rm-axis-y"><span>${esc(s.yAxis || t('probAxis'))}</span></div><div class="rm-grid">${gridHtml}</div><div class="rm-axis-x">${esc(s.xAxis || t('impactAxis'))}</div></div></figure>`
+  };
+};
+R['risk-matrix'] = R.riskmatrix;
+
+R.sequence = (s, idx = 0) => {
+  const actors = (s.actors || []).map((a, i) => typeof a === 'string' ? { id: a, label: a } : { id: a.id || `a${i}`, label: a.label || a.id });
+  const msgs = s.messages || [];
+  const W = Math.max(760, actors.length * 200);
+  const H = Math.max(260, 120 + msgs.length * 56 + (s.notes ? s.notes.length * 50 : 0));
+  const colX = new Map();
+  const margin = 100;
+  const span = actors.length > 1 ? (W - margin * 2) / (actors.length - 1) : 0;
+  actors.forEach((a, i) => colX.set(a.id, actors.length === 1 ? W / 2 : r2(margin + i * span)));
+  const aId = `seq-arrow-${idx}`, oId = `seq-arrow-open-${idx}`;
+  const defs = `<defs><marker id="${aId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="msg-arrow" d="M0,0 L10,5 L0,10 z"/></marker>` +
+    `<marker id="${oId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="msg-arrow-open" d="M1,1 L9,5 L1,9"/></marker></defs>`;
+  const lifelines = actors.map((a) => `<line class="lifeline" x1="${colX.get(a.id)}" y1="48" x2="${colX.get(a.id)}" y2="${H - 20}"/>`).join('');
+  const boxes = actors.map((a) => {
+    const cx = colX.get(a.id);
+    return `<g><rect class="actor-box" x="${r2(cx - 72)}" y="8" width="144" height="40" rx="8"/><text class="actor-label" x="${cx}" y="28">${esc(a.label)}</text></g>`;
+  }).join('');
+  const msgHtml = msgs.map((m, i) => {
+    const x1 = colX.get(m.from) ?? colX.get(actors[0]?.id) ?? 100;
+    const x2 = colX.get(m.to) ?? x1;
+    const y = 96 + i * 56;
+    const isRet = m.type === 'return';
+    if (x1 === x2) {
+      return `<text class="msg-label" x="${r2(x1 + 52)}" y="${y - 8}">${esc(m.label || '')}</text>` +
+        `<path class="${isRet ? 'seq-msg-return' : 'seq-msg'}" d="M${x1},${y} h42 v24 h-42" fill="none" marker-end="url(#${isRet ? oId : aId})"/>`;
+    }
+    const sx = x1 < x2 ? x1 + 4 : x1 - 4;
+    const ex = x1 < x2 ? x2 - 4 : x2 + 4;
+    return `<text class="msg-label" x="${r2((x1 + x2) / 2)}" y="${y - 8}">${esc(m.label || '')}</text>` +
+      `<line class="${isRet ? 'seq-msg-return' : 'seq-msg'}" x1="${sx}" y1="${y}" x2="${ex}" y2="${y}" marker-end="url(#${isRet ? oId : aId})"/>`;
+  }).join('');
+  const notesHtml = (s.notes || []).map((n, i) => {
+    const cx = colX.get(n.actor) ?? W / 2;
+    const ny = 96 + msgs.length * 56 + i * 48;
+    const nx = Math.max(12, Math.min(W - 232, cx - 110));
+    return `<g><rect class="seq-note" x="${r2(nx)}" y="${ny}" width="220" height="40"/><text class="note-label" x="${r2(nx + 110)}" y="${ny + 20}">${esc(n.text || '')}</text></g>`;
+  }).join('');
+  return {
+    css: ['sequence-diagram'],
+    html: `<figure class="seq card-outlined" aria-label="${esc(s.title || 'Sequence Diagram')}">` +
+      (s.title ? `<figcaption class="seq-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.title || 'Sequence Diagram')}"><title>${esc(s.title || 'Sequence Diagram')}</title>${defs}${lifelines}${msgHtml}${notesHtml}${boxes}</svg></figure>`
+  };
+};
+R['sequence-diagram'] = R.sequence;
+
+R.statediagram = (s, idx = 0) => {
+  const states = s.states || [];
+  const trans = s.transitions || [];
+  const cols = Math.min(4, Math.max(2, states.length));
+  const pos = new Map();
+  states.forEach((st, i) => {
+    const r = Math.floor(i / cols), c = i % cols;
+    const x = st.x != null ? +st.x : 76 + c * 210;
+    const y = st.y != null ? +st.y : 50 + r * 124;
+    pos.set(st.id, { x, y, w: 132, h: 48, cx: x + 66, cy: y + 24, st });
+  });
+  const W = Math.max(780, ...[...pos.values()].map((p) => p.x + p.w + 96));
+  const H = Math.max(240, ...[...pos.values()].map((p) => p.y + p.h + 56));
+  const mId = `sd-arrow-${idx}`;
+  const defs = `<defs><marker id="${mId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="sd-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>`;
+  const initSt = states.find((x) => x.initial) || states[0];
+  let initHtml = '';
+  if (initSt && pos.has(initSt.id)) {
+    const p = pos.get(initSt.id);
+    initHtml = `<circle class="sd-initial" cx="${p.x - 42}" cy="${p.cy}" r="8"/><line class="sd-edge" x1="${p.x - 34}" y1="${p.cy}" x2="${p.x - 2}" y2="${p.cy}" marker-end="url(#${mId})"/>`;
+  }
+  const edgeHtml = trans.map((tr) => {
+    const a = pos.get(tr.from), b = pos.get(tr.to);
+    if (!a || !b) return '';
+    if (Math.abs(a.cy - b.cy) < 10 && b.cx > a.cx && Math.abs(b.x - (a.x + a.w)) < 120) {
+      const mx = r2((a.x + a.w + b.x) / 2);
+      return `<line class="sd-edge" x1="${a.x + a.w}" y1="${a.cy}" x2="${b.x - 2}" y2="${b.cy}" marker-end="url(#${mId})"/>` +
+        (tr.label ? `<text class="sd-guard" x="${mx}" y="${a.cy - 10}">${esc(tr.label)}</text>` : '');
+    }
+    const ctrlY = Math.min(a.y, b.y) - 34;
+    const sx = a.cx, sy = a.y, ex = b.cx, ey = b.y;
+    return `<path class="sd-edge" d="M${sx},${sy} Q${r2((sx + ex) / 2)},${ctrlY} ${ex},${ey - 2}" marker-end="url(#${mId})"/>` +
+      (tr.label ? `<text class="sd-guard" x="${r2((sx + ex) / 2)}" y="${ctrlY + 12}">${esc(tr.label)}</text>` : '');
+  }).join('');
+  const nodeHtml = states.map((st) => {
+    const p = pos.get(st.id);
+    const tone = st.tone === 'success' ? ' is-success' : st.tone === 'danger' ? ' is-danger' : '';
+    const fin = st.final ? `<circle class="sd-final-outer" cx="${p.x + p.w + 48}" cy="${p.cy}" r="14"/><circle class="sd-final-inner" cx="${p.x + p.w + 48}" cy="${p.cy}" r="6"/><line class="sd-edge" x1="${p.x + p.w}" y1="${p.cy}" x2="${p.x + p.w + 32}" y2="${p.cy}" marker-end="url(#${mId})"/>` : '';
+    return `<g><rect class="sd-state${tone}" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="8"/><text class="sd-label" x="${p.cx}" y="${p.cy}">${esc(st.label || st.id)}</text></g>${fin}`;
+  }).join('');
+  return {
+    css: ['state-diagram'],
+    html: `<figure class="sd card-outlined" aria-label="${esc(s.title || 'State Diagram')}">` +
+      (s.title ? `<figcaption class="sd-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.title || 'State Diagram')}"><title>${esc(s.title || 'State Diagram')}</title>${defs}${initHtml}${edgeHtml}${nodeHtml}</svg></figure>`
+  };
+};
+R['state-diagram'] = R.statediagram;
+
+R.erd = (s, idx = 0) => {
+  const ents = s.entities || [];
+  const rels = s.relations || [];
+  const cols = Math.min(3, Math.max(1, ents.length));
+  const pos = new Map();
+  ents.forEach((e, i) => {
+    const r = Math.floor(i / cols), c = i % cols;
+    const x = e.x != null ? +e.x : 30 + c * 250;
+    const y = e.y != null ? +e.y : 28 + r * 210;
+    const h = Math.max(96, 46 + (e.columns || []).length * 26);
+    pos.set(e.id, { x, y, w: 204, h });
+  });
+  const W = Math.max(760, ...[...pos.values()].map((p) => p.x + p.w + 40));
+  const H = Math.max(360, ...[...pos.values()].map((p) => p.y + p.h + 40));
+  const mId = `erd-arrow-${idx}`;
+  const links = rels.map((rel) => {
+    const a = pos.get(rel.from), b = pos.get(rel.to);
+    const x1 = a ? r2(a.x + a.w / 2) : 0, y1 = a ? r2(a.y + a.h / 2) : 0;
+    const x2 = b ? r2(b.x + b.w / 2) : 0, y2 = b ? r2(b.y + b.h / 2) : 0;
+    const nm = /n:m|m:n/i.test(String(rel.cardinality || ''));
+    const lbl = rel.cardinality || rel.label || '';
+    return `<line class="erd-link${nm ? ' nm' : ''}" data-edge data-from="${esc(rel.from)}" data-to="${esc(rel.to)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#${mId})"/>` +
+      (lbl ? `<text class="erd-link-label" data-edge-label="${esc(rel.from)}-${esc(rel.to)}" x="${r2((x1 + x2) / 2)}" y="${r2((y1 + y2) / 2 - 6)}">${esc(lbl)}</text>` : '');
+  }).join('');
+  const nodes = ents.map((e) => {
+    const p = pos.get(e.id);
+    const rows = (e.columns || []).map((col) => `<li class="erd-row"><span class="erd-col">${esc(col.name || '')}</span>` +
+      (col.key ? `<span class="chip ${String(col.key).toLowerCase() === 'fk' ? 'fk' : 'pk'}">${esc(col.key)}</span>` : '') +
+      `<span class="erd-type">${esc(col.type || '')}</span></li>`).join('');
+    return `<g class="erd-node" data-node="${esc(e.id)}" transform="translate(${p.x},${p.y})" role="group" aria-label="${esc(e.name || e.id)}">` +
+      `<rect class="erd-hit" x="0" y="0" width="${p.w}" height="${p.h}" rx="12"/>` +
+      `<foreignObject x="0" y="0" width="${p.w}" height="${p.h}"><article class="erd-entity card-outlined" xmlns="http://www.w3.org/1999/xhtml"><header class="erd-head">${esc(e.name || e.id)}</header><ul class="erd-rows">${rows}</ul></article></foreignObject></g>`;
+  }).join('');
+  return {
+    css: ['erd'],
+    html: `<section class="erd stack" aria-label="${esc(s.title || 'Entity relationship diagram')}">` +
+      (s.title ? `<h2>${esc(s.title)}</h2>` : '') +
+      `<div class="erd-stage" data-zoompan data-zoom-min="0.5" data-zoom-max="2.4" tabindex="0">` +
+      `<div class="zoom-controls no-print"><button type="button" class="btn btn-ghost btn-sm" data-zoom-in aria-label="Zoom in">+</button><button type="button" class="btn btn-ghost btn-sm" data-zoom-out aria-label="Zoom out">&minus;</button><button type="button" class="btn btn-ghost btn-sm" data-zoom-reset aria-label="Reset zoom">&#x2922;</button><span class="zoom-readout" data-zoom-readout>100%</span></div>` +
+      `<svg viewBox="0 0 ${W} ${H}" data-draggable role="img" aria-label="${esc(s.title || 'Entity relationship diagram')}"><title>${esc(s.title || 'ERD')}</title>` +
+      `<defs><marker id="${mId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--text-muted)"/></marker></defs>` +
+      `<g data-viewport>${links}${nodes}</g></svg></div></section>`
+  };
+};
+
+R.sankey = (s) => {
+  const flows = s.flows || [];
+  if (!flows.length) return { css: ['sankey'], html: '<div class="empty-state">No flows</div>' };
+  const srcList = (s.sources || s.left || [...new Set(flows.map((f) => f.from))]).map((x) => typeof x === 'string' ? { id: x, label: x } : x);
+  const tgtList = (s.targets || s.right || [...new Set(flows.map((f) => f.to))]).map((x) => typeof x === 'string' ? { id: x, label: x } : x);
+  const srcTot = new Map(srcList.map((n) => [n.id, 0])), tgtTot = new Map(tgtList.map((n) => [n.id, 0]));
+  flows.forEach((f) => {
+    const v = Math.max(0.1, +f.value || 0);
+    srcTot.set(f.from, (srcTot.get(f.from) || 0) + v);
+    tgtTot.set(f.to, (tgtTot.get(f.to) || 0) + v);
+  });
+  const totalFlow = Math.max([...srcTot.values()].reduce((a, b) => a + b, 0), [...tgtTot.values()].reduce((a, b) => a + b, 0), 1);
+  const availH = 300, gap = 20;
+  const srcUsable = availH - gap * Math.max(0, srcList.length - 1);
+  const tgtUsable = availH - gap * Math.max(0, tgtList.length - 1);
+  const scale = Math.min(srcUsable, tgtUsable) / totalFlow;
+  const srcRect = new Map(), tgtRect = new Map();
+  let sy = 44;
+  srcList.forEach((n, i) => {
+    const h = Math.max(12, r2((srcTot.get(n.id) || 0) * scale));
+    srcRect.set(n.id, { y: sy, h, off: sy, cat: catOf(n.cat, i), label: n.label || n.id, val: srcTot.get(n.id) || 0 });
+    sy += h + gap;
+  });
+  let ty = 44;
+  tgtList.forEach((n) => {
+    const h = Math.max(12, r2((tgtTot.get(n.id) || 0) * scale));
+    tgtRect.set(n.id, { y: ty, h, off: ty, label: n.label || n.id, val: tgtTot.get(n.id) || 0 });
+    ty += h + gap;
+  });
+  const H = Math.max(380, Math.ceil(Math.max(sy, ty) + 24));
+  const paths = flows.map((f, i) => {
+    const sr = srcRect.get(f.from), tr = tgtRect.get(f.to);
+    if (!sr || !tr) return '';
+    const v = Math.max(0.1, +f.value || 0);
+    const fw = Math.max(2, r2(v * scale));
+    const y0 = r2(sr.off + fw / 2), y1 = r2(tr.off + fw / 2);
+    sr.off += fw; tr.off += fw;
+    const cat = catOf(f.cat, srcList.findIndex((x) => x.id === f.from) >= 0 ? srcList.findIndex((x) => x.id === f.from) : i);
+    return `<path class="sk-flow cat-${cat}" style="stroke-width:${fw}" d="M64,${y0} C380,${y0} 380,${y1} 696,${y1}"><title>${esc(sr.label)} -> ${esc(tr.label)}: ${esc(fmtNum(v))}</title></path>`;
+  }).join('');
+  const sNodes = [...srcRect.values()].map((r) => `<g><rect class="sk-node cat-${r.cat}" x="40" y="${r.y}" width="24" height="${r.h}"/><text class="sk-name" x="34" y="${r2(r.y + r.h / 2 - 6)}" text-anchor="end">${esc(r.label)}</text><text class="sk-val" x="34" y="${r2(r.y + r.h / 2 + 10)}" text-anchor="end">${esc(fmtNum(r.val))}</text></g>`).join('');
+  const tNodes = [...tgtRect.values()].map((r) => `<g><rect class="sk-node sk-target" x="696" y="${r.y}" width="24" height="${r.h}"/><text class="sk-name" x="726" y="${r2(r.y + r.h / 2 - 6)}">${esc(r.label)}</text><text class="sk-val" x="726" y="${r2(r.y + r.h / 2 + 10)}">${esc(fmtNum(r.val))}</text></g>`).join('');
+  const headers = (s.leftTitle ? `<text class="sk-col" x="40" y="26">${esc(s.leftTitle)}</text>` : '') +
+    (s.rightTitle ? `<text class="sk-col" x="720" y="26" text-anchor="end">${esc(s.rightTitle)}</text>` : '');
+  return {
+    css: ['sankey'],
+    html: `<figure class="sk card-outlined" aria-label="${esc(s.title || 'Sankey')}">` +
+      (s.title ? `<figcaption class="sk-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 760 ${H}" role="img" aria-label="${esc(s.title || 'Sankey')}"><title>${esc(s.title || 'Sankey')}</title>${headers}${paths}${sNodes}${tNodes}</svg></figure>`
+  };
+};
+
+R.fishbone = (s) => {
+  const cats = (s.categories || []).slice(0, 6);
+  const topCats = cats.filter((_, i) => i % 2 === 0);
+  const botCats = cats.filter((_, i) => i % 2 === 1);
+  const drawSide = (list, isTop, offset) => list.map((c, idx) => {
+    const baseX = r2(180 + idx * (380 / Math.max(list.length - 1, 1)) + (isTop ? 0 : 70));
+    const endX = baseX - 70;
+    const endY = isTop ? 68 : 352;
+    const txtY = isTop ? 54 : 370;
+    const causes = (c.causes || []).slice(0, 4);
+    const ribs = causes.map((cause, ci) => {
+      const f = (ci + 1) / (causes.length + 1);
+      const rx = r2(baseX + (endX - baseX) * f);
+      const ry = r2(210 + (endY - 210) * f);
+      return `<line class="fb-rib" x1="${rx}" y1="${ry}" x2="${r2(rx - 56)}" y2="${ry}"/><text class="fb-cause" x="${r2(rx - 60)}" y="${ry + 3}">${esc(cause)}</text>`;
+    }).join('');
+    return `<g class="fb-bone cat-${catOf(c.cat, idx + offset)}"><line class="fb-major" x1="${baseX}" y1="210" x2="${endX}" y2="${endY}"/><text class="fb-cat" x="${endX}" y="${txtY}">${esc(c.label || '')}</text>${ribs}</g>`;
+  }).join('');
+  return {
+    css: ['fishbone'],
+    html: `<figure class="fb card-outlined" aria-label="${esc(s.title || 'Fishbone')}">` +
+      (s.title ? `<figcaption class="fb-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 760 420" role="img" aria-label="${esc(s.title || 'Fishbone')}"><title>${esc(s.title || 'Fishbone')}</title>` +
+      `<line class="fb-spine" x1="40" y1="210" x2="606" y2="210"/>` +
+      `<g><rect class="fb-head" x="606" y="174" width="150" height="72"/><text class="fb-head-label" x="681" y="210">${esc(s.effect || s.title || '')}</text></g>` +
+      drawSide(topCats, true, 0) + drawSide(botCats, false, topCats.length) + `</svg></figure>`
+  };
+};
+
+R.kpitree = (s) => {
+  const root = s.root || {};
+  const leavesCount = (node) => !node.children || !node.children.length ? 1 : node.children.reduce((a, b) => a + leavesCount(b), 0);
+  const totalLeaves = Math.max(1, leavesCount(root));
+  const H = Math.max(280, totalLeaves * 76 + 40);
+  const colX = [20, 240, 480], boxW = 152, boxH = 48;
+  const conns = [], ops = [], boxes = [];
+  const place = (node, depth, yStart, yEnd) => {
+    const cy = r2((yStart + yEnd) / 2);
+    const x = colX[Math.min(depth, 2)];
+    const lvl = Math.min(depth + 1, 3);
+    boxes.push(`<g><rect class="kt-box lvl-${lvl}" x="${x}" y="${r2(cy - boxH / 2)}" width="${boxW}" height="${boxH}" rx="9"/><text class="kt-name" x="${r2(x + boxW / 2)}" y="${r2(cy - 4)}">${esc(node.name || '')}</text><text class="kt-val" x="${r2(x + boxW / 2)}" y="${r2(cy + 13)}">${esc(node.value || '')}</text></g>`);
+    const ch = node.children || [];
+    if (ch.length && depth < 2) {
+      const busX = x + boxW + 38;
+      let cur = yStart;
+      const childYs = [];
+      ch.forEach((c) => {
+        const spanH = ((yEnd - yStart) * leavesCount(c)) / Math.max(1, leavesCount(node));
+        childYs.push(place(c, depth + 1, cur, cur + spanH));
+        cur += spanH;
+      });
+      const minY = Math.min(...childYs), maxY = Math.max(...childYs);
+      let d = `M${x + boxW},${cy} H${busX} M${busX},${minY} V${maxY}`;
+      childYs.forEach((yC) => { d += ` M${busX},${yC} H${colX[depth + 1]}`; });
+      conns.push(`<path class="kt-conn" d="${d}"/>`);
+      if (node.op) ops.push(`<g><circle class="kt-op" cx="${busX}" cy="${cy}" r="14"/><text class="kt-op-sym" x="${busX}" y="${cy}">${esc(node.op)}</text></g>`);
+    }
+    return cy;
+  };
+  place(root, 0, 24, H - 24);
+  return {
+    css: ['kpi-tree'],
+    html: `<figure class="kt card-outlined" aria-label="${esc(s.title || 'KPI Tree')}">` +
+      (s.title ? `<figcaption class="kt-title">${esc(s.title)}</figcaption>` : '') +
+      `<svg viewBox="0 0 660 ${H}" role="img" aria-label="${esc(s.title || 'KPI Tree')}"><title>${esc(s.title || 'KPI Tree')}</title>${conns.join('')}${ops.join('')}${boxes.join('')}</svg></figure>`
+  };
+};
+R['kpi-tree'] = R.kpitree;
+
 /* ============================ assembler ============================ */
 /* give a rendered section's root element an id (keeps an id the markup already has) */
 function withId(html, id) {
@@ -2217,8 +3165,19 @@ function build(spec) {
     ? `<div class="ha-viewport-controls no-print" aria-label="${esc(t('viewportControls'))}"><button class="btn btn-ghost btn-sm" data-viewport-target="phone" type="button">${esc(t('phone'))}</button><button class="btn btn-ghost btn-sm" data-viewport-target="tablet" type="button">${esc(t('tablet'))}</button><button class="btn btn-ghost btn-sm" data-viewport-target="desktop" type="button">${esc(t('desktop'))}</button></div>`
     : '';
   const pal = spec.palette ? ` style="--accent:${spec.palette.accent};--on-accent:${spec.palette.onAccent || '#fff'}${spec.palette.colorPrimary ? `;--color-primary:${spec.palette.colorPrimary}` : ''}${spec.palette.extra || ''}"` : '';
-  /* ---- header variants (§3): toggle/viewport controls emitted in EVERY variant ---- */
-  const toggleBtn = `<button class="btn-ghost btn-sm no-print" data-theme-toggle aria-label="${esc(t('toggleTheme'))}" style="position:absolute;top:var(--sp-5);right:${viewportControls ? '220px' : 'var(--sp-5)'}">◐ ${esc(t('theme'))}</button>`;
+  const hasReview = mainInner.includes('data-review');
+  let reviewAnchor = 'review-signoff';
+  const rvIdMatch = mainInner.match(/<section[^>]*\sid="([^"]+)"[^>]*\bdata-review\b/);
+  if (rvIdMatch) reviewAnchor = rvIdMatch[1];
+  const detailsCount = (mainInner.match(/<details\b/g) || []).length;
+  const reviewJumpBtn = hasReview
+    ? `<a class="btn-ghost btn-sm review-jump" href="#${esc(reviewAnchor)}" data-review-jump>${esc(t('reviewJump'))} <span data-review-badge>0</span></a>`
+    : '';
+  const detailsToggleBtn = detailsCount >= 3
+    ? `<button type="button" class="btn-ghost btn-sm" data-details-toggle>${esc(t('expandAll'))}</button>`
+    : '';
+  const toggleBtn = `<button type="button" class="btn-ghost btn-sm" data-theme-toggle aria-label="${esc(t('toggleTheme'))}">◐ ${esc(t('theme'))}</button>`;
+  const actionsBar = `<div class="header-actions no-print">${reviewJumpBtn}${detailsToggleBtn}${toggleBtn}${viewportControls}</div>`;
   const eyebrowHtml = spec.eyebrow ? `<p class="eyebrow">${esc(spec.eyebrow)}</p>` : '';
   const titleHtml = `<h1>${esc(spec.title || '')}</h1>`;
   const ledeHtml = spec.subtitle ? `<p class="lede">${esc(spec.subtitle)}</p>` : '';
@@ -2227,15 +3186,15 @@ function build(spec) {
     : '';
   let headerHtml;
   if (header === 'none') {
-    headerHtml = `<header class="page-controls no-print"><button class="btn-ghost btn-sm" data-theme-toggle aria-label="${esc(t('toggleTheme'))}">◐ ${esc(t('theme'))}</button>${viewportControls}</header>`;
+    headerHtml = `<header class="page-controls no-print">${reviewJumpBtn}${detailsToggleBtn}${toggleBtn}${viewportControls}</header>`;
   } else if (header === 'banner') {
-    headerHtml = `<header class="page-header header-banner"><div class="container header-banner-inner">${toggleBtn}${viewportControls}${eyebrowHtml}${titleHtml}${ledeHtml}${metaHtml}</div></header>`;
+    headerHtml = `<header class="page-header header-banner"><div class="container header-banner-inner">${actionsBar}${eyebrowHtml}${titleHtml}${ledeHtml}${metaHtml}</div></header>`;
   } else if (header === 'split') {
-    headerHtml = `<header class="page-header header-split container">${toggleBtn}${viewportControls}<div>${eyebrowHtml}${titleHtml}${ledeHtml}</div>${metaHtml}</header>`;
+    headerHtml = `<header class="page-header header-split container">${actionsBar}<div>${eyebrowHtml}${titleHtml}${ledeHtml}</div>${metaHtml}</header>`;
   } else if (header === 'compact') {
-    headerHtml = `<header class="page-header header-compact container">${toggleBtn}${viewportControls}${eyebrowHtml}${titleHtml}${ledeHtml}</header>`;
+    headerHtml = `<header class="page-header header-compact container">${actionsBar}${eyebrowHtml}${titleHtml}${ledeHtml}</header>`;
   } else {
-    headerHtml = `<header class="page-header container">${toggleBtn}${viewportControls}${eyebrowHtml}${titleHtml}${ledeHtml}${metaHtml}</header>`;
+    headerHtml = `<header class="page-header container">${actionsBar}${eyebrowHtml}${titleHtml}${ledeHtml}${metaHtml}</header>`;
   }
   const footerHtml = spec.footer ? `<footer class="page-footer container">${esc(spec.footer)}</footer>` : '';
   const mainHtml = `<main class="container layout-${esc(layout)}">\n${inlineToc ? inlineToc + '\n' : ''}${mainInner}\n</main>`;

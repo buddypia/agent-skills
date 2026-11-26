@@ -68,56 +68,17 @@ Each recipe row below also carries a **Recommended layout · header · density**
 
 ### 2.1b Module discovery via the index (do this first)
 
-> **Multi-part document?** When the request names a document *genre* (経営資料, 進捗報告, SaaS分析, 技術仕様書, システム構成/アーキテクチャ解説, 提案書, 障害報告, 会議資料, リリース資料, 調査報告, 導入ガイド), start from a ready-made blueprint instead: `reference/10-composition-standards.md` §1.1 maps genres to `templates/blueprints/<id>.spec.json`. The shapes below are for single-purpose artifacts.
+> **Multi-part document or AI review?** When the request matches a document *genre* or core AI workflow (AI変更レビュー / データ分析 / 仕組み・コード解説 / インフォグラフィック / 経営資料 / 進捗報告 / SaaS分析 / 技術仕様書 / アーキテクチャ / 提案書 / 障害報告 / 会議資料 / リリース資料 / 調査報告 / 導入ガイド), start from one of the **15 blueprints** in `reference/10-composition-standards.md` §1.1 (`templates/blueprints/<id>.spec.json`). The shapes below are for single-purpose artifacts.
 
-The shape recipes below are **starting compositions**, not the full palette. There are **117 modules** across 5 families; pick them by scanning **`index/COMPONENTS.md`** (generated from `index/components.json`) - match the request against each module's *use when / keywords / intent (EN·KO·JA) / input*, then open `04-module-catalog.md` only for the chosen ones. Do not read every module file.
+The shape recipes below are **starting compositions**, not the full palette. There are **112 modules** across 5 families; pick them by scanning **`index/COMPONENTS.md`** (generated from `index/components.json`) - match the request against each module's *use when / keywords / intent (EN·KO·JA) / input*, then open `04-module-catalog.md` only for the chosen ones. Do not read every module file.
 
-The v2 additions slot into existing shapes:
+The v2–v8 typed/manual modules slot into existing shapes (prefer deterministic typed section types in `tools/build.mjs` wherever available):
 
-- **report / dashboard**: `stat-trend` (KPI + sparkline), `gauge`, `progress`, `chart-bullet` (goal vs actual), `funnel`, `heatmap`, `cal-heatmap`, `chart-stacked` (stacked/grouped/100% bar & area), `activity-feed`.
-- **spec / code-review**: `stat-list` (key→value spec sheet), `tree` (file/structure hierarchy), `activity-feed` (change log), `empty-state`.
-- **comparison / decision**: `radar` (capability profile across criteria).
-- **report / spec**: `feature-grid` (capability / "what's included" cards) for capability showcases inside reports and specs.
-
-The v3 additions (expressiveness pass - 17 hand-pasted modules) slot in as:
-
-- **diagram**: `sequence-diagram` (message order between services), `state-diagram` (states + guarded transitions), `swimlane` (per-owner process lanes), `gantt` (roadmap bars + milestones + today line), `cycle-loop` (PDCA/feedback ring), `org-chart` (hierarchy boxes), `kpi-tree` (driver/logic tree with operators), `journey-map` (stages + emotion curve + pain points).
-- **chart / dashboard / report**: `chart-scatter` (XY correlation, bubble variant), `chart-waterfall` (start→deltas→total), `treemap` (part-to-whole area tiles), `spectrum` (positions on a 1-D scale).
-- **spec / decision / comparison / infographic**: `quadrant` (2×2 positioning), `pyramid` (tiered hierarchy), `venn` (2–3 set overlap), `before-after` (as-is → to-be with delta chips), `risk-matrix` (probability × impact heat grid).
-
-The v4 additions (expressiveness pass 2 - 18 hand-pasted modules) slot in as:
-
-- **diagram**: `fishbone` (Ishikawa causes → one effect), `sankey` (quantity split/merge ribbons), `decision-tree` (branching conditions → outcomes), `hub-spoke` (one center + satellites), `concentric` (onion containment rings), `force-field` (driving vs restraining forces around a change).
-- **chart / dashboard / report**: `slope-chart` (many items across exactly two points), `dot-plot` (per-category range + value dots, gap analysis), `waffle` (part-of-100 cell grid), `boxplot` (distribution: median/quartiles/whiskers), `chart-area` (stacked composition over time), `bump-chart` (rank trajectory across periods).
-- **spec / decision / report / infographic**: `swot` (four fixed strategic quadrants of bullets), `pros-cons` (one option's for/against), `rating-scale` (Likert dot rows across criteria), `glossary` (term → definition reference).
-- **report / landing / infographic**: `persona-card` (UX archetype profile cards), `quote-block` (pull-quote / testimonial voice).
-
-The v5 additions (high-frequency pass - 18 hand-pasted modules) slot in as:
-
-- **diagram / planning**: `roadmap` (period × theme initiative bands - coarser than `gantt`), `process-chevron` (flat linear stage arrows - no branching, unlike `flow-diagram`), `layer-stack` (named horizontal layers, tech-stack/OSI style), `story-map` (backbone activities + release rows of story cards), `capability-map` (nested business-capability tiles with optional heat levels).
-- **chart / dashboard / report**: `histogram` (contiguous distribution bins - shape of the data, vs `boxplot`'s summary), `chart-combo` (bars + line on a second axis, two units on one canvas), `sparkline` (compact multi-metric rows with inline trend + delta badges), `pareto` (descending bars + cumulative % line, 80/20), `progress-ring` (circular % widgets - vs `gauge`'s dial and `progress`'s linear bar), `chart-bubble` (x/y + magnitude via radius, vs `chart-scatter`).
-- **spec / decision / report**: `raci-matrix` (task × role R/A/C/I badges), `toc` (leader-dot document navigation), `code-snippet` (single code listing with syntax-role spans - vs `diff-block`'s +/- changes), `agenda` (forward-looking time-slot program - vs `timeline`'s narrative past).
-- **landing / report**: `faq` (always-visible Q&A - vs `collapsible`'s interactive accordion), `pricing-table` (priced plan-selection cards), `hero-cta` (page-opening conversion block).
-
-The v6 additions (high-frequency pass 2 - 18 hand-pasted modules) slot in as:
-
-- **diagram / planning**: `okr-board` (objectives + key-result progress rows - vs `kpi-tree`'s metric math), `business-model-canvas` (the canonical 9-block BMC grid), `gap-analysis` (as-is → explicit gap+actions → to-be, vs `before-after`'s two-state delta), `maturity-ladder` (ascending assessment levels with a "current" marker - vs `stepper`'s process sequence).
-- **chart / dashboard / infographic**: `leaderboard` (current standings with rank badges + movement arrows - vs `bump-chart`'s trajectories), `composition-bar` (one-strip 100% segments - vs `waffle`/`chart-donut`), `diverging-bar` (two series mirrored around a spine: 賛成/反対, 男性/女性), `cohort-grid` (triangular retention table with intensity tints - vs generic `heatmap`), `tag-cloud` (weight-sized topic tags), `pictogram` (discrete icon-unit counts, ISOTYPE-style - vs `waffle`'s abstract squares).
-- **report / project docs**: `project-status` (RAG workstream health snapshot), `calendar-month` (month-at-a-glance grid with event chips - vs `cal-heatmap`'s intensity), `changelog` (versioned Added/Changed/Fixed blocks - vs `activity-feed`'s stream), `key-takeaways` (numbered executive TL;DR).
-- **tech docs / landing**: `file-tree` (static directory listing - vs interactive `tree`), `api-endpoint` (method badge + path + params + response unit), `team-grid` (member introduction cards - vs `persona-card`'s UX archetype), `logo-wall` (typographic social-proof strip).
-
-The v7 additions (architecture pass - 7 builder-section modules) exist because **one topology diagram is not an architecture document**. A reader who says "I looked at the diagram and still don't get it" usually needs a different *question* answered, not a prettier box. Pick by question:
-
-- **"what connects to what?"** → `arch-explorer` - the centrepiece. Zone bands, edges routed *around* intervening nodes, every label placed by collision search, scenario tabs that number the steps on the canvas, click-to-inspect component specs. Never hand-write its SVG; give the builder `nodes`/`edges`/`zones`/`scenarios`. For a small static picture with no flows to trace, `arch-diagram` is still the lighter choice.
-- **"what happens end to end, and where does the time go?"** → `request-trace` (hops on one shared time axis; the slowest hop is called out).
-- **"who emits this event and who reacts to it?"** → `event-catalog` (producer → event → N consumers, with delivery guarantee - the 1-to-N shape `pipeline-flow` cannot express).
-- **"where does it actually run / what about failover?"** → `deployment-topology` (region → AZ → unit, replica counts, DR posture).
-- **"what happens when this falls over?"** → `failure-modes` (impact, blast radius, detection, mitigation, RTO - severity-sorted; `risk-matrix` scores generic project risk, this is component-anchored operations).
-- **"what transforms the data at each stage?"** → `pipeline-flow`; **"what are all the components and where do they live in the repo?"** → `service-catalog`.
-
-`arch-explorer` **self-audits at build time** and prints a `warn:` line naming any edge that still crosses an unrelated node, any label it could not place clear, and any scenario step pointing at an edge missing from `edges` (that step then highlights nothing - the side panel reads fine while the diagram stays dead). Treat those warnings as failures of the spec, not cosmetic noise.
-
-> The former marketing/landing blocks (`pricing`, `quote`, `rating`) and the orphan `annotation-memo` were removed in the generality pass; v5 deliberately reinstated the landing family as first-class modules (`pricing-table`, `hero-cta`, `faq`) because they are among the highest-frequency real-world requests.
+- **review & explanation**: `review-signoff` (`review` — OK/Fix/Hold verdicts + copyable Markdown feedback), `verification-run` (`verification` — PASS/FAIL/WARN test logs), `annotated-walkthrough` (`walkthrough` — synced step + target highlights).
+- **report / dashboard**: `stat-trend`, `gauge`, `progress`, `chart-bullet`, `funnel`, `heatmap`, `cal-heatmap`, `chart-stacked` (supports stacked area via `areastacked`), `chart-scatter` (`scatter`), `chart-waterfall` (`waterfall`), `treemap`, `spectrum`, `slope-chart`, `dot-plot`, `waffle`, `boxplot`, `bump-chart`, `histogram`, `chart-combo`, `sparkline`, `pareto` (`pareto`), `chart-bubble`, `leaderboard` (`leaderboard`), `composition-bar`, `diverging-bar` (`diverging`), `cohort-grid` (`cohort`), `tag-cloud`, `pictogram`.
+- **spec / code-review / comparison**: `diff-block` (`diff`), `code-snippet` (`code`), `before-after` (`beforeafter`), `file-tree` (`filetree`), `api-endpoint` (`apiendpoint`), `changelog` (`changelog`), `key-takeaways` (`takeaways`), `stat-list` (`statlist`), `tree`, `activity-feed`, `empty-state`, `feature-grid`, `radar`, `quadrant`, `risk-matrix`, `swot`, `pros-cons`, `rating-scale`, `glossary`, `raci-matrix`, `agenda`, `project-status`, `calendar-month`.
+- **diagram**: `arch-explorer`, `pipeline-flow`, `request-trace`, `deployment-topology`, `service-catalog`, `event-catalog`, `failure-modes`, `sequence-diagram` (`sequence`), `state-diagram` (`statediagram`), `erd`, `sankey`, `fishbone`, `kpi-tree` (`kpitree`), `swimlane`, `gantt`, `cycle-loop`, `org-chart`, `journey-map`, `decision-tree`, `hub-spoke`, `concentric`, `force-field`, `roadmap`, `process-chevron`, `layer-stack`, `story-map`, `capability-map`, `okr-board`, `business-model-canvas`, `gap-analysis`, `maturity-ladder`.
+- **interactive Q&A / pricing**: use `collapsible` for expandable FAQs and `comparison` / `table` for structured plans and partner lists.
 
 ### 2.2 Document-family shapes (human-read reports / specs / comparisons)
 
@@ -175,8 +136,8 @@ Among the types of the legacy `html-visual`, all those belonging to "diagrams" a
 | | maturity model | Assessment levels you climb ("成熟度モデル", "성숙도", Lv1→Lv5, CMMI-style) | `maturity-ladder` (staircase steps + current-level highlight) | `slate` | `stack` · `compact` · `comfortable` |
 | **chart** | bar / line / donut | Visualizing quantity, trend, composition | `chart-bar` / `chart-line` / `chart-donut` (series colors `--cat-1..5`) | `dark-focus` | `bento` (charts `span:6`) · `compact` · `comfortable` |
 | | scatter / waterfall / treemap / spectrum | Correlation (XY / bubble), start→delta→total bridges, part-to-whole area tiles, positions on a 1-D scale | `chart-scatter` / `chart-waterfall` / `treemap` / `spectrum` | `dark-focus` | `bento` (`span:6`, treemap `span:12`) · `compact` · `comfortable` |
-| | slope / dot-plot / waffle / boxplot / area / bump | Two-point comparisons, per-category range+gap, part-of-100 grids, distributions, stacked composition over time, rank trajectories | `slope-chart` / `dot-plot` / `waffle` / `boxplot` / `chart-area` / `bump-chart` (all v4, hand-pasted) | `dark-focus` | `bento` (`span:6`) · `compact` · `comfortable` |
-| | histogram / combo / sparkline / pareto / ring / bubble | Distribution bins, bar+line dual axis, inline metric rows, 80/20 cumulative, circular %, x/y+size | `histogram` / `chart-combo` / `sparkline` / `pareto` / `progress-ring` / `chart-bubble` (all v5, hand-pasted) | `dark-focus` | `bento` (`span:6`, sparkline `span:4`) · `compact` · `comfortable` |
+| | slope / dot-plot / waffle / boxplot / stacked-area / bump | Two-point comparisons, per-category range+gap, part-of-100 grids, distributions, stacked composition over time, rank trajectories | `slope-chart` / `dot-plot` / `waffle` / `boxplot` / `chart-stacked` (`areastacked`) / `bump-chart` | `dark-focus` | `bento` (`span:6`) · `compact` · `comfortable` |
+| | histogram / combo / sparkline / pareto / gauge / bubble | Distribution bins, bar+line dual axis, inline metric rows, 80/20 cumulative, radial gauges, x/y+size | `histogram` / `chart-combo` / `sparkline` / `pareto` (`pareto`) / `gauge` / `chart-bubble` | `dark-focus` | `bento` (`span:6`, sparkline `span:4`) · `compact` · `comfortable` |
 | | leaderboard / composition / diverging / cohort / tags / pictogram | Standings+movement, one-strip 100%, mirrored opposing series, retention staircase, weighted topics, icon-unit counts | `leaderboard` / `composition-bar` / `diverging-bar` / `cohort-grid` / `tag-cloud` / `pictogram` (all v6, hand-pasted, pure CSS) | `dark-focus` | `bento` (`span:6`, composition-bar `span:12`) · `compact` · `comfortable` |
 | **dashboard** | dashboard / table | Metrics + a reorderable/filterable table | `kpi-grid` + `chart-*` + `data-table` (`[data-sortable]`+`[data-filter]`) | `dark-focus` | `bento` (kpi `variant:"hero"` or full-width, charts `span:6`, table `span:12`) · `compact` · `comfortable` (`compact` density for dense ops views) |
 | **timeline** | timeline | Chronological events, roadmap, history | `timeline` (`.is-done`/`.is-active`/`.is-todo` states) | `birchline` | `stack` · `banner` · `comfortable` |

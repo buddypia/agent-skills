@@ -128,11 +128,18 @@
       ]
     },
     {
-      "type": "html",
+      "type": "cohort",
       "span": 12,
-      "html": "<figure class=\"cht card-outlined\" aria-label=\"月次リテンションコホート（企業単位）\">\n  <figcaption class=\"cht-title\">月次リテンションコホート（企業単位）</figcaption>\n  <div class=\"cht-grid\">\n    <div class=\"cht-h lead\">コホート</div>\n    <div class=\"cht-h\">企業数</div>\n    <div class=\"cht-h\">M0</div>\n    <div class=\"cht-h\">M1</div>\n    <div class=\"cht-h\">M2</div>\n    <div class=\"cht-h\">M3</div>\n    <div class=\"cht-h\">M4</div>\n    <div class=\"cht-h\">M5</div>\n\n    <span class=\"cht-cohort\">2026-01</span>\n    <span class=\"cht-size\">128社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:62\">62%</span>\n    <span class=\"cht-cell\" style=\"--i:48\">48%</span>\n    <span class=\"cht-cell\" style=\"--i:39\">39%</span>\n    <span class=\"cht-cell\" style=\"--i:33\">33%</span>\n    <span class=\"cht-cell\" style=\"--i:29\">29%</span>\n\n    <span class=\"cht-cohort\">2026-02</span>\n    <span class=\"cht-size\">141社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:58\">58%</span>\n    <span class=\"cht-cell\" style=\"--i:45\">45%</span>\n    <span class=\"cht-cell\" style=\"--i:37\">37%</span>\n    <span class=\"cht-cell\" style=\"--i:31\">31%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-03</span>\n    <span class=\"cht-size\">156社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:55\">55%</span>\n    <span class=\"cht-cell\" style=\"--i:43\">43%</span>\n    <span class=\"cht-cell\" style=\"--i:35\">35%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-04</span>\n    <span class=\"cht-size\">149社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:51\">51%</span>\n    <span class=\"cht-cell\" style=\"--i:40\">40%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n\n    <span class=\"cht-cohort\">2026-05</span>\n    <span class=\"cht-size\">163社</span>\n    <span class=\"cht-cell\" style=\"--i:100\">100%</span>\n    <span class=\"cht-cell\" style=\"--i:49\">49%</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n    <span class=\"cht-cell cht-na\">-</span>\n  </div>\n</figure>",
-      "cssModules": [
-        "cohort-grid"
+      "title": "月次リテンションコホート（企業単位）",
+      "cohortLabel": "コホート",
+      "sizeLabel": "企業数",
+      "periods": ["M0", "M1", "M2", "M3", "M4", "M5"],
+      "cohorts": [
+        { "label": "2026-01", "size": "128社", "values": [100, 62, 48, 39, 33, 29] },
+        { "label": "2026-02", "size": "141社", "values": [100, 58, 45, 37, 31, null] },
+        { "label": "2026-03", "size": "156社", "values": [100, 55, 43, 35, null, null] },
+        { "label": "2026-04", "size": "149社", "values": [100, 51, 40, null, null, null] },
+        { "label": "2026-05", "size": "163社", "values": [100, 49, null, null, null, null] }
       ]
     },
     {

@@ -1,10 +1,10 @@
 # 04 - Module Catalog
 
-> **Canonical source.** This document is the canonical catalog of **all 117 modules** in `templates/modules/` (23 original + 16 added in v2 + 17 added in v3 + 18 added in v4 + 18 added in v5 + 18 added in v6 + 7 added in v7 - see §"v2 modules" / §"v3 modules" / §"v4 modules" / §"v5 modules" / §"v6 modules"). The complete module list, family grouping, and each module's contract (PURPOSE / VARIABLES / CSS classes / tokens / INTERACTION / lineage) are maintained here only; other references cite this file instead of duplicating module lists or counts.
+> **Canonical source.** This document is the canonical catalog of **all 112 modules** in `templates/modules/` (5 families across v1–v8 — see family table below). The complete module list, family grouping, and each module's contract (PURPOSE / VARIABLES / CSS classes / tokens / INTERACTION / lineage) are maintained here only; other references cite this file instead of duplicating module lists or counts.
 >
 > **Discovery (search, don't read everything):** `node tools/index.mjs --find "<keywords>"` ranks modules by tag/keyword/intent(EN·KO·JA)/use-when; `node tools/index.mjs --details <id>` prints the chosen module's contract. Fallback layers: `index/INDEX.md` (~9KB summary) → `index/COMPONENTS.md` (full prose) → this file (full CSS/markup). All generated from `index/components.json` (the single source of truth) by `tools/index.mjs`.
 
-Reference for all **117 modules** contained in `templates/modules/`. Each module is a self-contained (dependency-free) snippet following "one feature = one file," used by pasting it into the `{{CONTENT}}` slot of `base.template.html`. There are no CDNs, external libraries, or build steps whatsoever - it opens directly in an offline browser.
+Reference for all **112 modules** contained in `templates/modules/`. Each module is a self-contained (dependency-free) snippet following "one feature = one file," used by pasting it into the `{{CONTENT}}` slot of `base.template.html` or invoking its typed section in `tools/build.mjs`. There are no CDNs, external libraries, or build steps whatsoever - it opens directly in an offline browser.
 
 This catalog covers **Layer 2 (Modules)** of the 5-layer architecture. Each module depends on the Foundation / Primitives below it, and interactive ones connect to Layer 3's `interactions.js` (global `HA.*`) via data attributes.
 
@@ -43,11 +43,11 @@ Every module file begins with a header comment in the same format.
 
 | Family | Modules | Interactive |
 |---|---|---|
-| **charts** (35) | `kpi-grid`, `stat-trend`, `chart-bar`, `chart-line`, `chart-donut`, `chart-stacked`, `gauge`, `radar`, `funnel`, `progress`, `chart-bullet`, `heatmap`, `cal-heatmap`, `chart-scatter`, `chart-waterfall`, `treemap`, `spectrum`, `slope-chart`, `dot-plot`, `waffle`, `boxplot`, `chart-area`, `bump-chart`, `histogram`, `chart-combo`, `sparkline`, `pareto`, `progress-ring`, `chart-bubble`, `leaderboard`, `composition-bar`, `diverging-bar`, `cohort-grid`, `tag-cloud`, `pictogram` | `chart-bar`/`-line`/`-donut`/`chart-stacked` (bars) + v3 `chart-scatter`/`chart-waterfall` carry `[data-chart-tip]` + per-shape `data-tip` (`HA.tooltip`). `kpi-grid`/`stat-trend` count up via `[data-counter]` (`HA.counter`). `gauge`/`radar`/`funnel`/`progress`/`chart-bullet`/`heatmap`/`cal-heatmap`/`treemap`/`spectrum` and all v4/v5/v6 charts (`slope-chart`…`bump-chart`, `histogram`…`chart-bubble`, `leaderboard`…`pictogram`) are static |
-| **diagrams** (37) | `arch-explorer`, `pipeline-flow`, `request-trace`, `deployment-topology`, `flow-diagram`, `arch-diagram`, `erd`, `node-graph`, `mindmap`, `timeline`, `stepper`, `wireframe-block`, `mockup-frame`, `screen-flow`, `sequence-diagram`, `state-diagram`, `swimlane`, `gantt`, `cycle-loop`, `org-chart`, `kpi-tree`, `journey-map`, `fishbone`, `sankey`, `decision-tree`, `hub-spoke`, `concentric`, `force-field`, `roadmap`, `process-chevron`, `layer-stack`, `story-map`, `capability-map`, `okr-board`, `business-model-canvas`, `gap-analysis`, `maturity-ladder` | `timeline`, `pipeline-flow`, `request-trace`, `deployment-topology` are static. `arch-explorer` uses `HA.archExplorer` + `HA.zoompan`. `flow-diagram` has draggable nodes via `dragNode`; `mindmap`/`arch-diagram`/`erd`/`node-graph` use `dragNode`+`zoompan` (`node-graph` adds `crossfilter`). `mockup-frame` swaps screens via `tabs`. `wireframe-block` is static by default with opt-in `reorder`/`wfedit`/`wfflow`/`designpick`. `stepper` is static with optional `reveal`. `screen-flow` and all v3/v4/v5/v6 diagrams are static (with automatic SVG text fitting via `HA.fitSvgText`) |
-| **interactive** (7) | `data-table`, `tabs`, `collapsible`, `tree`, `slider-control`, `kanban-board`, `form-fields` | `interactions.js` or native `<details>`. `tree` collapses subtrees via `HA.tree`. `form-fields` is a themed prototype form whose submit is wired by `HA.formMock` (`[data-form-mock]`) |
-| **document** (30) | `service-catalog`, `event-catalog`, `failure-modes`, `callout-box`, `comparison-grid`, `decision-matrix`, `diff-block`, `stat-list`, `activity-feed`, `empty-state`, `checklist`, `quadrant`, `pyramid`, `venn`, `before-after`, `risk-matrix`, `swot`, `pros-cons`, `rating-scale`, `glossary`, `raci-matrix`, `toc`, `code-snippet`, `agenda`, `project-status`, `calendar-month`, `changelog`, `key-takeaways`, `file-tree`, `api-endpoint` | Static reading blocks (`activity-feed` accepts optional `[data-reveal]`). `checklist` carries real native checkbox/radio/switch controls (no JS - native toggling). v3/v4/v5/v6/v7 blocks are static |
-| **content** (8) | `feature-grid`, `persona-card`, `quote-block`, `faq`, `pricing-table`, `hero-cta`, `team-grid`, `logo-wall` | None (static) |
+| **charts** (33) | `kpi-grid`, `stat-trend`, `chart-bar`, `chart-line`, `chart-donut`, `chart-stacked`, `gauge`, `radar`, `funnel`, `progress`, `chart-bullet`, `heatmap`, `cal-heatmap`, `chart-scatter`, `chart-waterfall`, `treemap`, `spectrum`, `slope-chart`, `dot-plot`, `waffle`, `boxplot`, `bump-chart`, `histogram`, `chart-combo`, `sparkline`, `pareto`, `chart-bubble`, `leaderboard`, `composition-bar`, `diverging-bar`, `cohort-grid`, `tag-cloud`, `pictogram` | `chart-bar`/`-line`/`-donut`/`chart-stacked`/`chart-scatter`/`chart-waterfall` carry `[data-chart-tip]` + `data-tip` (`HA.tooltip`). `kpi-grid`/`stat-trend` count up via `[data-counter]` (`HA.counter`). Remaining chart modules are static |
+| **diagrams** (37) | `arch-explorer`, `pipeline-flow`, `request-trace`, `deployment-topology`, `flow-diagram`, `arch-diagram`, `erd`, `node-graph`, `mindmap`, `timeline`, `stepper`, `wireframe-block`, `mockup-frame`, `screen-flow`, `sequence-diagram`, `state-diagram`, `swimlane`, `gantt`, `cycle-loop`, `org-chart`, `kpi-tree`, `journey-map`, `fishbone`, `sankey`, `decision-tree`, `hub-spoke`, `concentric`, `force-field`, `roadmap`, `process-chevron`, `layer-stack`, `story-map`, `capability-map`, `okr-board`, `business-model-canvas`, `gap-analysis`, `maturity-ladder` | `timeline`, `pipeline-flow`, `request-trace`, `deployment-topology` are static. `arch-explorer` uses `HA.archExplorer` + `HA.zoompan`. `flow-diagram` uses `dragNode`; `mindmap`/`arch-diagram`/`erd`/`node-graph` use `dragNode`+`zoompan`. `mockup-frame` swaps screens via `tabs`. `wireframe-block` has opt-in `reorder`/`wfedit`/`wfflow`/`designpick`. Remaining SVG diagrams clamp overflow labels via `HA.fitSvgText` |
+| **interactive** (9) | `data-table`, `tabs`, `collapsible`, `tree`, `slider-control`, `kanban-board`, `form-fields`, `review-signoff`, `annotated-walkthrough` | `interactions.js` (`HA.sortable`, `HA.tabs`, `HA.tree`, `HA.formMock`, `HA.review`, `HA.walkthrough`, `HA.detailsToggle`) or native `<details>` |
+| **document** (30) | `service-catalog`, `event-catalog`, `failure-modes`, `verification-run`, `callout-box`, `comparison-grid`, `decision-matrix`, `diff-block`, `stat-list`, `activity-feed`, `empty-state`, `checklist`, `quadrant`, `pyramid`, `venn`, `before-after`, `risk-matrix`, `swot`, `pros-cons`, `rating-scale`, `glossary`, `raci-matrix`, `code-snippet`, `agenda`, `project-status`, `calendar-month`, `changelog`, `key-takeaways`, `file-tree`, `api-endpoint` | Static reading blocks (`activity-feed` accepts `[data-reveal]`); `verification-run` uses native `<details>`; `checklist` uses native checkbox/radio/switch controls |
+| **content** (3) | `feature-grid`, `persona-card`, `quote-block` | None (static) |
 
 > `wireframe-block` is static by default, but it becomes an **opt-in** module that supports reorder via `HA.reorder` with `[data-reorder]` (page/region insertion, card swapping, element insertion), an **element editor** via `HA.wfedit` with `[data-wf-palette]`/`[data-wf-board]` (16 types, click-to-add/drag-to-place, delete, label editing), and a **screen flow** via `HA.wfflow` with `[data-wf-flow]` (multiple pages + automatic arrow linking, page add/delete). Without these attributes it stays static as before.
 
@@ -242,9 +242,9 @@ Driven by the data attributes of `interactions.js` (global `HA`) or by native `<
 
 - **PURPOSE**: A sortable + live-filterable + paginated table (no external library). The search box filters rows by text, clicking a `<th>` does asc/desc sort with `▲`/`▼` indicators, rows paginate (8/page) into a pager, and clicking a row toggles its selected state.
 - **VARIABLES**: `{{PLACEHOLDER}}` + column headers `{{COL_NAME}}` `{{COL_EMAIL}}` `{{COL_ROLE}}` `{{COL_STATUS}}` + row cells `{{NAME}}` `{{EMAIL}}` `{{ROLE}}` `{{STATUS}}` `{{STATUS_CLASS}}` (`badge-success`/`badge-warning`/`badge-danger`/`badge-info`).
-- **CSS classes**: `.data-table`, `.dt-search`, `.dt-row`, `.data-table th[data-sort="asc"/"desc"]`. primitive: `table`, `.badge*`, `.hidden`, `.selected`, `.no-print` (on the pager).
+- **CSS classes**: `.data-table`, `.dt-search`, `.dt-row`, `.dt-sort-btn`, `.data-table th[aria-sort="ascending"|"descending"] .dt-sort-btn::after`. primitive: `table`, `.badge*`, `.hidden`, `.selected`, `.no-print` (on the pager).
 - **token**: `--accent`, `--bg-surface`, `--text-primary`, `--border-default`, `--radius-sm`.
-- **INTERACTION**: `input[data-filter][data-filter-in=".dt-row"]` -> `HA.filter` live-filters (toggling `.hidden`). `table[data-sortable]` -> `HA.sortable` sorts on `<th>` click. `table[data-paginate][data-page-size="8"]` -> `HA.paginate` pages rows into the sibling `[data-pager]` (with ≤8 rows the pager stays empty); `data-row-select` toggles `.selected` on row click. All wired by `interactions.js`.
+- **INTERACTION**: `input[data-filter][data-filter-in=".dt-row"]` -> `HA.filter` live-filters (toggling `.hidden`). `table[data-sortable]` -> `HA.sortable` wires `<button type="button" class="dt-sort-btn">` inside `<th scope="col">` (updating `aria-sort`, `Intl.Collator` sort, and a `role="status"` live region). `table[data-paginate][data-page-size="8"]` -> `HA.paginate` pages rows into the sibling `[data-pager]`; `data-row-select` toggles `.selected` on row click. All wired by `interactions.js`.
 - **NUMERIC COLUMNS**: `class="num"` on a column's `<th>`/`<td>`s right-aligns it with tabular figures; the builder detects columns whose every cell is a number (with optional currency/unit) and groups JS numbers ≥ 1000 with commas. The table sits in a `.dt-scroll` wrapper (horizontal scroll on narrow screens); the pager and search are scoped to their own `.data-table`.
 - **BUILDER VARIANTS** (`table` section key `density: "compact"`): the builder adds the class `dt-compact` to the `<table>`. Its CSS lives in this module's `<style data-module="data-table">` block: `.dt-compact thead th { padding: var(--sp-2); }` and `.dt-compact tbody td { padding: var(--sp-2) var(--sp-3); font-size: 13px; }`. This is a table-local tightening, independent of the page-level `density` axis (`03-themes-and-palettes.md` §1).
 - **lineage**: `html-visual` (table) + `demo2` (table-users).
@@ -781,16 +781,6 @@ flows, handshakes). Branching logic → `flow-diagram`; static structure →
 - **INTERACTION**: none required. `role="img"` + `<title>`. Boxes brighten on hover (paint only, reduced-motion guarded).
 - **lineage**: unified-system original (v4 expressiveness pass).
 
-## `chart-area.html`
-
-- **PURPOSE**: Self-contained **SVG stacked area chart** (no external libs). 2–3 series stacked over 5–7 time points as translucent `color-mix(--cat-N)` bands, each with a visible top edge; x labels + y gridlines. Shows how a TOTAL and its composition evolve continuously. Distinction: `chart-line` overlays independent series on a common baseline; `chart-stacked` is discrete stacked BARS at separate categories; `chart-area` stacks continuous bands so the top edge reads as the running total and each band as its share.
-- **VARIABLES**: `{{TITLE}}`; per series a filled `{{AREA_N}}` path + a top-edge `{{EDGE_N}}` polyline; per time point `{{XLABEL}}`; legend `{{SERIES}}`.
-- **SCALING**: plot `x 40→700` (6 points at `x=40,172,304,436,568,700`); baseline `y=280`, top `y=40` (240px). Cumulative value → `y = 280 − cum/MAX*240` (MAX = largest stack total). `AREA_N` = top edge (cumₙ) then bottom edge (cumₙ₋₁, reversed) closed; series 1's bottom edge is the baseline `y=280`.
-- **CSS classes**: `.ac`, `.ac-title`, `.ac-grid`, `.ac-axis`, `.ac-cat`, `.ac-area`(+`.cat-1..3`), `.ac-edge`(+`.cat-1..3`), `.ac-legend`. primitive: `.card-outlined`.
-- **token**: `--cat-1..3`, `--accent`, `--text-muted`, `--border-subtle`, `--border-default`, `--bg-surface`, `--radius-xs`, `--sp-*`.
-- **INTERACTION**: none required. `role="img"` + `<title>`. Bands deepen on `svg:hover` (paint only, reduced-motion guarded).
-- **lineage**: unified-system original (v4 expressiveness pass).
-
 ## `bump-chart.html`
 
 - **PURPOSE**: Self-contained **SVG bump chart / rank trajectory** (no external libs). Y axis is ORDINAL RANK (1 on top → N at the bottom), X is 3–5 time points; one polyline per item connects its rank at each point with a dot at every vertex, and the item label sits at both ends - line crossings read as overtakes. Distinction: `chart-line` plots raw VALUES on a continuous axis; `slope-chart` compares exactly two points; `bump-chart` tracks position in a RANKING across several periods (league tables, priority shifts).
@@ -967,16 +957,6 @@ The highest-frequency artifact elements - landing pages (hero-cta, pricing-table
 - **INTERACTION**: none required. `role="img"` + `<title>`; per-mark `<title>` tooltips. Bars/dots highlight on hover (paint only, reduced-motion guarded).
 - **lineage**: unified-system original (v5 high-frequency pass).
 
-## `progress-ring.html`
-
-- **PURPOSE**: A compact grid of **circular progress rings** (no external libs). 2–4 SVG rings side by side, each a track circle + an arc drawn with `stroke-dasharray`; the centre shows a big % number with a label below. Toned per ring with `--cat-N` so a dashboard row of completion / utilisation ratios reads at a glance. Distinction: `gauge` is a single dial (value against zones); `progress` is a linear bar; `progress-ring` is the multi-widget CIRCULAR % grid - several rings compared side by side, one categorical tone each.
-- **VARIABLES**: `{{TITLE}}`; per ring `{{LABEL}}` `{{PCT}}` (0–100, shown centred) and the `stroke-dasharray` "SEG GAP" pair.
-- **GEOMETRY**: viewBox `120×120` per ring; track/arc circle `r=52` ⇒ circumference `C = 2·π·52 = 326.73`. `frac = PCT/100`. `SEG = frac·326.73`, `GAP = 326.73 − SEG`. The arc `<circle>` is rotated `−90°` about `(60,60)` so it starts at 12 o'clock. Examples: 72% → `"235.25 91.48"`; 45% → `"147.03 179.70"`; 88% → `"287.52 39.21"`.
-- **CSS classes**: `.pgr`, `.pgr-title`, `.pgr-grid`, `.pgr-item`(+`.cat-1..4`), `.pgr-track`, `.pgr-arc`, `.pgr-num`, `.pgr-label`. primitive: `.card-outlined`.
-- **token**: `--cat-1..4`, `--bg-muted`, `--text-primary/-secondary`, `--font-mono`, `--radius-*`, `--sp-*`.
-- **INTERACTION**: none (static). Each ring SVG carries `role="img"` + `<title>`; the centre % and label are real text. Arc gains a soft tinted shadow on hover (paint only, reduced-motion guarded).
-- **lineage**: unified-system original (v5 high-frequency pass).
-
 ## `chart-bubble.html`
 
 - **PURPOSE**: Self-contained **SVG bubble chart** (no external libs). A scatter where each point's RADIUS encodes a third measure (e.g. market size), 5–8 labelled bubbles filled with translucent `--cat-N`, X & Y axes with ticks + titles, and optional dashed quadrant midlines. Plots three dimensions at once. Distinction: `chart-scatter` encodes only x/y position (fixed dot size); `chart-bubble` adds magnitude via bubble size and names each bubble in place, so position AND weight read together.
@@ -985,46 +965,6 @@ The highest-frequency artifact elements - landing pages (hero-cta, pricing-table
 - **CSS classes**: `.bub`, `.bub-title`, `.grid-line`, `.axis`, `.mid`, `.tick`, `.axis-label`, `.bubble`(+`.cat-1..5`, translucent fill + firm stroke), `.b-label`. primitive: `.card-outlined`.
 - **token**: `--cat-1..5`, `--accent`, `--text-primary/-secondary/-muted`, `--border-subtle`, `--border-default`, `--font-mono`, `--sp-*`.
 - **INTERACTION**: none required. `role="img"` + `<title>`; per-bubble `<title>`. On `svg:hover` siblings recede and the hovered bubble fills fully (paint only, reduced-motion guarded).
-- **lineage**: unified-system original (v5 high-frequency pass).
-
-## `faq.html`
-
-- **PURPOSE**: An **always-visible FAQ list** (pure CSS - no SVG, no JS). Each item pairs a round **Q** badge + question heading with a round **A** badge + answer paragraph, separated by thin dividers. For landing-page FAQ sections, product docs, and support pages. Distinction: `collapsible` is the INTERACTIVE accordion that hides answers behind a JS toggle; `glossary` maps short TERMS → definitions; `faq` keeps every Q&A pair open for reading, so it is the static FAQ layout, not a toggle or a lexicon.
-- **VARIABLES**: `{{TITLE}}`; per item `{{QUESTION}}` + `{{ANSWER}}`.
-- **SCALING**: single-column `<dl>`; each pair is a `.faq-item` wrapping a `<dt>` question and a `<dd>` answer. Badges are fixed 22px accent/neutral circles; the answer indents to align under the question text. Thin dividers between items; the last item drops its rule.
-- **CSS classes**: `.faq`, `.faq-title`, `.faq-list`, `.faq-item`, `.faq-q`, `.faq-a`, `.faq-badge`, `.faq-text`. primitive: `.card-outlined`.
-- **token**: `--accent`, `--bg-card`, `--bg-surface`, `--text-primary/-secondary/-muted`, `--border-default/-subtle`, `--radius-md/-pill`, `--sp-*`, `--type-body/-small/-caption`, `--shadow-sm`.
-- **INTERACTION**: none (static). Semantic `<dl>`/`<dt>`/`<dd>`; the Q/A badges are `aria-hidden` so the question and answer text are read directly.
-- **lineage**: unified-system original (v5 high-frequency pass).
-
-## `pricing-table.html`
-
-- **PURPOSE**: A **3-column pricing / plan-selection block** (pure CSS - no SVG, no JS). Each column is a plan card: name, a big price + billing period, a feature checklist (✓ included / – excluded), and a CTA button. The middle plan is highlighted with an accent border, a lift, and a "人気" badge. For SaaS pricing pages. Distinction: `comparison-grid` compares arbitrary options feature-by-feature in a matrix; `feature-grid` showcases capabilities with NO prices; `pricing-table` is the priced, one-card-per-plan layout whose job is to make the reader pick a plan.
-- **VARIABLES**: per plan `{{PLAN}}` name, `{{PRICE}}` + `{{PERIOD}}`, `{{FEATURE}}` rows (mark `.prc-no` for excluded), `{{CTA}}` label; `{{TITLE}}` for a11y.
-- **SCALING**: 3-column grid collapsing to 1 column under 720px. `.prc-featured` carries the accent border, a −4px lift (reduced-motion resets it), and the `.prc-popular` badge. ✓ / – are text glyphs (not SVG); excluded rows dim + strike through.
-- **CSS classes**: `.prc`, `.prc-title`, `.prc-grid`, `.prc-plan`, `.prc-featured`, `.prc-popular`, `.prc-name`, `.prc-price`, `.prc-amount`, `.prc-period`, `.prc-feats`, `.prc-feat`, `.prc-mark`, `.prc-no`, `.prc-cta`. primitives: `.card-outlined`, `.btn`, `.btn-ghost`.
-- **token**: `--accent`, `--on-accent`, `--bg-surface`, `--text-primary/-secondary/-muted`, `--border-default/-subtle`, `--color-success`, `--radius-pill`, `--sp-*`, `--type-h1/-h3/-small/-caption`, `--tracking-tight`, `--shadow-sm/-md`, `--dur-*`, `--ease-out`.
-- **INTERACTION**: none beyond the `.btn` primitive's own hover (paint + 1px lift, reduced-motion guarded in `elements.css`).
-- **lineage**: unified-system original (v5 high-frequency pass).
-
-## `toc.html`
-
-- **PURPOSE**: A **table of contents** (pure CSS - no SVG, no JS). Numbered chapters with a dotted leader running to a page number / anchor label, plus one level of indented subsections. Every row is a real `<a href="#...">` so it doubles as in-document navigation. For reports, specs, handbooks, long docs. Distinction: `glossary` pairs TERMS with prose definitions; `stepper` walks a PROCESS forward step-by-step; `toc` is a two-level navigational index of a document's own sections.
-- **VARIABLES**: `{{TITLE}}`; per chapter `{{NUM}}` + `{{CHAPTER}}` + `{{PAGE}}` + `{{ANCHOR}}`; per subsection `{{SUBNUM}}` + `{{SUB}}` + `{{PAGE}}` + `{{ANCHOR}}`.
-- **SCALING**: an `<ol>` of chapters; each chapter may nest an `<ol class="toc-subs">`. A row is a flex line: number, label, a flex-growing dotted leader (`.toc-dots` = a dotted `border-bottom`), then the page. Subsections indent under the chapter number column with quieter type. **ROOT EXCEPTION** (spec rule 8): the root is a `<nav aria-label>` - a table of contents IS a navigation landmark, so a semantic `<nav>` beats a `<figure>` here.
-- **CSS classes**: `.toc`, `.toc-title`, `.toc-list`, `.toc-chapter`, `.toc-subs`, `.toc-sub`, `.toc-row`, `.toc-num`, `.toc-label`, `.toc-dots`, `.toc-page`. primitive: `.card-outlined`.
-- **token**: `--accent`, `--bg-card`, `--text-primary/-secondary/-muted`, `--border-subtle`, `--font-mono`, `--radius-md`, `--sp-*`, `--type-body/-small/-h3`, `--shadow-sm`, `--dur-fast`, `--ease`.
-- **INTERACTION**: paint-only hover (row label + page warm toward the accent), reduced-motion guarded. Each row is a keyboard-focusable anchor link.
-- **lineage**: unified-system original (v5 high-frequency pass).
-
-## `hero-cta.html`
-
-- **PURPOSE**: A **landing-page hero / conversion block** (pure CSS - no SVG, no JS). An eyebrow label, a large headline with one accent-highlighted span, a supporting sub-lede, a primary + secondary CTA pair, and a small trust note (e.g. 導入実績) below the buttons. For the top-of-page opening of a marketing or product page. Distinction: `callout-box` is an inline notice mid-content; `empty-state` fills a zero-data view with a single recovery action; `hero-cta` is the page-opening block whose job is conversion.
-- **VARIABLES**: `{{EYEBROW}}`; `{{HEAD_A}}` + `{{HEAD_MARK}}` (accent span) + `{{HEAD_B}}`; `{{LEDE}}`; `{{CTA_PRIMARY}}` + `{{CTA_SECONDARY}}`; `{{TRUST}}`.
-- **SCALING**: centered column, max-width ~640px. Headline uses `--type-display`; the `.hro-mark` span tints to the accent with a soft underline highlight that survives line wraps (`box-decoration-break: clone`). Buttons wrap on narrow screens; the trust note sits quiet under them. **ROOT EXCEPTION** (spec rule 8): the root is a `<section aria-label>` - a hero is a page-level banner region, not a self-contained figure, so a semantic `<section>` is the correct landmark.
-- **CSS classes**: `.hro`, `.hro-inner`, `.hro-eyebrow`, `.hro-headline`, `.hro-mark`, `.hro-lede`, `.hro-actions`, `.hro-trust`. primitives: `.btn`, `.btn-ghost`.
-- **token**: `--accent`, `--bg-surface`, `--bg-page`, `--text-primary/-secondary/-muted`, `--border-subtle`, `--radius-lg`, `--sp-*`, `--type-display/-body/-caption`, `--tracking-display/-eyebrow`, `--shadow-sm`.
-- **INTERACTION**: none beyond the `.btn` primitives' own hover (paint + 1px lift, reduced-motion guarded in `elements.css`).
 - **lineage**: unified-system original (v5 high-frequency pass).
 
 ## `code-snippet.html`
@@ -1193,25 +1133,6 @@ Planning/exec staples (okr-board, business-model-canvas, gap-analysis, maturity-
 - **INTERACTION**: hover warms a row wash and fills its number badge (paint-only, `prefers-reduced-motion` guarded). `figure` + `figcaption`; rows are an ordered list, badges aria-hidden.
 - **lineage**: unified-system original (v6 high-frequency pass 2).
 
-## `team-grid.html`
-
-- **PURPOSE**: Self-contained **pure-CSS team roster** (no SVG, no JS). A 3–4 column grid of member cards; each leads with an initials avatar (accent / cat-tinted disc), then name, role, a one-line bio, and contact/skill chips. For the "who we are" introduction on about pages / proposals. Distinction: `persona-card` is a deep UX archetype profile (goals/pains); `org-chart` shows the reporting hierarchy; `team-grid` is the flat, equal-weight gallery of the actual people.
-- **VARIABLES**: `{{TITLE}}` + per card `{{INITIALS}}` (avatar, tint via `.cat-N`) `{{NAME}}` `{{ROLE}}` `{{BIO}}` + per chip `{{TAG}}`.
-- **SCALING**: `.tmg-grid` is `repeat(var(--tmg-cols),1fr)`; set `style="--tmg-cols:3|4"` on the figure. Cards are centered flex columns; the responsive rule collapses to 2 columns under 720px. Avatar tint switches via `.tmg-avatar.cat-1..5`.
-- **CSS classes**: `.tmg`, `.tmg-title`, `.tmg-grid`, `.tmg-card`, `.tmg-avatar`(+`.cat-1..5`), `.tmg-name`, `.tmg-role`, `.tmg-bio`, `.tmg-tags`, `.tmg-tag`. primitive: `.card-outlined`.
-- **token**: `--accent`, `--cat-1..5`, `--bg-surface`, `--bg-muted`, `--border-default/-subtle`, `--text-primary/-secondary/-muted`, `--radius-*`, `--sp-*`, `--shadow-sm/-md`, `--dur-fast`, `--ease`, `--ease-out`.
-- **INTERACTION**: hover lifts a card (border/shadow + `translateY`, motion under `prefers-reduced-motion: no-preference`). `figure` + `figcaption`; cards carry real name/role/bio text, avatars aria-hidden.
-- **lineage**: unified-system original (v6 high-frequency pass 2).
-
-## `logo-wall.html`
-
-- **PURPOSE**: Offline social-proof strip with a kicker and a wrapping row of verified company names; supplied inline SVG marks are optional. Do not invent customers, logos or adoption claims.
-- **VARIABLES**: `{{KICKER}}` + per item `{{COMPANY}}`. Repeat `.lgw-item` for each supplied company. Optional adoption text uses `.lgw-stat` and must have evidence.
-- **SCALING**: centered `flex-wrap` row with token spacing. Legacy `.lgw-tile` remains a supported alias.
-- **CSS classes**: `.lgw`, `.lgw-kicker`, `.lgw-row`, `.lgw-item`, `.lgw-name`, optional `.lgw-mono` / `.lgw-stat`; legacy `.lgw-tile`.
-- **INTERACTION**: paint-only hover, reduced-motion guarded; company names remain readable text.
-- **lineage**: unified-system original (v6 high-frequency pass 2).
-
 ## `file-tree.html`
 
 - **PURPOSE**: Self-contained **pure-CSS static directory listing** (no SVG, no JS). A mono-font project tree whose guides (├─ └─ │) are literal box-drawing glyphs in a dimmed lead column; folder rows read bold + accent, file rows plain, and an optional per-line annotation sits dimmed at the right. For the always-visible project-layout block in READMEs / specs. Distinction: `tree` (interactive) collapses arbitrary hierarchies via `HA.tree`; `code-snippet` shows a file's contents; `file-tree` is the flat, printed, never-collapsing layout listing that needs no JS.
@@ -1314,6 +1235,31 @@ Planning/exec staples (okr-board, business-model-canvas, gap-analysis, maturity-
 - **token**: `--accent`, `--cat-1..5`, `--color-success/-warning/-danger`, `--bg-card/-surface/-muted`, `--border-default/-subtle`, `--text-primary/-secondary/-muted`, `--font-mono`.
 - **INTERACTION**: inline search + kind filter (`data-scat-filter`, `data-scat-search`).
 - **lineage**: unified-system v7 architecture pass.
+
+---
+
+# v8 modules (3 added - AI review, verification & walkthrough pass)
+
+## `review-signoff.html`
+
+- **PURPOSE**: Interactive human-in-the-loop review checklist (`HA.review`) that lets a reviewer mark each change **OK / Needs Fix / Hold**, record comments, filter status, persist choices in `localStorage`, and copy structured Markdown feedback back into an AI prompt.
+- **BUILDER**: `section.type: "review"` (`alias: "review-signoff"`) - `{ id?, title?, subtitle?, filters?, exportTitle?, items: [{ id, title, scope?, desc?, evidence?, status?: "ok"|"fix"|"hold", note? }] }`. When present on a page, `build.mjs` also adds `[data-review-jump]` badge to `.header-actions`.
+- **CSS classes**: `.rv`, `.rv-head`, `.rv-controls`, `.rv-progress`, `.rv-filters`, `.rv-filter`, `.rv-list`, `.rv-item`, `.rv-scope`, `.rv-actions`, `.rv-btn`, `.rv-desc`, `.rv-evidence`, `.rv-input`, `.rv-export`, `.rv-output`.
+- **INTERACTION**: `HA.review` (`[data-review]`, `[data-review-item]`, `[data-review-status]`, `[data-review-note]`, `[data-review-filter]`, `[data-review-progress]`, `[data-review-output]`, `[data-review-copy]`, `[data-review-reset]`).
+
+## `verification-run.html`
+
+- **PURPOSE**: Structured verification and command execution evidence card summarizing overall `PASS` / `FAIL` / `WARN` verdict, counts, durations, executed CLI commands, and expandable `<details>` log excerpts (failed items open automatically).
+- **BUILDER**: `section.type: "verification"` (`alias: "verification-run"`) - `{ title?, subtitle?, verdict?: "pass"|"fail"|"warn", duration?, meta?: [string], items: [{ name, cmd?, status: "pass"|"fail"|"warn"|"skip", counts?, duration?, note?, log?, open? }] }`.
+- **CSS classes**: `.vr`, `.vr-head`, `.vr-summary`, `.vr-verdict` (`.-pass`|`.-fail`|`.-warn`), `.vr-stat`, `.vr-list`, `.vr-item`, `.vr-row`, `.vr-badge`, `.vr-cmd`, `.vr-meta`, `.vr-body`, `.vr-log`.
+- **INTERACTION**: Native `<details>`/`<summary>`; pairs with header `[data-details-toggle]` when 3+ `<details>` blocks appear on the page.
+
+## `annotated-walkthrough.html`
+
+- **PURPOSE**: Interactive step-by-step walkthrough pairing numbered code/diagram nodes (`[data-walk-target="id"]`) on the left stage with synchronized clickable/arrow-key explanation steps (`[data-walk-step="id"]`) on the right.
+- **BUILDER**: `section.type: "walkthrough"` (`alias: "annotated-walkthrough"`) - `{ title?, subtitle?, svg?, steps: [{ id?, title, label?, code?, desc?, meta?, target? }] }`.
+- **CSS classes**: `.wk`, `.wk-bar`, `.wk-nav`, `.wk-readout`, `.wk-grid`, `.wk-stage`, `.wk-node` (`.is-active`, `.is-dimmed`), `.wk-pin`, `.wk-steps`, `.wk-step` (`.is-active`), `.wk-num`.
+- **INTERACTION**: `HA.walkthrough` (`[data-walkthrough]`, `[data-walk-step]`, `[data-walk-target]`, `[data-walk-prev]`, `[data-walk-next]`, `[data-walk-readout]`).
 
 ---
 

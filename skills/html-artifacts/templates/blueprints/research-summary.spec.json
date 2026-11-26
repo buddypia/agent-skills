@@ -29,10 +29,13 @@
   ],
   "sections": [
     {
-      "type": "html",
-      "html": "<figure class=\"ktw card-outlined\" aria-label=\"主要ファインディング\">\n  <figcaption class=\"ktw-title\">主要ファインディング</figcaption>\n  <ol class=\"ktw-list\">\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">リモートワーカーの62%が地方移住・二拠点生活に前向き</span>\n        <span class=\"ktw-elab\">前年調査比 +9ポイント。特に20〜30代で関心が突出している。</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">最大の障壁は「収入・仕事の継続」への不安</span>\n        <span class=\"ktw-elab\">検討層の58%が懸念として挙げた。</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">移住支援制度への期待は若年層ほど高い</span>\n      </div>\n    </li>\n    <li class=\"ktw-row\">\n      <span class=\"ktw-num\" aria-hidden=\"true\"></span>\n      <div class=\"ktw-body\">\n        <span class=\"ktw-lead\">次の一手は「収入継続を支える求人・副業マッチング支援」</span>\n        <span class=\"ktw-elab\">慎重層を検討層へ転換する鍵になる。</span>\n      </div>\n    </li>\n  </ol>\n</figure>",
-      "cssModules": [
-        "key-takeaways"
+      "type": "takeaways",
+      "title": "主要ファインディング",
+      "items": [
+        { "lead": "リモートワーカーの62%が地方移住・二拠点生活に前向き", "elab": "前年調査比 +9ポイント。特に20〜30代で関心が突出している。" },
+        { "lead": "最大の障壁は「収入・仕事の継続」への不安", "elab": "検討層の58%が懸念として挙げた。" },
+        { "lead": "移住支援制度への期待は若年層ほど高い" },
+        { "lead": "次の一手は「収入継続を支える求人・副業マッチング支援」", "elab": "慎重層を検討層へ転換する鍵になる。" }
       ]
     },
     {
@@ -103,10 +106,16 @@
       ]
     },
     {
-      "type": "html",
-      "html": "<figure class=\"dvb card-outlined\" aria-label=\"「支援制度があれば移住を検討」年代別 賛成/反対\">\n  <figcaption class=\"dvb-title\">「支援制度があれば移住を検討」年代別 賛成/反対</figcaption>\n  <div class=\"dvb-legend\">\n    <span class=\"dvb-key a\"><i></i>賛成</span>\n    <span class=\"dvb-key b\"><i></i>反対</span>\n  </div>\n  <div class=\"dvb-rows\">\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">71%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:100%\"></span></span>\n      <span class=\"dvb-cat\">20代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:20%\"></span></span>\n      <span class=\"dvb-val b\">14%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">64%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:90%\"></span></span>\n      <span class=\"dvb-cat\">30代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:30%\"></span></span>\n      <span class=\"dvb-val b\">21%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">52%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:73%\"></span></span>\n      <span class=\"dvb-cat\">40代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:46%\"></span></span>\n      <span class=\"dvb-val b\">33%</span>\n    </div>\n    <div class=\"dvb-row\">\n      <span class=\"dvb-val a\">43%</span>\n      <span class=\"dvb-track a\"><span class=\"dvb-fill\" style=\"--w:61%\"></span></span>\n      <span class=\"dvb-cat\">50代</span>\n      <span class=\"dvb-track b\"><span class=\"dvb-fill\" style=\"--w:62%\"></span></span>\n      <span class=\"dvb-val b\">44%</span>\n    </div>\n  </div>\n</figure>",
-      "cssModules": [
-        "diverging-bar"
+      "type": "diverging",
+      "title": "「支援制度があれば移住を検討」年代別 賛成/反対",
+      "seriesA": "賛成",
+      "seriesB": "反対",
+      "max": 71,
+      "items": [
+        { "label": "20代", "a": 71, "aDisplay": "71%", "b": 14, "bDisplay": "14%" },
+        { "label": "30代", "a": 64, "aDisplay": "64%", "b": 21, "bDisplay": "21%" },
+        { "label": "40代", "a": 52, "aDisplay": "52%", "b": 33, "bDisplay": "33%" },
+        { "label": "50代", "a": 43, "aDisplay": "43%", "b": 44, "bDisplay": "44%" }
       ]
     },
     {
